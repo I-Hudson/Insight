@@ -2,7 +2,6 @@
 #include "Engine.h"
 #include "Core/MemoryTracker.h"
 #include "Core/Logger.h"
-#include "Core/Memory.h"
 
 #ifdef TEST_ENABLED
 #define DOCTEST_CONFIG_IMPLEMENTATION_IN_DLL
@@ -22,7 +21,7 @@ int main(int argc, char** argv)
 	Insight::Core::Logger::Init();
 
 #ifdef TEST_ENABLED
-	const char* args[] = { "-d", "--order-by=suite"};
+	const char* args[] = { "-d", "--order-by=suite", "--no-breaks=true" };
 	return doctest::Context(ARRAYSIZE(args), args).run();
 #else
 	Insight::App::Engine* app = CreateApplication();

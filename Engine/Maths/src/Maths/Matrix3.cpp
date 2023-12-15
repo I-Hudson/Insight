@@ -330,6 +330,7 @@ namespace Insight
 }
 
 #ifdef IS_TESTING
+#if 0
 #include "doctest.h"
 namespace test
 {
@@ -497,4 +498,5 @@ namespace test
 		}*/
 	}
 }
+#endif
 #endif

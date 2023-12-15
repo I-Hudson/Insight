@@ -43,6 +43,9 @@ namespace Insight
 			bool operator==(const Vector3& other) const;
 			bool operator!=(const Vector3& other) const;
 
+			bool Equal(const Vector3& other, const float errorRange) const;
+			bool NotEqual(const Vector3& other, const float errorRange) const;
+
 			Vector3 operator=(float scalar);
 			Vector3 operator=(const Vector3& other);
 

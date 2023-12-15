@@ -1,6 +1,5 @@
 #include "Maths/Vector3.h"
 #include "Maths/MathsUtils.h"
-
 #include <limits>
 
 namespace Insight
@@ -147,12 +146,22 @@ namespace Insight
 #ifdef IS_MATHS_DIRECTX_MATHS
 			return DirectX::XMVectorGetX(DirectX::XMVectorEqual(xmvector, other.xmvector));
 #else
-			return Equals(x, other.x) && Equals(y, other.y) && Equals(z, other.z);
+			return Equal(other, std::numeric_limits<float>::epsilon());
 #endif
 		}
 		bool Vector3::operator!=(const Vector3& other) const
 		{
 			return !(*this == other);
+		}
+
+		bool Vector3::Equal(const Vector3& other, const float errorRange) const
+		{
+			return Equals(x, other.x, errorRange) && Equals(y, other.y, errorRange) && Equals(z, other.z, errorRange);
+		}
+
+		bool Vector3::NotEqual(const Vector3& other, const float errorRange) const
+		{
+			return !(Equal(other, errorRange));
 		}
 
 		Vector3 Vector3::operator=(float scalar)
@@ -317,6 +326,73 @@ namespace test
 			CHECK(vec3.z == 117.117f);
 		}
 
+		TEST_CASE("Length")
+		{
+			Vector3 one = Vector3(10.0f, 5.0f, 25.0f);
+			CHECK(Equals(one.Length(), 27.386f, 0.001f));
+			CHECK(Equals(one.LengthSquared(), 750.0f, 0.001f));
+		}
+
+		TEST_CASE("Normalise")
+		{
+			Vector3 one = Vector3(10.0f, 5.0f, 25.0f);
+			CHECK(one.Normalised().Equal(Vector3(0.37f, 0.18f, 0.91f), 0.01f));
+			one.Normalise();
+			CHECK(one.Equal(Vector3(0.37f, 0.18f, 0.91f), 0.01f));
+		}
+
+		TEST_CASE("Dot")
+		{
+			Vector3 one = Vector3(1.0, 0.0f, 0.0f);
+			Vector3 two = Vector3(0.0f, 1.0f, 0.0f);
+			CHECK(one.Dot(two) == 0.0f);
+
+			two = Vector3(-1.0f, 0.0f, 0.0f);
+			CHECK(one.Dot(two) == -1.0f);
+		}
+
+		TEST_CASE("Access Operators")
+		{
+			Vector3 one = Vector3(10.0f, 5.0f, 75.24f);
+			CHECK(Equals(one[0], 10.0f, 0.001f));
+			CHECK(Equals(one[1], 5.0f, 0.001f));
+			CHECK(Equals(one[2], 75.24f, 0.001f));
+
+			one[0] = 50.0f;
+			one[1] = 100.0f;
+			one[2] = 69.78f;
+			CHECK(Equals(one[0], 50.0f, 0.001f));
+			CHECK(Equals(one[1], 100.0f, 0.001f));
+			CHECK(Equals(one[2], 69.78f, 0.001f));
+		}
+
+		TEST_CASE("Equal")
+		{
+			Vector3 one = Vector3(10.0f, 5.0f, 25.0f);
+			Vector3 two = Vector3(10.0f, 5.0f, 25.0f);
+			CHECK(one == two);
+		}
+
+		TEST_CASE("Not Equal")
+		{
+			Vector3 one = Vector3(10.0f, 5.0f, 25.0f);
+			Vector3 two = Vector3(5.0f, 10.0f, 25.0f);
+			CHECK(one != two);
+		}
+
+		TEST_CASE("Assign")
+		{
+			Vector3 one = Vector3(10.0f, 5.0f, 25.0f);
+			one = 20.0f;
+			CHECK(Equals(one.x, 20.0f, 0.001f));
+			CHECK(Equals(one.y, 20.0f, 0.001f));
+			CHECK(Equals(one.z, 20.0f, 0.001f));
+
+			Vector3 two(55.0f, 75.8f, 0.458f);
+			one = two;
+			CHECK(one == two);
+		}
+
 		TEST_CASE("Multiplcation")
 		{
 			Vector3 one = Vector3(10.0f, 50.0f, 100.0f);
@@ -353,16 +429,6 @@ namespace test
 			CHECK(result.x == one.x);
 			CHECK(result.y == one.y);
 			CHECK(result.z == one.z);
-		}
-
-		TEST_CASE("Dot")
-		{
-			Vector3 one = Vector3(1.0, 0.0f, 0.0f);
-			Vector3 two = Vector3(0.0f, 1.0f, 0.0f);
-			CHECK(one.Dot(two) == 0.0f);
-			
-			two = Vector3(-1.0f, 0.0f, 0.0f);
-			CHECK(one.Dot(two) == -1.0f);
 		}
 	}
 }

@@ -161,12 +161,22 @@ namespace Insight
 #ifdef IS_MATHS_DIRECTX_MATHS
 			return DirectX::XMVector4Equal(xmvector, other.xmvector);
 #else
-			return Equals(x, other.x) && Equals(y, other.y) && Equals(z, other.z) && Equals(w, other.w);
+			return Equal(other, std::numeric_limits<float>::epsilon());
 #endif
 		}
 		bool Vector4::operator!=(const Vector4& other) const
 		{
 			return !(*this == other);
+		}
+
+		bool Vector4::Equal(const Vector4& other, const float errorRange) const
+		{
+			return Equals(x, other.x, errorRange) && Equals(y, other.y, errorRange) && Equals(z, other.z, errorRange) && Equals(w, other.w, errorRange);
+		}
+
+		bool Vector4::NotEqual(const Vector4& other, const float errorRange) const
+		{
+			return !(Equal(other, errorRange));
 		}
 
 		Vector4 Vector4::operator=(float scalar)

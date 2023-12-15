@@ -141,12 +141,22 @@ namespace Insight
 #ifdef IS_MATHS_DIRECTX_MATHS
 			return DirectX::XMVectorGetX(DirectX::XMVectorEqual(xmvector, other.xmvector));
 #else
-			return Equals(x, other.x) && Equals(y, other.y);
+			return Equal(other, std::numeric_limits<float>::epsilon());
 #endif
 		}
 		bool Vector2::operator!=(const Vector2& other) const
 		{
 			return !(*this == other);
+		}
+
+		bool Vector2::Equal(const Vector2& other, const float errorRange) const
+		{
+			return Equals(x, other.x, errorRange) && Equals(y, other.y, errorRange);
+		}
+
+		bool Vector2::NotEqual(const Vector2& other, const float errorRange) const
+		{
+			return !(Equal(other, errorRange));
 		}
 
 		Vector2 Vector2::operator=(float value)
@@ -309,6 +319,74 @@ namespace test
 			CHECK(vec.y == 117.117f);
 		}
 
+		TEST_CASE("Length")
+		{
+			Vector2 one = Vector2(10.0f, 5.0f);
+			CHECK(Equals(one.Length(), 11.180f, 0.001f));
+			CHECK(Equals(one.LengthSquared(), 125.00f, 0.001f));
+		}
+
+		TEST_CASE("Normalise")
+		{
+			Vector2 one = Vector2(50.f, 0.0f);
+			CHECK(one.Normalised() == Vector2(1.0f, 0.0));
+			one.Normalise();
+			CHECK(one == Vector2(1.0f, 0.0));
+		}
+
+		TEST_CASE("Dot")
+		{
+			Vector2 one = Vector2(0.2f, 0.7f);
+			Vector2 two = Vector2(-0.5f, 0.1f);
+			CHECK(Equals(one.Dot(two), -0.03f, 0.001f));
+
+			two = Vector2(-1.0f, 0.0f);
+			CHECK(Equals(one.Dot(two), -0.2f, 0.001f));
+
+			one = Vector2(-6, 8);
+			two = Vector2(5, 12);
+			float result = one.Dot(two);
+			CHECK(Equals(result, 66.0f, 0.001f));
+		}
+
+		TEST_CASE("Access Operators")
+		{
+			Vector2 one = Vector2(10.0f, 5.0f);
+			CHECK(Equals(one[0], 10.0f, 0.001f));
+			CHECK(Equals(one[1], 5.0f, 0.001f));
+			
+			one[0] = 50.0f;
+			one[1] = 100.0f;
+			CHECK(Equals(one[0], 50.0f, 0.001f));
+			CHECK(Equals(one[1], 100.0f, 0.001f));
+		}
+
+		TEST_CASE("Equal")
+		{
+			Vector2 one = Vector2(10.0f, 5.0f);
+			Vector2 two = Vector2(10.0f, 5.0f);
+			CHECK(one == two);
+		}
+
+		TEST_CASE("Not Equal")
+		{
+			Vector2 one = Vector2(10.0f, 5.0f);
+			Vector2 two = Vector2(5.0f, 10.0f);
+			CHECK(one != two);
+		}
+
+		TEST_CASE("Assign")
+		{
+			Vector2 one = Vector2(10.0f, 5.0f);
+			one = 20.0f;
+			CHECK(Equals(one.x, 20.0f, 0.001f));
+			CHECK(Equals(one.y, 20.0f, 0.001f));
+
+			Vector2 two(55.0f, 75.8f);
+			one = two;
+			CHECK(one == two);
+		}
+
 		TEST_CASE("Multiplication")
 		{
 			Vector2 one = Vector2(10.0f, 50.0f);
@@ -349,43 +427,46 @@ namespace test
 			CHECK(resultA.y == one.y);
 		}
 
-		TEST_CASE("Length")
+		TEST_CASE("Addition")
 		{
-			Vector2 one = Vector2(10.0f, 5.0f);
-			CHECK(Equals(one.Length(), 11.180f, 0.001f));
-			CHECK(Equals(one.LengthSquared(), 125.00f, 0.001f));
+			Vector2 one = Vector2(10.0f, 50.0f);
+			Vector2 two = Vector2(5.0f, 2.5f);
+
+			Vector2 resultA = one + two;
+			Vector2 resultB = two + one;
+
+			CHECK(Equals(resultA.x, 15.0f, 0.001f));
+			CHECK(Equals(resultA.y, 52.5f, 0.001f));
+			CHECK(Equals(resultB.x, 15.0f, 0.001f));
+			CHECK(Equals(resultB.y, 52.5f, 0.001f));
+
+			resultA = one += Vector2(50.0f, 5.0f);
+
+			CHECK(Equals(one.x, 60.0f, 0.001f));
+			CHECK(Equals(one.y, 55.0f, 0.001f));
+			CHECK(Equals(resultA.x, one.x, 0.001f));
+			CHECK(Equals(resultA.y, one.y, 0.001f));
 		}
 
-		TEST_CASE("Dot")
+		TEST_CASE("Minus")
 		{
-			Vector2 one = Vector2(1.0, 0.0f);
-			Vector2 two = Vector2(0.0f, 1.0f);
-			CHECK(one.Dot(two) == 0.0f);
+			Vector2 one = Vector2(10.0f, 50.0f);
+			Vector2 two = Vector2(5.0f, 2.5f);
 
-			two = Vector2(-1.0f, 0.0f);
-			CHECK(one.Dot(two) == -1.0f);
+			Vector2 resultA = one - two;
+			Vector2 resultB = two - one;
 
-			one = Vector2(-6, 8);
-			two = Vector2(5, 12);
-			float result = one.Dot(two);
-			CHECK(result == 66.0f);
-		}
+			CHECK(Equals(resultA.x, 5.0f, 0.001f));
+			CHECK(Equals(resultA.y, 47.5f, 0.001f));
+			CHECK(Equals(resultB.x, -5.0f, 0.001f));
+			CHECK(Equals(resultB.y, -47.5f, 0.001f));
 
-		TEST_CASE("Equal")
-		{
-			Vector2 one = Vector2(1.0, 0.0f);
-			Vector2 two = Vector2(0.0f, 1.0f);
-			CHECK(one != two);
-			two = one;
-			CHECK(one == two);
-		}
+			resultA = one -= Vector2(50.0f, 5.0f);
 
-		TEST_CASE("Normalise")
-		{
-			Vector2 one = Vector2(50.f, 0.0f);
-			CHECK(one.Normalised() == Vector2(1.0f, 0.0));
-			one.Normalise();
-			CHECK(one == Vector2(1.0f, 0.0));
+			CHECK(Equals(one.x, -40.0f, 0.001f));
+			CHECK(Equals(one.y, 45.0f, 0.001f));
+			CHECK(Equals(resultA.x, one.x, 0.001f));
+			CHECK(Equals(resultA.y, one.y, 0.001f));
 		}
 	}
 }

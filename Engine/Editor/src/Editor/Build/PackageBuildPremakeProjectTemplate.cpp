@@ -22,6 +22,8 @@ namespace Insight::Editor
         const char* buildConfiguration = "Debug";
 #elif defined(IS_RELEASE)
         const char* buildConfiguration = "Release";
+#else
+        const char* buildConfiguration = "UNKNOWN";
 #endif
         const std::string srcDLLFolder = EnginePaths::GetRootPath() + "/deps/" + buildConfiguration + "-windows-x86_64/dll";
 

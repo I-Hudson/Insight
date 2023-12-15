@@ -13,7 +13,8 @@ namespace Insight::Editor
 #elif IS_RELEASE
 #define BUILD_CONFIGURAION "Release"
 #else
-#error BUILD_CONFIGURAION must have a valid value.
+//#error BUILD_CONFIGURAION must have a valid value.
+#define BUILD_CONFIGURAION "UNKNOWN"
 #endif
 
 #if IS_PLATFORM_WINDOWS

@@ -67,6 +67,9 @@ namespace Insight
             const char* buildConfiguration = "Debug";
 #elif defined(IS_RELEASE)
             const char* buildConfiguration = "Release";
+#else
+            const char* buildConfiguration = "UNKNOWN";
+
 #endif
             const std::string buildExeFolder = projectInfo.GetIntermediatePath() + "/PackageBuild/bin/" + buildConfiguration + "-windows-x86_64/" + projectInfo.ProjectName;
             std::filesystem::copy(buildExeFolder, outputFolder, std::filesystem::copy_options::recursive);

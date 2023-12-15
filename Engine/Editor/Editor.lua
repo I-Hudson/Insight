@@ -151,6 +151,9 @@ project "Insight_Editor"
         symbols "On"
         links
         {
+            "Reflectd.lib",
+            "Splashd.lib",
+            "efswd.lib",
         }
         libdirs
         {

@@ -68,6 +68,8 @@ workspace "Insight"
     {
         "Debug",
         "Release",
+
+        "Testing"
     }
     platforms 
     { 
@@ -152,7 +154,8 @@ workspace "Insight"
         buildoptions "/MDd"
         defines
         {
-            "_DEBUG"
+            "_DEBUG",
+            "IS_TEST"
         }
 
     filter "configurations:Release"
