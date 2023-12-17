@@ -277,7 +277,6 @@ namespace Insight
 }
 
 #ifdef IS_TESTING
-#if 0
 #include "doctest.h"
 namespace test
 {
@@ -287,6 +286,16 @@ namespace test
 		const Matrix2 Matrix_Test(
 			4, 7,
 			2, 6);
+
+		TEST_CASE("Size Of")
+		{
+#ifdef IS_MATHS_DIRECTX_MATHS
+			CHECK(sizeof(Matrix2) == 64);
+#else
+			CHECK(sizeof(Matrix2) == 16);
+#endif
+		}
+
 		TEST_CASE("Constructors")
 		{
 			Matrix2 matrix;
@@ -399,5 +408,4 @@ namespace test
 		}
 	}
 }
-#endif
 #endif

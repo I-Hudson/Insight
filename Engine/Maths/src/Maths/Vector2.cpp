@@ -304,6 +304,15 @@ namespace test
 	using namespace Insight::Maths;
 	TEST_SUITE("Vector2")
 	{
+		TEST_CASE("Size Of")
+		{
+#ifdef IS_MATHS_DIRECTX_MATHS
+			CHECK(sizeof(Vector2) == 16);
+#else
+			CHECK(sizeof(Vector2) == 8);
+#endif
+		}
+
 		TEST_CASE("Constructors")
 		{
 			Vector2 vec = Vector2();

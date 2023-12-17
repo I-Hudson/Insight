@@ -14,7 +14,7 @@
 #define IS_MATHS
 #endif
 
-#define IS_MATHS_DIRECTX_MATHS
+//#define IS_MATHS_DIRECTX_MATHS
 
 #define IS_UNUSED(x) (void)x
 
