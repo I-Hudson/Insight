@@ -165,7 +165,7 @@ namespace Insight
 
         const ProjectInfo& ProjectSystem::GetProjectInfo() const
         {
-            ASSERT(IsProjectOpen());
+            ASSERT_MSG(IsProjectOpen(), "There must be an open project to get the project info.");
             return m_projectInfo;
         }
     }
