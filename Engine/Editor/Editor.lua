@@ -141,11 +141,6 @@ project "Insight_Editor"
         prebuildcommands { "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/dll/\" \"%{cfg.targetdir}\"", "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/pdb/\" \"%{cfg.targetdir}\"", }
 
 
-    filter "configurations:Testing" 
-        links
-        {
-        }
-
     filter "configurations:Testing"
         defines { "DEBUG" }  
         symbols "On"
@@ -164,4 +159,11 @@ project "Insight_Editor"
         { 
             "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/dll/\" \"%{cfg.targetdir}\"", 
             "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/pdb/\" \"%{cfg.targetdir}\"", 
+        }
+
+    filter "system:Windows" 
+        files
+        {
+            "Insight_Editor.rc",
+            "resource.h",
         }

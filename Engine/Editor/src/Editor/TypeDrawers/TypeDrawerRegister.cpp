@@ -21,11 +21,7 @@ namespace Insight
 
         TypeDrawerRegister::~TypeDrawerRegister()
         {
-            for (auto& pair : m_drawers)
-            {
-                Delete(pair.second);
-            }
-            m_drawers.clear();
+            UnregisterAllTypeDrawers();
         }
 
         const ITypeDrawer* TypeDrawerRegister::GetDrawer(const char* typeName) const
