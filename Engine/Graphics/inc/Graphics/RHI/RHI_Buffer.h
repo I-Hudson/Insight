@@ -45,6 +45,14 @@ namespace Insight
 			friend std::hash<RHI_BufferView>;
 		};
 
+		struct RHI_BufferCreateInfo
+		{
+			BufferType BufferType;
+			u64 SizeBytes;
+			u64 Stride;
+			RHI_Buffer_Overrides Overrides;
+		};
+
 		class IS_GRAPHICS RHI_Buffer : public RHI_Resource
 		{
 		public:
@@ -54,6 +62,7 @@ namespace Insight
 
 			virtual ~RHI_Buffer() { }
 
+			virtual void Create(RenderContext* context, const RHI_BufferCreateInfo& createInfo) { Create(context, createInfo.BufferType, createInfo.SizeBytes, createInfo.Stride, createInfo.Overrides); }
 			virtual void Create(RenderContext* context, BufferType bufferType, u64 sizeBytes, u64 stride, RHI_Buffer_Overrides overrides) = 0;
 			virtual RHI_BufferView Upload(const void* data, u64 sizeInBytes, u64 offset, u64 alignment) = 0;
 
