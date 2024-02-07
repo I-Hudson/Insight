@@ -178,7 +178,8 @@ workspace "Insight"
             "IS_DX12_ENABLED",
             "IS_VULKAN_ENABLED",
             "IS_CPP_WINRT",
-            
+            "RENDERGRAPH_V2_ENABLED",
+
             "USE_PIX",
             "NOMINMAX",
 

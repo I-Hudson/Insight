@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef RENDERGRAPH_V2_ENABLED
+
 #include "Graphics/Enums.h"
 #include "Graphics/RenderGraphV2/RenderGraphTask.h"
 
@@ -22,19 +24,11 @@ namespace Insight
 {
 	namespace Graphics
 	{
-		using RGTextureHandle = int;
-		using RGBufferHandle = int;
-
 		class RenderContext;
 		class RHI_CommandList;
 
 		class RenderGraphV2;
-		class RenderGraphBuilderV2;
 
-		struct RenderGraphSetupData
-		{
-			RenderGraphBuilderV2& Builder;
-		};
 		struct RenderGraphExecuteData
 		{
 			RenderGraphV2& RenderGraph;
@@ -46,32 +40,69 @@ namespace Insight
 			RHI_CommandList* CmdList;
 		};
 
-		class RenderGraphPassBaseV2 : public RenderGraphTask
+		class IS_GRAPHICS RenderGraphPassBaseV2 : public RenderGraphTask
 		{
 		public:
-			template<typename TPassData>
-			using SetupFunc = std::function<void(TPassData& passData, const RenderGraphBuilderV2& buildData)>;
-			template<typename TPassData>
-			using ExecuteFunc = std::function<void(TPassData& passData, const RenderGraphExecuteData& excuteData)>;
-			template<typename TPassData>
-			using PostFunc = std::function<void(TPassData& passData, const RenderGraphPostData& postData)>;
+			RenderGraphPassBaseV2(RenderGraphV2* renderGraph, GPUQueue gpuQueue);
+			virtual ~RenderGraphPassBaseV2();
 
-			RenderGraphPassBaseV2(GPUQueue gpuQueue) : RenderGraphTask(gpuQueue) { }
-			virtual ~RenderGraphPassBaseV2() { }
+			RGBufferHandle CreateBuffer(std::string bufferName, RHI_BufferCreateInfo createInfo);
+			RGTextureHandle CreateTexture(std::string textureName, RHI_TextureInfo createInfo);
 
-		protected:
-			virtual void Setup(const RenderGraphSetupData& data) = 0;
-			virtual void Execute(const RenderGraphExecuteData& data) = 0;
-			virtual void Post(const RenderGraphPostData& data) = 0;
+			void ReadBuffer(const RGBufferHandle handle);
+			void WriteBuffer(const RGBufferHandle handle);
+
+			void ReadTexture(const RGTextureHandle handle);
+			void WriteTexture(const RGTextureHandle handle);
 
 		public:
 			std::string m_passName;
 
 			std::vector<std::pair<RGBufferHandle, RHI_BufferCreateInfo>> m_bufferCreates;
+			std::vector<RGBufferHandle> m_bufferReads;
+			std::vector<RGBufferHandle> m_bufferWrites;
+
 			std::vector<std::pair<RGTextureHandle, RHI_TextureInfo>> m_textureCreates;
+			std::vector<RGTextureHandle> m_textureReads;
+			std::vector<RGTextureHandle> m_textureWrites;
 
-			RGTextureHandle m_depthStencilWrite = -1;
+			friend class RenderGraphV2;
+		};
 
+		class IS_GRAPHICS RenderGraphGraphicsPassV2 : public RenderGraphPassBaseV2
+		{
+		public:
+			using PreExecuteFunc = std::function<void(RenderGraphGraphicsPassV2& graphPass)>;
+			using ExecuteFunc = std::function<void(const RenderGraphExecuteData& excuteData)>;
+			using PostExecuteFunc = std::function<void(const RenderGraphPostData& postExecuteData)>;
+
+			RenderGraphGraphicsPassV2(RenderGraphV2* renderGraph
+				, std::string passName
+				, PreExecuteFunc setupFunc
+				, ExecuteFunc executeFunc
+				, PostExecuteFunc postFunc);
+
+			virtual ~RenderGraphGraphicsPassV2() override;
+
+			virtual const char* GetTaskName() const override { return "RenderGraphGraphicsPassV2"; }
+
+			virtual void PreExecute() override;
+			virtual void Execute() override;
+			virtual void PostExecute() override;
+
+			void SetViewport(const u32 width, const u32 height);
+			void SetScissor(const u32 width, const u32 height);
+
+			void SetShader(const ShaderDesc shaderDesc);
+			void SetPipeline(const PipelineStateObject pipelineStateObject);
+			void SetRenderpass(const RenderpassDescription renderpassDescription);
+
+			/// @brief Does this pass render directly on top of the swapchain image.
+			void SetAsRenderToSwapchain();
+
+			RGTextureHandle GetDepthSteniclTexture() const;
+
+		private:
 			/// Optional, define a custom render pass. Otherwise we create it and/or fill in the blanks.
 			RenderpassDescription m_renderpassDescription = { };
 
@@ -80,61 +111,17 @@ namespace Insight
 			ShaderDesc m_shader = { }; // Shader to be used for this pass.
 			PipelineStateObject m_PSO = { }; // PSO to be used for this pass.
 
-			glm::ivec2 m_viewport;
-			glm::ivec2 m_scissor;
+			glm::ivec2 m_viewport = glm::ivec2(0, 0);
+			glm::ivec2 m_scissor = glm::ivec2(0, 0);
 
-			std::vector<PipelineBarrier> m_incomingBarriers; /// These should be done before rendering.
+			bool m_renderOnTopOfSwapchain = false;
 
-			friend class RenderGraphBuilderV2;
+			PreExecuteFunc m_preExecuteFunc;
+			ExecuteFunc m_executeFunc;
+			PostExecuteFunc m_postExecuteFunc;
+
 			friend class RenderGraphV2;
-		};
-
-		template<typename TPassData>
-		class RenderGraphGraphicsPassV2 : public RenderGraphPassBaseV2
-		{
-		public:
-			RenderGraphGraphicsPassV2(std::string passName, SetupFunc<TPassData> setupFunc, ExecuteFunc<TPassData> executeFunc, PostFunc<TPassData> postFunc, TPassData initalData)
-				: RenderGraphPassBaseV2(GPUQueue_Graphics)
-				, m_setupFunc(std::move(setupFunc))
-				, m_executeFunc(std::move(executeFunc))
-				, m_postFunc(std::move(postFunc))
-				, m_passData(std::move(initalData))
-			{
-				m_passName = std::move(passName);
-			}
-
-			virtual ~RenderGraphGraphicsPassV2() override
-			{
-				m_setupFunc = {};
-				m_executeFunc = {};
-				m_postFunc = {};
-				m_passData = {};
-			}
-
-			TPassData& GetData() const { return m_passData; }
-
-			virtual const char* GetTaskName() const override { return "RenderGraphGraphicsPassV2"; }
-
-		protected:
-			virtual void Setup(const RenderGraphSetupData& data) override
-			{
-				m_setupFunc(m_passData, data.Builder);
-			}
-			virtual void Execute(const RenderGraphExecuteData& data) override
-			{
-				m_executeFunc(m_passData, data.RenderGraph, data.CmdList);
-			}
-			virtual void Post(const RenderGraphPostData& data) override
-			{
-				m_postFunc(m_passData, data.RenderGraph, data.CmdList);
-			}
-
-		private:
-			TPassData m_passData;
-
-			SetupFunc<TPassData> m_setupFunc;
-			ExecuteFunc<TPassData> m_executeFunc;
-			ExecuteFunc<TPassData> m_postFunc;
 		};
 	}
 }
+#endif

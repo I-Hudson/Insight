@@ -1,13 +1,14 @@
 #pragma once
 
-#include "Core/Memory.h"
+#ifdef RENDERGRAPH_V2_ENABLED
+
 #include "Core/Singleton.h"
 #include "Graphics/RenderGraphV2/RenderGraphPassV2.h"
 
 #include "Graphics/RenderContext.h"
 
-#include <type_traits>
 #include <functional>
+
 #ifdef RENDER_GRAPH_RENDER_THREAD
 #include <ppltasks.h>
 #endif
@@ -54,35 +55,19 @@ namespace Insight
 			void AddPreRender(RenderGraphSetPreRenderFunc func);
 			void AddPostRender(RenderGraphSetPreRenderFunc func);
 
-			template<typename TData>
-			void AddPass(std::string passName, typename RenderGraphPassBaseV2::SetupFunc<TData> setupFunc
-				, typename RenderGraphPassBaseV2::ExecuteFunc<TData> executeFunc, TData initalData = { })
+			void AddGraphicsPass(std::string passName
+				, RenderGraphGraphicsPassV2::PreExecuteFunc preExecuteFunc
+				, RenderGraphGraphicsPassV2::ExecuteFunc executeFunc
+				, RenderGraphGraphicsPassV2::PostExecuteFunc postExecuteFunc)
 			{
 				std::lock_guard lock(m_mutex);
-				GetUpdatePasses().emplace_back(
-					MakeUPtr<RenderGraphPass<TData>>(
-						std::move(passName)
-						, std::move(setupFunc)
+				GetGraphicsPendingPasses().emplace_back(
+					RenderGraphGraphicsPassV2(
+						this
+						, std::move(passName)
+						, std::move(preExecuteFunc)
 						, std::move(executeFunc)
-						, std::move([](TData&, RenderGraph&, RHI_CommandList*) {})
-						, std::move(initalData)));
-			}
-
-			template<typename TData>
-			void AddPass(std::string passName
-				, typename RenderGraphPassBaseV2::SetupFunc<TData>   setupFunc
-				, typename RenderGraphPassBaseV2::ExecuteFunc <TData> executeFunc
-				, typename RenderGraphPassBaseV2::PostFunc<TData>  postFunc
-				, TData initalData = { })
-			{
-				std::lock_guard lock(m_mutex);
-				GetUpdatePasses().emplace_back(
-					MakeUPtr<RenderGraphPass<TData>>(
-						std::move(passName)
-						, std::move(setupFunc)
-						, std::move(executeFunc)
-						, std::move(postFunc)
-						, std::move(initalData)));
+						, std::move(postExecuteFunc)));
 			}
 
 			/// @brief Set the render resolution size.
@@ -107,11 +92,11 @@ namespace Insight
 
 			void PlaceBarriersInToPipeline(RenderGraphPassBaseV2* pass, RHI_CommandList* cmdList);
 
-			std::vector<UPtr<RenderGraphPassBaseV2>>& GetUpdatePasses();
-			std::vector<UPtr<RenderGraphPassBaseV2>>& GetRenderPasses();
+			std::vector<RenderGraphGraphicsPassV2>& GetGraphicsPendingPasses();
+			std::vector<RenderGraphGraphicsPassV2>& GetGraphicsRenderPasses();
 
-			const std::vector<UPtr<RenderGraphPassBaseV2>>& GetUpdatePasses() const;
-			const std::vector<UPtr<RenderGraphPassBaseV2>>& GetRenderPasses() const;
+			const std::vector<RenderGraphGraphicsPassV2>& GetGraphicsPendingPasses() const;
+			const std::vector<RenderGraphGraphicsPassV2>& GetGraphicsRenderPasses() const;
 
 		private:
 			RenderContext* m_context = nullptr;
@@ -129,12 +114,15 @@ namespace Insight
 			std::vector<RenderGraphSetPreRenderFunc> m_renderPreRenderFunc;
 			std::vector<RenderGraphSetPostRenderFunc> m_renderPostRenderFunc;
 
-			std::vector<std::vector<UPtr<RenderGraphPassBaseV2>>> m_passes;
+			std::vector<std::vector<RenderGraphGraphicsPassV2>> m_graphicsPasses;
+			//std::vector<std::vector<UPtr<RenderGraphComputePassV2>>> m_computePasses;
+			std::vector<RenderGraphPassBaseV2*> m_orderedPasses;
+
 
 			/// @brief General render resolution to be used for all render passes. Can be overwritten.
 			glm::ivec2 m_render_resolution = {};
 			bool m_render_resolution_has_changed = false;
-			/// @brief Set the render resolution to the window resolution when the window resolution has changed automaticly.
+			/// @brief Set the render resolution to the window resolution when the window resolution has changed automaticity.
 			bool m_set_render_resolution_to_window_resolution_auto = true;
 			/// @brief General ouput resolution to be used for all render passes. Can be overwritten.
 			glm::ivec2 m_output_resolution = {};
@@ -143,3 +131,4 @@ namespace Insight
 		};
 	}
 }
+#endif

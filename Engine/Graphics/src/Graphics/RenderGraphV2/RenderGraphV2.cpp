@@ -1,6 +1,7 @@
+#ifdef RENDERGRAPH_V2_ENABLED
+
 #include "Graphics/RenderGraphV2/RenderGraphV2.h"
 #include "Graphics/RenderGraphV2/RenderGraphPassV2.h"
-#include "Graphics/RenderGraphV2/RenderGraphBuilderV2.h"
 #include "Graphics/RenderContext.h"
 
 #include "Graphics/RenderContext.h"
@@ -38,7 +39,7 @@ namespace Insight
 			m_context = context;
 			for (size_t i = 0; i < m_context->GetFramesInFligtCount(); ++i)
 			{
-				m_passes.push_back({});
+				//m_passes.push_back({});
 			}
 
 			m_textureCaches.Setup();
@@ -53,7 +54,7 @@ namespace Insight
 			IS_PROFILE_FUNCTION();
 			std::lock_guard lock(m_mutex);
 			std::swap(m_passesUpdateIndex, m_passesRenderIndex);
-			GetUpdatePasses().clear();
+			GetGraphicsPendingPasses().clear();
 
 			for (RenderGraphSyncFunc& func : m_syncFuncs)
 			{
@@ -167,13 +168,15 @@ namespace Insight
 		RenderpassDescription RenderGraphV2::GetRenderpassDescription(std::string_view passName) const
 		{
 			ASSERT(m_context->IsRenderThread());
-			auto itr = std::find_if(GetRenderPasses().begin(), GetRenderPasses().end(), [passName](const UPtr<RenderGraphPassBaseV2>& pass)
+			const std::vector<RenderGraphGraphicsPassV2>& graphicPasses = GetGraphicsRenderPasses();
+			
+			auto itr = std::find_if(graphicPasses.begin(), graphicPasses.end(), [passName](const RenderGraphGraphicsPassV2& pass)
 				{
-					return pass->m_passName == passName;
+					return pass.m_passName == passName;
 				});
-			if (itr != GetRenderPasses().end())
+			if (itr != graphicPasses.end())
 			{
-				return (*itr)->m_renderpassDescription;
+				return (*itr).m_renderpassDescription;
 			}
 			return { };
 		}
@@ -181,13 +184,15 @@ namespace Insight
 		PipelineStateObject RenderGraphV2::GetPipelineStateObject(std::string_view passName) const
 		{
 			ASSERT(m_context->IsRenderThread());
-			auto itr = std::find_if(GetRenderPasses().begin(), GetRenderPasses().end(), [passName](const UPtr<RenderGraphPassBaseV2>& pass)
+			const std::vector<RenderGraphGraphicsPassV2>& graphicPasses = GetGraphicsRenderPasses();
+
+			auto itr = std::find_if(graphicPasses.begin(), graphicPasses.end(), [passName](const RenderGraphGraphicsPassV2& pass)
 				{
-					return pass->m_passName == passName;
+					return pass.m_passName == passName;
 				});
-			if (itr != GetRenderPasses().end())
+			if (itr != graphicPasses.end())
 			{
-				return (*itr)->m_PSO;
+				return (*itr).m_PSO;
 			}
 			return { };
 		}
@@ -199,7 +204,8 @@ namespace Insight
 
 			m_context->GpuWaitForIdle();
 
-			m_passes.clear();
+			m_graphicsPasses.clear();
+			m_orderedPasses.clear();
 
 			m_textureCaches.ForEach([](RHI_ResourceCache<RHI_Texture>*& textureCache)
 			{
@@ -230,15 +236,14 @@ namespace Insight
 			IS_PROFILE_FUNCTION();
 			ASSERT(m_context->IsRenderThread());
 
-			RenderGraphBuilderV2 builder(this);
+			std::vector<RenderGraphGraphicsPassV2>& graphicPasses = GetGraphicsRenderPasses();
 			//TODO Low: This should be threaded. Leave as single thread for now.
-			for (UPtr<RenderGraphPassBaseV2>& pass : GetRenderPasses())
+			for (RenderGraphGraphicsPassV2& pass : graphicPasses)
 			{
-				builder.SetPass(pass.Get());
-				pass->Setup(RenderGraphSetupData { builder });
+				pass.PreExecute();
 				
 				/// Build all our textures.
-				for (auto& pair : pass.Get()->m_textureCreates)
+				for (auto& pair : pass.m_textureCreates)
 				{
 					RHI_Texture* tex = m_textureCaches.Get()->Get(pair.first);
 					if (!tex->ValidResource())
@@ -249,31 +254,32 @@ namespace Insight
 					}
 				}
 
-				PipelineStateObject& pso = pass.Get()->m_PSO;
-				pass->m_PSO.Swapchain = pass->m_swapchainPass;
-				pass->m_renderpassDescription.Pso = &pso;
+				PipelineStateObject& pso = pass.m_PSO;
+				pass.m_PSO.Swapchain = pass.m_swapchainPass;
+				pass.m_renderpassDescription.Pso = &pso;
 
 				/// Build the shader here but no need to cache a reference to it as we 
 				/// can lookup it up later. Just make sure it exists.
-				pso.Shader = m_context->GetShaderManager().GetOrCreateShader(pass.Get()->m_shader);
+				pso.Shader = m_context->GetShaderManager().GetOrCreateShader(pass.m_shader);
 
 				int rtIndex = 0;
-				for (auto const& rt : pass.Get()->TextureWrites)
+				for (auto const& rt : pass.m_textureWrites)
 				{
 					if (rt != -1)
 					{
 						pso.RenderTargets[rtIndex] = m_textureCaches.Get()->Get(rt);
 						++rtIndex;
-						pass->m_renderpassDescription.ColourAttachments.push_back(m_textureCaches.Get()->Get(rt));
+						pass.m_renderpassDescription.ColourAttachments.push_back(m_textureCaches.Get()->Get(rt));
 					}
 				}
-				pso.DepthStencil = m_textureCaches.Get()->Get(pass.Get()->m_depthStencilWrite);
-				pass->m_renderpassDescription.DepthStencil = pso.DepthStencil;
+				const RGTextureHandle depthSteniclHandle = pass.GetDepthSteniclTexture();
+				pso.DepthStencil = m_textureCaches.Get()->Get(depthSteniclHandle);
+				pass.m_renderpassDescription.DepthStencil = pso.DepthStencil;
 
-				pass->m_renderpassDescription.SwapchainPass = pass->m_swapchainPass;
+				pass.m_renderpassDescription.SwapchainPass = pass.m_swapchainPass;
 
-				m_context->GetRenderpassManager().GetOrCreateRenderpass(pass->m_renderpassDescription);
-				pass->m_PSO.Renderpass = pass->m_renderpassDescription.GetHash();
+				m_context->GetRenderpassManager().GetOrCreateRenderpass(pass.m_renderpassDescription);
+				pass.m_PSO.Renderpass = pass.m_renderpassDescription.GetHash();
 			}
 		}
 
@@ -284,13 +290,13 @@ namespace Insight
 
 			struct FindImageBarrier
 			{
-				static ImageBarrier FindPrevious(const std::vector<UPtr<RenderGraphPassBaseV2>>& passes, int currentPassIndex, RGTextureHandle handleToFind)
+				static ImageBarrier FindPrevious(const std::vector<RenderGraphGraphicsPassV2>& passes, int currentPassIndex, RGTextureHandle handleToFind)
 				{
 					for (int i = currentPassIndex - 1; i >= 0; --i)
 					{
-						RenderGraphPassBaseV2* pass = passes.at(i).Get();
+						const RenderGraphGraphicsPassV2& pass = passes.at(i);
 						int textureIndex = 0;
-						for (const auto& pipelineBarriers : pass->m_incomingBarriers)
+						for (const auto& pipelineBarriers : pass.PipelineBarriers)
 						{
 							for (const auto& imageBarrier : pipelineBarriers.ImageBarriers)
 							{
@@ -315,8 +321,10 @@ namespace Insight
 
 			std::unordered_map<RHI_Texture*, std::vector<ImageBarrier>> texture_barrier_history;
 			int passIndex = 0;
+			std::vector<RenderGraphGraphicsPassV2>& graphicPasses = GetGraphicsRenderPasses();
+
 			/// This should be threaded. Leave as single thread for now.
-			for (UPtr<RenderGraphPassBaseV2>& pass : GetRenderPasses())
+			for (RenderGraphGraphicsPassV2& pass : graphicPasses)
 			{
 				PipelineBarrier colorPipelineBarrier;
 				PipelineBarrier depthPipelineBarrier;
@@ -327,14 +335,14 @@ namespace Insight
 				/// Colour writes
 				//if (!pass->m_skipTextureWriteBarriers)
 				{
-					for (auto const& rt : pass.Get()->TextureWrites)
+					for (auto const& rt : pass.m_textureWrites)
 					{
 						RHI_Texture* texture = rt == -1 ? m_context->GetSwaphchainIamge() : m_textureCaches.Get()->Get(rt);
 						
 
 						PlaceInitalBarrier::PlaceBarrier(texture, texture_barrier_history[texture]);
 
-						ImageBarrier previousBarrier = FindImageBarrier::FindPrevious(GetRenderPasses(), passIndex, rt);
+						ImageBarrier previousBarrier = FindImageBarrier::FindPrevious(graphicPasses, passIndex, rt);
 
 						ImageBarrier barrier;
 						barrier.TextureHandle = rt;
@@ -355,16 +363,17 @@ namespace Insight
 				colorPipelineBarrier.DstStage = +PipelineStageFlagBits::ColourAttachmentOutput;
 				colorPipelineBarrier.ImageBarriers = colorImageBarriers;
 
+				const RGTextureHandle depthSteniclHandle = pass.GetDepthSteniclTexture();
 				/// Depth write
-				if (pass->m_depthStencilWrite != -1)
+				if (depthSteniclHandle != -1)
 				{
-					RHI_Texture* texture = m_textureCaches.Get()->Get(pass->m_depthStencilWrite);
+					RHI_Texture* texture = m_textureCaches.Get()->Get(depthSteniclHandle);
 					PlaceInitalBarrier::PlaceBarrier(texture, texture_barrier_history[texture]);
 
-					ImageBarrier previousBarrier = FindImageBarrier::FindPrevious(GetRenderPasses(), passIndex, pass->m_depthStencilWrite);
+					ImageBarrier previousBarrier = FindImageBarrier::FindPrevious(graphicPasses, passIndex, depthSteniclHandle);
 
 					ImageBarrier barrier;
-					barrier.TextureHandle = pass->m_depthStencilWrite;
+					barrier.TextureHandle = depthSteniclHandle;
 					barrier.Image = texture;
 
 					barrier.SrcAccessFlags = AccessFlagBits::None;
@@ -384,11 +393,11 @@ namespace Insight
 
 				if (colorPipelineBarrier.ImageBarriers.size() > 0 || colorPipelineBarrier.BufferBarriers.size() > 0)
 				{
-					pass->m_incomingBarriers.push_back(colorPipelineBarrier);
+					pass.PipelineBarriers.push_back(colorPipelineBarrier);
 				}
 				if (depthPipelineBarrier.ImageBarriers.size() > 0 || depthPipelineBarrier.BufferBarriers.size() > 0)
 				{
-					pass->m_incomingBarriers.push_back(depthPipelineBarrier);
+					pass.PipelineBarriers.push_back(depthPipelineBarrier);
 				}
 
 				colorPipelineBarrier = { };
@@ -399,12 +408,12 @@ namespace Insight
 				/// Texture reads
 				//if (!pass->m_skipTextureReadBarriers)
 				{
-					for (auto const& rt : pass.Get()->TextureReads)
+					for (auto const& rt : pass.m_textureReads)
 					{
 						RHI_Texture* texture = rt == -1 ? m_context->GetSwaphchainIamge() : m_textureCaches.Get()->Get(rt);
 						PlaceInitalBarrier::PlaceBarrier(texture, texture_barrier_history[texture]);
 
-						ImageBarrier previousBarrier = FindImageBarrier::FindPrevious(GetRenderPasses(), passIndex, rt);
+						ImageBarrier previousBarrier = FindImageBarrier::FindPrevious(graphicPasses, passIndex, rt);
 
 						ImageBarrier barrier;
 						barrier.Image = texture;
@@ -440,11 +449,11 @@ namespace Insight
 				
 				if (colorPipelineBarrier.ImageBarriers.size() > 0 || colorPipelineBarrier.BufferBarriers.size() > 0)
 				{
-					pass->m_incomingBarriers.push_back(colorPipelineBarrier);
+					pass.PipelineBarriers.push_back(colorPipelineBarrier);
 				}
 				if (depthPipelineBarrier.ImageBarriers.size() > 0 || depthPipelineBarrier.BufferBarriers.size() > 0)
 				{
-					pass->m_incomingBarriers.push_back(depthPipelineBarrier);
+					pass.PipelineBarriers.push_back(depthPipelineBarrier);
 				}
 
 				++passIndex;
@@ -457,27 +466,32 @@ namespace Insight
 			ASSERT(m_context->IsRenderThread());
 
 			NVTX3_FUNC_RANGE();
+
+			std::vector<RenderGraphGraphicsPassV2>& graphicPasses = GetGraphicsRenderPasses();
+
 			/// TODO Low: Could be threaded? Leave as it is for now as it works.
-			for (UPtr<RenderGraphPassBaseV2>& pass : GetRenderPasses())
+			for (RenderGraphGraphicsPassV2& pass : graphicPasses)
 			{
+				pass.SetCommandList(cmdList);
+
 				cmdList->BeginTimeBlock("PlaceBarriersInToPipeline", glm::vec4(1, 0, 0, 1));
-				PlaceBarriersInToPipeline(pass.Get(), cmdList);
+				PlaceBarriersInToPipeline(&pass, cmdList);
 				cmdList->EndTimeBlock();
 
-				cmdList->SetViewport(0.0f, 0.0f, (float)pass->m_viewport.x, (float)pass->m_viewport.y, 0.0f, 1.0f, false);
-				cmdList->SetScissor(0, 0, pass->m_viewport.x, pass->m_viewport.y);
+				cmdList->SetViewport(0.0f, 0.0f, (float)pass.m_viewport.x, (float)pass.m_viewport.y, 0.0f, 1.0f, false);
+				cmdList->SetScissor(0, 0, pass.m_viewport.x, pass.m_viewport.y);
 
-				std::string passName = std::string(pass->m_passName.begin(), pass->m_passName.end());
+				std::string passName = std::string(pass.m_passName.begin(), pass.m_passName.end());
 				cmdList->BeginTimeBlock(passName + "_Execute", glm::vec4(0, 1, 0, 1));
 				GPUProfiler::Instance().StartProfile(cmdList, passName);
-				pass->Execute(RenderGraphExecuteData { *this, cmdList});
+				pass.Execute();
 				GPUProfiler::Instance().EndProfile(cmdList);
 				cmdList->EndTimeBlock();
 			}
 
-			for (UPtr<RenderGraphPassBaseV2>& pass : GetRenderPasses())
+			for (RenderGraphGraphicsPassV2& pass : graphicPasses)
 			{
-				pass->Post(RenderGraphPostData { *this, cmdList });
+				pass.PostExecute();
 			}
 
 			// If our swap chain image is not in the 'PresentSrc' layout then transition it.
@@ -496,8 +510,8 @@ namespace Insight
 				imageBarrier.SubresourceRange = ImageSubresourceRange::SingleMipAndLayer(ImageAspectFlagBits::Colour);
 
 				barrier.ImageBarriers.push_back(std::move(imageBarrier));
-				cmdList->PipelineBarrier(barrier);
 				cmdList->BeginTimeBlock("Transition swapchain image, common");
+				cmdList->PipelineBarrier(barrier);
 				cmdList->EndTimeBlock();
 			}
 		}
@@ -505,39 +519,40 @@ namespace Insight
 		void RenderGraphV2::Clear()
 		{
 			IS_PROFILE_FUNCTION();
-			m_passes.clear();
+			m_graphicsPasses.clear();
+			m_orderedPasses.clear();
 		}
 
 		void RenderGraphV2::PlaceBarriersInToPipeline(RenderGraphPassBaseV2* pass, RHI_CommandList* cmdList)
 		{
 			ASSERT(m_context->IsRenderThread());
 
-			for (auto& barrier : pass->m_incomingBarriers)
+			for (auto& barrier : pass->PipelineBarriers)
 			{
 				cmdList->PipelineBarrier(barrier);
 			}
 		}
 
-		std::vector<UPtr<RenderGraphPassBaseV2>>& RenderGraphV2::GetUpdatePasses()
+		std::vector<RenderGraphGraphicsPassV2>& RenderGraphV2::GetGraphicsPendingPasses()
 		{
-			return m_passes.at(m_passesUpdateIndex);
+			return m_graphicsPasses.at(m_passesUpdateIndex);
 		}
 
-		std::vector<UPtr<RenderGraphPassBaseV2>>& RenderGraphV2::GetRenderPasses()
+		std::vector<RenderGraphGraphicsPassV2>& RenderGraphV2::GetGraphicsRenderPasses()
 		{
 			ASSERT(m_context->IsRenderThread());
-			return m_passes.at(m_passesRenderIndex);
+			return m_graphicsPasses.at(m_passesRenderIndex);
 		}
 
-		const std::vector<UPtr<RenderGraphPassBaseV2>>& RenderGraphV2::GetUpdatePasses() const
+		const std::vector<RenderGraphGraphicsPassV2>& RenderGraphV2::GetGraphicsPendingPasses() const
 		{
-			return m_passes.at(m_passesUpdateIndex);
+			return m_graphicsPasses.at(m_passesUpdateIndex);
 		}
 
-		const std::vector<UPtr<RenderGraphPassBaseV2>>& RenderGraphV2::GetRenderPasses() const
+		const std::vector<RenderGraphGraphicsPassV2>& RenderGraphV2::GetGraphicsRenderPasses() const
 		{
 			ASSERT(m_context->IsRenderThread());
-			return m_passes.at(m_passesRenderIndex);
+			return m_graphicsPasses.at(m_passesRenderIndex);
 		}
 
 		void RenderGraphV2::SetRenderResolution(glm::ivec2 render_resolution)
@@ -554,3 +569,4 @@ namespace Insight
 		}
 	}
 }
+#endif
