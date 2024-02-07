@@ -180,8 +180,11 @@ namespace Insight
 			arguments.push_back(c_Include_Directory);
 			arguments.push_back(wResourcePath.c_str());
 
-			//arguments.push_back(DXC_ARG_DEBUG);
+			arguments.push_back(DXC_ARG_DEBUG);
 			arguments.push_back(DXC_ARG_SKIP_OPTIMIZATIONS);
+
+			arguments.push_back(L"-Qstrip_debug");
+			//arguments.push_back(L"-Qstrip_reflect");
 
 			arguments.push_back(L"-Wnull-character");
 
@@ -263,11 +266,23 @@ namespace Insight
 			std::string shaderCSOFolderPath = EnginePaths::GetExecutablePath() + "/Shader_CSO/";
 			FileSystem::CreateFolder(shaderCSOFolderPath);
 
-			std::string shaderToDisk = shaderCSOFolderPath + std::string(shaderToDiskView) + ".cso";
+			std::string shaderToDisk = shaderCSOFolderPath + name + "_" + StageToFuncName(stage) + "_" + StageToProfileTarget(stage) + ".cso";
 			shaderDisk.open(shaderToDisk.c_str());
 			if (shaderDisk.is_open())
 			{
 				shaderDisk.write((const char*)code->GetBufferPointer(), code->GetBufferSize());
+				shaderDisk.close();
+			}
+
+			ComPtr<IDxcBlob> pDebugData;
+			ComPtr<IDxcBlobUtf16> pDebugDataPath;
+			ShaderCompileResults->GetOutput(DXC_OUT_PDB, IID_PPV_ARGS(pDebugData.GetAddressOf()), pDebugDataPath.GetAddressOf());
+			std::string debugPath = shaderCSOFolderPath + Platform::StringFromWString(pDebugDataPath->GetStringPointer());
+
+			shaderDisk.open(debugPath.c_str());
+			if (shaderDisk.is_open())
+			{
+				shaderDisk.write((const char*)pDebugData->GetBufferPointer(), pDebugData->GetBufferSize());
 				shaderDisk.close();
 			}
 

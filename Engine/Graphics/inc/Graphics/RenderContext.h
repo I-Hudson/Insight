@@ -35,6 +35,7 @@ namespace Insight
 		class RHI_Texture;
 		class RenderTarget;
 		class RenderGraph;
+		class RenderGraphV2;
 
 		enum class GraphicsAPI
 		{
@@ -269,6 +270,7 @@ namespace Insight
 			GPUProfiler m_gpuProfiler;
 
 			RenderGraph* m_renderGraph;
+			RenderGraphV2* m_renderGraphV2;
 
 			std::array<u8, static_cast<u64>(DeviceExtension::DeviceExtensionCount)> m_deviceExtensions;
 			std::array<u8, static_cast<u64>(DeviceExtension::DeviceExtensionCount)> m_enabledDeviceExtensions;

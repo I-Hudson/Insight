@@ -5,6 +5,7 @@
 #include "Input/InputDevices/InputDeivce_Controller.h"
 
 #include "Core/Logger.h"
+#include "Core/Profiler.h"
 
 namespace Insight
 {
@@ -35,6 +36,7 @@ namespace Insight
 
 		void InputSystem::Initialise()
 		{
+			IS_PROFILE_FUNCTION();
 #ifdef IS_PLATFORM_DESKTOP
 			AddInputDevice(InputDeviceTypes::KeyboardMouse, 0);
 #endif // IS_PLATFORM_DESKTOP

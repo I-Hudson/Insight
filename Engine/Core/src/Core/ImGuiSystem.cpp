@@ -1,4 +1,5 @@
 #include "Core/ImGuiSystem.h"
+#include "Core/Profiler.h"
 
 namespace Insight
 {
@@ -6,6 +7,7 @@ namespace Insight
 	{
 		void ImGuiSystem::Initialise()
 		{
+			IS_PROFILE_FUNCTION();
 			ImGui::CreateContext();
 			ImPlot::CreateContext();
 

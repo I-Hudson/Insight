@@ -7,6 +7,7 @@
 #include "Runtime/Engine.h"
 
 #include "Core/CommandLineArgs.h"
+#include "Core/Profiler.h"
 
 namespace Insight
 {
@@ -20,6 +21,7 @@ namespace Insight
 
 		void GraphicsSystem::Initialise(Input::InputSystem* inputSystem)
 		{
+			IS_PROFILE_FUNCTION();
 			m_inputSystem = inputSystem;
 			PixelFormatExtensions::Init();
 

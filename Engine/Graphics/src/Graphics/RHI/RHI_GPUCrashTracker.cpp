@@ -1,10 +1,8 @@
 #include "Graphics/RHI/RHI_GPUCrashTracker.h"
 #include "Core/Memory.h"
+#include "FileSystem/FileSystem.h"
 
-#include <fstream>
-#include <iomanip>
 #include <string>
-#include <array>
 
 namespace Insight
 {
@@ -156,6 +154,8 @@ namespace Insight
 			// Write the crash dump data to a file using the .nv-gpudmp extension
 			// registered with Nsight Graphics.
 			const std::string crashDumpFileName = c_CrashFolder + baseFileName + ".nv-gpudmp";
+			FileSystem::CreateFolder(c_CrashFolder);
+
 			std::ofstream dumpFile(crashDumpFileName, std::ios::out | std::ios::binary);
 			if (dumpFile)
 			{
@@ -183,7 +183,7 @@ namespace Insight
 				json.data()));
 
 			// Write the crash dump data as JSON to a file.
-			const std::string jsonFileName = c_CrashFolder + crashDumpFileName + ".json";
+			const std::string jsonFileName = crashDumpFileName + ".json";
 			std::ofstream jsonFile(jsonFileName, std::ios::out | std::ios::binary);
 			if (jsonFile)
 			{

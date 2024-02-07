@@ -6,6 +6,8 @@
 
 #include "Serialisation/Archive.h"
 
+#include "Core/Profiler.h"
+
 namespace Insight
 {
     namespace Runtime
@@ -30,6 +32,7 @@ namespace Insight
 
         void ResourceSystem::Initialise()
         {
+            IS_PROFILE_FUNCTION();
             ResourceLoaderRegister::Initialise();
 
             RegisterAllResources();

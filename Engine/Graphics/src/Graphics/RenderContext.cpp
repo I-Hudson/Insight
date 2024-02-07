@@ -1,10 +1,15 @@
 #include "Graphics/RenderContext.h"
 
+#ifdef IS_VULKAN_ENABLED
 #include "Graphics/RHI/Vulkan/RenderContext_Vulkan.h"
-#include "Graphics/RHI/DX12/RenderContext_DX12.h"
+#endif
 
-#include "Graphics/RenderTarget.h"
+#ifdef IS_DX12_ENABLED
+#include "Graphics/RHI/DX12/RenderContext_DX12.h"
+#endif
+
 #include "Graphics/RenderGraph/RenderGraph.h"
+#include "Graphics/RenderGraphV2/RenderGraphV2.h"
 
 #include "Graphics/Fonts/fa_solid_900.ttf.h"
 
@@ -72,6 +77,9 @@ namespace Insight
 			context->m_renderGraph = ::New<RenderGraph>();
 			context->m_renderGraph->Init(context);
 			context->m_frameDescriptorAllocator.Setup();
+
+			context->m_renderGraphV2 = ::New<RenderGraphV2>();
+			context->m_renderGraphV2->Init(context);
 
 			context->m_gpuProfiler.Initialise(context);
 
@@ -240,6 +248,9 @@ namespace Insight
 
 			m_renderGraph->Release();
 			Delete(m_renderGraph);
+
+			m_renderGraphV2->Release();
+			Delete(m_renderGraphV2);
 
 			m_shaderManager.Destroy();
 			m_renderpassManager.ReleaseAll();

@@ -39,7 +39,7 @@ namespace Insight
 			m_context = context;
 			for (size_t i = 0; i < m_context->GetFramesInFligtCount(); ++i)
 			{
-				//m_passes.push_back({});
+				m_graphicsPasses.push_back({});
 			}
 
 			m_textureCaches.Setup();
