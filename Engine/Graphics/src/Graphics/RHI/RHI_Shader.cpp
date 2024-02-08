@@ -183,7 +183,7 @@ namespace Insight
 			arguments.push_back(DXC_ARG_DEBUG);
 			arguments.push_back(DXC_ARG_SKIP_OPTIMIZATIONS);
 
-			arguments.push_back(L"-Qstrip_debug");
+			//arguments.push_back(L"-Qstrip_debug");
 			//arguments.push_back(L"-Qstrip_reflect");
 
 			arguments.push_back(L"-Wnull-character");
@@ -221,7 +221,8 @@ namespace Insight
 			{
 				arguments.push_back(L"-spirv");
 			}
-			//arguments.push_back(L"-fspv-reflect");
+
+			arguments.push_back(L"-fspv-reflect");
 			ASSERT(SUCCEEDED(DXCompiler->Compile(
 				&Source,								// Source buffer.
 				arguments.data(),						// Array of pointers to arguments.

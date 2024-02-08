@@ -324,75 +324,74 @@ namespace Insight
 
     std::string FileSystem::GetRelativePath(std::string_view path, std::string_view basePath)
     {
-#if 0
-        std::string fullPath;
-        {
-            IS_PROFILE_SCOPE("fullPath");
-            fullPath = IsAbsolutePath(path) ? std::string(path) : GetAbsolutePath(path);
-        }
-        std::string fullBasePath; 
-        {
-            IS_PROFILE_SCOPE("fullBasePath");
-            fullBasePath = IsAbsolutePath(basePath) ? std::string(basePath) : GetAbsolutePath(basePath);
-        }
+#if 1
+        IS_PROFILE_SCOPE("weakly_canonical");
+        std::string _Weakly_canonical_path = FileSystem::IsAbsolutePath(path) ? std::string(path) : _STD filesystem::weakly_canonical(path).string();
+        std::string _Weakly_canonical_base = FileSystem::IsAbsolutePath(basePath) ? std::string(basePath) : _STD filesystem::weakly_canonical(basePath).string();;
+        PathToUnix(_Weakly_canonical_path);
+        PathToUnix(_Weakly_canonical_base);
 
-        std::vector<std::string> fullPathSplit;
+        std::vector<std::string> _Weakly_canonical_path_split;
         {
             IS_PROFILE_SCOPE("fullPath split");
 
-            fullPathSplit = SplitString(fullPath, '/');
+            _Weakly_canonical_path_split = SplitString(_Weakly_canonical_path, '/');
         }
-        std::vector<std::string> fullBasePathSplit; 
+        std::vector<std::string> _Weakly_canonical_base_split;
         {
             IS_PROFILE_SCOPE("fullBasePath split");
-            fullBasePathSplit = SplitString(fullBasePath, '/');
+            _Weakly_canonical_base_split = SplitString(_Weakly_canonical_base, '/');
         }
         
+        const u32 shortestPathSize = _Weakly_canonical_path_split.size() < _Weakly_canonical_base_split.size() 
+            ? _Weakly_canonical_path_split.size() : _Weakly_canonical_base_split.size();
+        bool foundSplitInPath = false;
+        // Find our common paths
         std::string result;
         {
-            IS_PROFILE_SCOPE("../");
-            if (fullPathSplit.size() < fullBasePathSplit.size())
+            for (size_t i = 0; i < shortestPathSize; ++i)
             {
-                u32 parentOffset = fullBasePathSplit.size() - fullPathSplit.size();
-                for (size_t parentOffsetIdx = 0; parentOffsetIdx < parentOffset; ++parentOffsetIdx)
+                if (_Weakly_canonical_path_split[i] != _Weakly_canonical_base_split[i])
                 {
-                    result += "../";
-                }
-            }
-        }
-
-        bool foundRelative = false;
-        {
-            IS_PROFILE_SCOPE("add relative path to result");
-            const u32 shortestPath = std::min(fullPathSplit.size(), fullBasePathSplit.size());
-            for (int i = 0; i < shortestPath; ++i)
-            {
-                if (fullPathSplit[i] != fullBasePathSplit[i])
-                {
-                    foundRelative = true;
-                    for (size_t pathIdx = 0; pathIdx < shortestPath; ++pathIdx)
+                    foundSplitInPath = true;
+                    if (i < _Weakly_canonical_base_split.size())
                     {
-                        result += fullPathSplit[pathIdx] + "/";
+                        const u32 diffDirs = _Weakly_canonical_base_split.size() - i;
+                        for (size_t diffDirsIdx = 0; diffDirsIdx < diffDirs; ++diffDirsIdx)
+                        {
+                            result += "../";
+                        }
+                    }
+
+                    if (_Weakly_canonical_path_split.size() > i)
+                    {
+                        for (size_t pathIdx = i; pathIdx < _Weakly_canonical_path_split.size(); ++pathIdx)
+                        {
+                            result += _Weakly_canonical_path_split[i];
+                        }
                     }
                     break;
                 }
             }
         }
 
-        if (!foundRelative && fullPathSplit.size() > fullBasePathSplit.size())
+        if (!foundSplitInPath)
         {
-            for (size_t i = fullBasePathSplit.size(); i < fullPathSplit.size(); ++i)
+            const u32 pathDifferenceSize = _Weakly_canonical_base_split.size() - _Weakly_canonical_path_split.size();
+            for (size_t idx = 0; idx < pathDifferenceSize; ++idx)
             {
-                result += fullPathSplit[i] + "/";
+                result += "../";
             }
         }
 
         if (!result.empty() && result.back() == '/')
         {
-            result.pop_back();
+            //result.pop_back();
         }
-
-        result += ".";
+        else if (result.empty())
+        {
+            result += ".";
+        }
 
         return result;
 #else

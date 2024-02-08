@@ -99,6 +99,12 @@ namespace Insight
 				}
 			}
 
+			bool HasResource(TypePtr object) const
+			{
+				std::lock_guard lock(m_lock);
+				return m_objects.find(object) != m_objects.end();
+			}
+
 			void ReleaseAll()
 			{
 				std::lock_guard lock(m_lock);
@@ -118,7 +124,7 @@ namespace Insight
 
 		protected:
 			std::unordered_set<TypePtr> m_objects;
-			std::mutex m_lock;
+			mutable std::mutex m_lock;
 		};
 
 		/// @brief Empty base class used for tracking elsewhere.
@@ -224,6 +230,19 @@ namespace Insight
 				}
 				return -1;
 			}
+			
+			bool HasValue(TypePtr ptr) const
+			{
+				std::lock_guard lock(m_lock);
+				for (auto& [key, value] : m_itemLookup)
+				{
+					if (value.ItemPtr == ptr)
+					{
+						return true;
+					}
+				}
+				return false;
+			}
 
 			virtual void Release() override
 			{
@@ -257,7 +276,7 @@ namespace Insight
 			}
 
 		private:
-			std::mutex m_lock;
+			mutable std::mutex m_lock;
 
 			RHI_ResourceManager<TValue>& m_manager;
 

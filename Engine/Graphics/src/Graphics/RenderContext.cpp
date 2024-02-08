@@ -336,6 +336,11 @@ namespace Insight
 			m_textures.FreeResource(texture);
 		}
 
+		bool RenderContext::HasTexture(RHI_Texture* texture) const
+		{
+			return m_textures.HasResource(texture);
+		}
+
 		void RenderContext::RenderUpdateLoop()
 		{
 			IS_PROFILE_FUNCTION();
@@ -526,6 +531,11 @@ namespace Insight
 	void Renderer::FreeTexture(Graphics::RHI_Texture* texture)
 	{
 		s_context->FreeTexture(texture);
+	}
+
+	bool Renderer::HasTexture(Graphics::RHI_Texture* texture)
+	{
+		return s_context->HasTexture(texture);
 	}
 
 	Graphics::GraphicsAPI Renderer::GetGraphicsAPI()

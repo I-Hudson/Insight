@@ -569,6 +569,7 @@ namespace Insight
 									cmdList->SetScissor((int)clip_min.x, (int)clip_min.y, (int)clip_max.x, (int)clip_max.y);
 								}
 								RHI_Texture* texture = static_cast<RHI_Texture*>(pcmd->TextureId);
+								//ASSERT(RenderGraph::Instance().HasTexture(texture) || Renderer::HasTexture(texture));
 
 								if (texture)
 								{

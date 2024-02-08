@@ -42,6 +42,11 @@ namespace Insight
 			RHI_Texture* GetRHITexture(std::string textureName) const;
 			RHI_Texture* GetRHITexture(RGTextureHandle handle) const;
 
+			bool HasTexture(RHI_Texture* texture) const
+			{
+				return m_textureCaches.Get()->HasValue(texture);
+			}
+
 			RHI_Texture* GetRenderCompletedRHITexture(std::string textureName) const;
 
 			RenderpassDescription GetRenderpassDescription(std::string_view passName) const;

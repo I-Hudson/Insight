@@ -1,4 +1,5 @@
 #include "Threading/TaskSystem.h"
+#include "Core/Profiler.h"
 
 namespace Insight
 {
@@ -7,6 +8,7 @@ namespace Insight
 
 		void TaskSystem::Initialise()
 		{
+			IS_PROFILE_FUNCTION();
 			Shutdown();
 			m_destroy = false;
 

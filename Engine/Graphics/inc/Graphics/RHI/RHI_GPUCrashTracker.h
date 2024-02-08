@@ -10,6 +10,9 @@
 #endif
 
 #ifdef IS_NVIDIA_AFTERMATH_ENABLED
+#ifdef IS_DX12_ENABLED
+#include <d3dx12.h>
+#endif
 #include "GFSDK_Aftermath.h"
 #include "GFSDK_Aftermath_GpuCrashDump.h"
 #include "GFSDK_Aftermath_GpuCrashDumpDecoding.h"
@@ -26,6 +29,8 @@ namespace Insight
 
 			virtual void Init() = 0;
 			virtual void Destroy() = 0;
+
+			virtual void DeviceLost() = 0;
 		};
 
 #ifdef IS_NVIDIA_AFTERMATH_ENABLED
@@ -34,6 +39,8 @@ namespace Insight
 		public:
 			virtual void Init() override;
 			virtual void Destroy() override;
+
+			virtual void DeviceLost() override;
 
 		private:
 			//*********************************************************
@@ -50,7 +57,7 @@ namespace Insight
 			void OnDescription(PFN_GFSDK_Aftermath_AddGpuCrashDumpDescription addDescription);
 
 			// Handler for app-managed marker resolve callback
-			void OnResolveMarker(const void* pMarker, void** resolvedMarkerData, uint32_t* markerSize);
+			void OnResolveMarker(const void* pMarkerData, const uint32_t markerDataSize, void* pUserData, void** ppResolvedMarkerData, uint32_t* pResolvedMarkerDataSize);
 
 			//*********************************************************
 			// Helpers for writing a GPU crash dump and debug information
@@ -108,10 +115,11 @@ namespace Insight
 
 			// App-managed marker resolve callback
 			static void ResolveMarkerCallback(
-				const void* pMarker,
-				void* pUserData,
-				void** resolvedMarkerData,
-				uint32_t* markerSize);
+				const void* pMarkerData
+				, const uint32_t markerDataSize
+				, void* pUserData
+				, void** ppResolvedMarkerData
+				, uint32_t* pResolvedMarkerDataSize);
 
 			// Shader debug information lookup callback.
 			static void ShaderDebugInfoLookupCallback(

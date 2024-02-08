@@ -69,7 +69,7 @@ namespace Insight
 					{
 						if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&m_debugController))))
 						{
-							m_debugController->EnableDebugLayer();
+							//m_debugController->EnableDebugLayer();
 							/// Enable additional debug layers.
 							dxgiFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
 
@@ -86,17 +86,17 @@ namespace Insight
 
 				FindPhysicalDevice(&m_physicalDevice.GetPhysicalDevice());
 
-				m_gpuCrashTracker = RHI_GPUCrashTracker::Create();
-				if (m_gpuCrashTracker)
-				{
-					m_gpuCrashTracker->Init();
-				}
-
 				ThrowIfFailed(D3D12CreateDevice(
 					m_physicalDevice.GetPhysicalDevice().Get(),
 					m_d3dFeatureLevel,
 					IID_PPV_ARGS(&m_device)
 				));
+
+				m_gpuCrashTracker = RHI_GPUCrashTracker::Create();
+				if (m_gpuCrashTracker)
+				{
+					m_gpuCrashTracker->Init();
+				}
 
 				m_d3d12maAllocationCallbacks.pAllocate = D3D12Allocate;
 				m_d3d12maAllocationCallbacks.pFree = D3D12Free;
@@ -398,8 +398,10 @@ namespace Insight
 							
 							if (HRESULT hr = m_swapchain->Present(presentSyncInterval, presentFlags); FAILED(hr))
 							{
-								if (hr == 0x0)
+								if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET)
 								{
+									m_gpuCrashTracker->DeviceLost();
+
 									HRESULT deviceRemovedReason = m_device->GetDeviceRemovedReason();
 									IS_CORE_ERROR("[RenderContext_DX12::PostRender] Device has been removed. Reason: '{}'.", deviceRemovedReason);
 								}

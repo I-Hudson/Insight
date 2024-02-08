@@ -250,6 +250,7 @@ namespace Insight
 
 			RHI_Texture* CreateTextre();
 			void FreeTexture(RHI_Texture* texture);
+			bool HasTexture(RHI_Texture* texture) const;
 
 		protected:
 			///const static int c_FrameCount = 3;
@@ -340,6 +341,7 @@ namespace Insight
 
 		static Graphics::RHI_Texture* CreateTexture();
 		static void FreeTexture(Graphics::RHI_Texture* texture);
+		static bool HasTexture(Graphics::RHI_Texture* texture);
 
 		static Graphics::GraphicsAPI GetGraphicsAPI();
 

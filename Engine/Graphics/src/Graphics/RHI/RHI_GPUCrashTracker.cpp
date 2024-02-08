@@ -1,5 +1,9 @@
 #include "Graphics/RHI/RHI_GPUCrashTracker.h"
+#ifdef IS_DX12_ENABLED
+#include "Graphics/RHI/DX12/RenderContext_DX12.h"
+#endif
 #include "Core/Memory.h"
+#include "Core/Logger.h"
 #include "FileSystem/FileSystem.h"
 
 #include <string>
@@ -40,11 +44,58 @@ namespace Insight
 				CrashDumpDescriptionCallback,                                     // Register callback for GPU crash dump description.
 				ResolveMarkerCallback,                                            // Register callback for resolving application-managed markers.
 				this));                                                           // Set the GpuCrashTracker object as user data for the above callbacks.
+
+#ifdef IS_DX12_ENABLED
+			// Initialize Nsight Aftermath for this device.
+			const uint32_t aftermathFlags =
+				GFSDK_Aftermath_FeatureFlags_EnableMarkers |             // Enable event marker tracking.
+				GFSDK_Aftermath_FeatureFlags_CallStackCapturing |        // Enable automatic call stack event markers.
+				GFSDK_Aftermath_FeatureFlags_EnableResourceTracking |    // Enable tracking of resources.
+				GFSDK_Aftermath_FeatureFlags_GenerateShaderDebugInfo |   // Generate debug information for shaders.
+				GFSDK_Aftermath_FeatureFlags_EnableShaderErrorReporting; // Enable additional runtime shader error reporting.
+
+			RHI::DX12::RenderContext_DX12& renderContextDX12 = static_cast<RHI::DX12::RenderContext_DX12&>(RenderContext::Instance());
+			AFTERMATH_CHECK_ERROR(GFSDK_Aftermath_DX12_Initialize(
+				GFSDK_Aftermath_Version_API,
+				aftermathFlags,
+				renderContextDX12.GetDevice()));
+#endif
 		}
 
 		void RHI_GPUCrashTrackerNvidiaAftermath::Destroy()
 		{
 			AFTERMATH_CHECK_ERROR(GFSDK_Aftermath_DisableGpuCrashDumps());
+		}
+
+		void RHI_GPUCrashTrackerNvidiaAftermath::DeviceLost()
+		{
+			GFSDK_Aftermath_CrashDump_Status status = GFSDK_Aftermath_CrashDump_Status_Unknown;
+			AFTERMATH_CHECK_ERROR(GFSDK_Aftermath_GetCrashDumpStatus(&status));
+
+			auto tStart = std::chrono::steady_clock::now();
+			auto tElapsed = std::chrono::milliseconds::zero();
+
+			// Loop while Aftermath crash dump data collection has not finished or
+			// the application is still processing the crash dump data.
+			while (status != GFSDK_Aftermath_CrashDump_Status_CollectingDataFailed &&
+				   status != GFSDK_Aftermath_CrashDump_Status_Finished &&
+				   tElapsed.count() < 3000)
+			{
+				// Sleep a couple of milliseconds and poll the status again.
+				std::this_thread::sleep_for(std::chrono::milliseconds(50));
+				AFTERMATH_CHECK_ERROR(GFSDK_Aftermath_GetCrashDumpStatus(&status));
+
+				tElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - tStart);
+			}
+
+			if (status == GFSDK_Aftermath_CrashDump_Status_Finished)
+			{
+				IS_CORE_INFO("Aftermath finished processing the crash dump.\n");
+			}
+			else
+			{
+				IS_CORE_INFO("Unexpected crash dump status after timeout: %d\n", status);
+			}
 		}
 
 		void RHI_GPUCrashTrackerNvidiaAftermath::OnCrashDump(const void* pGpuCrashDump, const uint32_t gpuCrashDumpSize)
@@ -68,11 +119,6 @@ namespace Insight
 				shaderDebugInfoSize,
 				&identifier));
 
-			// Store information for decoding of GPU crash dumps with shader address mapping
-			// from within the application.
-			std::vector<uint8_t> data((uint8_t*)pShaderDebugInfo, (uint8_t*)pShaderDebugInfo + shaderDebugInfoSize);
-			//m_shaderDebugInfo[identifier].swap(data);
-
 			// Write to file for later in-depth analysis of crash dumps with Nsight Graphics
 			WriteShaderDebugInformationToFile(identifier, pShaderDebugInfo, shaderDebugInfoSize);
 		}
@@ -89,7 +135,7 @@ namespace Insight
 			addDescription(GFSDK_Aftermath_GpuCrashDumpDescriptionKey_UserDefined + 2, "More user-defined information...");
 		}
 
-		void RHI_GPUCrashTrackerNvidiaAftermath::OnResolveMarker(const void* pMarker, void** resolvedMarkerData, uint32_t* markerSize)
+		void RHI_GPUCrashTrackerNvidiaAftermath::OnResolveMarker(const void* pMarkerData, const uint32_t markerDataSize, void* pUserData, void** ppResolvedMarkerData, uint32_t* pResolvedMarkerDataSize)
 		{
 			// Important: the pointer passed back via resolvedMarkerData must remain valid after this function returns
 			// using references for all of the m_markerMap accesses ensures that the pointers refer to the persistent data
@@ -201,6 +247,7 @@ namespace Insight
 			// Create a unique file name.
 			const std::string filePath = "shader-" + std::to_string(identifier) + ".nvdbg";
 
+			FileSystem::CreateFolder(c_shaderFolder);
 			std::ofstream f(c_shaderFolder + filePath, std::ios::out | std::ios::binary);
 			if (f)
 			{
@@ -272,10 +319,10 @@ namespace Insight
 			pGpuCrashTracker->OnDescription(addDescription);
 		}
 
-		void RHI_GPUCrashTrackerNvidiaAftermath::ResolveMarkerCallback(const void* pMarker, void* pUserData, void** resolvedMarkerData, uint32_t* markerSize)
+		void RHI_GPUCrashTrackerNvidiaAftermath::ResolveMarkerCallback(const void* pMarkerData, const uint32_t markerDataSize, void* pUserData, void** ppResolvedMarkerData, uint32_t* pResolvedMarkerDataSize)
 		{
 			RHI_GPUCrashTrackerNvidiaAftermath* pGpuCrashTracker = reinterpret_cast<RHI_GPUCrashTrackerNvidiaAftermath*>(pUserData);
-			pGpuCrashTracker->OnResolveMarker(pMarker, resolvedMarkerData, markerSize);
+			pGpuCrashTracker->OnResolveMarker(pMarkerData, markerDataSize, pUserData, ppResolvedMarkerData, pResolvedMarkerDataSize);
 		}
 
 		void RHI_GPUCrashTrackerNvidiaAftermath::ShaderDebugInfoLookupCallback(const GFSDK_Aftermath_ShaderDebugInfoIdentifier* pIdentifier, PFN_GFSDK_Aftermath_SetData setShaderDebugInfo, void* pUserData)
