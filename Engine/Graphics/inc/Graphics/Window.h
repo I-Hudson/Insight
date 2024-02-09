@@ -84,18 +84,19 @@ namespace Insight
 			void SetCallbacks();
 
 		private:
-			bool m_glfwInit = false;
 			std::string m_title;
-			GLFWwindow* m_glfwWindow = nullptr;
-			bool m_isFullScreen = false;
+			static std::unordered_map<GLFWwindow*, WindowInputs> m_windowInputs;
 
 			glm::ivec2 m_fullScreenSize = {0,0};
 			glm::ivec2 m_fullScreenPosition = {0,0};
 			glm::ivec2 m_windowedSize = { 0,0 };
 			glm::ivec2 m_windowedPosition = { 0,0 };
 
-			static std::unordered_map<GLFWwindow*, WindowInputs> m_windowInputs;
+			GLFWwindow* m_glfwWindow = nullptr;
 			Input::InputSystem* m_inputSystem = nullptr;
+
+			bool m_glfwInit = false;
+			bool m_isFullScreen = false;
 		};
 	}
 

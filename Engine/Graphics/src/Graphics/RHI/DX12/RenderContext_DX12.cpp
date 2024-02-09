@@ -69,7 +69,7 @@ namespace Insight
 					{
 						if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&m_debugController))))
 						{
-							//m_debugController->EnableDebugLayer();
+							m_debugController->EnableDebugLayer();
 							/// Enable additional debug layers.
 							dxgiFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
 
@@ -95,7 +95,7 @@ namespace Insight
 				m_gpuCrashTracker = RHI_GPUCrashTracker::Create();
 				if (m_gpuCrashTracker)
 				{
-					m_gpuCrashTracker->Init();
+					//m_gpuCrashTracker->Init();
 				}
 
 				m_d3d12maAllocationCallbacks.pAllocate = D3D12Allocate;

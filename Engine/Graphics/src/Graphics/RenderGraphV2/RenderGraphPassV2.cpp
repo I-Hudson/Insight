@@ -21,60 +21,60 @@ namespace Insight
 
 		RGBufferHandle RenderGraphPassBaseV2::CreateBuffer(std::string bufferName, RHI_BufferCreateInfo createInfo)
 		{
-			//const RGBufferHandle handle = RenderGraph->CreateBuffer(bufferName, createInfo);
-			//if (Algorithm::VectorFindIf(m_bufferCreates, [&handle](const std::pair<RGBufferHandle, RHI_BufferCreateInfo>& pair)
-			//	{
-			//		return handle == pair.first;
-			//	}) == m_bufferCreates.end())
-			//{
-			//	m_bufferCreates.push_back(std::make_pair(handle, createInfo));
-			//}
-			//return handle;
+			const RGBufferHandle handle = RenderGraph->CreateBuffer(bufferName);
+			if (Algorithm::VectorFindIf(BufferCreates, [&handle](const std::pair<RGBufferHandle, RHI_BufferCreateInfo>& pair)
+				{
+					return handle == pair.first;
+				}) == BufferCreates.end())
+			{
+				BufferCreates.push_back(std::make_pair(handle, createInfo));
+			}
+			return handle;
 			return -1;
 		}
 
 		RGTextureHandle RenderGraphPassBaseV2::CreateTexture(std::string textureName, RHI_TextureInfo createInfo)
 		{
-			const RGTextureHandle handle = RenderGraph->CreateTexture(textureName, createInfo);
-			if (Algorithm::VectorFindIf(m_textureCreates, [&handle](const std::pair<RGTextureHandle, RHI_TextureInfo>& pair)
+			const RGTextureHandle handle = RenderGraph->CreateTexture(textureName);
+			if (Algorithm::VectorFindIf(TextureCreates, [&handle](const std::pair<RGTextureHandle, RHI_TextureInfo>& pair)
 				{
 					return handle == pair.first;
-				}) == m_textureCreates.end())
+				}) == TextureCreates.end())
 			{
-				m_textureCreates.push_back(std::make_pair(handle, createInfo));
+				TextureCreates.push_back(std::make_pair(handle, createInfo));
 			}
 			return handle;
 		}
 
 		void RenderGraphPassBaseV2::ReadBuffer(const RGBufferHandle handle)
 		{
-			if (std::find(m_bufferReads.begin(), m_bufferReads.end(), handle) == m_bufferReads.end())
+			if (std::find(BufferReads.begin(), BufferReads.end(), handle) == BufferReads.end())
 			{
-				m_bufferReads.push_back(handle);
+				BufferReads.push_back(handle);
 			}
 		}
 
 		void RenderGraphPassBaseV2::WriteBuffer(const RGBufferHandle handle)
 		{
-			if (std::find(m_bufferWrites.begin(), m_bufferWrites.end(), handle) == m_bufferWrites.end())
+			if (std::find(BufferWrites.begin(), BufferWrites.end(), handle) == BufferWrites.end())
 			{
-				m_bufferWrites.push_back(handle);
+				BufferWrites.push_back(handle);
 			}
 		}
 
 		void RenderGraphPassBaseV2::ReadTexture(const RGTextureHandle handle)
 		{
-			if (std::find(m_textureReads.begin(), m_textureReads.end(), handle) == m_textureReads.end())
+			if (std::find(TextureReads.begin(), TextureReads.end(), handle) == TextureReads.end())
 			{
-				m_textureReads.push_back(handle);
+				TextureReads.push_back(handle);
 			}
 		}
 
 		void RenderGraphPassBaseV2::WriteTexture(const RGTextureHandle handle)
 		{
-			if (std::find(m_textureWrites.begin(),m_textureWrites.end(), handle) == m_textureWrites.end())
+			if (std::find(TextureWrites.begin(), TextureWrites.end(), handle) == TextureWrites.end())
 			{
-				m_textureWrites.push_back(handle);
+				TextureWrites.push_back(handle);
 			}
 		}
 
@@ -85,7 +85,7 @@ namespace Insight
 			, m_executeFunc(std::move(executeFunc))
 			, m_postExecuteFunc(std::move(postFunc))
 		{
-			m_passName = std::move(passName);
+			PassName = std::move(passName);
 		}
 
 		RenderGraphGraphicsPassV2::~RenderGraphGraphicsPassV2()
@@ -139,11 +139,11 @@ namespace Insight
 			m_renderOnTopOfSwapchain = true;
 		}
 
-		RGTextureHandle RenderGraphGraphicsPassV2::GetDepthSteniclTexture() const
+		RGTextureHandle RenderGraphGraphicsPassV2::GetDepthSteniclWriteTexture() const
 		{
-			for (size_t i = 0; i < m_textureReads.size(); ++i)
+			for (size_t i = 0; i < TextureWrites.size(); ++i)
 			{
-				const RGTextureHandle handle = m_textureReads.at(i);
+				const RGTextureHandle handle = TextureWrites.at(i);
 				RHI_Texture* texture = RenderGraph->GetRHITexture(handle);
 				if (texture && PixelFormatExtensions::IsDepthStencil(texture->GetFormat()))
 				{

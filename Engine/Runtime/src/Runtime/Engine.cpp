@@ -45,6 +45,8 @@ namespace Insight
 
 		bool Engine::Init(int argc, char** argv)
 		{
+			IS_PROFILE_FUNCTION();
+
 			IS_CORE_INFO("Runtime Version {}.{}.{}.", 
 				ENGINE_VERSION_MAJOIR, ENGINE_VERSION_MINOR, ENGINE_VERSION_PATCH);
 

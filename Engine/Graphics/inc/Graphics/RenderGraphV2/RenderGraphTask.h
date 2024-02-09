@@ -35,8 +35,7 @@ namespace Insight
             virtual void Execute() = 0;
             /// @brief Called after all other Execute functions have been invoked.
             virtual void PostExecute() = 0;
-        
-            std::vector<PipelineBarrier> PipelineBarriers;
+
             RenderGraphV2* RenderGraph = nullptr;
             RHI_CommandList* CmdList = nullptr;
             GPUQueue GpuQueue;

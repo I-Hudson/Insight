@@ -34,7 +34,12 @@ namespace Insight
 			void Swap();
 			void Execute(RHI_CommandList* cmdList);
 
-			RGTextureHandle CreateTexture(std::string textureName, RHI_TextureInfo info);
+			RGBufferHandle CreateBuffer(std::string bufferName);
+			RGTextureHandle CreateTexture(std::string bufferName);
+
+			RGBufferHandle GetBuffer(std::string bufferName) const;
+			RHI_Buffer* GetRHIBuffer(std::string bufferName) const;
+			RHI_Buffer* GetRHIBuffer(RGTextureHandle handle) const;
 
 			RGTextureHandle GetTexture(std::string textureName) const;
 			RHI_Texture* GetRHITexture(std::string textureName) const;
@@ -127,6 +132,7 @@ namespace Insight
 			/// @brief General ouput resolution to be used for all render passes. Can be overwritten.
 			glm::ivec2 m_output_resolution = {};
 
+			FrameResource<RHI_ResourceCache<RHI_Buffer>*> m_bufferCaches;
 			FrameResource<RHI_ResourceCache<RHI_Texture>*> m_textureCaches;
 		};
 	}

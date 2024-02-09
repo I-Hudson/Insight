@@ -31,6 +31,9 @@ namespace Insight
 			virtual void Destroy() = 0;
 
 			virtual void DeviceLost() = 0;
+
+		protected:
+			bool m_initiaised = false;
 		};
 
 #ifdef IS_NVIDIA_AFTERMATH_ENABLED

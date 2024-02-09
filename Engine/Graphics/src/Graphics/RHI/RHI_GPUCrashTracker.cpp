@@ -60,11 +60,17 @@ namespace Insight
 				aftermathFlags,
 				renderContextDX12.GetDevice()));
 #endif
+
+			m_initiaised = true;
 		}
 
 		void RHI_GPUCrashTrackerNvidiaAftermath::Destroy()
 		{
-			AFTERMATH_CHECK_ERROR(GFSDK_Aftermath_DisableGpuCrashDumps());
+			if (m_initiaised)
+			{
+				AFTERMATH_CHECK_ERROR(GFSDK_Aftermath_DisableGpuCrashDumps());
+				m_initiaised = false;
+			}
 		}
 
 		void RHI_GPUCrashTrackerNvidiaAftermath::DeviceLost()
@@ -94,7 +100,7 @@ namespace Insight
 			}
 			else
 			{
-				IS_CORE_INFO("Unexpected crash dump status after timeout: %d\n", status);
+				IS_CORE_INFO("Unexpected crash dump status after timeout: %d\n", static_cast<int>(status));
 			}
 		}
 

@@ -42,6 +42,12 @@ namespace Insight
 				m_graphicsPasses.push_back({});
 			}
 
+			m_bufferCaches.Setup();
+			m_bufferCaches.ForEach([](RHI_ResourceCache<RHI_Buffer>*& bufferCache)
+				{
+					bufferCache = Renderer::CreateBufferResourceCache();
+				});
+
 			m_textureCaches.Setup();
 			m_textureCaches.ForEach([](RHI_ResourceCache<RHI_Texture>*& textureCache)
 				{
@@ -135,10 +141,34 @@ namespace Insight
 			cmdList->EndTimeBlock();
 		}
 
-		RGTextureHandle RenderGraphV2::CreateTexture(std::string textureName, RHI_TextureInfo info)
+		RGBufferHandle RenderGraphV2::CreateBuffer(std::string bufferName)
+		{
+			ASSERT(m_context->IsRenderThread());
+			return m_bufferCaches.Get()->AddOrReturn(bufferName);
+		}
+
+		RGTextureHandle RenderGraphV2::CreateTexture(std::string textureName)
 		{
 			ASSERT(m_context->IsRenderThread());
 			return m_textureCaches.Get()->AddOrReturn(textureName);
+		}
+
+		RGBufferHandle RenderGraphV2::GetBuffer(std::string bufferName) const
+		{
+			ASSERT(m_context->IsRenderThread());
+			return m_textureCaches.Get()->GetId(bufferName);
+		}
+
+		RHI_Buffer* RenderGraphV2::GetRHIBuffer(std::string bufferName) const
+		{
+			ASSERT(m_context->IsRenderThread());
+			return GetRHIBuffer(GetBuffer(bufferName));
+		}
+
+		RHI_Buffer* RenderGraphV2::GetRHIBuffer(RGTextureHandle handle) const
+		{
+			ASSERT(m_context->IsRenderThread());
+			return m_bufferCaches.Get()->Get(handle);
 		}
 
 		RGTextureHandle RenderGraphV2::GetTexture(std::string textureName) const
@@ -172,7 +202,7 @@ namespace Insight
 			
 			auto itr = std::find_if(graphicPasses.begin(), graphicPasses.end(), [passName](const RenderGraphGraphicsPassV2& pass)
 				{
-					return pass.m_passName == passName;
+					return pass.PassName == passName;
 				});
 			if (itr != graphicPasses.end())
 			{
@@ -188,7 +218,7 @@ namespace Insight
 
 			auto itr = std::find_if(graphicPasses.begin(), graphicPasses.end(), [passName](const RenderGraphGraphicsPassV2& pass)
 				{
-					return pass.m_passName == passName;
+					return pass.PassName == passName;
 				});
 			if (itr != graphicPasses.end())
 			{
@@ -243,7 +273,7 @@ namespace Insight
 				pass.PreExecute();
 				
 				/// Build all our textures.
-				for (auto& pair : pass.m_textureCreates)
+				for (auto& pair : pass.TextureCreates)
 				{
 					RHI_Texture* tex = m_textureCaches.Get()->Get(pair.first);
 					if (!tex->ValidResource())
@@ -263,7 +293,7 @@ namespace Insight
 				pso.Shader = m_context->GetShaderManager().GetOrCreateShader(pass.m_shader);
 
 				int rtIndex = 0;
-				for (auto const& rt : pass.m_textureWrites)
+				for (auto const& rt : pass.TextureWrites)
 				{
 					if (rt != -1)
 					{
@@ -272,7 +302,7 @@ namespace Insight
 						pass.m_renderpassDescription.ColourAttachments.push_back(m_textureCaches.Get()->Get(rt));
 					}
 				}
-				const RGTextureHandle depthSteniclHandle = pass.GetDepthSteniclTexture();
+				const RGTextureHandle depthSteniclHandle = pass.GetDepthSteniclWriteTexture();
 				pso.DepthStencil = m_textureCaches.Get()->Get(depthSteniclHandle);
 				pass.m_renderpassDescription.DepthStencil = pso.DepthStencil;
 
@@ -335,7 +365,7 @@ namespace Insight
 				/// Colour writes
 				//if (!pass->m_skipTextureWriteBarriers)
 				{
-					for (auto const& rt : pass.m_textureWrites)
+					for (auto const& rt : pass.TextureWrites)
 					{
 						RHI_Texture* texture = rt == -1 ? m_context->GetSwaphchainIamge() : m_textureCaches.Get()->Get(rt);
 						
@@ -363,7 +393,7 @@ namespace Insight
 				colorPipelineBarrier.DstStage = +PipelineStageFlagBits::ColourAttachmentOutput;
 				colorPipelineBarrier.ImageBarriers = colorImageBarriers;
 
-				const RGTextureHandle depthSteniclHandle = pass.GetDepthSteniclTexture();
+				const RGTextureHandle depthSteniclHandle = pass.GetDepthSteniclWriteTexture();
 				/// Depth write
 				if (depthSteniclHandle != -1)
 				{
@@ -408,7 +438,7 @@ namespace Insight
 				/// Texture reads
 				//if (!pass->m_skipTextureReadBarriers)
 				{
-					for (auto const& rt : pass.m_textureReads)
+					for (auto const& rt : pass.TextureReads)
 					{
 						RHI_Texture* texture = rt == -1 ? m_context->GetSwaphchainIamge() : m_textureCaches.Get()->Get(rt);
 						PlaceInitalBarrier::PlaceBarrier(texture, texture_barrier_history[texture]);
@@ -481,7 +511,7 @@ namespace Insight
 				cmdList->SetViewport(0.0f, 0.0f, (float)pass.m_viewport.x, (float)pass.m_viewport.y, 0.0f, 1.0f, false);
 				cmdList->SetScissor(0, 0, pass.m_viewport.x, pass.m_viewport.y);
 
-				std::string passName = std::string(pass.m_passName.begin(), pass.m_passName.end());
+				std::string passName = std::string(pass.PassName.begin(), pass.PassName.end());
 				cmdList->BeginTimeBlock(passName + "_Execute", glm::vec4(0, 1, 0, 1));
 				GPUProfiler::Instance().StartProfile(cmdList, passName);
 				pass.Execute();

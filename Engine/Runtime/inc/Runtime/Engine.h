@@ -5,6 +5,7 @@
 
 #include "Core/CommandLineArgs.h"
 
+#include "Core/Console.h"
 #include "Core/ObjectManager.h"
 
 #include "Runtime/RuntimeSettings.h"
@@ -72,6 +73,7 @@ namespace Insight
 
 			std::thread::id m_updateThread;
 
+			Core::Console m_console;
 			ObjectManager m_objectManager;
 
 			Runtime::RuntimeSettings m_runtimeSettings;

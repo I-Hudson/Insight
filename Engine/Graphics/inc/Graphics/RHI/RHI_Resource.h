@@ -122,6 +122,10 @@ namespace Insight
 			int GetSize() const { return static_cast<int>(m_objects.size()); }
 			bool IsEmpty() const { return m_objects.size() == 0ull; }
 
+			void Lock() const { m_lock.lock(); }
+			void Unlock() const { m_lock.unlock(); }
+			const std::unordered_set<TypePtr>& GetData() const { return m_objects; }
+
 		protected:
 			std::unordered_set<TypePtr> m_objects;
 			mutable std::mutex m_lock;

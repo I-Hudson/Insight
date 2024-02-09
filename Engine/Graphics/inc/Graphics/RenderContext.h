@@ -286,7 +286,7 @@ namespace Insight
 
 			std::vector<IRHI_ResourceCache*> m_resourceCaches;
 			RHI_ResourceManager<RHI_Texture> m_textures;
-			std::map<BufferType, RHI_ResourceManager<RHI_Buffer>> m_buffers;
+			RHI_ResourceManager<RHI_Buffer> m_buffers;
 
 			RHI_ResourceRenderTracker m_resource_tracker;
 			RHI_ShaderManager m_shaderManager;
@@ -345,7 +345,7 @@ namespace Insight
 
 		static Graphics::GraphicsAPI GetGraphicsAPI();
 
-		static Graphics::RHI_ResourceCache<Graphics::RHI_Buffer>* CreateBufferResourceCache(const Graphics::BufferType bufferType);
+		static Graphics::RHI_ResourceCache<Graphics::RHI_Buffer>* CreateBufferResourceCache();
 		static Graphics::RHI_ResourceCache<Graphics::RHI_Texture>* CreateTextureResourceCache();
 
 		static void FreeResourceCache(Graphics::IRHI_ResourceCache* resourceCache);

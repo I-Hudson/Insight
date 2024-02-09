@@ -56,15 +56,17 @@ namespace Insight
 			void WriteTexture(const RGTextureHandle handle);
 
 		public:
-			std::string m_passName;
+			std::string PassName;
 
-			std::vector<std::pair<RGBufferHandle, RHI_BufferCreateInfo>> m_bufferCreates;
-			std::vector<RGBufferHandle> m_bufferReads;
-			std::vector<RGBufferHandle> m_bufferWrites;
+			std::vector<std::pair<RGBufferHandle, RHI_BufferCreateInfo>> BufferCreates;
+			std::vector<RGBufferHandle> BufferReads;
+			std::vector<RGBufferHandle> BufferWrites;
 
-			std::vector<std::pair<RGTextureHandle, RHI_TextureInfo>> m_textureCreates;
-			std::vector<RGTextureHandle> m_textureReads;
-			std::vector<RGTextureHandle> m_textureWrites;
+			std::vector<std::pair<RGTextureHandle, RHI_TextureInfo>> TextureCreates;
+			std::vector<RGTextureHandle> TextureReads;
+			std::vector<RGTextureHandle> TextureWrites;
+
+			std::vector<PipelineBarrier> PipelineBarriers;
 
 			friend class RenderGraphV2;
 		};
@@ -100,7 +102,7 @@ namespace Insight
 			/// @brief Does this pass render directly on top of the swapchain image.
 			void SetAsRenderToSwapchain();
 
-			RGTextureHandle GetDepthSteniclTexture() const;
+			RGTextureHandle GetDepthSteniclWriteTexture() const;
 
 		private:
 			/// Optional, define a custom render pass. Otherwise we create it and/or fill in the blanks.

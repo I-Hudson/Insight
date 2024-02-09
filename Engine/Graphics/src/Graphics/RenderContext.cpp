@@ -280,26 +280,13 @@ namespace Insight
 				m_resourceCaches.clear();
 			}
 
-			if (!m_textures.IsEmpty())
-			{
-				IS_CORE_WARN("[RenderContext::BaseDestroy] Not all RHI_Texture's have been release with 'FreeTexture'. Please do this.");
-				//m_textures.ReleaseAll();
-			}
-
-			for (auto& [bufferType, buffer] : m_buffers)
-			{
-				if (!buffer.IsEmpty())
-				{
-					IS_CORE_WARN("[RenderContext::BaseDestroy] Not all RHI_Buffer of type '{0}' have been release with the appropriate 'Free{0}Buffer'. Please do this.",
-						BufferTypeToString[(int)bufferType]);
-					buffer.ReleaseAll();
-				}
-			}
+			ASSERT_MSG(m_buffers.IsEmpty(), "[RenderContext::BaseDestroy] Not all RHI_Buffers have been release with 'FreeBuffer'. Please do this.");
+			ASSERT_MSG(m_textures.IsEmpty(), "[RenderContext::BaseDestroy] Not all RHI_Textures have been release with 'FreeTexture'. Please do this.");
 		}
 
 		RHI_Buffer* RenderContext::CreateBuffer(BufferType bufferType, u64 sizeBytes, int stride, Graphics::RHI_Buffer_Overrides buffer_overrides)
 		{
-			RHI_Buffer* buffer = m_buffers[bufferType].CreateResource();
+			RHI_Buffer* buffer = m_buffers.CreateResource();
 			buffer->Create(this, bufferType, sizeBytes, stride, buffer_overrides);
 			buffer->SetName("Buffer");
 			return buffer;
@@ -310,18 +297,24 @@ namespace Insight
 			if (buffer)
 			{
 				BufferType bufferType = buffer->GetType();
-				m_buffers[bufferType].FreeResource(buffer);
+				m_buffers.FreeResource(buffer);
 			}
 		}
 
 		int RenderContext::GetBufferCount(BufferType bufferType) const
 		{
-			const auto itr = m_buffers.find(bufferType);
-			if (itr != m_buffers.end())
+			int count = 0;
+			m_buffers.Lock();
+			const std::unordered_set<RHI_Buffer*>& buffers = m_buffers.GetData();
+			for (const RHI_Buffer* buffer : buffers)
 			{
-				return itr->second.GetSize();
+				if (buffer->GetType() == bufferType)
+				{
+					++count;
+				}
 			}
-			return 0;
+			m_buffers.Unlock();
+			return count;
 		}
 
 		RHI_Texture* RenderContext::CreateTextre()
@@ -358,6 +351,7 @@ namespace Insight
 
 				PreRender(cmdList);
 
+				cmdList->SetName("RenderGraphCmdList");
 				m_renderGraph->Execute(cmdList);
 
 				if (cmdList->m_descriptorAllocator->WasUniformBufferResized())
@@ -543,14 +537,15 @@ namespace Insight
 		return s_context->GetGraphicsAPI();
 	}
 
-	Graphics::RHI_ResourceCache<Graphics::RHI_Buffer>* Renderer::CreateBufferResourceCache(const Graphics::BufferType bufferType)
+	Graphics::RHI_ResourceCache<Graphics::RHI_Buffer>* Renderer::CreateBufferResourceCache()
 	{
 		ASSERT(s_context);
 		Graphics::RHI_ResourceCache<Graphics::RHI_Buffer>* resourceCache =
-			New<Graphics::RHI_ResourceCache<Graphics::RHI_Buffer>, Core::MemoryAllocCategory::Graphics>(s_context->m_buffers.at(bufferType));
+			New<Graphics::RHI_ResourceCache<Graphics::RHI_Buffer>, Core::MemoryAllocCategory::Graphics>(s_context->m_buffers);
 		s_context->m_resourceCaches.push_back(resourceCache);
 		return resourceCache;
 	}
+
 	Graphics::RHI_ResourceCache<Graphics::RHI_Texture>* Renderer::CreateTextureResourceCache()
 	{
 		ASSERT(s_context);
