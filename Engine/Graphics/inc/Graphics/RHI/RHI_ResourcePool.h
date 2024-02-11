@@ -30,9 +30,9 @@ namespace Insight
                 m_hot.resize(InitialSize);
                 m_cold.resize(InitialSize);
                 m_generation.resize(InitialSize);
-                for (size_t i = 0; i < InitialSize; ++i)
+                for (u64 i = 0; i < InitialSize; ++i)
                 {
-                    m_freeList.push(i);
+                    m_freeList.push(static_cast<u32>(i));
                 }
             }
             ~RHI_ResourcePool() { }
@@ -41,40 +41,71 @@ namespace Insight
             {
                 RHI_Handle<ColdType> handle;
                 std::lock_guard freeListLock(m_freeListMutex);
+                if (m_freeList.empty())
+                {
+                    Grow(m_hot.size() * 2);
+                }
                 const u32 freeIndex = m_freeList.top();
                 m_freeList.pop();
                 handle.Index = freeIndex;
                 return handle;
             }
 
-            void Release(const RHI_Handle<ColdType> handle)
+            void Release(const RHI_Handle<ColdType> handle, HotType& hotType, ColdType& coldType)
             {
                 std::lock_guard freeListLock(m_freeListMutex);
                 std::lock_guard generationLock(m_generationMutex);
+
+                hotType = m_hot.at(handle.Index);
+                coldType = m_cold.at(handle.Index);
+
                 m_freeList.push(handle.Index);
                 ++m_generation.at(handle.Index);
             }
 
-            HotType GetHotType(const RHI_Handle<ColdType> handle) const
+            const HotType* GetHotType(const RHI_Handle<ColdType> handle) const
             {
                 std::lock_guard hotLock(m_hotMutex);
                 std::lock_guard generationLock(m_generationMutex);
                 if (m_generation.at(handle.Index) != handle.Generation)
                 {
-                    return { };
+                    return nullptr;
                 }
-                return m_hot.at(handle.Index);
+                return &m_hot.at(handle.Index);
             }
 
-            ColdType GetColdType(const RHI_Handle<ColdType> handle) const
+            const ColdType* GetColdType(const RHI_Handle<ColdType> handle) const
             {
                 std::lock_guard coldLock(m_coldMutex);
                 std::lock_guard generationLock(m_generationMutex);
                 if (m_generation.at(handle.Index) != handle.Generation)
                 {
-                    return { };
+                    return nullptr;
                 }
-                return m_cold.at(handle.Index);
+                return &m_cold.at(handle.Index);
+            }
+
+
+        private:
+            void Grow(const u32 newSize)
+            {
+                u32 oldSize = 0;
+                {
+                    std::lock_guard hotLock(m_hotMutex);
+                    std::lock_guard coldLock(m_coldMutex);
+                    std::lock_guard generationLock(m_generationMutex);
+
+                    oldSize = m_hot.size();
+                    m_hot.resize(newSize);
+                    m_cold.resize(newSize);
+                    m_generation.resize(newSize);
+                }
+
+                const u32 difference = newSize - oldSize;
+                for (size_t i = oldSize; i < difference; ++i)
+                {
+                    m_freeList.push(i);
+                }
             }
 
         private:

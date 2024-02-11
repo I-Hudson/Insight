@@ -139,6 +139,60 @@ namespace Insight
 			return m_queuedUploads.back()->Request;
 		}
 
+		void RHI_UploadQueue::UploadTexture(const void* data, u64 sizeInBytes, RHI_Handle<Texture> textureHandle)
+		{
+			IS_PROFILE_FUNCTION();
+
+			UploadDataToStagingBuffer(data, sizeInBytes, RHI_UploadTypes::Texture);
+
+			std::lock_guard lock(m_mutex);
+			m_queuedUploads.push_back(MakeRPtr<
+				RHI_UploadQueueRequestInternal>(
+					[=](const RHI_UploadQueueRequestInternal* request, RHI_CommandList* cmdList)
+					{
+						if (request->Cancelled)
+						{
+							return;
+						}
+
+						Texture* tex = RenderContext::Instance().GetTexture(textureHandle);
+
+						PipelineBarrier barreir;
+						barreir.SrcStage = +PipelineStageFlagBits::TopOfPipe;
+						barreir.DstStage = +PipelineStageFlagBits::Transfer;
+
+						ImageBarrier imageBarrier;
+						imageBarrier.SrcAccessFlags = AccessFlagBits::None;
+						imageBarrier.DstAccessFlags = AccessFlagBits::TransferWrite;
+						imageBarrier.OldLayout = tex->Layout;
+						imageBarrier.NewLayout = ImageLayout::TransforDst;
+						imageBarrier.SubresourceRange = ImageSubresourceRange::SingleMipAndLayer(ImageAspectFlagBits::Colour);
+						//imageBarrier.Image = texture;
+						barreir.ImageBarriers.push_back(imageBarrier);
+
+						cmdList->PipelineBarrier(barreir);
+						barreir = { };
+
+						request->Request->Status = DeviceUploadStatus::Uploading;
+						//cmdList->CopyBufferToImage(texture, m_uploadStagingBuffer, m_frameUploadOffset);
+						m_frameUploadOffset += request->SizeInBytes;
+
+						barreir.SrcStage = +PipelineStageFlagBits::Transfer;
+						barreir.DstStage = +PipelineStageFlagBits::FragmentShader;
+
+						imageBarrier.SrcAccessFlags = AccessFlagBits::TransferWrite;
+						imageBarrier.DstAccessFlags = AccessFlagBits::ShaderRead;
+						//imageBarrier.OldLayout = texture->GetLayout();
+						imageBarrier.NewLayout = ImageLayout::ShaderReadOnly;
+						imageBarrier.SubresourceRange = ImageSubresourceRange::SingleMipAndLayer(ImageAspectFlagBits::Colour);
+						//imageBarrier.Image = texture;
+
+						barreir.ImageBarriers.push_back(imageBarrier);
+						cmdList->PipelineBarrier(barreir);
+
+					}, nullptr, sizeInBytes));
+		}
+
 		void RHI_UploadQueue::UploadToDevice(RHI_CommandList* cmdList)
 		{
 			IS_PROFILE_FUNCTION();

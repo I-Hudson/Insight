@@ -94,6 +94,9 @@ namespace Insight
 
 #ifdef IS_RESOURCE_HANDLES_ENABLED
 				virtual RHI_Handle<Texture> CreateTexture(const Texture texture) override;
+				virtual void FreeTexture(const RHI_Handle<Texture> handle) override;
+				virtual void UploadToTexture(const RHI_Handle<Texture> handle, const std::vector<u8>& data) override;
+				virtual Texture* GetTexture(const RHI_Handle<Texture> handle) const override;
 #endif
 
 			protected:

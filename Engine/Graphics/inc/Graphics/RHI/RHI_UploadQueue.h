@@ -6,6 +6,10 @@
 #include "Graphics/Defines.h"
 #include "Graphics/Enums.h"
 
+#ifdef IS_RESOURCE_HANDLES_ENABLED
+#include "Graphics/RHI/RHI_Handle.h"
+#endif
+
 #include <vector>
 #include <functional>
 
@@ -77,6 +81,9 @@ namespace Insight
 			/// <param name="data"></param>
 			/// <param name="sizeInBytes"></param>
 			RPtr<RHI_UploadQueueRequest> UploadTexture(const void* data, u64 sizeInBytes, RHI_Texture* texture);
+#ifdef IS_RESOURCE_HANDLES_ENABLED
+			void UploadTexture(const void* data, u64 sizeInBytes, RHI_Handle<Texture> textureHandle);
+#endif
 			/// <summary>
 			/// Upload the data to the device.
 			/// </summary>

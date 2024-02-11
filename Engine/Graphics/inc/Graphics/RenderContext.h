@@ -22,6 +22,7 @@
 #ifdef IS_RESOURCE_HANDLES_ENABLED
 #include "Graphics/Resources/Texture.h"
 #include "Graphics/RHI/RHI_Handle.h"
+#include "Graphics/RHI/RHI_ResourcePool.h"
 #endif
 
 #include "Threading/Semaphore.h"
@@ -235,6 +236,9 @@ namespace Insight
 
 #ifdef IS_RESOURCE_HANDLES_ENABLED
 			virtual RHI_Handle<Texture> CreateTexture(const Texture texture) { FAIL_ASSERT(); return {}; }
+			virtual void FreeTexture(const RHI_Handle<Texture> handle) { FAIL_ASSERT(); }
+			virtual void UploadToTexture(const RHI_Handle<Texture> handle, const std::vector<u8>& data) { FAIL_ASSERT(); }
+			virtual Texture* GetTexture(const RHI_Handle<Texture> handle) const { FAIL_ASSERT(); return nullptr; }
 #endif
 
 			void ImGuiBeginFrame();

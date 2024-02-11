@@ -873,6 +873,28 @@ namespace Insight
 
 				return handle;
 			}
+
+			void RenderContext_DX12::FreeTexture(const RHI_Handle<Texture> handle)
+			{
+				TextureDrawData_DX12 drawData;
+				Texture textureData;
+				m_texturePool.Release(handle, drawData, textureData);
+
+				RHI_ResourceRenderTracker::Instance().AddDeferedRelase([drawData]()
+					{
+						drawData.D3D12Allocation->Release();
+					});
+			}
+
+			void RenderContext_DX12::UploadToTexture(const RHI_Handle<Texture> handle, const std::vector<u8>& data)
+			{
+				GetUploadQueue().UploadTexture(data.data(), data.size(), handle);
+			}
+
+			Texture* RenderContext_DX12::GetTexture(const RHI_Handle<Texture> handle) const
+			{
+				return const_cast<Texture*>(m_texturePool.GetColdType(handle));
+			}
 #endif
 
 			void RenderContext_DX12::WaitForGpu()
