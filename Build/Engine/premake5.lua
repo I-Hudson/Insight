@@ -99,6 +99,9 @@ workspace "Insight"
         "IS_MEMORY_TRACKING",
         "RENDER_GRAPH_ENABLED",
         "TOBJECTPTR_REF_COUNTING",
+
+        "RENDERGRAPH_V2_ENABLED",
+        "IS_RESOURCE_HANDLES_ENABLED",
     }
 
     includedirs
@@ -178,7 +181,6 @@ workspace "Insight"
             "IS_DX12_ENABLED",
             "IS_VULKAN_ENABLED",
             "IS_CPP_WINRT",
-            "RENDERGRAPH_V2_ENABLED",
 
             "USE_PIX",
             "NOMINMAX",

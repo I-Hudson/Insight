@@ -820,6 +820,61 @@ namespace Insight
 				return m_samNullHandle;
 			}
 
+#ifdef IS_RESOURCE_HANDLES_ENABLED
+			RHI_Handle<Texture> RenderContext_DX12::CreateTexture(const Texture texture)
+			{
+				TextureDrawData_DX12 drawData;
+				Texture textureData;
+				RHI_Handle<Texture> handle = m_texturePool.Create(drawData, textureData);
+
+				textureData = texture;
+				drawData.LayerCount = textureData.LayerCount;
+				Platform::MemCopy(drawData.ClearColour, textureData.ClearColour, sizeof(textureData.ClearColour));
+
+				CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Tex2D(
+					PixelFormatToDX12(textureData.Format),
+					textureData.Width,
+					textureData.Height,
+					textureData.LayerCount,
+					textureData.MipCount,
+					1,
+					0,
+					ImageUsageFlagsToDX12(textureData.ImageUsage),
+					D3D12_TEXTURE_LAYOUT_UNKNOWN,
+					0);
+
+				D3D12_CLEAR_VALUE clearColour = {};
+				clearColour.Format = resourceDesc.Format;
+				if (textureData.ImageUsage & ImageUsageFlagsBits::DepthStencilAttachment)
+				{
+					clearColour.DepthStencil.Depth = RenderContext::Instance().IsRenderOptionsEnabled(RenderOptions::ReverseZ) ? 0.0f : 1.0f;
+					clearColour.DepthStencil.Stencil = 0;
+				}
+				else if (textureData.ImageUsage & ImageUsageFlagsBits::ColourAttachment)
+				{
+					Platform::MemCopy(clearColour.Color, textureData.ClearColour, sizeof(textureData.ClearColour));
+				}
+
+				D3D12MA::ALLOCATION_DESC allocationDesc = {};
+				allocationDesc.HeapType = D3D12_HEAP_TYPE_DEFAULT;
+
+				ThrowIfFailed(GetAllocator()->CreateResource(
+					&allocationDesc,
+					&resourceDesc,
+					ImageLayoutToDX12ResouceState(textureData.Layout),
+					&clearColour,
+					&drawData.D3D12Allocation,
+					IID_NULL, NULL));
+				if (!textureData.DebugName.empty())
+				{
+					SetObjectName(textureData.DebugName.c_str(), drawData.D3D12Allocation->GetResource());
+				}
+				ASSERT(drawData.D3D12Allocation);
+
+				return handle;
+			}
+#endif
+
 			void RenderContext_DX12::WaitForGpu()
 			{
 				// Increment the fence value for the current frame.

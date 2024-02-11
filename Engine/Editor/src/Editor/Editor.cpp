@@ -23,8 +23,6 @@
 
 #include "Serialisation/Archive.h"
 
-#include "Core/Console.h"
-
 #include <SplashScreen.h>
 
 namespace Insight

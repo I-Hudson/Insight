@@ -11,6 +11,10 @@
 #include "Graphics/RenderGraph/RenderGraph.h"
 #include "Graphics/RHI/RHI_GPUCrashTracker.h"
 
+#ifdef IS_RESOURCE_HANDLES_ENABLED
+#include "Graphics/RHI/RHI_ResourcePool.h"
+#endif
+
 #include "D3D12MemAlloc.h"
 
 #include <array>
@@ -85,9 +89,12 @@ namespace Insight
 				DescriptorHeapHandle_DX12 GetDescriptorSRVNullHandle() const;
 				DescriptorHeapHandle_DX12 GetDescriptorUAVNullHandle() const;
 				DescriptorHeapHandle_DX12 GetDescriptorSAMNullHandle() const;
-				
 
 				D3D12MA::Allocator* GetAllocator() const { return m_d3d12MA; }
+
+#ifdef IS_RESOURCE_HANDLES_ENABLED
+				virtual RHI_Handle<Texture> CreateTexture(const Texture texture) override;
+#endif
 
 			protected:
 				virtual void WaitForGpu() override;
@@ -102,6 +109,10 @@ namespace Insight
 				ComPtr<ID3D12Device> m_device{ nullptr };
 				ComPtr<ID3D12Debug> m_debugController{ nullptr };
 				D3D12MA::ALLOCATION_CALLBACKS m_d3d12maAllocationCallbacks;
+
+#ifdef IS_RESOURCE_HANDLES_ENABLED
+				RHI_ResourcePool<TextureDrawData_DX12, Texture> m_texturePool;
+#endif
 
 				ID3D12QueryHeap* m_timeStampQueryHeap = nullptr;
 				u64 m_timeStampCurrentIndex = 0;

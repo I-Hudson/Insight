@@ -19,8 +19,11 @@
 #include "Graphics/RenderStats.h"
 #include "Graphics/GPUProfiler.h"
 
-#include "Core/Collections/FactoryMap.h"
-#include "Threading/ThreadScopeLock.h"
+#ifdef IS_RESOURCE_HANDLES_ENABLED
+#include "Graphics/Resources/Texture.h"
+#include "Graphics/RHI/RHI_Handle.h"
+#endif
+
 #include "Threading/Semaphore.h"
 
 #include <mutex>
@@ -229,6 +232,10 @@ namespace Insight
 
 			GPUDeferedManager& GetDeferredManager()                   { return m_gpu_defered_manager; }
 			RHI_UploadQueue& GetUploadQueue()                         { return m_uploadQueue; }
+
+#ifdef IS_RESOURCE_HANDLES_ENABLED
+			virtual RHI_Handle<Texture> CreateTexture(const Texture texture) { FAIL_ASSERT(); return {}; }
+#endif
 
 			void ImGuiBeginFrame();
 			void ImGuiRender();

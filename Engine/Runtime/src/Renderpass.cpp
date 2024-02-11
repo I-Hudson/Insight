@@ -3,8 +3,8 @@
 
 #include "Graphics/RenderContext.h"
 
-#include "Graphics/RenderTarget.h"
 #include "Graphics/RenderGraph/RenderGraph.h"
+#include "Graphics/RenderGraphV2/RenderGraphV2.h"
 #include "Graphics/Frustum.h"
 #include "Graphics/Window.h"
 #include "Graphics/GFXHelper.h"
@@ -1330,6 +1330,52 @@ namespace Insight
 			{
 				RGTextureHandle RenderTarget;
 			};
+
+			RenderGraphV2::Instance().AddGraphicsPass("Swapchain",
+				[](RenderGraphGraphicsPassV2& pass)
+				{
+					pass.SetAsRenderToSwapchain();
+
+					ShaderDesc shaderDesc("Swapchain", {}, ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
+					pass.SetShader(shaderDesc);
+
+					PipelineStateObject swapchainPso = { };
+					swapchainPso.Name = "Swapchain_PSO";
+					swapchainPso.CullMode = CullMode::Front;
+					swapchainPso.ShaderDescription = shaderDesc;
+					pass.SetPipeline(swapchainPso);
+
+					const glm::ivec2 renderGraphOutputResolution = pass.RenderGraph->GetOutputResolution();
+					pass.SetViewport(renderGraphOutputResolution.x, renderGraphOutputResolution.y);
+					pass.SetScissor(renderGraphOutputResolution.x, renderGraphOutputResolution.y);
+				},
+				[&](const RenderGraphExecuteData& data)
+				{
+					IS_PROFILE_SCOPE("Swapchain pass execute");
+
+					RenderGraphV2& renderGraph = data.RenderGraph;
+					RHI_CommandList* cmdList = data.CmdList;
+
+					PipelineStateObject pso = renderGraph.GetPipelineStateObject("SwapchainPass");
+					cmdList->BindPipeline(pso, nullptr);
+					cmdList->BeginRenderpass(renderGraph.GetRenderpassDescription("SwapchainPass"));
+
+					const RGTextureHandle renderTarget = renderGraph.GetTexture("Composite_Texture");
+					if (renderTarget != -1)
+					{
+						cmdList->SetTexture(0, 0, renderGraph.GetRHITexture(renderTarget));
+						cmdList->SetSampler(1, 0, m_buffer_samplers.Clamp_Sampler);
+					}
+					else
+					{
+						cmdList->SetTexture(0, 0, nullptr);
+						cmdList->SetSampler(1, 0, nullptr);
+					}
+
+					cmdList->Draw(3, 1, 0, 0);
+					cmdList->EndRenderpass();
+				},
+				{ });
 
 			RenderGraph::Instance().AddPass<TestPassData>("SwapchainPass", [](TestPassData& data, RenderGraphBuilder& builder)
 				{
