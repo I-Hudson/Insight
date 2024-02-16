@@ -61,8 +61,6 @@ project "Insight_Runtime"
 
         "../../vendor/stb/stb_image.h",
         "../../vendor/stb/stb_image_write.h",
-
-        "../../vendor/SimplygonSDK_10.1.11000.0/SimplygonLoader.cpp",
     }
 
     links

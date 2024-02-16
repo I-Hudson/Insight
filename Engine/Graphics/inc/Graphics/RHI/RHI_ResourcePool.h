@@ -87,9 +87,9 @@ namespace Insight
 
 
         private:
-            void Grow(const u32 newSize)
+            void Grow(const u64 newSize)
             {
-                u32 oldSize = 0;
+                u64 oldSize = 0;
                 {
                     std::lock_guard hotLock(m_hotMutex);
                     std::lock_guard coldLock(m_coldMutex);
@@ -101,10 +101,10 @@ namespace Insight
                     m_generation.resize(newSize);
                 }
 
-                const u32 difference = newSize - oldSize;
-                for (size_t i = oldSize; i < difference; ++i)
+                const u64 difference = newSize - oldSize;
+                for (u64 i = oldSize; i < difference; ++i)
                 {
-                    m_freeList.push(i);
+                    m_freeList.push(static_cast<u32>(i));
                 }
             }
 

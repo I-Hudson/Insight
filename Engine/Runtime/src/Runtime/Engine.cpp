@@ -21,7 +21,6 @@
 #include "ECS/ECSWorld.h"
 #include "ECS/Components/TagComponent.h"
 
-#include "Graphics/SimplygonWrapper.h"
 #include "Resource/ResourceManager.h"
 
 #include "Serialisation/Archive.h"
@@ -231,8 +230,6 @@ namespace Insight
 			m_systemRegistry.UnregisterSystem(&m_assetRegistry);
 
 			ASSERT(m_systemRegistry.IsEmpty());
-
-			SimplygonWrapper::Shutdown();
 
 			Platform::Shutdown();
 		}

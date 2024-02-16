@@ -33,7 +33,6 @@ namespace Insight
 		/// @brief Utility class to help with anything related to loading from assimp.
 		class ModelLoader : public IResourceLoader
 		{
-			constexpr static bool c_SimplygonEnabled = false;
 		public:
 			static const uint32_t Default_Model_Importer_Flags =
 				// Switch to engine conventions

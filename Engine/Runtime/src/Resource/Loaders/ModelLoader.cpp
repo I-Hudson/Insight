@@ -11,7 +11,6 @@
 #include "Platforms/Platform.h"
 
 #include "Graphics/RenderContext.h"
-#include "Graphics/SimplygonWrapper.h"
 
 #include "Asset/AssetRegistry.h"
 
@@ -175,16 +174,6 @@ namespace Insight
 
 		bool ModelLoader::LoadModel(Model* model, std::string file_path, u32 importer_flags)
 		{
-			if (c_SimplygonEnabled)
-			{
-				SimplygonWrapper::Initialise();
-				std::string optimisedPath = SimplygonWrapper::Run(file_path, SimplygonStages::Reduction);
-				if (!optimisedPath.empty())
-				{
-					file_path = optimisedPath;
-				}
-			}
-
 			Assimp::Importer importer;
 			// Remove points and lines.
 			importer.SetPropertyInteger(AI_CONFIG_PP_SBP_REMOVE, aiPrimitiveType_LINE | aiPrimitiveType_POINT);
