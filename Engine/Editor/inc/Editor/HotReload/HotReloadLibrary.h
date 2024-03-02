@@ -24,6 +24,7 @@ namespace Insight::Editor
         std::string_view GetName() const;
         std::string_view GetPath() const;
         std::string_view GetFullPath() const;
+        void* GetLibraryHandle() const;
 
     private:
         void* m_libraryHandle = nullptr;

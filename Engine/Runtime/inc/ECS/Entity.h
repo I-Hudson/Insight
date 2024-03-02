@@ -161,6 +161,7 @@ namespace Insight
 			static void UnregisterComponent(std::string_view component_type);
 			static Component* CreateComponent(std::string_view component_type);
 
+			static bool HasComponent(std::string_view component_type);
 			static std::vector<std::string> GetComponentNames();
 
 		private:

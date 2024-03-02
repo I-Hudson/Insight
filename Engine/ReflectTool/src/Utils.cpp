@@ -7,6 +7,8 @@ namespace InsightReflectTool
 {
     namespace Utils
     {
+        StateInfo State;
+
         void WriteGeneratedFileHeader(std::fstream& file)
         {
             if (file.is_open())

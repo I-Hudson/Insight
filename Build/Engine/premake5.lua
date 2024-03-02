@@ -97,6 +97,7 @@ workspace "Insight"
 
         "IS_PLATFORM_X64",
         "IS_MEMORY_TRACKING",
+        "IS_ENGINE",
         "RENDER_GRAPH_ENABLED",
         "TOBJECTPTR_REF_COUNTING",
 

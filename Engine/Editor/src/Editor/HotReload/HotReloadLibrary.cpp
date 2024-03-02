@@ -1,5 +1,6 @@
 #include "Editor/HotReload/HotReloadLibrary.h"
 #include "Editor/HotReload/HotReloadExportFunctions.h"
+#include "Editor/HotReload/HotReloadEvents.h"
 
 #include "Core/Logger.h"
 #include "Core/ImGuiSystem.h"
@@ -46,6 +47,8 @@ namespace Insight::Editor
         {
             IS_CORE_ERROR("[HotReloadLibrary::Load] Unable to load library at '{0}'. Unknown why.", libraryPath);
         }
+
+        Core::EventSystem::Instance().DispatchEventNow(MakeRPtr<HotReloadLibraryLoaded>());
     }
 
     void HotReloadLibrary::Unload()
@@ -61,6 +64,7 @@ namespace Insight::Editor
         uninitialiseFunc();
 
         Platform::FreeDynamicLibrary(m_libraryHandle);
+        Core::EventSystem::Instance().DispatchEventNow(MakeRPtr<HotReloadLibraryUnLoaded>());
     }
 
     bool HotReloadLibrary::IsLoaded() const
@@ -93,5 +97,10 @@ namespace Insight::Editor
     std::string_view HotReloadLibrary::GetFullPath() const
     {
         return m_fullPath;
+    }
+
+    void* HotReloadLibrary::GetLibraryHandle() const
+    {
+        return m_libraryHandle;
     }
 }

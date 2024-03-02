@@ -33,6 +33,7 @@ namespace Insight::Editor
         "IS_EDITOR_ENABLED",
         "IS_EXPORT_PROJECT_DLL",
         "IS_EXPORT_DLL",
+        "IS_EXPORT_GAME_DLL_FUNCTIONS",
     }
 
     includedirs

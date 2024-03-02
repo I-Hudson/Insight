@@ -4,6 +4,8 @@
 #include "GenerateFiles/GenerateResourceRegister.h"
 #include "GenerateFiles/GenerateProjectInitialise.h"
 
+#include "Utils.h"
+
 #include <Reflect.h>
 #include <CodeGenerate/CodeGenerate.h>
 
@@ -101,12 +103,14 @@ int main(int argc, char** agc)
 
     if (typeValue == "Engine")
     {
+        StateInfo::Instance().IsEngine = true;
         genEditorWindowsFile = genOutputPath + "/Editor/inc/EditorWindows.gen.h";
         genComponentRegisterFile = genOutputPath + "/Runtime/inc/ECS/RegisterComponents.gen.h";
         genTypeDrawerRegisterFile = genOutputPath + "/Editor/inc/TypeDrawers.gen.h";
     }
     else if (typeValue == "Project")
     {
+        StateInfo::Instance().IsProject = true;
         genEditorWindowsFile = genOutputPath + "/EditorWindows.gen.h";
         genComponentRegisterFile = genOutputPath + "/RegisterComponents.gen.h";
         genTypeDrawerRegisterFile = genOutputPath + "/TypeDrawers.gen.h";

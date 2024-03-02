@@ -140,5 +140,15 @@ namespace Insight
 			}
 			return false;
 		}
+
+		template<typename T, typename V, std::enable_if_t<std::is_integral_v<V>, bool> = true>
+		INLINE bool VectorIndexWithinRange(const std::vector<T>& vector, const V index)
+		{
+			if (index < 0 || (!vector.empty() && index > vector.size() - 1))
+			{
+				return false;
+			}
+			return true;
+		}
 	}
 }

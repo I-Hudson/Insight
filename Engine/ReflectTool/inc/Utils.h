@@ -9,6 +9,17 @@
 
 namespace InsightReflectTool
 {
+    struct StateInfo
+    {
+        static StateInfo& Instance()
+        {
+            static StateInfo Instance;
+            return Instance;
+        }
+        bool IsEngine = false;
+        bool IsProject = false;
+    };
+
     namespace Utils
     {
         using WriteSourceFunctionBodyFunc = std::function<void(std::fstream& file)>;

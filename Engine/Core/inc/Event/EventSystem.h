@@ -26,7 +26,9 @@ namespace Insight
 			void RemoveEventListener(void* object, EventType eventType);
 			
 			void DispatchEvent(RPtr<Event> e);
+			void DispatchEvent();
 			void DispatchEventNow(RPtr<Event> e);
+			void DispatchEventNow();
 
 			void Update();
 

@@ -1,4 +1,5 @@
 #include "Editor/HotReload/HotReloadSystem.h"
+#include "Editor/HotReload/HotReloadEvents.h"
 #include "Editor/HotReload/HotReloadPremakeSolutionTemplate.h"
 #include "Editor/HotReload/HotReloadPremakeProjectTemplate.h"
 
@@ -8,6 +9,7 @@
 #include "Editor/Premake/PremakeSolutionGenerator.h"
 
 #include "Core/Logger.h"
+#include "Core/EnginePaths.h"
 
 #include "Event/EventSystem.h"
 #include "Algorithm/Vector.h"
@@ -65,7 +67,7 @@ namespace Insight::Editor
         PremakeSolutionGenerator solutionGenerator;
 
         PremakeHeaderToolData headerToolData;
-        headerToolData.ReflectDirectories.push_back(Runtime::ProjectSystem::Instance().GetProjectInfo().GetProjectPath());
+        headerToolData.ReflectDirectories.push_back(Runtime::ProjectSystem::Instance().GetProjectInfo().GetProjectPath() + "/Content");
         headerToolData.GeneratedFilesOutputPath = PremakeSolutionGenerator::GetProjectIntermediateCodePath() + "/Generated";
 
         PremakeTemplateData templateData;

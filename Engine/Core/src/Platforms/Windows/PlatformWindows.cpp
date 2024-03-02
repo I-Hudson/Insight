@@ -586,6 +586,17 @@ namespace Insight
 				library = nullptr;
 			}
 		}
+
+		void* PlatformWindows::GetDynamicFunctionVoid(void* library, const char* functionName)
+		{
+			if (library == nullptr || (!functionName || strlen(functionName) == 0))
+			{
+				return nullptr;
+			}
+			void* procAddress = GetProcAddress(reinterpret_cast<HMODULE>(library), functionName);
+			return procAddress;
+		}
+
 	}
 }
 #endif /// IS_PLATFORM_WINDOWS

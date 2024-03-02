@@ -44,7 +44,7 @@ namespace Insight
 
 		void EventSystem::DispatchEventNow(RPtr<Event> e)
 		{
-			std::lock_guard eventListenerLock(m_eventListenersLock);
+			//std::lock_guard eventListenerLock(m_eventListenersLock);
 			auto const& eventFuncItr = m_eventListeners[e->GetEventType()];
 			for (auto const& func : eventFuncItr)
 			{

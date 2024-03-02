@@ -59,13 +59,8 @@ namespace Insight
 			template<typename ReturnT, typename... Args>
 			static ReturnT(*GetDynamicFunction(void* library, std::string_view functionName))(Args...)
 			{
-				if (library == nullptr || functionName.empty())
-				{
-					return nullptr;
-				}
-
+				void* procAddress = GetDynamicFunctionVoid(library, functionName.data());
 				using ReturnFuncSig = ReturnT(*)(Args...);
-				void* procAddress = GetProcAddress((HMODULE)library, functionName.data());
 				ReturnFuncSig func = reinterpret_cast<ReturnFuncSig>(procAddress);
 				if (func == nullptr)
 				{
@@ -73,6 +68,9 @@ namespace Insight
 				}
 				return func;
 			}
+
+		private:
+			static void* GetDynamicFunctionVoid(void* library, const char* functionName);
 
 		private:
 			static Core::MemoryInformation s_memoryInformation;

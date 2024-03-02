@@ -112,6 +112,11 @@ namespace Insight
 			return nullptr;
 		}
 
+		bool ComponentRegistry::HasComponent(std::string_view component_type)
+		{
+			return m_register_funcs.find(std::string(component_type)) != m_register_funcs.end();
+		}
+
 		std::vector<std::string> ComponentRegistry::GetComponentNames()
 		{
 			std::vector<std::string> componentTypeNames;

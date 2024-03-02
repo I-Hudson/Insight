@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/Defines.h"
+#include "Core/TypeAlias.h"
 
 namespace Insight
 {
@@ -20,6 +21,9 @@ namespace Insight
 			WorldLoad,
 			WorldDestroy,
 
+			HotReloadLibraryUnLoaded,
+			HotReloadLibraryLoaded,
+
 			Size
 		};
 
@@ -36,6 +40,9 @@ namespace Insight
 			true,	// WorldSave
 			true,	// WorldLoad
 			true,	// WorldDestroy
+
+			false,	// HotReloadLibraryUnLoaded
+			false,	// HotReloadLibraryLoaded
 		};
 		static_assert(ARRAY_COUNT(EventTypeMultiplePerFrame) == static_cast<u64>(EventType::Size));
 

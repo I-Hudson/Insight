@@ -13,10 +13,215 @@
 #include <shared_mutex>
 #endif
 
+#include "Core/TypeAlias.h"
+#include "Core/Logger.h"
+#include "Algorithm/Vector.h"
+
+#include "ECS/Entity.h"
+
+#include <Reflect.h>
+
+#include <vector>
+#include <set>
+
 namespace Insight
 {
 	namespace ECS
 	{
+		class Component;
+		using ComponentId = i32;
+
+		class IComponentArray
+		{
+		public:
+			IComponentArray(Reflect::TypeInfo typeInfo);
+			virtual ~IComponentArray();
+
+			virtual void OnEarlyUpdate() = 0;
+			virtual void OnUpdate(const float deltaTime) = 0;
+			virtual void OnLateUpdate() = 0;
+
+			virtual ComponentId AddComponent() = 0;
+			virtual bool RemoveComponent(const ComponentId componentId) = 0;
+
+			template<typename T>
+			T* GetComponent(const ComponentId componentId)
+			{
+				Component* component = GetComponentPtr(componentId);
+				if (!component)
+				{
+					return nullptr;
+				}
+
+				T* componentType = dynamic_cast<T*>(component);
+				return componentType;
+			}
+
+			const Reflect::TypeInfo& GetTypeInfo() const;
+
+		protected:
+			virtual Component* GetComponentPtr(const ComponentId componentId) = 0;
+
+		protected:
+			Reflect::TypeInfo m_typeInfo;
+		};
+
+		template<typename T>
+		class ComponentTypeArray : public IComponentArray
+		{
+			static_assert(std::is_base_of_v<Component, T>);
+
+		public:
+			ComponentTypeArray(Reflect::TypeInfo typeInfo)
+				: IComponentArray(std::move(typeInfo))
+			{ }
+
+			virtual ~ComponentTypeArray() override
+			{ }
+
+			virtual void OnEarlyUpdate() override
+			{
+				for (size_t i = 0; i < m_components.size(); ++i)
+				{
+					Component* component = static_cast<Component*>(&m_components.at(i));
+					component->OnEarlyUpdate();
+				}
+			}
+			virtual void OnUpdate(const float deltaTime) override
+			{
+				for (size_t i = 0; i < m_components.size(); ++i)
+				{
+					Component* component = static_cast<Component*>(&m_components.at(i));
+					component->OnUpdate(deltaTime);
+				}
+			}
+			virtual void OnLateUpdate() override
+			{
+				for (size_t i = 0; i < m_components.size(); ++i)
+				{
+					Component* component = static_cast<Component*>(&m_components.at(i));
+					component->OnLateUpdate();
+				}
+			}
+
+			virtual ComponentId AddComponent() override
+			{
+				if (m_freeList.empty())
+				{
+					m_components.push_back(T());
+					const i32 newFreeSlot = m_components.size() - 1;
+
+					assert(m_freeList.find(newFreeSlot) == m_freeList.end());
+					m_freeList.insert(newFreeSlot);
+				}
+
+				const i32 freeSlot = *m_freeList.begin();
+				m_freeList.erase(freeSlot);
+				return freeSlot;
+			}
+
+			virtual bool RemoveComponent(const ComponentId componentId) override
+			{
+				if (!Algorithm::VectorIndexWithinRange(m_components, componentId))
+				{
+					IS_CORE_WARN("[ComponentTypeArray::RemoveComponent] ComponentId '{}' is out of range. Enter a valid ComponentId.");
+					return false;
+				}
+
+				if (m_freeList.find(componentId) != m_freeList.end())
+				{
+					IS_CORE_WARN("[ComponentTypeArray::RemoveComponent] ComponentId '{}' is already within the free list.");
+					return false;
+				}
+
+				m_components.at(componentId) = T();
+				m_freeList.insert(componentId);
+			}
+
+		protected:
+			virtual Component* GetComponentPtr(const ComponentId componentId) override
+			{
+				if (!Algorithm::VectorIndexWithinRange(m_components, componentId))
+				{
+					return nullptr;
+				}
+
+				if (m_freeList.find(componentId) != m_freeList.end())
+				{
+					IS_CORE_WARN("[ComponentTypeArray::RemoveComponent] ComponentId '{}' is already within the free list.");
+					return nullptr;
+				}
+
+				T& componentRef = m_components[componentId];
+				return static_cast<Component*>(&componentRef);
+			}
+
+		private:
+			std::vector<T> m_components;
+			std::set<ComponentId> m_freeList;
+		};
+
+		class ComponentManager
+		{
+		public:
+			ComponentManager();
+			~ComponentManager();
+
+			template<typename T>
+			ComponentId AddComponent()
+			{
+				if (!ComponentRegistry::HasComponent(T::Type_Name))
+				{
+					return -1;
+				}
+
+				const Reflect::TypeInfo typeInfo = T::GetStaticTypeInfo();
+
+				IComponentArray* foundComponentArray = nullptr;
+				for (size_t i = 0; i < m_componentArrays.size(); ++i)
+				{
+					IComponentArray* componentArray = m_componentArrays.at(i);
+					if (typeInfo == componentArray->GetTypeInfo())
+					{
+						foundComponentArray = componentArray;
+						break;
+					}
+				}
+
+				if (!foundComponentArray)
+				{
+					foundComponentArray = ::New<ComponentTypeArray<T>>(typeInfo);
+					m_componentArrays.push_back(foundComponentArray);
+				}
+
+				return foundComponentArray->AddComponent();
+			}
+
+			template<typename T>
+			T* GetComponent(const ComponentId componentId) const
+			{
+				static_assert(std::is_base_of_v<Component, T>);
+				const Reflect::TypeInfo typeInfo = T::GetStaticTypeInfo();
+				for (size_t i = 0; i < m_componentArrays.size(); ++i)
+				{
+					IComponentArray* componentArray = m_componentArrays.at(i);
+					if (typeInfo == componentArray->GetTypeInfo())
+					{
+						return componentArray->GetComponent<T>(componentId);
+					}
+				}
+
+				return nullptr;
+			}
+
+			void OnEarlyUpdate() const;
+			void OnUpdate(const float deltaTime) const;
+			void OnLateUpdate() const;
+
+		private:
+			std::vector<IComponentArray*> m_componentArrays;
+		};
+
 #ifdef IS_ECS_ENABLED
 		/*
 		//// <summary>
