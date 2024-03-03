@@ -119,8 +119,6 @@ project "InsightStandalone"
         "../../vendor/stb/stb_image_write.h",
         "../../vendor/SPIRV-Reflect/spirv_reflect.h",
         "../../vendor/SPIRV-Reflect/spirv_reflect.cpp",
-
-        "../../vendor/SimplygonSDK_10.1.11000.0/SimplygonLoader.cpp",
     }
 
     filter "system:Windows"
@@ -292,6 +290,7 @@ project "InsightStandalone"
             "WinPixEventRuntime.lib",
             "cppwinrt_fast_forwarder.lib",
             "Xinput.lib",
+            "Comctl32.lib",
         }
         files
         {

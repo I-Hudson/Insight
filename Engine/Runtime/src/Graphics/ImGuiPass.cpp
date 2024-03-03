@@ -2,8 +2,10 @@
 
 #include "Graphics/RenderGraph/RenderGraph.h"
 
+#ifdef RENDERGRAPH_V2_ENABLED
 #include "Graphics/RenderGraphV2/RenderGraphV2.h"
 #include "Graphics/RenderGraphV2/RenderGraphPassV2.h"
+#endif
 
 #include "Graphics/RenderContext.h"
 #include "Graphics/Window.h"
@@ -107,6 +109,7 @@ namespace Insight
 				ImDrawData* ImDrawData;
 			};
 
+#ifdef RENDERGRAPH_V2_ENABLED
 			ImGuiPassData imGuiRenderData = m_passData.GetCurrent();
 			RenderGraphV2::Instance().AddGraphicsPass("ImGuiPass"
 				, [](RenderGraphGraphicsPassV2& pass)
@@ -361,6 +364,7 @@ namespace Insight
 					cmdList->EndRenderpass();
 				},
 				{});
+#endif
 
 			RenderGraph::Instance().AddPass<ImguiPass>("ImGuiPass", [this](ImguiPass& data, RenderGraphBuilder& builder)
 				{

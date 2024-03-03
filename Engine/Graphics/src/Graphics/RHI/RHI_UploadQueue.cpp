@@ -139,6 +139,7 @@ namespace Insight
 			return m_queuedUploads.back()->Request;
 		}
 
+#ifdef IS_RESOURCE_HANDLES_ENABLED
 		void RHI_UploadQueue::UploadTexture(const void* data, u64 sizeInBytes, RHI_Handle<Texture> textureHandle)
 		{
 			IS_PROFILE_FUNCTION();
@@ -192,6 +193,7 @@ namespace Insight
 
 					}, nullptr, sizeInBytes));
 		}
+#endif
 
 		void RHI_UploadQueue::UploadToDevice(RHI_CommandList* cmdList)
 		{

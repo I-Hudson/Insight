@@ -1331,6 +1331,7 @@ namespace Insight
 				RGTextureHandle RenderTarget;
 			};
 
+#ifdef RENDERGRAPH_V2_ENABLED
 			RenderGraphV2::Instance().AddGraphicsPass("Swapchain",
 				[](RenderGraphGraphicsPassV2& pass)
 				{
@@ -1376,6 +1377,7 @@ namespace Insight
 					cmdList->EndRenderpass();
 				},
 				{ });
+#endif
 
 			RenderGraph::Instance().AddPass<TestPassData>("SwapchainPass", [](TestPassData& data, RenderGraphBuilder& builder)
 				{

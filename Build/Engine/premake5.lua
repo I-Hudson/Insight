@@ -101,7 +101,7 @@ workspace "Insight"
         "RENDER_GRAPH_ENABLED",
         "TOBJECTPTR_REF_COUNTING",
 
-        "RENDERGRAPH_V2_ENABLED",
+        --"RENDERGRAPH_V2_ENABLED",
         "IS_RESOURCE_HANDLES_ENABLED",
     }
 

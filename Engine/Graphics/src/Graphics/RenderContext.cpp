@@ -78,8 +78,10 @@ namespace Insight
 			context->m_renderGraph->Init(context);
 			context->m_frameDescriptorAllocator.Setup();
 
+#ifdef RENDERGRAPH_V2_ENABLED
 			context->m_renderGraphV2 = ::New<RenderGraphV2>();
 			context->m_renderGraphV2->Init(context);
+#endif
 
 			context->m_gpuProfiler.Initialise(context);
 
@@ -249,8 +251,10 @@ namespace Insight
 			m_renderGraph->Release();
 			Delete(m_renderGraph);
 
+#ifdef RENDERGRAPH_V2_ENABLED
 			m_renderGraphV2->Release();
 			Delete(m_renderGraphV2);
+#endif
 
 			m_shaderManager.Destroy();
 			m_renderpassManager.ReleaseAll();
