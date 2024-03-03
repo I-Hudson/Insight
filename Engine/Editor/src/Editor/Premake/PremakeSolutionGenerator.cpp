@@ -42,7 +42,7 @@ namespace Insight::Editor
 
     bool PremakeSolutionGenerator::BuildSolution(const char* solutionPath, const char* outputDirectory) const
     {
-       std::string buildSolutionBatch = EnginePaths::GetRootPath() + "/Build/Engine/Build_Solution.bat";
+       std::string buildSolutionBatch = EnginePaths::GetInstallDirectory() + "/Build/Engine/Build_Solution.bat";
 
        std::string cmdCommend = "/c" + buildSolutionBatch + " " + solutionPath + BUILD_SOULTION_EXTENSION + " " + BUILD_IDE + " Build " + BUILD_CONFIGURAION + " " + BUILD_PLATFORM;
        return Platform::RunProcessAndWait(cmdCommend.c_str());
@@ -65,7 +65,7 @@ namespace Insight::Editor
 
     void PremakeSolutionGenerator::RunInsightHeaderTool(const PremakeHeaderToolData& headerToolData) const
     {
-        std::string insightRootPath = EnginePaths::GetRootPath();
+        std::string insightRootPath = EnginePaths::GetInstallDirectory();
 
         for (size_t i = 0; i < headerToolData.ReflectDirectories.size(); ++i)
         {
@@ -96,7 +96,7 @@ namespace Insight::Editor
             return;
         }
 
-        std::string insightRootPath = EnginePaths::GetRootPath();
+        std::string insightRootPath = EnginePaths::GetInstallDirectory();
         std::string generateProjectsBatch = "/c" + insightRootPath + "/Build/Engine/GENERATE_PROJECT.bat";
         std::string cmdCommend = generateProjectsBatch + " " + std::string(solutionPath) + " " + BUILD_IDE;
         Platform::RunProcessAndWait(cmdCommend.c_str());

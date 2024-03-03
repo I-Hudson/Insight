@@ -13,13 +13,13 @@ namespace Insight
 
         static void Initialise();
 
-        static std::string GetRootPath();
+        static std::string GetInstallDirectory();
         static std::string GetExecutablePath();
         static std::string GetResourcePath();
 
     private:
         static bool m_initialise;
-        static std::string m_rootPath;
+        static std::string m_installDirectory;
         static std::string m_executablePath;
         static std::string m_resourcePath;
     };

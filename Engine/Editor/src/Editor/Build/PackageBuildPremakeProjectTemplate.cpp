@@ -25,7 +25,7 @@ namespace Insight::Editor
 #else
         const char* buildConfiguration = "UNKNOWN";
 #endif
-        const std::string srcDLLFolder = EnginePaths::GetRootPath() + "/deps/" + buildConfiguration + "-windows-x86_64/dll";
+        const std::string srcDLLFolder = EnginePaths::GetInstallDirectory() + "/deps/" + buildConfiguration + "-windows-x86_64/dll";
 
         for (const auto& path : std::filesystem::recursive_directory_iterator(srcDLLFolder))
         {

@@ -9,7 +9,7 @@ namespace Insight::Editor
     {
         PremakeProjectTemplateData data;
         data.ProjectName = Runtime::ProjectSystem::Instance().GetProjectInfo().ProjectName;
-        data.InsightRootPath = EnginePaths::GetRootPath();
+        data.InsightRootPath = EnginePaths::GetInstallDirectory();
         return data;
     }
 }

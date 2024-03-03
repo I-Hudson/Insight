@@ -30,6 +30,12 @@ namespace Insight
             PlatformProgress progressBar;
             progressBar.Show("Build Progress");
 
+            progressBar.UpdateProgress(0, "Removing all old files");
+            for (const auto& entry : std::filesystem::directory_iterator(outputFolder))
+            {
+                std::filesystem::remove_all(entry.path());
+            }
+
             const Runtime::ProjectInfo& projectInfo = Runtime::ProjectSystem::Instance().GetProjectInfo();
 
             PremakeHeaderToolData headerToolData;
@@ -55,12 +61,6 @@ namespace Insight
             progressBar.UpdateProgress(60, "Building solution");
             std::string solutionPath = projectInfo.GetIntermediatePath() + "/PackageBuild/" + PremakeSolutionGenerator::GetProjectIDESolutionName();
             solutionGenerator.BuildSolution(solutionPath.c_str(), outputFolder.data());
-
-            progressBar.UpdateProgress(75, "Removing all old files");
-            for (const auto& entry : std::filesystem::directory_iterator(outputFolder))
-            {
-                std::filesystem::remove_all(entry.path());
-            }
 
             progressBar.UpdateProgress(85, "Copying built exe to output folder");
 #ifdef IS_DEBUG

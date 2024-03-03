@@ -94,8 +94,7 @@ namespace Insight
         private:
             /// @brief Store all asset infos here, then give pointers to the packages which they are included in.
             /// This unordered_map acts as the owner all of the pointers.
-            std::unordered_map<Core::GUID, AssetInfo*> m_guidToAssetInfo;
-            std::unordered_map<std::string, Core::GUID> m_pathToAssetGuid;
+            std::unordered_map<std::string, AssetInfo*> m_pathToAssetInfo;
 
             std::vector<IAssetPackage*> m_assetPackages;
 

@@ -29,20 +29,18 @@ namespace Insight::Runtime
 
     void AssetRegistry::Shutdown()
     {
-        std::vector<IAssetPackage*> packages = m_assetPackages;
-        for (IAssetPackage*& package : packages)
+        for (IAssetPackage*& package : m_assetPackages)
         {
-            Algorithm::VectorRemove(m_assetPackages, package);
             Delete(package);
+            package = nullptr;
         }
         m_assetPackages.clear();
 
-        for (auto& [guid, assetInfo] : m_guidToAssetInfo)
+        for (auto& [path, assetInfo] : m_pathToAssetInfo)
         {
             Delete(assetInfo);
         }
-        m_guidToAssetInfo.clear();
-        m_pathToAssetGuid.clear();
+        m_pathToAssetInfo.clear();
 
         m_state = Core::SystemStates::Not_Initialised;
     }
@@ -54,7 +52,8 @@ namespace Insight::Runtime
 
     IAssetPackage* AssetRegistry::LoadAssetPackage(std::string_view path)
     {
-        std::string pathWithExtension = FileSystem::ReplaceExtension(path, IAssetPackage::c_FileExtension);
+        std::string pathWithExtension = std::string(path);// FileSystem::ReplaceExtension(path, IAssetPackage::c_FileExtension);
+        pathWithExtension = FileSystem::GetAbsolutePath(pathWithExtension);
         IAssetPackage* pathPackage = GetAssetPackageFromPath(pathWithExtension);
         if (pathPackage != nullptr)
         {
@@ -144,8 +143,7 @@ namespace Insight::Runtime
         AssetInfo* newInfo = ::New<AssetInfo>(path, package->GetPath(), package, enableMetaFile);
         Core::MemoryTracker::Instance().NameAllocation(newInfo, path.data());
 
-        m_guidToAssetInfo[newInfo->Guid] = newInfo;
-        m_pathToAssetGuid[newInfo->GetFullFilePath()] = newInfo->Guid;
+        m_pathToAssetInfo[newInfo->GetFullFilePath()] = newInfo;
         const AssetInfo* addedInfo = package->AddAsset(newInfo);
         ASSERT(newInfo == addedInfo);
 
@@ -166,12 +164,8 @@ namespace Insight::Runtime
             package->RemoveAsset(info);
         }
 
-        Core::GUID assetGuid = m_pathToAssetGuid.find(std::string(path))->second;
-        m_pathToAssetGuid.erase(std::string(path));
-        ASSERT(assetGuid.IsValid());
-
-        AssetInfo* assetInfo = m_guidToAssetInfo.find(assetGuid)->second;
-        m_guidToAssetInfo.erase(assetGuid);
+        AssetInfo* assetInfo = m_pathToAssetInfo.find(std::string(path))->second;
+        m_pathToAssetInfo.erase(std::string(path));
 
         ASSERT(assetInfo);
         Delete(assetInfo);
@@ -269,14 +263,9 @@ namespace Insight::Runtime
 
     const AssetInfo* AssetRegistry::GetAsset(const Core::GUID& guid) const
     {
-        if (auto iter = m_guidToAssetInfo.find(guid);
-            iter != m_guidToAssetInfo.end())
+        for (const auto& [path, assetInfo] : m_pathToAssetInfo)
         {
-            return iter->second;
-        }
-        for (const auto& [assetGuid, assetInfo] : m_guidToAssetInfo)
-        {
-            if (assetGuid == guid)
+            if (guid == assetInfo->Guid)
             {
                 return assetInfo;
             }
@@ -286,10 +275,10 @@ namespace Insight::Runtime
 
     const AssetInfo* AssetRegistry::GetAsset(std::string_view path) const
     {
-        if (auto iter = m_pathToAssetGuid.find(std::string(path));
-            iter != m_pathToAssetGuid.end())
+        if (auto iter = m_pathToAssetInfo.find(std::string(path));
+            iter != m_pathToAssetInfo.end())
         {
-            return GetAsset(iter->second);
+            return iter->second;
         }
         return nullptr;
     }
@@ -297,7 +286,7 @@ namespace Insight::Runtime
     std::vector<const AssetInfo*> AssetRegistry::GetAllAssetInfos() const
     {
         std::vector<const AssetInfo*> assetInfos;
-        for (const auto& [guid, assetInfo] : m_guidToAssetInfo)
+        for (const auto& [path, assetInfo] : m_pathToAssetInfo)
         {
             assetInfos.push_back(assetInfo);
         }
@@ -313,7 +302,7 @@ namespace Insight::Runtime
     {
         std::vector<const AssetInfo*> assets;
 
-        for (const auto& [guid, assetInfo] : m_guidToAssetInfo)
+        for (const auto& [path, assetInfo] : m_pathToAssetInfo)
         {
             std::string_view assetExtension = FileSystem::GetExtension(assetInfo->FileName);
             if (!assetExtension.empty()
@@ -335,7 +324,7 @@ namespace Insight::Runtime
 
         for (IAssetPackage* package : m_assetPackages)
         {
-            if (package->GetPath() == path)
+            if (package && package->GetPath() == path)
             {
                 return package;
             }
@@ -347,7 +336,7 @@ namespace Insight::Runtime
     {
         for (IAssetPackage* package : m_assetPackages)
         {
-            if (package->GetName() == name)
+            if (package && package->GetName() == name)
             {
                 return package;
             }
@@ -416,7 +405,7 @@ namespace Insight::Runtime
     {
         for (IAssetPackage* package: m_assetPackages)
         {
-            if (package->HasAsset(assetInfo)) 
+            if (package && package->HasAsset(assetInfo))
             {
                 return package;
             }

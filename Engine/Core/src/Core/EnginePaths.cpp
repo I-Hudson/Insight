@@ -13,7 +13,7 @@
 namespace Insight
 {
     bool EnginePaths::m_initialise = false;
-    std::string EnginePaths::m_rootPath;
+    std::string EnginePaths::m_installDirectory;
     std::string EnginePaths::m_executablePath;
     std::string EnginePaths::m_resourcePath;
 
@@ -26,21 +26,22 @@ namespace Insight
         m_executablePath = std::move(std::filesystem::path{ szPath }.parent_path().string()); // to finish the folder path with (back)slash
         FileSystem::PathToUnix(m_executablePath);
 #endif
-        const u32 rootFromExePath = 3;
-        m_rootPath = m_executablePath;
-        for (size_t i = 0; i < rootFromExePath; ++i)
+
+        const u32 installDirectoryFromExePath = 3;
+        m_installDirectory = m_executablePath;
+        for (size_t i = 0; i < installDirectoryFromExePath; ++i)
         {
-            m_rootPath = std::filesystem::path{ m_rootPath }.parent_path().string();
+            m_installDirectory = std::filesystem::path{ m_installDirectory }.parent_path().string();
         }
 
-        m_resourcePath = m_rootPath + "/" + "Resources";
+        m_resourcePath = m_executablePath + "/" + "Resources";
         m_initialise = true;
     }
 
-    std::string EnginePaths::GetRootPath()
+    std::string EnginePaths::GetInstallDirectory()
     {
         ASSERT(m_initialise);
-        return m_rootPath;
+        return m_installDirectory;
     }
 
     std::string EnginePaths::GetExecutablePath()

@@ -23,7 +23,8 @@ namespace Insight
 		{
 			StandaloneModule::Initialise(GetSystemRegistry().GetSystem<Core::ImGuiSystem>());
 
-			Runtime::AssetRegistry::Instance().LoadAssetPackage(EnginePaths::GetRootPath() + "/Resources.isassetpackage");
+			Runtime::AssetRegistry::Instance().LoadAssetPackage("BuiltContent.zip");
+			Runtime::AssetRegistry::Instance().LoadAssetPackage("ProjectAssets.zip");
 
 			std::string windowTitle = "Insight Standalone";
 #ifdef IS_DEBUG

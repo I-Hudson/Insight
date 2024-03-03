@@ -324,7 +324,7 @@ namespace Insight
 
     std::string FileSystem::GetRelativePath(std::string_view path, std::string_view basePath)
     {
-#if 1
+#if 0
         IS_PROFILE_SCOPE("weakly_canonical");
         std::string _Weakly_canonical_path = FileSystem::IsAbsolutePath(path) ? std::string(path) : _STD filesystem::weakly_canonical(path).string();
         std::string _Weakly_canonical_base = FileSystem::IsAbsolutePath(basePath) ? std::string(basePath) : _STD filesystem::weakly_canonical(basePath).string();;

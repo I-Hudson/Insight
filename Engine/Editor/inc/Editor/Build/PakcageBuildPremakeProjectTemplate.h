@@ -149,8 +149,6 @@ namespace Insight::Editor
         insightPath .. "/vendor/stb/stb_image_write.h",
         insightPath .. "/vendor/SPIRV-Reflect/spirv_reflect.h",
         insightPath .. "/vendor/SPIRV-Reflect/spirv_reflect.cpp",
-
-        insightPath .. "/vendor/SimplygonSDK_10.1.11000.0/SimplygonLoader.cpp",
     }
 
     postbuildcommands

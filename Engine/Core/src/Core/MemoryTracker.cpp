@@ -85,9 +85,14 @@ namespace Insight
             }
             m_allocations = {};
 
+            const char* TotalAllocatedBytesText = "Total allocated bytes: '{}'";
             if (m_totalAllocatedInBytes > 0)
             {
-                IS_CORE_ERROR("Total allocated bytes: '{}'", m_totalAllocatedInBytes);
+                IS_CORE_ERROR(TotalAllocatedBytesText, m_totalAllocatedInBytes);
+            }
+            else
+            {
+                IS_CORE_INFO(TotalAllocatedBytesText, m_totalAllocatedInBytes);
             }
 
             m_totalAllocatedInBytes = 0;
