@@ -282,6 +282,7 @@ namespace Insight
         {
             ASSERT(assetGuid != Core::GUID::s_InvalidGUID);
             const AssetInfo* assetInfo = AssetRegistry::Instance().GetAsset(assetGuid);
+            ASSERT(assetInfo);
 
             TObjectPtr<IResource> resource = GetResourceFromGuid(assetGuid);
             if (resource)

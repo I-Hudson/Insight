@@ -245,19 +245,20 @@ namespace Insight::Runtime
 
     std::vector<Byte> AssetRegistry::LoadAsset(std::string_view path) const
     {
-        const AssetInfo* info = GetAsset(path);
+        std::string absPath = FileSystem::GetAbsolutePath(path);
+        const AssetInfo* info = GetAsset(absPath);
         if (info && info->AssetPackage)
         {
-            return info->AssetPackage->LoadAsset(path);
+            return info->AssetPackage->LoadAsset(absPath);
         }
         else
         {
-            if (FileSystem::Exists(path))
+            if (FileSystem::Exists(absPath))
             {
-               return FileSystem::ReadFromFile(path);
+               return FileSystem::ReadFromFile(absPath);
             }
         }
-        IS_CORE_ERROR("[AssetRegistry::LoadAsset] Unable to load asset from path '{}'.", path.data());
+        IS_CORE_ERROR("[AssetRegistry::LoadAsset] Unable to load asset from path '{}'.", absPath.data());
         return {};
     }
 

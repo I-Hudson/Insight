@@ -42,6 +42,15 @@ namespace Insight
 
 			m_gameRenderpass = New<Graphics::Renderpass>();
 			m_gameRenderpass->Create();
+
+			std::vector<u8> runtimeSettingsData = Runtime::AssetRegistry::Instance().LoadAsset("RuntimeSettings.json");
+			Serialisation::JsonSerialiser runtimeSettingsSerialsier(true);
+			if (runtimeSettingsSerialsier.Deserialise(runtimeSettingsData))
+			{
+				Runtime::RuntimeSettings& runtimeSettings = Runtime::RuntimeSettings::Instance();
+				runtimeSettings.Deserialise(&runtimeSettingsSerialsier);
+				Runtime::WorldSystem::Instance().LoadWorld(runtimeSettings.InitialWorldPath);
+			}
 		}
 
 		void StandaloneApp::OnUpdate()

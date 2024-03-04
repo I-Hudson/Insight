@@ -160,7 +160,7 @@ namespace Insight
 
             Serialisation::JsonSerialiser serialsier(false);
             Runtime::RuntimeSettings::Instance().Serialise(&serialsier);
-            FileSystem::SaveToFile(serialsier.GetSerialisedData(), runtimeSettingsPath);
+            FileSystem::SaveToFile(serialsier.GetSerialisedData(), runtimeSettingsPath, true);
 
             Runtime::AssetPackageZip builtContent(projectInfo.GetIntermediatePath() + "/PackageBuild/BuiltContent", "BuiltContent");
             Runtime::AssetRegistry::Instance().AddAsset(runtimeSettingsPath, &builtContent, false, false);
@@ -174,9 +174,10 @@ namespace Insight
         void PackageBuild::BuildContentFiles(std::string_view outputFolder) const
         {
             const Runtime::ProjectInfo& projectInfo = Runtime::ProjectSystem::Instance().GetProjectInfo();
-            const std::string projectAssetsPath = projectInfo.GetIntermediatePath() + "/PackageBuild/BuiltContent/ProjectAssets.zip";
+            const std::string projectAssetsPath = projectInfo.GetContentPath() + "/ProjectAssets.zip";
             Runtime::AssetRegistry::Instance().GetAssetPackageFromName(Editor::Editor::c_ProjectAssetPackageName)->BuildPackage(projectAssetsPath);
             std::filesystem::copy(projectAssetsPath, outputFolder, std::filesystem::copy_options::update_existing);
+            std::filesystem::remove(projectAssetsPath);
         }
     }
 }

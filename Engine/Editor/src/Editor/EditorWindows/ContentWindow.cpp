@@ -213,7 +213,8 @@ namespace Insight::Editor
 
                 if (!m_currentDirectory.empty())
                 {
-                    for (auto iter : std::filesystem::directory_iterator(m_currentDirectory))
+                    std::error_code directoryIteratorErrorCode;
+                    for (auto iter : std::filesystem::directory_iterator(m_currentDirectory, directoryIteratorErrorCode))
                     {
                         IS_PROFILE_SCOPE("Entry");
 
@@ -443,6 +444,12 @@ namespace Insight::Editor
                         {
                             ImGui::SameLine();
                         }
+                    }
+
+                    if (directoryIteratorErrorCode)
+                    {
+                        m_currentDirectory = Runtime::ProjectSystem::Instance().GetProjectInfo().GetContentPath();
+                        IS_CORE_ERROR("[ContentWindow::CentreArea] Directory iterator error code '{}'.", directoryIteratorErrorCode.message());
                     }
 
                     if (!new_line)
