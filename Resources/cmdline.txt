@@ -1,1 +1,1 @@
-start_window_minimised=true
+wait_for_debugger=true

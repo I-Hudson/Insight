@@ -6,6 +6,7 @@ namespace Insight::Editor
     constexpr static const char* c_PremakeProjectTag_InsightPath = "--INSIGHT_PATH";
     constexpr static const char* c_PremakeProjectTag_Targetname = "--TARGET_NAME";
     constexpr static const char* c_PremakeProjectTag_PrebuildCommands = "--PREBUILD_COMMANDS";
+    constexpr static const char* c_PremakeProjectTag_Defines = "--DEFINES";
 
     constexpr static const char* c_PremakeProjectFileName = "premake5_project.lua";
 
@@ -49,11 +50,14 @@ namespace Insight::Editor
 
         "COMMAND_LIST_RENDER_BATCH",
         "IS_NVIDIA_AFTERMATH_ENABLED",
+
+        --DEFINES
     }
 
     includedirs
     {
         "../../Content/",
+        "../../Intermediate/CodeFiles/",
 
         "%{IncludeDirs.InsightCore}",
         "%{IncludeDirs.InsightMaths}",
@@ -145,6 +149,12 @@ namespace Insight::Editor
         "../../Content/**.hpp", 
         "../../Content/**.cpp",
         "../../Content/**.inl", 
+
+        "../../Intermediate/CodeFiles/**.h", 
+        "../../Intermediate/CodeFiles/**.c",
+        "../../Intermediate/CodeFiles/**.hpp", 
+        "../../Intermediate/CodeFiles/**.cpp",
+        "../../Intermediate/CodeFiles/**.inl",
 
         --PROJECT_FILES
 

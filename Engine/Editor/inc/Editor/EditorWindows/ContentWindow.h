@@ -45,12 +45,11 @@ namespace Insight
             virtual ~ContentWindow() override;
 
             EDITOR_WINDOW(ContentWindow, EditorWindowCategories::Windows);
-
+            // Begin - IEditorWindow
             virtual void Initialise() override;
             virtual void Shutdown() override;
-
             virtual void OnDraw() override;
-
+            // End - IEditorWindow
         private:
             void TopBar();
             void CentreArea();

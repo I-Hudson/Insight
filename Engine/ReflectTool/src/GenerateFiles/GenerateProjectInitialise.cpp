@@ -25,7 +25,10 @@ namespace InsightReflectTool
             Utils::WriteIncludeFile(file, "TypeDrawers.gen.h");
 
             Utils::WriteIncludeFile(file, "Core/Logger.h");
+
+            file << "#ifdef IS_EDITOR" << NEW_LINE;
             Utils::WriteIncludeFile(file, "Editor/HotReload/HotReloadMetaData.h");
+            file << "#endif" << NEW_LINE;
 
             file << "\n";
 
@@ -48,68 +51,80 @@ namespace InsightReflectTool
                     const int indent = 2;
                     TAB_N(indent);
                     file << "SET_IMGUI_CURRENT_CONTEXT();" << NEW_LINE;
-                    TAB_N(indent);
-                    file << "Editor::" << EditorWindowRegister::c_RegisterAllEditorWindows << "();" << NEW_LINE;                    
-                    TAB_N(indent);
-                    file << "ECS::"<< ComponentRegister::c_RegisterAllComponents << "(); " << NEW_LINE;
-                    TAB_N(indent);
-                    file << "Editor::" << TypeDrawerRegister::c_RegisterAllTypeDrawers << "(); " << NEW_LINE;
-                    TAB_N(indent);
-                    file << "IS_INFO(\"Project DLL module initialised\");" << NEW_LINE;
+                    TAB_N(indent); file << "#ifdef IS_EDITOR" << NEW_LINE;
+                    TAB_N(indent); file << "Editor::" << EditorWindowRegister::c_RegisterAllEditorWindows << "();" << NEW_LINE;
+                    TAB_N(indent); file << "Editor::" << TypeDrawerRegister::c_RegisterAllTypeDrawers << "(); " << NEW_LINE;
+                    TAB_N(indent); file << "#endif" << NEW_LINE;
+
+                    TAB_N(indent); file << "ECS::Project::"<< ComponentRegister::c_RegisterAllComponents << "(); " << NEW_LINE;
+                    TAB_N(indent);  file << "IS_INFO(\"Project DLL module initialised\");" << NEW_LINE;
                 }, 1);
 
             Utils::WriteSourceFunctionDefinition(file, "extern \"C\" IS_PROJECT void", ProjectModule::c_Uninitialise, { }, [&](std::fstream& file)
                 {
                     const int indent = 2;
-                    TAB_N(indent);
-                    file << "Editor::" << EditorWindowRegister::c_UnregisterAllEditorWindows <<"();" << NEW_LINE;
-                    TAB_N(indent);
-                    file << "ECS::" << ComponentRegister::c_UnregisterAllComponents << "();" << NEW_LINE;
-                    TAB_N(indent);
-                    file << "Editor::" << TypeDrawerRegister::c_UnregisterAllTypeDrawers << "();" << NEW_LINE;
-                    TAB_N(indent);
-                    file << "IS_INFO(\"Project DLL module uninitialised\");" << NEW_LINE;
+                    
+                    TAB_N(indent); file << "#ifdef IS_EDITOR" << NEW_LINE;
+                    TAB_N(indent); file << "Editor::" << EditorWindowRegister::c_UnregisterAllEditorWindows <<"();" << NEW_LINE;
+                    TAB_N(indent); file << "Editor::" << TypeDrawerRegister::c_UnregisterAllTypeDrawers << "();" << NEW_LINE;
+                    TAB_N(indent); file << "#endif" << NEW_LINE;
+
+                    TAB_N(indent); file << "ECS::Project::" << ComponentRegister::c_UnregisterAllComponents << "();" << NEW_LINE;
+                    TAB_N(indent); file << "IS_INFO(\"Project DLL module uninitialised\");" << NEW_LINE;
                 }, 1);
 
             Utils::WriteSourceFunctionDefinition(file, "extern \"C\" IS_PROJECT std::vector<std::string>", ProjectModule::c_GetEditorWindowNames, { }, [&](std::fstream& file)
                 {
                     const int indent = 2;
-                    TAB_N(indent);
-                    file << "return Editor::" << EditorWindowRegister::c_GetAllEditorWindowNames << "();" << NEW_LINE;
+                    TAB_N(indent); file << "#ifdef IS_EDITOR" << NEW_LINE;
+                    TAB_N(indent); file << "return Editor::" << EditorWindowRegister::c_GetAllEditorWindowNames << "();" << NEW_LINE;
+                    TAB_N(indent); file << "#else" << NEW_LINE;
+                    TAB_N(indent); file << "return std::vector<std::string>();" << NEW_LINE;
+                    TAB_N(indent); file << "#endif" << NEW_LINE;
                 }, 1);
 
             Utils::WriteSourceFunctionDefinition(file, "extern \"C\" IS_PROJECT std::vector<std::string>", ProjectModule::c_GetComponentNames, { }, [&](std::fstream& file)
                 {
                     const int indent = 2;
                     TAB_N(indent);
-                    file << "return ECS::" << ComponentRegister::c_GetAllComponentNames << "();" << NEW_LINE;
+                    file << "return ECS::Project::" << ComponentRegister::c_GetAllComponentNames << "();" << NEW_LINE;
                 }, 1);
 
             Utils::WriteSourceFunctionDefinition(file, "extern \"C\" IS_PROJECT std::vector<std::string>", ProjectModule::c_GetTypeDrawerNames, { }, [&](std::fstream& file)
             {
                 const int indent = 2;
-                TAB_N(indent);
-                file << "return Editor::" << TypeDrawerRegister::c_GetAllTypeDrawerNames << "();" << NEW_LINE;
+                TAB_N(indent); file << "#ifdef IS_EDITOR" << NEW_LINE;
+                TAB_N(indent); file << "return Editor::" << TypeDrawerRegister::c_GetAllTypeDrawerNames << "();" << NEW_LINE;
+                TAB_N(indent); file << "#else" << NEW_LINE;
+                TAB_N(indent); file << "return std::vector<std::string>();" << NEW_LINE;
+                TAB_N(indent); file << "#endif" << NEW_LINE;
             }, 1);
 
+            file << "#ifdef IS_EDITOR" << NEW_LINE;
             Utils::WriteSourceFunctionDefinition(file, "extern \"C\" IS_PROJECT ::Insight::Editor::HotReloadMetaData", ProjectModule::c_GetMetaData, { }, [&](std::fstream& file)
             {
                 const int indent = 2;
                 TAB_N(indent); file << "::Insight::Editor::HotReloadMetaData metaData;" << NEW_LINE;
                 file << NEW_LINE;
 
+                TAB_N(indent); file << "#ifdef IS_EDITOR" << NEW_LINE;
                 TAB_N(indent); file << "metaData.EditorWindowNames = std::move(Editor::" << EditorWindowRegister::c_GetAllEditorWindowNames << "()); " << NEW_LINE;
+                TAB_N(indent); file << "#endif" << NEW_LINE;
+
                 TAB_N(indent); file << "metaData.ComponentNames = std::move(ECS::" << ComponentRegister::c_GetAllComponentNames << "()); " << NEW_LINE;
                 TAB_N(indent); file << "metaData.TypeDrawerNames = std::move(Editor::" << TypeDrawerRegister::c_GetAllTypeDrawerNames << "()); " << NEW_LINE;
                 file << NEW_LINE;
 
+                TAB_N(indent); file << "#ifdef IS_EDITOR" << NEW_LINE;
                 TAB_N(indent); file << "metaData.EditorWindowTypeInfos = std::move(Editor::" << EditorWindowRegister::c_GetAllEditorWindowsTypeInfos << "());" << NEW_LINE;
+                TAB_N(indent); file << "#endif" << NEW_LINE;
+
                 TAB_N(indent); file << "metaData.ComponentTypeInfos = std::move(ECS::" << ComponentRegister::c_GetAllComponentTypeInfos << "());" << NEW_LINE;
                 file << NEW_LINE;
 
                 TAB_N(indent); file << "return metaData;" << NEW_LINE;
             }, 1);
-
+            file << "#endif" << NEW_LINE;
 
             file << "}\n";
 

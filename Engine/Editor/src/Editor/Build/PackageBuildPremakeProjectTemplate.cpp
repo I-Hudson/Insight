@@ -43,6 +43,13 @@ namespace Insight::Editor
         }
         premake.replace(premake.find(c_PremakeProjectTag_PrebuildCommands), strlen(c_PremakeProjectTag_PrebuildCommands), dllPaths);
 
+        std::string allDefines;
+        for (size_t defineIdx = 0; defineIdx < templateData.AdditionalDefines.size(); ++defineIdx)
+        {
+            allDefines += "\"" + templateData.AdditionalDefines.at(defineIdx) + "\"" + + ",";
+        }
+        premake.replace(premake.find(c_PremakeProjectTag_Defines), strlen(c_PremakeProjectTag_Defines), allDefines);
+
         std::string premakeOutFile = std::string(templateData.PremakeOutputPath) + "/" + c_PremakeProjectFileName;
         std::vector<uint8_t> vec(premake.begin(), premake.end());
         FileSystem::SaveToFile(vec, premakeOutFile, FileType::Text, true);

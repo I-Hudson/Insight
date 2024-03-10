@@ -228,7 +228,8 @@ namespace Insight::Editor
 
                         if (iter.is_regular_file())
                         {
-                            if (assetInfo == nullptr)
+                            if (assetInfo == nullptr
+                                || FileSystem::GetExtension(assetInfo->GetFullFilePath()) == Runtime::AssetMetaData::c_FileExtension)
                             {
                                 continue;
                             }

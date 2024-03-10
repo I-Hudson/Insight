@@ -149,7 +149,7 @@ namespace Insight
 #else
 		EntityManager::EntityManager()
 		{
-			RegisterAllComponents();
+			Engine::RegisterAllComponents();
 		}
 
 		EntityManager::EntityManager(EntityManager&& other)
@@ -159,7 +159,7 @@ namespace Insight
 
 		EntityManager& EntityManager::operator=(EntityManager&& other)
 		{
-			RegisterAllComponents();
+			Engine::RegisterAllComponents();
 
 #ifdef ECS_ENABLED
 			m_ecsWorld = other.m_ecsWorld;

@@ -29,7 +29,7 @@ namespace InsightReflectTool
 
             file << "namespace Insight {\n";
             TAB_N(1);
-            file << "namespace Runtime {\n";
+            file << "namespace Runtime::" + StateInfo::Instance().GetTypeString()  + "{\n";
 
             Utils::WriteSourceFunctionDefinition(file, "void", ResourceRegister::c_RegisterAllResources, {}, [&](std::fstream& file)
             {

@@ -2,7 +2,6 @@
 
 #include "StandaloneModule.h"
 
-#include "Runtime/EntryPoint.h"
 #include "Core/Memory.h"
 #include "Core/ImGuiSystem.h"
 #include "Core/EnginePaths.h"
@@ -13,7 +12,7 @@
 
 #include "Asset/AssetRegistry.h"
 
-#include <imgui.h>
+#include "Runtime/EntryPoint.h"
 
 namespace Insight
 {
@@ -21,6 +20,15 @@ namespace Insight
 	{
 		void StandaloneApp::OnInit()
 		{
+#ifdef IS_PACKAGE_BUILD
+			// Register all our game objects so they can be used.
+			auto initialiseFunc = Platform::GetDynamicFunction<void, Core::ImGuiSystem*>(GetModuleHandle(nullptr), "ProjectModuleInitialise");
+			Core::ImGuiSystem* imguiSystem = GetSystemRegistry().GetSystem<Core::ImGuiSystem>();
+			ASSERT(initialiseFunc != nullptr);
+			ASSERT(imguiSystem != nullptr);
+			initialiseFunc(imguiSystem);
+#endif
+
 			StandaloneModule::Initialise(GetSystemRegistry().GetSystem<Core::ImGuiSystem>());
 
 			Runtime::AssetRegistry::Instance().LoadAssetPackage("BuiltContent.zip");

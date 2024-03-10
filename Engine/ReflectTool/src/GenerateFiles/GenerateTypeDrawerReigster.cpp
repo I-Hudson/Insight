@@ -21,6 +21,7 @@ namespace InsightReflectTool
             Utils::WriteGeneratedFileHeader(file);
             std::string fileOutputAbsPath = std::filesystem::canonical(outFilePath).parent_path().generic_string();
 
+            file << "#ifdef IS_EDITOR" << NEW_LINE;
             file << "#include \"ECS/Entity.h\"" << NEW_LINE;
             Utils::WriteIncludeFiles(file, fileOutputAbsPath, typeDrawerFiles);
 
@@ -64,6 +65,7 @@ namespace InsightReflectTool
             TAB_N(1);
             file << "}" << NEW_LINE;
             file << "}" << NEW_LINE;
+            file << "#endif" << NEW_LINE;
             file.close();
 
             return true;

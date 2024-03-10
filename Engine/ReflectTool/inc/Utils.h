@@ -16,6 +16,9 @@ namespace InsightReflectTool
             static StateInfo Instance;
             return Instance;
         }
+
+        std::string GetTypeString() const { return IsEngine ? "Engine" : "Project"; }
+
         bool IsEngine = false;
         bool IsProject = false;
     };

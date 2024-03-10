@@ -59,6 +59,8 @@ namespace Insight
                 templateData.ProjectData.AdditionalDefines.push_back("TRACY_ON_DEMAND");
             }
 
+            templateData.ProjectData.AdditionalDefines.push_back("IS_PACKAGE_BUILD");
+
             templateData.CreateFuncs.CreateSolutionFunc = CreatePackageBuildSolutionFile;
             templateData.CreateFuncs.CreateProjectFunc = CreatePackageBuildProjectFile;
 

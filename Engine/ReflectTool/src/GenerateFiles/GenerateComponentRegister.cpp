@@ -32,7 +32,7 @@ namespace InsightReflectTool
 
             file << "namespace Insight {\n";
             TAB_N(1);
-            file << "namespace ECS {\n";
+            file << "namespace ECS::" + StateInfo::Instance().GetTypeString() + "{\n";
 
             Utils::WriteSourceFunctionDefinition(file, "void", ComponentRegister::c_RegisterAllComponents, {}, [&](std::fstream& file)
             {

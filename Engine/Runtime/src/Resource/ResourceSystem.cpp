@@ -35,7 +35,7 @@ namespace Insight
             IS_PROFILE_FUNCTION();
             ResourceLoaderRegister::Initialise();
 
-            RegisterAllResources();
+            Engine::RegisterAllResources();
 
             m_resourceMangaer.Initialise();
             m_state = Core::SystemStates::Initialised;

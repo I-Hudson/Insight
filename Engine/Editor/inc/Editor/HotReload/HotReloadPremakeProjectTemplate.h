@@ -34,6 +34,7 @@ namespace Insight::Editor
         "IS_EXPORT_PROJECT_DLL",
         "IS_EXPORT_DLL",
         "IS_EXPORT_GAME_DLL_FUNCTIONS",
+        "IS_EDITOR",
     }
 
     includedirs
