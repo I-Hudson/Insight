@@ -25,7 +25,7 @@ namespace Insight
     {
         constexpr const char* c_generateProjectBach = "/../../../Build/Engine/GENERATE_PROJECT.bat";
 
-        void PackageBuild::Build(std::string_view outputFolder)
+        void PackageBuild::Build(std::string_view outputFolder, const PackageBuildOptions& options)
         {
             PlatformProgress progressBar;
             progressBar.Show("Build Progress");
@@ -50,6 +50,14 @@ namespace Insight
             templateData.ProjectData = PremakeProjectTemplateData::CreateFromProjectInfo();
             templateData.ProjectData.AdditionalFiles.push_back(templateData.HeaderToolData.GeneratedFilesOutputPath);
             templateData.ProjectData.PremakeOutputPath = projectInfo.GetIntermediatePath() + "/PackageBuild";
+
+            if (options.EnableProfiling)
+            {
+                templateData.ProjectData.AdditionalDefines.push_back("IS_PROFILE_ENABLED");
+                templateData.ProjectData.AdditionalDefines.push_back("IS_PROFILE_TRACY");
+                templateData.ProjectData.AdditionalDefines.push_back("TRACY_IMPORTS");
+                templateData.ProjectData.AdditionalDefines.push_back("TRACY_ON_DEMAND");
+            }
 
             templateData.CreateFuncs.CreateSolutionFunc = CreatePackageBuildSolutionFile;
             templateData.CreateFuncs.CreateProjectFunc = CreatePackageBuildProjectFile;

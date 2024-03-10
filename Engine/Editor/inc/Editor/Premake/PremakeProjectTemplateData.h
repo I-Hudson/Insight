@@ -12,6 +12,8 @@ namespace Insight::Editor
         std::string InsightRootPath;
         std::string PremakeOutputPath;
 
+        std::vector<std::string> AdditionalDefines;
+
         std::vector<std::string> AdditionalFiles; // Add files to premake within the 'files' tag.
         std::unordered_map<std::string, std::vector<std::string>> VirtualFilePaths; // Create a new vpath in premake and add files to it.
     

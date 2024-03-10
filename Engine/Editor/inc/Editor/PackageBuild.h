@@ -6,13 +6,18 @@ namespace Insight
 {
     namespace Editor
     {
+        struct PackageBuildOptions
+        {
+            bool EnableProfiling = false;
+        };
+
         /// @brief Take the engine and client code and compile a new .exe
         // with the correct resources included.
         class PackageBuild
         {
         public:
 
-            void Build(std::string_view outputFolder);
+            void Build(std::string_view outputFolder, const PackageBuildOptions& options);
 
         private:
             std::string GetExecuteablepath();

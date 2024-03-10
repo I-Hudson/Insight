@@ -30,6 +30,7 @@ namespace Insight
 
 		private:
 			BuildSystem* m_buildSystem = nullptr;
+			bool m_enableProfiling = false;
         };
     }
 }

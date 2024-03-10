@@ -40,6 +40,8 @@ namespace Insight
 		{
 			IS_PROFILE_FUNCTION();
 		
+			ImGui::Checkbox("Enable profiling", &m_enableProfiling);
+
 			if (ImGui::Button("Package Build"))
 			{
 				std::string folderSelcted;
@@ -47,7 +49,10 @@ namespace Insight
 				if (fileDialog.Show(PlatformFileDialogOperations::SelectFolder, &folderSelcted))
 				{
 					PackageBuild build;
-					build.Build(folderSelcted);
+					PackageBuildOptions options;
+					options.EnableProfiling = m_enableProfiling;
+
+					build.Build(folderSelcted, options);
 				}
 			}
 		}
