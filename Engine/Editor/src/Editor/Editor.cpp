@@ -23,6 +23,8 @@
 
 #include "Serialisation/Archive.h"
 
+#include "Editor/EditorStyle.h"
+
 #include <SplashScreen.h>
 
 namespace Insight
@@ -106,6 +108,8 @@ namespace Insight
             m_editorResourceManager.Initialise();
 
             EditorModule::Initialise(GetSystemRegistry().GetSystem<Core::ImGuiSystem>());
+
+            //SetEditorStyle();
 
             std::string windowTitle = "Insight Editor";
 #ifdef IS_DEBUG

@@ -556,6 +556,7 @@ namespace Insight
 				std::vector<DescriptorSet> const& descriptorSets = m_descriptorAllocator->GetAllocatorDescriptorSets();
 				for (const auto& set : descriptorSets)
 				{
+					IS_PROFILE_SCOPE("Single Set");
 					if (set.Bindings.size() == 0)
 					{
 						// If the set is a 'bindless' set then just continue.
@@ -576,6 +577,8 @@ namespace Insight
 						{
 							if (binding.RHI_Buffer_View.IsValid())
 							{
+								IS_PROFILE_SCOPE("Root constant buffer");
+
 								RHI::DX12::RHI_Buffer_DX12* bufferDX12 = static_cast<RHI::DX12::RHI_Buffer_DX12*>(binding.RHI_Buffer_View.GetBuffer());
 								m_commandList->SetGraphicsRootConstantBufferView(rootParameterIdx,
 									bufferDX12->GetResource()->GetGPUVirtualAddress() + binding.RHI_Buffer_View.GetOffset());
@@ -587,6 +590,8 @@ namespace Insight
 						{
 							if (binding.RHI_Buffer_View.IsValid())
 							{
+								IS_PROFILE_SCOPE("Root UAV buffer");
+
 								RHI::DX12::RHI_Buffer_DX12* bufferDX12 = static_cast<RHI::DX12::RHI_Buffer_DX12*>(binding.RHI_Buffer_View.GetBuffer());
 								m_commandList->SetGraphicsRootUnorderedAccessView(rootParameterIdx,
 									bufferDX12->GetResource()->GetGPUVirtualAddress() + binding.RHI_Buffer_View.GetOffset());
@@ -601,6 +606,8 @@ namespace Insight
 								RHI_Texture_DX12 const* textureDX12 = static_cast<RHI_Texture_DX12 const*>(binding.RHI_Texture);
 								if (textureDX12->GetResource())
 								{
+									IS_PROFILE_SCOPE("Root UAV texture");
+
 									m_commandList->SetGraphicsRootUnorderedAccessView(rootParameterIdx, textureDX12->GetResource()->GetGPUVirtualAddress());
 									++RenderStats::Instance().DescriptorSetBindings;
 								}
@@ -646,6 +653,8 @@ namespace Insight
 
 									if (binding.RHI_Buffer_View.IsValid())
 									{
+										IS_PROFILE_SCOPE("Create constant buffer");
+
 										D3D12_CONSTANT_BUFFER_VIEW_DESC desc = {};
 										RHI::DX12::RHI_Buffer_DX12* bufferDX12 = static_cast<RHI::DX12::RHI_Buffer_DX12*>(binding.RHI_Buffer_View.GetBuffer());
 										desc.BufferLocation = bufferDX12->GetResource()->GetGPUVirtualAddress() + binding.RHI_Buffer_View.GetOffset();
@@ -655,6 +664,8 @@ namespace Insight
 									}
 									else
 									{
+										IS_PROFILE_SCOPE("Copy null buffer");
+
 										m_contextDX12->GetDevice()->CopyDescriptorsSimple(1, dstHandle.CPUPtr, m_contextDX12->GetDescriptorCBVNullHandle().CPUPtr, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 										++RenderStats::Instance().DescriptorSetUpdates;
 									}
@@ -673,6 +684,8 @@ namespace Insight
 										RHI_Texture_DX12 const* textureDX12 = static_cast<RHI_Texture_DX12 const*>(binding.RHI_Texture);
 										if (textureDX12->GetResource())
 										{
+											IS_PROFILE_SCOPE("Copy texture");
+
 											DescriptorHeapHandle_DX12 srvHandle = textureDX12->GetDescriptorHandle();
 											m_contextDX12->GetDevice()->CopyDescriptorsSimple(1, dstHandle.CPUPtr, srvHandle.CPUPtr, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 											++RenderStats::Instance().DescriptorSetUpdates;
@@ -680,7 +693,9 @@ namespace Insight
 									}
 									else
 									{
-										m_contextDX12->GetDevice()->CopyDescriptorsSimple(1, dstHandle.CPUPtr, m_contextDX12->GetDescriptorSRVNullHandle().CPUPtr, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+										IS_PROFILE_SCOPE("Copy null texture");
+
+										//m_contextDX12->GetDevice()->CopyDescriptorsSimple(1, dstHandle.CPUPtr, m_contextDX12->GetDescriptorSRVNullHandle().CPUPtr, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 										++RenderStats::Instance().DescriptorSetUpdates;
 									}
 								}
@@ -695,6 +710,8 @@ namespace Insight
 									}
 									if (binding.RHI_Sampler)
 									{
+										IS_PROFILE_SCOPE("Copy sampler");
+
 										RHI_Sampler_DX12 const* samplerDX12 = static_cast<RHI_Sampler_DX12 const*>(binding.RHI_Sampler);
 										DescriptorHeapHandle_DX12 srvHandle = samplerDX12->Handle;
 										m_contextDX12->GetDevice()->CopyDescriptorsSimple(1, samplerHandle.CPUPtr, srvHandle.CPUPtr, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
@@ -702,7 +719,9 @@ namespace Insight
 									}
 									else
 									{
-										m_contextDX12->GetDevice()->CopyDescriptorsSimple(1, samplerHandle.CPUPtr, m_contextDX12->GetDescriptorSAMNullHandle().CPUPtr, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+										IS_PROFILE_SCOPE("Copy null sampler");
+
+										//m_contextDX12->GetDevice()->CopyDescriptorsSimple(1, samplerHandle.CPUPtr, m_contextDX12->GetDescriptorSAMNullHandle().CPUPtr, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
 										++RenderStats::Instance().DescriptorSetUpdates;
 									}
 								}
@@ -718,6 +737,8 @@ namespace Insight
 #endif // DX12_REUSE_DESCRIPTOR_TABLES
 							)
 						{
+							IS_PROFILE_SCOPE("Set table");
+
 							m_boundDescriptorSets.at(rootParameterIdx) = firstHandle;
 							m_commandList->SetGraphicsRootDescriptorTable(rootParameterIdx, firstHandle.GPUPtr);
 							++RenderStats::Instance().DescriptorSetBindings;

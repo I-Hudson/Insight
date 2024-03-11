@@ -77,6 +77,17 @@ namespace Insight::Editor
                 SplitDirectory();
             });
 
+        m_fileExtensionToTexture[".fbx"] = 
+            EditorResourceManager::Instance().LoadSync(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/Editor/Icons/FBX_File_Icon.png", Runtime::Texture2D::GetStaticResourceTypeId())).CastTo<Runtime::Texture2D>().Get();
+        m_fileExtensionToTexture[".obj"] =
+            EditorResourceManager::Instance().LoadSync(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/Editor/Icons/OBJ_File_Icon.png", Runtime::Texture2D::GetStaticResourceTypeId())).CastTo<Runtime::Texture2D>().Get();
+        m_fileExtensionToTexture[".gltf"] =
+            EditorResourceManager::Instance().LoadSync(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/Editor/Icons/GLTF_File_Icon.png", Runtime::Texture2D::GetStaticResourceTypeId())).CastTo<Runtime::Texture2D>().Get();
+        
+        m_fileExtensionToTexture[".fbx"]->SetAlpha(true);
+        m_fileExtensionToTexture[".obj"]->SetAlpha(true);
+        m_fileExtensionToTexture[".gltf"]->SetAlpha(true);
+
         m_thumbnailToTexture[ContentWindowThumbnailType::Folder] =
             EditorResourceManager::Instance().LoadSync(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/Editor/Icons/Folder.png", Runtime::Texture2D::GetStaticResourceTypeId())).CastTo<Runtime::Texture2D>().Get();
         m_thumbnailToTexture[ContentWindowThumbnailType::File] =
@@ -765,6 +776,12 @@ namespace Insight::Editor
 
     Runtime::Texture2D* ContentWindow::PathToThumbnail(std::string const& path)
     {
+        std::string_view pathExtension = FileSystem::GetExtension(path);
+        if (auto iter = m_fileExtensionToTexture.find(std::string(pathExtension)); iter != m_fileExtensionToTexture.end())
+        {
+            return iter->second;
+        }
+
         if (std::filesystem::is_directory(path))
         {
             return m_thumbnailToTexture[ContentWindowThumbnailType::Folder];

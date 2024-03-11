@@ -50,6 +50,11 @@ namespace Insight
             return m_metaData.PixelFormat;
         }
 
+        void Texture::SetAlpha(bool value)
+        {
+            m_rhi_texture->m_hasAlpha = value;
+        }
+
         Graphics::RHI_Texture* Texture::GetRHITexture() const
         {
             return m_rhi_texture;

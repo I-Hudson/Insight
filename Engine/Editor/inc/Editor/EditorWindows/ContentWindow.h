@@ -67,6 +67,7 @@ namespace Insight
 
         private:
             std::unordered_map<ContentWindowThumbnailType, Runtime::Texture2D*> m_thumbnailToTexture;
+            std::unordered_map<std::string, Runtime::Texture2D*> m_fileExtensionToTexture;
 
             Core::Timer m_lastClickTimer;
             std::string itemClickedId;

@@ -159,6 +159,8 @@ namespace Insight
 
 		bool ModelLoader::Load(IResource* resource) const
 		{
+			IS_PROFILE_FUNCTION();
+
 			if (resource == nullptr || resource->GetResourceTypeId() != Model::GetStaticResourceTypeId())
 			{
 				return false;
@@ -174,6 +176,8 @@ namespace Insight
 
 		bool ModelLoader::LoadModel(Model* model, std::string file_path, u32 importer_flags)
 		{
+			IS_PROFILE_FUNCTION();
+
 			Assimp::Importer importer;
 			// Remove points and lines.
 			importer.SetPropertyInteger(AI_CONFIG_PP_SBP_REMOVE, aiPrimitiveType_LINE | aiPrimitiveType_POINT);
@@ -207,14 +211,19 @@ namespace Insight
 
 			Graphics::RenderContext::Instance().GetDeferredManager().Instance().Push([model, loader_data](Graphics::RHI_CommandList* cmdList)
 				{
+					IS_PROFILE_SCOPE("Upload GPUData");
+
 					UploadGPUData(const_cast<AssimpLoaderData&>(loader_data));
 
-					for (size_t i = 0; i < model->m_meshes.size(); ++i)
 					{
-						for (auto& lod : model->m_meshes.at(i)->m_lods)
+						IS_PROFILE_SCOPE("Set mesh vertex/index buffers");
+						for (size_t i = 0; i < model->m_meshes.size(); ++i)
 						{
-							lod.Vertex_buffer = model->m_vertex_buffer;
-							lod.Index_buffer = model->m_index_buffer;
+							for (auto& lod : model->m_meshes.at(i)->m_lods)
+							{
+								lod.Vertex_buffer = model->m_vertex_buffer;
+								lod.Index_buffer = model->m_index_buffer;
+							}
 						}
 					}
 				});
@@ -255,6 +264,8 @@ namespace Insight
 
 		bool ModelLoader::LoadMesh(Mesh* mesh, std::string file_path, u32 importer_flags)
 		{
+			IS_PROFILE_FUNCTION();
+
 			Assimp::Importer importer;
 			// Remove points and lines.
 			importer.SetPropertyInteger(AI_CONFIG_PP_SBP_REMOVE, aiPrimitiveType_LINE | aiPrimitiveType_POINT);
@@ -321,7 +332,7 @@ namespace Insight
 						if (loader_data.Model->m_meshes.size() <= loader_data.MeshIndex)
 						{
 							std::string path = loader_data.Model->GetFilePath() + "/";
-							path += std::string(aiMesh->mName.C_Str(), aiMesh->mName.length);
+							path += std::string(aiMesh->mName.C_Str(), aiMesh->mName.length) + "_idx" + std::to_string(i);
 
 							ResourceId meshResourceId(path, Mesh::GetStaticResourceTypeId());
 							new_mesh = static_cast<Mesh*>(ResourceManager::Instance().CreateDependentResource(meshResourceId).Get());
@@ -732,6 +743,8 @@ namespace Insight
 
 		void ModelLoader::UploadGPUData(AssimpLoaderData& loader_data)
 		{
+			IS_PROFILE_SCOPE("Create & upload GPUData");
+
 			Graphics::RHI_Buffer** vertex_buffer = nullptr;
 			Graphics::RHI_Buffer** index_buffer = nullptr;
 			if (loader_data.Model)

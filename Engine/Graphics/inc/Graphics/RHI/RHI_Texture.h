@@ -78,6 +78,7 @@ namespace Insight
 			PixelFormat		 GetFormat				    (u32 mip = 0)	const { if (mip < m_infos.size()) { return m_infos.at(mip).Format; }		return PixelFormat::Unknown; }
 			ImageLayout		 GetLayout				    (u32 mip = 0)	const { if (mip < m_infos.size()) { return m_infos.at(mip).Layout; }		return ImageLayout::Undefined; }
 			glm::vec4		 GetClearColour				()				const { if (m_infos.size() > 0)   { return m_infos.at(0).ClearColour; }		return glm::vec4(0, 0, 0, 0); }
+			bool			 HasAplha					()				const { return m_hasAlpha; }
 
 			void			SetLayout(ImageLayout newLayout, u32 mip = 0) { if (mip < m_infos.size()) { m_infos.at(mip).Layout = newLayout; } }
 
@@ -106,8 +107,10 @@ namespace Insight
 			std::vector<RHI_TextureInfo> m_infos = { };
 			GPUDeferedRequest m_deferedRequest;
 			RHI_UploadQueueRequest* m_uploadRequest = nullptr;
-
 			friend class RHI_CommandList;
+		
+		public:
+			bool m_hasAlpha = false;
 		};
 	}
 }

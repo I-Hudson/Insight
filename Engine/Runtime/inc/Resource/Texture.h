@@ -74,6 +74,8 @@ namespace Insight
 			u32 GetDepth() const;
 			PixelFormat GetFormat() const;
 
+			void SetAlpha(bool value);
+
 			Graphics::RHI_Texture* GetRHITexture() const;
 
 		protected:
