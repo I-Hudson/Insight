@@ -67,7 +67,7 @@ namespace Insight::Editor
         PremakeSolutionGenerator solutionGenerator;
 
         PremakeHeaderToolData headerToolData;
-        headerToolData.ReflectDirectories.push_back(Runtime::ProjectSystem::Instance().GetProjectInfo().GetProjectPath() + "/Content");
+        headerToolData.ReflectDirectories.push_back(Runtime::ProjectSystem::Instance().GetProjectInfo().GetContentPath());
         headerToolData.GeneratedFilesOutputPath = PremakeSolutionGenerator::GetProjectIntermediateCodePath() + "/Generated";
 
         PremakeTemplateData templateData;
