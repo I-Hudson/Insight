@@ -17,6 +17,8 @@
 
 #include "FileSystem/FileSystem.h"
 
+#include "World/WorldSystem.h"
+
 #include "Core/EnginePaths.h"
 #include "Core/Profiler.h"
 #include "Event/EventSystem.h"
@@ -79,14 +81,21 @@ namespace Insight::Editor
 
         m_fileExtensionToTexture[".fbx"] = 
             EditorResourceManager::Instance().LoadSync(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/Editor/Icons/FBX_File_Icon.png", Runtime::Texture2D::GetStaticResourceTypeId())).CastTo<Runtime::Texture2D>().Get();
+        m_fileExtensionToTexture[".fbx"]->SetAlpha(true);
+
         m_fileExtensionToTexture[".obj"] =
             EditorResourceManager::Instance().LoadSync(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/Editor/Icons/OBJ_File_Icon.png", Runtime::Texture2D::GetStaticResourceTypeId())).CastTo<Runtime::Texture2D>().Get();
+        m_fileExtensionToTexture[".obj"]->SetAlpha(true);
+        
         m_fileExtensionToTexture[".gltf"] =
             EditorResourceManager::Instance().LoadSync(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/Editor/Icons/GLTF_File_Icon.png", Runtime::Texture2D::GetStaticResourceTypeId())).CastTo<Runtime::Texture2D>().Get();
-        
-        m_fileExtensionToTexture[".fbx"]->SetAlpha(true);
-        m_fileExtensionToTexture[".obj"]->SetAlpha(true);
         m_fileExtensionToTexture[".gltf"]->SetAlpha(true);
+        
+        m_fileExtensionToTexture[".isworld"] =
+            EditorResourceManager::Instance().LoadSync(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/Editor/Icons/World_File_Icon.png", Runtime::Texture2D::GetStaticResourceTypeId())).CastTo<Runtime::Texture2D>().Get();
+        m_fileExtensionToTexture[".isworld"]->SetAlpha(true);
+
+
 
         m_thumbnailToTexture[ContentWindowThumbnailType::Folder] =
             EditorResourceManager::Instance().LoadSync(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/Editor/Icons/Folder.png", Runtime::Texture2D::GetStaticResourceTypeId())).CastTo<Runtime::Texture2D>().Get();
@@ -799,9 +808,13 @@ namespace Insight::Editor
                 IS_INFO("Create new C++ Class");
                 m_showGeneralMenu = false;
             }
-            else if (ImGui::MenuItem("Dummy"))
+            else if (ImGui::MenuItem("Create World"))
             {
                 m_showGeneralMenu = false;
+
+                TObjectPtr<Runtime::World> world = Runtime::WorldSystem::Instance().CreateWorld("New World");
+                world->SaveWorld(m_currentDirectory + "/" + world->GetFileName() + Runtime::World::c_FileExtension);
+                Runtime::WorldSystem::Instance().RemoveWorld(world);
             }
             ImGui::EndPopup();
         }
