@@ -14,6 +14,10 @@
 
 #include "Runtime/EntryPoint.h"
 
+#ifdef IS_PACKAGE_BUILD
+#include "Generated/ProjectInitialise.gen.h"
+#endif
+
 namespace Insight
 {
 	namespace Standalone
@@ -21,12 +25,7 @@ namespace Insight
 		void StandaloneApp::OnInit()
 		{
 #ifdef IS_PACKAGE_BUILD
-			// Register all our game objects so they can be used.
-			auto initialiseFunc = Platform::GetDynamicFunction<void, Core::ImGuiSystem*>(GetModuleHandle(nullptr), "ProjectModuleInitialise");
-			Core::ImGuiSystem* imguiSystem = GetSystemRegistry().GetSystem<Core::ImGuiSystem>();
-			ASSERT(initialiseFunc != nullptr);
-			ASSERT(imguiSystem != nullptr);
-			initialiseFunc(imguiSystem);
+			ProjectModuleInitialise(GetSystemRegistry().GetSystem<Core::ImGuiSystem>());
 #endif
 
 			StandaloneModule::Initialise(GetSystemRegistry().GetSystem<Core::ImGuiSystem>());
@@ -57,7 +56,11 @@ namespace Insight
 			{
 				Runtime::RuntimeSettings& runtimeSettings = Runtime::RuntimeSettings::Instance();
 				runtimeSettings.Deserialise(&runtimeSettingsSerialsier);
-				Runtime::WorldSystem::Instance().LoadWorld(runtimeSettings.InitialWorldPath);
+				Insight::Runtime::World* loadedWorld = Runtime::WorldSystem::Instance().LoadWorld(runtimeSettings.InitialWorldPath);
+				if (loadedWorld)
+				{
+					loadedWorld->SetWorldState(Runtime::WorldStates::Running);
+				}
 			}
 		}
 

@@ -146,11 +146,12 @@ int main(int argc, char** agc)
     }
     else if (typeValue == "Project")
     {
-        std::string projectInitialiseFile;
-        projectInitialiseFile = genOutputPath + "/ProjectInitialise.gen.cpp";
+        std::string projectInitialiseFileHeader = genOutputPath + "/ProjectInitialise.gen.h";
+        std::string projectInitialiseFileSource = genOutputPath + "/ProjectInitialise.gen.cpp";
 
         GenerateProjectInitialise generateProjectInitialise;
-        result |= generateProjectInitialise.Generate(fileParser, projectInitialiseFile, options);
+        result |= generateProjectInitialise.GenerateHeader(fileParser, projectInitialiseFileHeader, options);
+        result |= generateProjectInitialise.GenerateSource(fileParser, projectInitialiseFileSource, options);
     }
 
     return result;

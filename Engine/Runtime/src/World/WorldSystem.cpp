@@ -122,6 +122,7 @@ namespace Insight
             TObjectPtr<World> world = CreateWorld();
             SetActiveWorld(world);
             world->Deserialise(&serialiser);
+            world->SetWorldState(WorldStates::Running);
             return world.Get();
         }
 
