@@ -241,6 +241,8 @@ namespace Insight
 
 		void RenderContext::BaseDestroy()
 		{
+			IS_PROFILE_FUNCTION();
+
 			StopRenderThread();
 
 			m_frameDescriptorAllocator.ForEach([](DescriptorAllocator& allocator)

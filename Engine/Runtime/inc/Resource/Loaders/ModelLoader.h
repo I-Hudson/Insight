@@ -156,7 +156,8 @@ namespace Insight
 			/// @param loader_data 
 			static void Optimize(AssimpLoaderData& loader_data);
 
-			static void GenerateLODs(AssimpLoaderData& loader_data);
+			static void GenerateLODsForModel(AssimpLoaderData& loader_data);
+			static void GenerateLODsForMesh(AssimpLoaderData& loader_data, Mesh* mesh);
 
 			/// @brief Resize the GPU buffers for the model/mesh and upload all the data.
 			/// @param loader_data 

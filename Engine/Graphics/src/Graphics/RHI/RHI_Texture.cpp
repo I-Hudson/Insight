@@ -13,7 +13,7 @@
 #include <filesystem>
 
 
-#define RHI_TEXTURE_DEFER_ENABLED
+//#define RHI_TEXTURE_DEFER_ENABLED
 
 namespace Insight
 {
@@ -37,6 +37,8 @@ namespace Insight
 
 		void RHI_Texture::LoadFromData(Byte* data, u32 width, u32 height, u32 depth, u32 channels)
 		{
+			IS_PROFILE_FUNCTION();
+
 			const u64 size_in_bytes = width * height * depth * channels;
 			if (data == nullptr || size_in_bytes == 0)
 			{

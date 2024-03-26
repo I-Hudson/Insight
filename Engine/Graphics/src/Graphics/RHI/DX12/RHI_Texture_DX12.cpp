@@ -60,6 +60,8 @@ namespace Insight
 
 			void RHI_Texture_DX12::Create(RenderContext* context, RHI_TextureInfo createInfo)
 			{
+				IS_PROFILE_FUNCTION();
+
 				m_context = static_cast<RenderContext_DX12*>(context);
 				for (size_t i = 0; i < createInfo.Mip_Count; ++i)
 				{
@@ -145,6 +147,8 @@ namespace Insight
 
 			void RHI_Texture_DX12::Upload(void* data, int sizeInBytes)
 			{
+				IS_PROFILE_FUNCTION();
+
 				m_uploadStatus = DeviceUploadStatus::Uploading;
 
 				/// We need a staging buffer to upload data from CPU to GPU.
@@ -166,11 +170,15 @@ namespace Insight
 
 			std::vector<Byte> RHI_Texture_DX12::Download(void* data, int sizeInBytes)
 			{
+				IS_PROFILE_FUNCTION();
+
 				return std::vector<Byte>();
 			}
 
 			void RHI_Texture_DX12::Release()
 			{
+				IS_PROFILE_FUNCTION();
+
 				RHI_Texture::Release();
 
 				if (m_allocation)
