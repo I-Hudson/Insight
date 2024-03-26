@@ -63,7 +63,6 @@ workspace "Insight"
     language ("C++")
     cppdialect ("C++17")
 
-
     configurations
     {
         "Debug",
@@ -73,7 +72,8 @@ workspace "Insight"
     }
     platforms 
     { 
-        "Win64", 
+        "Win64",
+        "UWP",
     }
 
     flags
@@ -171,9 +171,11 @@ workspace "Insight"
             "DOCTEST_CONFIG_DISABLE",
         }
 
-    filter "system:Windows"
-    	system "windows"
-    	toolset("msc-v143")
+    filter "system:windows"
+
+
+    filter { "platforms:Win64" or "platforms:UWP" }
+        toolset("msc-v143")
         defines
         {
             "IS_PLATFORM_WINDOWS",
@@ -197,14 +199,14 @@ workspace "Insight"
             "Comctl32.lib",
         }
 
-    filter { "system:Windows", "configurations:Debug" or "configurations:Testing" }
+    filter { "platforms:Win64", "configurations:Debug" or "configurations:Testing" }
         ignoredefaultlibraries
         {
             "libcmt.lib",
             "msvcrt.lib",
             "libcmtd.lib",
         }
-    filter { "system:Windows", "configurations:Release" }
+    filter { "platforms:Win64", "configurations:Release" }
         ignoredefaultlibraries
         {
             "libcmt.lib",

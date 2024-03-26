@@ -110,6 +110,14 @@ project "Insight_Editor"
         --"call $(SolutionDir)Build/Engine/RunInsightReflectTool.bat"
     }
 
+    filter "platforms:Win64"
+        system "windows"
+        files
+        {
+            "Insight_Editor.rc",
+            "resource.h",
+        }
+
     filter "configurations:Debug"
         defines { "DEBUG" }  
         symbols "On"
@@ -159,11 +167,4 @@ project "Insight_Editor"
         { 
             "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/dll/\" \"%{cfg.targetdir}\"", 
             "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/pdb/\" \"%{cfg.targetdir}\"", 
-        }
-
-    filter "system:Windows" 
-        files
-        {
-            "Insight_Editor.rc",
-            "resource.h",
         }

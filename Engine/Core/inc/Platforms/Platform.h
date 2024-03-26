@@ -8,6 +8,8 @@
 #define SAFE_BREAK(void)
 #endif
 
+#include "Core/Defines.h"
+
 #if defined(IS_PLATFORM_WINDOWS) || defined(IS_PLATFORM_OSX) ||defined(IS_PLATFORM_LINUX)
 #define IS_PLATFORM_DESKTOP
 #endif
