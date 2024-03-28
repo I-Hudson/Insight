@@ -86,6 +86,11 @@ namespace Insight
             PackagePath = FileSystem::GetParentPath(fullPackagePath);
         }
 
+        bool AssetInfo::IsMemoryAsset() const
+        {
+            return m_isMemoryAsset;
+        }
+
         std::string AssetInfo::GetFullFilePath() const
         {
             return FilePath + "/" + FileName;

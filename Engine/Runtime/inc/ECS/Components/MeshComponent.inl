@@ -2,6 +2,7 @@
 
 #include "Resource/ResourceManager.h"
 #include "Resource/Model.h"
+#include "Asset/AssetInfo.h"
 
 namespace Insight
 {

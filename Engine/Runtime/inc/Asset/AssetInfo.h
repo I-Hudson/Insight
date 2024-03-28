@@ -65,6 +65,8 @@ namespace Insight
             void SetFile(std::string fileName, std::string filePath);
             void SetPackage(std::string fullPackagePath);
 
+            bool IsMemoryAsset() const;
+
             /// @brief Return the full path to the asset, relative from either the content folder
             /// or package if it is stored in one
             /// @return std::string
@@ -98,6 +100,8 @@ namespace Insight
 
         private:
             void LoadMetaData() const;
+
+            bool m_isMemoryAsset = false;
         };
     }
  

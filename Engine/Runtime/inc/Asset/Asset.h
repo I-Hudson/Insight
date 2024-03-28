@@ -1,0 +1,49 @@
+#pragma once
+
+#include "Asset/AssetInfo.h"
+#include "Runtime/Defines.h"
+#include "Core/IObject.h"
+#include "Core/RefCount.h"
+
+namespace Insight::Runtime
+{
+    class AssetRegistry;
+
+    enum class AssetState
+    {
+        NotLoaded,
+        Loading,
+        Loaded,
+        Unloaded,
+        Unloading,
+        Invalid
+    };
+
+    /// @brief Base class for asset classes. An Asset object is something which can comes from 
+    /// a file on disk.
+    class IS_RUNTIME Asset : public Core::RefCount
+    {
+    public:
+        Asset(const AssetInfo* assetInfo);
+        virtual ~Asset() override;
+
+        const AssetInfo* GetAssetInfo() const;
+        AssetState GetAssetState() const;
+        bool IsMemoryAsset() const;
+
+        std::string GetFileName() const;
+        std::string GetFilePath() const;
+        std::string GetPackageName() const;
+        std::string GetPackagePath() const;
+
+    protected:
+        virtual void OnUnload() = 0;
+
+    protected:
+        const AssetInfo* m_assetInfo = nullptr;
+        std::atomic<AssetState> m_assetState = AssetState::NotLoaded;
+        bool m_isMemoryAsset = false;
+
+        friend class AssetRegistry;
+    };
+}

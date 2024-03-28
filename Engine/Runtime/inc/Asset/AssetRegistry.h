@@ -3,8 +3,10 @@
 #include "Runtime/Defines.h"
 #include "Core/Singleton.h"
 #include "Core/ISysytem.h"
+#include "Core/ReferencePtr.h"
 
 #include "Asset/AssetInfo.h"
+#include "Asset/Asset.h"
 #include "Asset/AssetPackage/IAssetPackage.h"
 #include "Core/GUID.h"
 
@@ -52,9 +54,14 @@ namespace Insight
             void UpdateMetaData(AssetUser* object);
             void DeserialiseAssetUser(AssetInfo* assetInfo, AssetUser* object) const;
 
+            Ref<Asset> LoadAsset2(const std::string& path) const;
+            DEPRECATED_MSG("Use 'Ref<Asset> LoadAsset'.")
             std::vector<Byte> LoadAsset(std::string_view path) const;
 
+            Ref<Asset> GetAsset2(const std::string& path) const;
+            DEPRECATED_MSG("Use 'Ref<Asset> GetAsset'.")
             const AssetInfo* GetAsset(const Core::GUID& guid) const;
+            DEPRECATED_MSG("Use 'Ref<Asset> GetAsset'.")
             const AssetInfo* GetAsset(std::string_view path) const;
 
             std::vector<const AssetInfo*> GetAllAssetInfos() const;

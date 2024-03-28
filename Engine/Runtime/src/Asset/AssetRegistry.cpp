@@ -1,6 +1,5 @@
 #include "Asset/AssetRegistry.h"
 
-#include "Asset/AssetUser.h"
 #include "Asset/AssetPackage/IAssetPackage.h"
 #include "Asset/AssetPackage/AssetPackageFileSystem.h"
 #include "Asset/AssetPackage/AssetPackageZip.h"
@@ -178,38 +177,38 @@ namespace Insight::Runtime
         {
             return;
         }
-
+    
         Serialisation::BinarySerialiser binarySerialiser(false);
         Serialisation::JsonSerialiser jsonSerialiser(false);
-
+    
         AssetMetaData* metaData = assetInfo->MetaData;
         ASSERT(metaData)
-
+    
         metaData->Serialise(&binarySerialiser);
         if (object)
         {
-            object->Serialise(&binarySerialiser);
+            //object->Serialise(&binarySerialiser);
         }
-
+    
         metaData->Serialise(&jsonSerialiser);
         if (object)
         {
-            object->Serialise(&jsonSerialiser);
+            //object->Serialise(&jsonSerialiser);
         }
-
+    
         ASSERT(FileSystem::SaveToFile(binarySerialiser.GetSerialisedData(), assetInfo->GetFullFilePath() + AssetMetaData::c_FileExtension,FileType::Binary, true));
-
+    
         if (!m_debugMetaFileDirectory.empty())
         {
             std::string assetPathRelativeToContent = FileSystem::GetRelativePath(assetInfo->GetFullFilePath(), m_assetReativeBaseDirectory);
             ASSERT(FileSystem::SaveToFile(jsonSerialiser.GetSerialisedData(), m_debugMetaFileDirectory + "/" + assetPathRelativeToContent + AssetMetaData::c_FileExtension, true));
-
+    
         }
     }
 
     void AssetRegistry::UpdateMetaData(AssetUser* object)
     {
-        UpdateMetaData(RemoveConst(object->GetAssetInfo()), object);
+        //UpdateMetaData(RemoveConst(object->GetAssetInfo()), object);
     }
 
     void AssetRegistry::DeserialiseAssetUser(AssetInfo* assetInfo, AssetUser* object) const
@@ -238,9 +237,14 @@ namespace Insight::Runtime
         binarySerialiser.SkipObject();
         if (!binarySerialiser.AtEnd())
         {
-            object->Deserialise(&binarySerialiser);
+            //object->Deserialise(&binarySerialiser);
         }
-        object->SetAssetInfo(assetInfo);
+        //object->SetAssetInfo(assetInfo);
+    }
+
+    Ref<Asset> AssetRegistry::LoadAsset2(const std::string& path) const
+    {
+        return Ref<Asset>();
     }
 
     std::vector<Byte> AssetRegistry::LoadAsset(std::string_view path) const
@@ -260,6 +264,11 @@ namespace Insight::Runtime
         }
         IS_CORE_ERROR("[AssetRegistry::LoadAsset] Unable to load asset from path '{}'.", absPath.data());
         return {};
+    }
+
+    Ref<Asset> AssetRegistry::GetAsset2(const std::string& path) const
+    {
+        return Ref<Asset>();
     }
 
     const AssetInfo* AssetRegistry::GetAsset(const Core::GUID& guid) const

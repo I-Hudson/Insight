@@ -114,6 +114,16 @@ namespace Insight
 			// Unload all our memory meshes.
 			for (Mesh* mesh : m_meshes)
 			{
+				if (m_vertex_buffer != mesh->m_lods.at(0).Vertex_buffer)
+				{
+					Renderer::FreeVertexBuffer(mesh->m_lods.at(0).Vertex_buffer);
+				}
+
+				if (m_index_buffer != mesh->m_lods.at(0).Index_buffer)
+				{
+					Renderer::FreeIndexBuffer(mesh->m_lods.at(0).Index_buffer);
+				}
+
 				mesh->OnUnloaded(mesh);
 				RemoveDependentResource(mesh);
 				ResourceManager::Instance().RemoveDependentResource(mesh->GetResourceId());

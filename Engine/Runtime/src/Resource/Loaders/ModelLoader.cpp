@@ -121,7 +121,9 @@ namespace Insight
 				const char* pMode = "rb")  override
 			{
 				const AssetInfo* assetInfo = AssetRegistry::Instance().GetAsset(pFile);
-				return ::New<CustomAssimpIOStrean>(assetInfo);
+				Assimp::IOStream* stream = ::New<CustomAssimpIOStrean>(assetInfo);
+				Core::MemoryTracker::Instance().NameAllocation(stream, assetInfo->GetFullFilePath().c_str());
+				return stream;
 			}
 
 			virtual void Close(Assimp::IOStream* pFile)  override

@@ -19,6 +19,7 @@ namespace Insight
 	{
 		class Material;
 		class ModelLoader;
+		class Model;
 
 		/// @brief Define the data used to create a mesh from a model.
 		struct MeshFromModelData
@@ -83,6 +84,7 @@ namespace Insight
 
 			friend class ModelLoader;
 			friend struct RenderMesh;
+			friend class Model;
 		};
 	}
 
