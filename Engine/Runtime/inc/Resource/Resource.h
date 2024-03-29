@@ -2,7 +2,6 @@
 
 #include "Resource/ResourceId.h"
 #include "Runtime/Defines.h"
-#include "Asset/AssetUser.h"
 
 #include "Core/IObject.h"
 #include "Core/Defines.h"
@@ -24,6 +23,11 @@
 
 namespace Insight
 {
+	namespace Runtime
+	{
+		class AssetInfo;
+	}
+
 	namespace Runtime
 	{
 		class IResource;
@@ -90,7 +94,7 @@ namespace Insight
 		{
 			REFLECT_GENERATED_BODY()
 		public:
-			using ResourceSerialiserType = Serialisation::BinarySerialiser;
+			using ResourceSerialiserType = Serialisation::JsonSerialiser;
 
 			IResource() = delete;
 			IResource(std::string_view filePath);

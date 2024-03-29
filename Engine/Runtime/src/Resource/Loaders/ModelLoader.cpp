@@ -18,6 +18,7 @@
 #include <assimp/scene.h>
 #include <assimp/mesh.h>
 #include <assimp/IOSystem.hpp>
+#include <assimp/DefaultIOSystem.h>
 #include <assimp/IOStream.hpp>
 
 #include <meshoptimizer.h>
@@ -32,8 +33,11 @@ namespace Insight
 		class CustomAssimpIOStrean : public Assimp::IOStream
 		{
 		public:
-			CustomAssimpIOStrean(const AssetInfo* assetInfo)
-				: m_assetInfo(assetInfo)
+			std::string Path;
+
+			CustomAssimpIOStrean(std::string path, const AssetInfo* assetInfo)
+				: Path(path)
+				, m_assetInfo(assetInfo)
 			{
 				m_fileData = AssetRegistry::Instance().LoadAsset(m_assetInfo->GetFullFilePath());
 				ASSERT(!m_fileData.empty());
@@ -104,8 +108,13 @@ namespace Insight
 			u64 m_cursor = 0;
 		};
 
-		class CustomAssimpIOSystem : public Assimp::IOSystem
+		class CustomAssimpIOSystem : public Assimp::DefaultIOSystem
 		{
+			/*
+				THis must use the C++ new and delete and not Insight's own New and Delete
+				as some loaders like gtlf uses shared_ptrs. Because of this if we use our own New 
+				then we never call our own Delete so Insight doesn't know that a pointer has been deleted.
+			*/
 		public:
 			virtual bool Exists(const char* pFile) const override
 			{
@@ -118,17 +127,17 @@ namespace Insight
 			}
 
 			virtual Assimp::IOStream* Open(const char* pFile,
-				const char* pMode = "rb")  override
+				const char* pMode = "rb") override
 			{
 				const AssetInfo* assetInfo = AssetRegistry::Instance().GetAsset(pFile);
-				Assimp::IOStream* stream = ::New<CustomAssimpIOStrean>(assetInfo);
+				Assimp::IOStream* stream = new CustomAssimpIOStrean(pFile, assetInfo);
 				Core::MemoryTracker::Instance().NameAllocation(stream, assetInfo->GetFullFilePath().c_str());
 				return stream;
 			}
 
-			virtual void Close(Assimp::IOStream* pFile)  override
+			virtual void Close(Assimp::IOStream* pFile) override
 			{
-				::Delete(pFile);
+				delete pFile;
 			}
 
 		};

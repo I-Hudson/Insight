@@ -167,7 +167,7 @@ namespace Insight
             }
 
             auto itr = m_allocations.find(ptr);
-            //ASSERT(itr != m_allocations.end());
+            ASSERT(itr != m_allocations.end());
             if (itr != m_allocations.end())
             {
                 m_categoryAllocationSizeBytes.at(static_cast<u64>(itr->second.Category)) -= itr->second.Size;
