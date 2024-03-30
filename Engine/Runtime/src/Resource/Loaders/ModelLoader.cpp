@@ -447,8 +447,9 @@ namespace Insight
 		{
 			IS_PROFILE_FUNCTION();
 
+			loader_data.Vertices.reserve(loader_data.Vertices.size() + mesh->mNumVertices);
 			/// walk through each of the mesh's vertices
-			for (unsigned int i = 0; i < mesh->mNumVertices; i++)
+			for (unsigned int i = 0; i < mesh->mNumVertices; ++i)
 			{
 				IS_PROFILE_SCOPE("Add Vertex");
 
@@ -514,11 +515,12 @@ namespace Insight
 			}
 
 			/// Now walk through each of the mesh's faces (a face is a mesh its triangle) and retrieve the corresponding vertex indices.
-			for (unsigned int i = 0; i < mesh->mNumFaces; i++)
+			for (unsigned int i = 0; i < mesh->mNumFaces; ++i)
 			{
 				aiFace face = mesh->mFaces[i];
+				loader_data.Indices.reserve(loader_data.Indices.size() + face.mNumIndices);
 				/// retrieve all indices of the face and store them in the indices vector
-				for (unsigned int j = 0; j < face.mNumIndices; j++)
+				for (unsigned int j = 0; j < face.mNumIndices; ++j)
 				{
 					loader_data.Indices.push_back(face.mIndices[j]);
 				}

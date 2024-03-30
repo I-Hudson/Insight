@@ -5,19 +5,19 @@ namespace Insight
 {
     IObject::IObject()
     {
-        //ObjectManager::Instance().RegisterObject(this);
+        ObjectManager::Instance().RegisterObject(this);
     }
 
     IObject::~IObject()
     {
-        //ObjectManager::Instance().UnregisterObject(this);
+        ObjectManager::Instance().UnregisterObject(this);
     }
 
     IS_SERIALISABLE_CPP(IObject);
 
     void IObject::SetGuid(const Core::GUID& guid)
     {
-        ObjectManager::Instance().UpdateGuidForObject(this, m_guid, guid);
+        //ObjectManager::Instance().UpdateGuidForObject(this, m_guid, guid);
         m_guid = guid;
     }
 

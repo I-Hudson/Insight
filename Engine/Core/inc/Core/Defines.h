@@ -150,6 +150,7 @@
 #define NO_DISCARD [[nodiscard]]
 #define NO_VTABLE __declspec(novtable)
 #define FUNCTION __FUNCSIG__
+#define PROCESSER_PAUSE _mm_pause()
 #endif
 
 

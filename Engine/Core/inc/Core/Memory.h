@@ -7,6 +7,7 @@
 #include <atomic>
 #include <type_traits>
 #include <utility>
+#include <cassert>
 
 /// Helper macro for making a new pointer with tracking.
 #define NewTracked(Type)			::New<Type>()
@@ -22,7 +23,7 @@
 NO_DISCARD FORCE_INLINE void* NewBytes(u64 bytes, Insight::Core::MemoryAllocCategory memoryAllocCategory)
 {
 	void* ptr = std::malloc(bytes);
-	Insight::Core::MemoryTracker::Instance().Track(ptr, bytes, memoryAllocCategory, Insight::Core::MemoryTrackAllocationType::Single);
+	Insight::Core::MemoryTracker::Instance().Track(ptr, bytes, memoryAllocCategory, Insight::Core::MemoryTrackAllocationType::Array);
 	return ptr;
 }
 NO_DISCARD FORCE_INLINE void* NewBytes(u64 bytes)
@@ -77,6 +78,26 @@ FORCE_INLINE void DeleteBytes(T*& pointer)
 		std::free(pointer);
 	}
 	pointer = nullptr;
+}
+
+FORCE_INLINE void* ReallocBytes(void* bytes, const u64 newSize)
+{
+	if (bytes == nullptr)
+	{
+		return NewBytes(newSize);
+	}
+
+	u8* memory = (u8*)bytes;
+	if (newSize == 0)
+	{
+		::DeleteBytes(memory);
+		return nullptr;
+	}
+	Insight::Core::MemoryTracker::Instance().UnTrack(memory);
+	memory = (u8*)std::realloc(memory, newSize);
+	Insight::Core::MemoryTracker::Instance().Track(memory, newSize, Insight::Core::MemoryTrackAllocationType::Array);
+	assert(memory != nullptr);
+	return memory;
 }
 
 template<typename T>

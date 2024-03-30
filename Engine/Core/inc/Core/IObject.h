@@ -8,6 +8,8 @@
 
 namespace Insight
 {
+	class ObjectManager;
+
 	/// <summary>
 	/// Base for all "objects" within the engine.
 	/// IObject contains some base level information like type name, type hash.
@@ -26,6 +28,9 @@ namespace Insight
 
 	private:
 		Core::GUID m_guid;
+		i64 m_objectIndex = -1;
+
+		friend class ObjectManager;
 	};
 
 	OBJECT_SERIALISER(IObject, 1,
