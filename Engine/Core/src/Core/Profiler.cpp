@@ -39,5 +39,36 @@ namespace Insight
 			}
 #endif
 		}
+
+		bool IsProfilerAttached()
+		{
+#if defined(IS_PROFILE_ENABLED)
+#if defined(IS_PROFILE_OPTICK)	
+			returnOptick::IsActive();
+#elif defined(IS_PROFILE_TRACY) 
+			return tracy::GetProfiler().IsConnected();
+#else
+			return false;
+#endif
+#endif
+		}
+
+		void ShutdownProfiler()
+		{
+#if defined(IS_PROFILE_ENABLED)
+#if defined(IS_PROFILE_OPTICK)	
+			
+#elif defined(IS_PROFILE_TRACY) 
+			if (IsProfilerAttached())
+			{
+				tracy::GetProfiler().RequestShutdown();
+				while (!tracy::GetProfiler().HasShutdownFinished())
+				{
+				}
+			}
+#else
+#endif
+#endif
+		}
 	}
 }

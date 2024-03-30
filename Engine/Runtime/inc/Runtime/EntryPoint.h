@@ -2,6 +2,7 @@
 #include "Engine.h"
 #include "Core/MemoryTracker.h"
 #include "Core/Logger.h"
+#include "Core/Profiler.h"
 
 #ifdef TEST_ENABLED
 #define DOCTEST_CONFIG_IMPLEMENTATION_IN_DLL
@@ -32,6 +33,7 @@ int main(int argc, char** argv)
 	app->Destroy();
 	DeleteTracked(app);
 
+	Insight::Core::ShutdownProfiler();
 	///Insight::Core::MemoryTracker::Instance().Destroy();
 	return 0;
 #endif

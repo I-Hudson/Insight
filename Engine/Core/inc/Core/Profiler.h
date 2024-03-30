@@ -8,6 +8,8 @@ namespace Insight
 	{
 		/// Wait for the profiler to be a attached.
 		void IS_CORE WaitForProfiler();
+		bool IS_CORE IsProfilerAttached();
+		void IS_CORE ShutdownProfiler();
 	}
 }
 
