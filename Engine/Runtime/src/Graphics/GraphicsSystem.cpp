@@ -51,6 +51,8 @@ namespace Insight
 
 		void GraphicsSystem::Shutdown()
 		{
+			IS_PROFILE_FUNCTION();
+
 			if (m_context)
 			{
 				m_context->GpuWaitForIdle();

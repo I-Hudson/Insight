@@ -195,6 +195,8 @@ namespace Insight
 
 		void Engine::Destroy()
 		{
+			IS_PROFILE_FUNCTION();
+
 			Graphics::RenderContext::Instance().WaitForRenderThread();
 			Graphics::RenderContext::Instance().GpuWaitForIdle();
 

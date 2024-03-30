@@ -16,6 +16,7 @@
 
 #include "Core/EnginePaths.h"
 #include "Core/Logger.h"
+#include "Core/Profiler.h"
 
 #include "Algorithm/Vector.h"
 
@@ -28,6 +29,8 @@ namespace Insight::Runtime
 
     void AssetRegistry::Shutdown()
     {
+        IS_PROFILE_FUNCTION();
+
         for (IAssetPackage*& package : m_assetPackages)
         {
             Delete(package);

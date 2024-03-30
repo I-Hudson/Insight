@@ -35,6 +35,8 @@ namespace Insight
 
 		void ImGuiSystem::Shutdown()
 		{
+			IS_PROFILE_FUNCTION();
+
 			ImPlot::DestroyContext();
 			ImGui::DestroyContext();
 

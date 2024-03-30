@@ -25,6 +25,8 @@ namespace Insight
 
 		void TaskSystem::Shutdown()
 		{
+			IS_PROFILE_FUNCTION();
+
 			m_destroy = true;
 			for (size_t i = 0; i < m_threads.size(); ++i)
 			{

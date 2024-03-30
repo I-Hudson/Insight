@@ -43,6 +43,8 @@ namespace Insight
 
         void ResourceSystem::Shutdown()
         {
+            IS_PROFILE_FUNCTION();
+
             m_resourceMangaer.Shutdown();
 
             ResourceLoaderRegister::Shutdown();

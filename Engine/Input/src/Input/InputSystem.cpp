@@ -54,6 +54,8 @@ namespace Insight
 
 		void InputSystem::Shutdown()
 		{
+			IS_PROFILE_FUNCTION();
+
 			for (auto& device : m_inputDevices)
 			{
 				device->Shutdown();

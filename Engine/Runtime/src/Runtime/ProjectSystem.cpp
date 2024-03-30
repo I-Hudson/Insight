@@ -4,6 +4,7 @@
 #include "Resource/ResourceManager.h"
 
 #include "Core/Logger.h"
+#include "Core/Profiler.h"
 
 #include "FileSystem/FileSystem.h"
 #include "Platforms/Platform.h"
@@ -36,6 +37,8 @@ namespace Insight
 
         void ProjectSystem::Shutdown()
         {
+            IS_PROFILE_FUNCTION();
+
             Core::EventSystem::Instance().DispatchEventNow(MakeRPtr<Core::ProjectCloseEvent>(m_projectInfo.ProjectPath));
             m_projectInfo = {};
             m_state = Core::SystemStates::Not_Initialised;
