@@ -87,6 +87,8 @@ namespace Insight
 		float aspect = 0.0f;
 		void Renderpass::Create()
 		{
+			IS_PROFILE_FUNCTION();
+
 			if constexpr (DefaultModelToLoad == DefaultModels::Backpack)
 			{
 				TObjectPtr<Runtime::Model> model_backpack = Runtime::ResourceManager::Instance().LoadSync(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Survival_BackPack_2/obj/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));

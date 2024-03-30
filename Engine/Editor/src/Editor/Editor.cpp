@@ -45,6 +45,8 @@ namespace Insight
 
         void Editor::OnPreInit()
         {
+            IS_PROFILE_FUNCTION();
+
             static const std::string splashScreenBackGroundPath = EnginePaths::GetResourcePath() + "/Insight/cover.png";
             splashScreen.Init(860, 420);
             splashScreen.SetBackgroundImage(splashScreenBackGroundPath.c_str());
@@ -151,6 +153,8 @@ namespace Insight
 
         void Editor::OnPostInit()
         {
+            IS_PROFILE_FUNCTION();
+
             m_gameRenderpass = New<Graphics::Renderpass>();
             m_gameRenderpass->Create();
 
