@@ -232,6 +232,8 @@ namespace Insight
 
 		void RenderContext::ImGuiRelease()
 		{
+			IS_PROFILE_FUNCTION();
+
 			if (m_font_texture)
 			{
 				Renderer::FreeTexture(m_font_texture);
@@ -407,6 +409,8 @@ namespace Insight
 
 		void RenderContext::StopRenderThread()
 		{
+			IS_PROFILE_FUNCTION();
+
 			if (m_desc.MultithreadContext
 				&& m_renderThreadId != std::thread::id())
 			{

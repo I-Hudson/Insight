@@ -325,72 +325,40 @@ namespace Insight
     std::string FileSystem::GetRelativePath(std::string_view path, std::string_view basePath)
     {
 #if 0
-        IS_PROFILE_SCOPE("weakly_canonical");
-        std::string _Weakly_canonical_path = FileSystem::IsAbsolutePath(path) ? std::string(path) : _STD filesystem::weakly_canonical(path).string();
-        std::string _Weakly_canonical_base = FileSystem::IsAbsolutePath(basePath) ? std::string(basePath) : _STD filesystem::weakly_canonical(basePath).string();;
-        PathToUnix(_Weakly_canonical_path);
-        PathToUnix(_Weakly_canonical_base);
-
-        std::vector<std::string> _Weakly_canonical_path_split;
+        if (path == basePath)
         {
-            IS_PROFILE_SCOPE("fullPath split");
+            return "";
+        }
 
-            _Weakly_canonical_path_split = SplitString(_Weakly_canonical_path, '/');
-        }
-        std::vector<std::string> _Weakly_canonical_base_split;
+        std::vector<std::string_view> pathSplit = SplitString(path, '/');
+        std::vector<std::string_view> basePathSplit = SplitString(basePath, '/');
+
+        u32 pathIdx = 0;
+        u32 basePathIdx = 0;
+
+        while (pathIdx < pathSplit.size()
+            && basePathIdx < basePathSplit.size()
+            && pathSplit[pathIdx] == basePathSplit[basePathIdx])
         {
-            IS_PROFILE_SCOPE("fullBasePath split");
-            _Weakly_canonical_base_split = SplitString(_Weakly_canonical_base, '/');
+            ++pathIdx;
+            ++basePathIdx;
         }
-        
-        const u32 shortestPathSize = _Weakly_canonical_path_split.size() < _Weakly_canonical_base_split.size() 
-            ? _Weakly_canonical_path_split.size() : _Weakly_canonical_base_split.size();
-        bool foundSplitInPath = false;
-        // Find our common paths
+
         std::string result;
-        {
-            for (size_t i = 0; i < shortestPathSize; ++i)
-            {
-                if (_Weakly_canonical_path_split[i] != _Weakly_canonical_base_split[i])
-                {
-                    foundSplitInPath = true;
-                    if (i < _Weakly_canonical_base_split.size())
-                    {
-                        const u32 diffDirs = _Weakly_canonical_base_split.size() - i;
-                        for (size_t diffDirsIdx = 0; diffDirsIdx < diffDirs; ++diffDirsIdx)
-                        {
-                            result += "../";
-                        }
-                    }
 
-                    if (_Weakly_canonical_path_split.size() > i)
-                    {
-                        for (size_t pathIdx = i; pathIdx < _Weakly_canonical_path_split.size(); ++pathIdx)
-                        {
-                            result += _Weakly_canonical_path_split[i];
-                        }
-                    }
-                    break;
-                }
-            }
-        }
-
-        if (!foundSplitInPath)
+        if (basePathIdx < basePathSplit.size())
         {
-            const u32 pathDifferenceSize = _Weakly_canonical_base_split.size() - _Weakly_canonical_path_split.size();
-            for (size_t idx = 0; idx < pathDifferenceSize; ++idx)
+            while (basePathIdx < basePathSplit.size())
             {
                 result += "../";
+                ++basePathIdx;
             }
         }
 
-        if (!result.empty() && result.back() == '/')
+        while (pathIdx < pathSplit.size())
         {
-            //result.pop_back();
-        }
-        else if (result.empty())
-        {
-            result += ".";
+            result += pathSplit[pathIdx];
+            ++pathIdx;
         }
 
         return result;

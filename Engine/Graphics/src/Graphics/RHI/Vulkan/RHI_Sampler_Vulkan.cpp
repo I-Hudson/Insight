@@ -54,6 +54,8 @@ namespace Insight
 
 			void RHI_SamplerManager_Vulkan::ReleaseAll()
 			{
+				IS_PROFILE_FUNCTION();
+
 				for (auto& pair : m_samplers)
 				{
 					VkSampler sampler = static_cast<VkSampler>(pair.second->Resource);

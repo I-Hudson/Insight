@@ -51,6 +51,8 @@ namespace Insight
 
 			void RHI_SamplerManager_DX12::ReleaseAll()
 			{
+				IS_PROFILE_FUNCTION();
+
 				for (auto& pair : m_samplers)
 				{
 					RHI_Sampler_DX12* samplerDX12 = static_cast<RHI_Sampler_DX12*>(pair.second.Get());

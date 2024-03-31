@@ -553,8 +553,8 @@ public:
 	CONSTEXPR Ptr& operator=(T* other)					        { m_ptr = other; return *this; }
 
 	/// Compare
-	CONSTEXPR bool operator==(Ptr const& other) const			    { m_ptr = other.m_ptr; }
-	CONSTEXPR bool operator==(T* other) const					    { m_ptr = other; }
+	CONSTEXPR bool operator==(Ptr const& other) const			    { return m_ptr == other.m_ptr; }
+	CONSTEXPR bool operator==(T* other) const					    { return m_ptr == other; }
 	
 	CONSTEXPR operator bool() const								{ return Get() != nullptr; }
 	CONSTEXPR T* operator->() const                               { return m_ptr; }

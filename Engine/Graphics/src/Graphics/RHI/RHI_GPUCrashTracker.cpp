@@ -66,6 +66,7 @@ namespace Insight
 
 		void RHI_GPUCrashTrackerNvidiaAftermath::Destroy()
 		{
+			IS_PROFILE_FUNCTION();
 			if (m_initiaised)
 			{
 				AFTERMATH_CHECK_ERROR(GFSDK_Aftermath_DisableGpuCrashDumps());

@@ -150,7 +150,7 @@ namespace Insight::Editor
                     contentRelativePath = FileSystem::GetRelativePath(currentPath, Runtime::ProjectSystem::Instance().GetProjectInfo().GetContentPath());
                     //std::filesystem::relative(currentPath, Runtime::ProjectSystem::Instance().GetProjectInfo().GetContentPath());
                 }
-                if (contentRelativePath == ".")
+                if (contentRelativePath.empty())
                 {
                     contentFolderFound = true;
                 }

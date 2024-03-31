@@ -830,6 +830,8 @@ namespace Insight
 
 			void RenderContext_Vulkan::GpuWaitForIdle()
 			{
+				IS_PROFILE_FUNCTION();
+
 				vkDeviceWaitIdle(m_device);
 			}
 

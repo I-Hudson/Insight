@@ -223,6 +223,8 @@ namespace Insight
 
 		void Window::Destroy()
 		{
+			IS_PROFILE_FUNCTION();
+
 			m_title.resize(0);
 
 			if (m_glfwWindow)
@@ -263,6 +265,8 @@ namespace Insight
 
 		void Window::Rebuild()
 		{
+			IS_PROFILE_FUNCTION();
+
 			std::string oldTitle = m_title;
 			glm::ivec2 oldPosition = GetPosition();
 			glm::ivec2 oldSize = GetSize();

@@ -63,6 +63,8 @@ namespace Insight
 
 		void RHI_PipelineLayoutManager::Destroy()
 		{
+			IS_PROFILE_FUNCTION();
+
 			for (auto& pair : m_layouts)
 			{
 				pair.second->Release();

@@ -229,6 +229,8 @@ namespace Insight
 
 			void RenderContext_DX12::Destroy()
 			{
+				IS_PROFILE_FUNCTION();
+
 				StopRenderThread();
 				WaitForGpu();
 
@@ -272,6 +274,7 @@ namespace Insight
 
 				if (m_swapchain)
 				{
+					IS_PROFILE_SCOPE("Swapchain Release");
 					m_swapchainImages.clear();
 					m_swapchain.Reset();
 					m_swapchain = nullptr;
@@ -279,6 +282,7 @@ namespace Insight
 
 				if (m_d3d12MA)
 				{
+					IS_PROFILE_SCOPE("D3D12MA Release");
 					m_d3d12MA->Release();
 					m_d3d12MA = nullptr;
 				}
@@ -287,6 +291,7 @@ namespace Insight
 
 				if (m_device)
 				{
+					IS_PROFILE_SCOPE("Device Release");
 					m_device.Reset();
 					m_device = nullptr;
 				}
@@ -299,6 +304,7 @@ namespace Insight
 
 				if (m_factory)
 				{
+					IS_PROFILE_SCOPE("Factory Release");
 					m_factory.Reset();
 					m_factory = nullptr;
 				}
@@ -307,6 +313,7 @@ namespace Insight
 				ComPtr<IDXGIDebug1> dxgiDebug;
 				if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&dxgiDebug))))
 				{
+					IS_PROFILE_SCOPE("ReportLiveObjects");
 					dxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_FLAGS(DXGI_DEBUG_RLO_ALL));
 				}
 			}
@@ -330,6 +337,8 @@ namespace Insight
 
 			void RenderContext_DX12::DestroyImGui()
 			{
+				IS_PROFILE_FUNCTION();
+
 				ImGuiRelease();
 				ImGui_ImplDX12_Shutdown();
 			}
@@ -899,6 +908,8 @@ namespace Insight
 
 			void RenderContext_DX12::WaitForGpu()
 			{
+				IS_PROFILE_FUNCTION();
+
 				// Increment the fence value for the current frame.
 				//++m_submitFrameContexts.Get().SubmitFenceValue;
 				//u64 currentFenceValue = m_submitFrameContexts.Get().SubmitFence->GetCompletedValue();
