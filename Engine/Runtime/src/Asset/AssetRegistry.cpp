@@ -4,7 +4,7 @@
 #include "Asset/AssetPackage/AssetPackageFileSystem.h"
 #include "Asset/AssetPackage/AssetPackageZip.h"
 
-#include "Runtime/ProjectSystem.h"
+#include "Asset/Importers/ModelImporter.h"
 
 #include "Resource/Loaders/ResourceLoaderRegister.h"
 #include "Resource/ResourceDatabase.h"
@@ -24,6 +24,8 @@ namespace Insight::Runtime
 {
     void AssetRegistry::Initialise()
     {
+        m_importers.push_back(New<ModelImporter>());
+
         m_state = Core::SystemStates::Initialised;
     }
 
@@ -36,13 +38,16 @@ namespace Insight::Runtime
             Delete(package);
             package = nullptr;
         }
-        m_assetPackages.clear();
 
         for (auto& [path, assetInfo] : m_pathToAssetInfo)
         {
             Delete(assetInfo);
         }
-        m_pathToAssetInfo.clear();
+
+        for (IAssetImporter*& importer : m_importers)
+        {
+            Delete(importer);
+        }
 
         m_state = Core::SystemStates::Not_Initialised;
     }
@@ -247,7 +252,90 @@ namespace Insight::Runtime
 
     Ref<Asset> AssetRegistry::LoadAsset2(const std::string& path) const
     {
-        return Ref<Asset>();
+        /*
+            Order of things:
+            First get the correct asset importer for the data being loaded. Do this before loading the data
+            so we don't read from disk, then just discard the data, saving on IO processing and remove possible not needed
+            newing and deleteing from vector creation.
+
+            Then check that we have a valid AssetInfo for this path.
+
+            If we have a valid importer and valid AssetInfo then we can load the byte data from disk.
+            // TODO When loading data maybe the importer should be in charge as then it might not have to load the whole contents 
+            of the file into a single buffer but could seek and only load the parts in wants at only one point in time.
+        */
+
+        const IAssetImporter* importer = nullptr;
+        std::string_view extension = FileSystem::GetExtension(path);
+        for (const IAssetImporter* assetImporter : m_importers)
+        {
+            if (assetImporter && assetImporter->IsValidImporterForFileExtension(extension.data()))
+            {
+                importer = assetImporter;
+                break;
+            }
+        }
+        if (importer == nullptr)
+        {
+            return Ref<Asset>();
+        }
+
+        const AssetInfo* assetInfo = GetAssetInfo(path);
+        if (assetInfo == nullptr)
+        {
+            return Ref<Asset>();
+        }
+
+        std::vector<u8> assetData = LoadAssetData(path);
+        if (assetData.empty())
+        {
+            return Ref<Asset>();
+        }
+
+        Ref<Asset> asset = importer->Import(assetInfo, assetData);
+        return asset;
+    }
+
+    const AssetInfo* AssetRegistry::GetAssetInfo(const std::string& path) const
+    {
+#define GET_ASSET_INFO_DIRECT_FROM_ASSET_PACKAGE
+#ifdef GET_ASSET_INFO_DIRECT_FROM_ASSET_PACKAGE
+        for (size_t i = 0; i < m_assetPackages.size(); ++i)
+        {
+            const AssetInfo* assetInfo = m_assetPackages[i]->GetAsset(path);
+            if (assetInfo != nullptr)
+            {
+                return assetInfo;
+            }
+        }
+#else
+        if (auto iter = m_pathToAssetInfo.find(std::string(path));
+            iter != m_pathToAssetInfo.end())
+        {
+            return iter->second;
+        }
+#endif
+#undef GET_ASSET_INFO_DIRECT_FROM_ASSET_PACKAGE
+        return nullptr;
+    }
+
+    std::vector<Byte> AssetRegistry::LoadAssetData(std::string_view path) const
+    {
+        std::string absPath = FileSystem::GetAbsolutePath(path);
+        const AssetInfo* info = GetAsset(absPath);
+        if (info && info->AssetPackage)
+        {
+            return info->AssetPackage->LoadAsset(absPath);
+        }
+        else
+        {
+            if (FileSystem::Exists(absPath))
+            {
+                return FileSystem::ReadFromFile(absPath);
+            }
+        }
+        IS_CORE_ERROR("[AssetRegistry::LoadAsset] Unable to load asset from path '{}'.", absPath.data());
+        return {};
     }
 
     std::vector<Byte> AssetRegistry::LoadAsset(std::string_view path) const

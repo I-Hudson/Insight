@@ -21,6 +21,7 @@ namespace Insight
     {
         class AssetUser;
         class IAssetPackage;
+        class IAssetImporter;
 
         /// @brief Manage all references to known assets on disk.
         class IS_RUNTIME AssetRegistry : public Core::Singleton<AssetRegistry>, public Core::ISystem
@@ -55,6 +56,10 @@ namespace Insight
             void DeserialiseAssetUser(AssetInfo* assetInfo, AssetUser* object) const;
 
             Ref<Asset> LoadAsset2(const std::string& path) const;
+            const AssetInfo* GetAssetInfo(const std::string& path) const;
+            std::vector<Byte> LoadAssetData(std::string_view path) const;
+
+
             DEPRECATED_MSG("Use 'Ref<Asset> LoadAsset'.")
             std::vector<Byte> LoadAsset(std::string_view path) const;
 
@@ -104,6 +109,7 @@ namespace Insight
             std::unordered_map<std::string, AssetInfo*> m_pathToAssetInfo;
 
             std::vector<IAssetPackage*> m_assetPackages;
+            std::vector<IAssetImporter*> m_importers;
 
             std::unordered_map<Core::GUID, std::unordered_set<const IObject*>> m_assetToObjects;
             mutable std::mutex m_assetToObjectGuid;

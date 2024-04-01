@@ -324,7 +324,7 @@ namespace Insight
 
     std::string FileSystem::GetRelativePath(std::string_view path, std::string_view basePath)
     {
-#if 0
+#if 1
         if (path == basePath)
         {
             return "";

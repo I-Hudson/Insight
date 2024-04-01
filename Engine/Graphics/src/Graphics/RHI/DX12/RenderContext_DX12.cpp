@@ -69,9 +69,9 @@ namespace Insight
 					{
 						if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&m_debugController))))
 						{
-							//m_debugController->EnableDebugLayer();
+							m_debugController->EnableDebugLayer();
 							/// Enable additional debug layers.
-							//dxgiFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
+							dxgiFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
 
 						}
 					}
