@@ -35,7 +35,7 @@ namespace Insight
 			constexpr int GetStride() { return sizeof(Vertex); }
 		};
 
-		struct VertexOptomised
+		struct IS_GRAPHICS VertexOptomised
 		{
 #define POS_BIT_MASK 0b1111'1111'1111'1111'0000'0000'0000'0000
 #define POS_BIT_SHIFT 16

@@ -6,6 +6,8 @@
 
 #include "Asset/Importers/ModelImporter.h"
 
+#include "Runtime/ProjectSystem.h"
+
 #include "Resource/Loaders/ResourceLoaderRegister.h"
 #include "Resource/ResourceDatabase.h"
 
@@ -250,7 +252,7 @@ namespace Insight::Runtime
         //object->SetAssetInfo(assetInfo);
     }
 
-    Ref<Asset> AssetRegistry::LoadAsset2(const std::string& path) const
+    Ref<Asset> AssetRegistry::LoadAsset2(std::string path) const
     {
         /*
             Order of things:
@@ -265,6 +267,8 @@ namespace Insight::Runtime
             of the file into a single buffer but could seek and only load the parts in wants at only one point in time.
         */
 
+        path = ValidatePath(path);
+
         const IAssetImporter* importer = nullptr;
         std::string_view extension = FileSystem::GetExtension(path);
         for (const IAssetImporter* assetImporter : m_importers)
@@ -277,22 +281,18 @@ namespace Insight::Runtime
         }
         if (importer == nullptr)
         {
+            IS_CORE_ERROR("[AssetRegistry::LoadAsset2] 'Importer' is nullptr for extension '{}'.", extension);
             return Ref<Asset>();
         }
 
         const AssetInfo* assetInfo = GetAssetInfo(path);
         if (assetInfo == nullptr)
         {
+            IS_CORE_ERROR("[AssetRegistry::LoadAsset2] Unable to get AssetInfo from path '{}'.", path);
             return Ref<Asset>();
         }
 
-        std::vector<u8> assetData = LoadAssetData(path);
-        if (assetData.empty())
-        {
-            return Ref<Asset>();
-        }
-
-        Ref<Asset> asset = importer->Import(assetInfo, assetData);
+        Ref<Asset> asset = importer->Import(assetInfo, path);
         return asset;
     }
 
@@ -630,5 +630,28 @@ namespace Insight::Runtime
             return false;
         }
         return true;
+    }
+
+    std::string AssetRegistry::ValidatePath(const std::string& path) const
+    {
+        if (path.empty())
+        {
+            return path;
+        }
+
+        if (FileSystem::IsAbsolutePath(path))
+        {
+            return path;
+        }
+        else
+        {
+            std::string newPath = ProjectSystem::Instance().GetProjectInfo().GetContentPath();
+            if (path.front() != '/')
+            {
+                newPath += '/';
+            }
+            newPath += path;
+            return newPath;
+        }
     }
 }

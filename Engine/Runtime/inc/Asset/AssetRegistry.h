@@ -55,7 +55,7 @@ namespace Insight
             void UpdateMetaData(AssetUser* object);
             void DeserialiseAssetUser(AssetInfo* assetInfo, AssetUser* object) const;
 
-            Ref<Asset> LoadAsset2(const std::string& path) const;
+            Ref<Asset> LoadAsset2(std::string path) const;
             const AssetInfo* GetAssetInfo(const std::string& path) const;
             std::vector<Byte> LoadAssetData(std::string_view path) const;
 
@@ -102,6 +102,8 @@ namespace Insight
             void LoadMetaData(AssetInfo* assetInfo);
 
             bool AssetInfoValidate(const AssetInfo* assetInfo) const;
+
+            std::string ValidatePath(const std::string& path) const;
 
         private:
             /// @brief Store all asset infos here, then give pointers to the packages which they are included in.

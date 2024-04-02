@@ -15,7 +15,7 @@ namespace Insight
             virtual ~IAssetImporter();
 
             bool IsValidImporterForFileExtension(const char* fileExtension) const;
-            virtual Ref<Asset> Import(const AssetInfo* assetInfo, const std::vector<u8>& data) const = 0;
+            virtual Ref<Asset> Import(const AssetInfo* assetInfo, const std::string_view path) const = 0;
 
         private:
             std::vector<const char*> m_validFileExtensions;
