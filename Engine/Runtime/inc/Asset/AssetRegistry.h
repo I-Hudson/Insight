@@ -10,6 +10,8 @@
 #include "Asset/AssetPackage/IAssetPackage.h"
 #include "Core/GUID.h"
 
+#include "Threading/SpinLock.h"
+
 #include <unordered_map>
 #include <mutex>
 
@@ -55,7 +57,7 @@ namespace Insight
             void UpdateMetaData(AssetUser* object);
             void DeserialiseAssetUser(AssetInfo* assetInfo, AssetUser* object) const;
 
-            Ref<Asset> LoadAsset2(std::string path) const;
+            Ref<Asset> LoadAsset2(std::string path);
             const AssetInfo* GetAssetInfo(const std::string& path) const;
             std::vector<Byte> LoadAssetData(std::string_view path) const;
 
@@ -111,7 +113,10 @@ namespace Insight
             std::unordered_map<std::string, AssetInfo*> m_pathToAssetInfo;
 
             std::vector<IAssetPackage*> m_assetPackages;
+
             std::vector<IAssetImporter*> m_importers;
+            Threading::SpinLock m_loadedAssetLock;
+            std::unordered_map<std::string, Ref<Asset>> m_loadedAssets;
 
             std::unordered_map<Core::GUID, std::unordered_set<const IObject*>> m_assetToObjects;
             mutable std::mutex m_assetToObjectGuid;

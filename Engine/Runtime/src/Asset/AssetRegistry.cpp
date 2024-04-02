@@ -19,6 +19,7 @@
 #include "Core/EnginePaths.h"
 #include "Core/Logger.h"
 #include "Core/Profiler.h"
+#include "Threading/ScopedLock.h"
 
 #include "Algorithm/Vector.h"
 
@@ -252,7 +253,7 @@ namespace Insight::Runtime
         //object->SetAssetInfo(assetInfo);
     }
 
-    Ref<Asset> AssetRegistry::LoadAsset2(std::string path) const
+    Ref<Asset> AssetRegistry::LoadAsset2(std::string path)
     {
         /*
             Order of things:
@@ -293,6 +294,10 @@ namespace Insight::Runtime
         }
 
         Ref<Asset> asset = importer->Import(assetInfo, path);
+        {
+            Threading::ScopedLock lock(m_loadedAssetLock);
+            m_loadedAssets[path] = asset;
+        }
         return asset;
     }
 

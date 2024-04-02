@@ -41,13 +41,13 @@ namespace Insight
             return m_pointer != nullptr;
         }
 
-        ReferencePtr operator=(const ReferencePtr& other) const
+        ReferencePtr operator=(const ReferencePtr& other)
         {
             ReferencePtr(other).Swap(*this);
             return *this;
         }
         template<typename TOther, std::enable_if_t<rp_is_convertible_v<TOther, T>, int> = 0>
-        ReferencePtr operator=(const ReferencePtr<TOther>& other) const
+        ReferencePtr operator=(const ReferencePtr<TOther>& other)
         {
             ReferencePtr<TOther>(other).Swap(*this);
             return *this;
@@ -96,7 +96,7 @@ namespace Insight
         }
 
         template<typename TOther>
-        void Swap(const ReferencePtr<TOther>& other)
+        void Swap(ReferencePtr<TOther>& other)
         {
             T* temp = m_pointer;
             m_pointer = other.m_pointer;
