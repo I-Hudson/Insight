@@ -270,6 +270,11 @@ namespace Insight::Runtime
             of the file into a single buffer but could seek and only load the parts in wants at only one point in time.
         */
 
+        if (path.empty())
+        {
+            return Ref<Asset>();
+        }
+
         path = ValidatePath(path);
 
         const IAssetImporter* importer = nullptr;
