@@ -5,6 +5,7 @@
 #include "Asset/AssetPackage/AssetPackageZip.h"
 
 #include "Asset/Importers/ModelImporter.h"
+#include "Asset/Importers/TextureImporter.h"
 
 #include "Runtime/ProjectSystem.h"
 
@@ -28,6 +29,7 @@ namespace Insight::Runtime
     void AssetRegistry::Initialise()
     {
         m_importers.push_back(New<ModelImporter>());
+        m_importers.push_back(New<TextureImporter>());
 
         m_state = Core::SystemStates::Initialised;
     }
@@ -326,6 +328,8 @@ namespace Insight::Runtime
 
     std::vector<Byte> AssetRegistry::LoadAssetData(std::string_view path) const
     {
+        IS_PROFILE_FUNCTION();
+
         std::string absPath = FileSystem::GetAbsolutePath(path);
         const AssetInfo* info = GetAsset(absPath);
         if (info && info->AssetPackage)

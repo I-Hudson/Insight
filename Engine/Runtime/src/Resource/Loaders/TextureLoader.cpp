@@ -9,7 +9,9 @@
 #include <stb_image.h>
 #include <stb_image_write.h>
 
+#ifndef QOI_IMPLEMENTATION
 #define QOI_IMPLEMENTATION
+#endif
 #include <qoi.h>
 
 namespace Insight::Runtime

@@ -46,11 +46,10 @@ namespace Insight
             }
 
             const u32 pixelFormatByteSize = PixelFormatExtensions::SizeInBytes(m_pixelFormat);
-            const u32 channels = pixelFormatByteSize / 4;
-            ASSERT(dataSize == GetWidth() * GetHeight() * GetDepth() * pixelFormatByteSize);
+            ASSERT(dataSize == GetWidth() * GetHeight() * GetDepth() * m_channels);
             m_rhiTexture = Renderer::CreateTexture();
             m_rhiTexture->SetName(m_assetInfo->FileName);
-            m_rhiTexture->LoadFromData((Byte*)data, GetWidth(), GetHeight(), GetDepth(), channels);
+            m_rhiTexture->LoadFromData((Byte*)data, GetWidth(), GetHeight(), GetDepth(), m_channels);
         }
 
         Graphics::RHI_Texture* TextureAsset::GetRHITexture() const

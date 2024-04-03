@@ -4,7 +4,8 @@
 #include "FileSystem/FileSystem.h"
 
 #include "Core/Logger.h"
-    
+#include "Core/Profiler.h"
+
 namespace Insight
 {
     namespace Runtime
@@ -20,6 +21,8 @@ namespace Insight
 
         std::vector<Byte> AssetPackageFileSystem::LoadInteral(const AssetInfo* assetInfo) const
         {
+            IS_PROFILE_FUNCTION();
+
             if (!assetInfo)
             {
                 return { };

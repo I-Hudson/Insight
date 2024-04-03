@@ -65,6 +65,8 @@ namespace Insight
             return referencePtr;
         }
 
+        T* operator->() { return m_pointer; }
+        const T* operator->() const { return m_pointer; }
         T* Ptr() { return m_pointer; }
         const T* Ptr() const { return m_pointer; }
 

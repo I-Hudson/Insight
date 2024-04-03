@@ -207,8 +207,9 @@ namespace Insight
 			}
 
 			{
-				IS_PROFILE_SCOPE("Process all mesh nodes");
 
+#ifdef THREADED_LOADING
+				IS_PROFILE_SCOPE("Process all mesh nodes - threaded");
 				std::vector<std::future<void>> processNodesFutures;
 				for (size_t i = 0; i < meshNodes.size(); ++i)
 				{
@@ -222,6 +223,13 @@ namespace Insight
 						processNodesFutures[processNodeFutureIdx].get();
 					}
 				}
+#else
+				IS_PROFILE_SCOPE("Process all mesh nodes");
+				for (size_t i = 0; i < meshNodes.size(); ++i)
+				{
+					ModelImporter::ProcessNode(meshNodes[i]);
+				}
+#endif
 			}
 
 			for (size_t i = 0; i < meshNodes.size(); ++i)

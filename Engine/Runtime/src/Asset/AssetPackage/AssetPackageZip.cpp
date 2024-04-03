@@ -5,6 +5,8 @@
 
 #include "Serialisation/Serialisers/BinarySerialiser.h"
 
+#include "Core/Profiler.h"
+
 namespace Insight
 {
     namespace Runtime
@@ -38,6 +40,8 @@ namespace Insight
 
         std::vector<Byte> AssetPackageZip::LoadInteral(const AssetInfo* assetInfo) const
         {
+            IS_PROFILE_FUNCTION();
+
             if (!assetInfo)
             {
                 return { };

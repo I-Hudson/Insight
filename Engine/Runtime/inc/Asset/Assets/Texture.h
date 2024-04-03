@@ -38,6 +38,7 @@ namespace Insight
             u32 m_width = 0;
             u32 m_height = 0;
             u32 m_depth = 0;
+            u32 m_channels = 0;
             PixelFormat m_pixelFormat = PixelFormat::Unknown;
             
             Graphics::RHI_Texture* m_rhiTexture = nullptr;
