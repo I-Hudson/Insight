@@ -7,38 +7,38 @@ namespace Insight
 {
     namespace Runtime
     {
-        Texture::Texture(const AssetInfo* assetInfo)
+        TextureAsset::TextureAsset(const AssetInfo* assetInfo)
             : Asset(assetInfo)
         {
 
         }
 
-        Texture::~Texture()
+        TextureAsset::~TextureAsset()
         {
 
         }
 
-        u32 Texture::GetWidth() const
+        u32 TextureAsset::GetWidth() const
         {
             return m_width;
         }
 
-        u32 Texture::GetHeight() const
+        u32 TextureAsset::GetHeight() const
         {
             return m_height;
         }
         
-        u32 Texture::GetDepth() const
+        u32 TextureAsset::GetDepth() const
         {
             return m_depth;
         }
         
-        PixelFormat Texture::GetFormat() const
+        PixelFormat TextureAsset::GetFormat() const
         {
             return m_pixelFormat;
         }
 
-        void Texture::SetTextureData(const void* data, const u64 dataSize)
+        void TextureAsset::SetTextureData(const void* data, const u64 dataSize)
         {
             if (m_rhiTexture)
             {
@@ -53,12 +53,12 @@ namespace Insight
             m_rhiTexture->LoadFromData((Byte*)data, GetWidth(), GetHeight(), GetDepth(), channels);
         }
 
-        Graphics::RHI_Texture* Texture::GetRHITexture() const
+        Graphics::RHI_Texture* TextureAsset::GetRHITexture() const
         {
             return m_rhiTexture;
         }
 
-        void Texture::OnUnload()
+        void TextureAsset::OnUnload()
         {
 
         }

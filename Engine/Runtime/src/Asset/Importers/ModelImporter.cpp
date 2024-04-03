@@ -1,6 +1,7 @@
 #include "Asset/Importers/ModelImporter.h"
 #include "Asset/AssetRegistry.h"
 #include "Asset/Assets/Model.h"
+#include "Asset/Assets/TExture.h"
 
 #include "Graphics/Vertex.h"
 
@@ -105,7 +106,7 @@ namespace Insight
 		class CustomAssimpIOSystem : public Assimp::DefaultIOSystem
 		{
 			/*
-				THis must use the C++ new and delete and not Insight's own New and Delete
+				This must use the C++ new and delete and not Insight's own New and Delete
 				as some loaders like gtlf uses shared_ptrs. Because of this if we use our own New
 				then we never call our own Delete so Insight doesn't know that a pointer has been deleted.
 			*/
@@ -191,6 +192,7 @@ namespace Insight
 				return Ref<Asset>();
 			}
 
+
 			Ref<ModelAsset> modelAsset = New<ModelAsset>(assetInfo);
 			modelAsset.Ptr()->m_assetState = AssetState::Loaded;
 
@@ -198,6 +200,10 @@ namespace Insight
 			{
 				IS_PROFILE_SCOPE("Get complete mesh hierarchy");
 				GetMeshHierarchy(scene, scene->mRootNode, nullptr, meshNodes);
+				for (size_t i = 0; i < meshNodes.size(); ++i)
+				{
+					meshNodes[i]->Directory = assetInfo->FilePath;
+				}
 			}
 
 			{
@@ -259,7 +265,11 @@ namespace Insight
 					IS_PROFILE_SCOPE("Mesh evaluated");
 					const aiMesh* aiMesh = aiScene->mMeshes[aiNode->mMeshes[i]];
 					ProcessMesh(aiScene, aiMesh, meshNode->Mesh);
-
+					if (aiScene->HasMaterials() && aiMesh->mMaterialIndex < aiScene->mNumMaterials)
+					{
+						meshNode->AssimpMaterial = aiScene->mMaterials[aiMesh->mMaterialIndex];
+						ProcessMaterial(meshNode);
+					}
 				}
 			}
 		}
@@ -349,6 +359,56 @@ namespace Insight
 					indices.push_back(face.mIndices[j]);
 				}
 			}
+		}
+
+		void ModelImporter::ProcessMaterial(MeshNode* meshNode) const
+		{
+			IS_PROFILE_FUNCTION();
+
+			const aiMaterial* aiMaterial = meshNode->AssimpMaterial;
+			ASSERT_MSG(aiMaterial, "[ModelImporter::ProcessMaterial] AssimpMaterial from MeshNode was nullptr. This shouldn't happen.");
+			const std::string materialname = aiMaterial->GetName().C_Str();
+
+			const std::string diffuseTexturePath = GetTexturePath(aiMaterial, meshNode->Directory, aiTextureType_BASE_COLOR, aiTextureType_DIFFUSE);
+			Ref<TextureAsset> diffuseTexture = AssetRegistry::Instance().LoadAsset2(diffuseTexturePath).As<TextureAsset>();
+
+			const std::string normalTexturePath = GetTexturePath(aiMaterial, meshNode->Directory, aiTextureType_NORMAL_CAMERA, aiTextureType_NORMALS);
+			Ref<TextureAsset> normalTexture = AssetRegistry::Instance().LoadAsset2(normalTexturePath).As<TextureAsset>();
+
+			aiColor4D colour(1.0f);
+			aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_DIFFUSE, &colour);
+
+			aiColor4D opacity(1.0f);
+			aiGetMaterialColor(aiMaterial, AI_MATKEY_OPACITY, &opacity);
+		}
+
+		std::string ModelImporter::GetTexturePath(const aiMaterial* aiMaterial, const std::string_view directory, const aiTextureType textureTypePBR, const aiTextureType textureTypeLegacy) const
+		{
+			aiTextureType textureType = aiTextureType_NONE;
+			if (aiMaterial->GetTextureCount(textureTypePBR) > 0)
+			{
+				textureType = textureTypePBR;
+			}
+			else if (aiMaterial->GetTextureCount(textureTypeLegacy) > 0)
+			{
+				textureType = textureTypeLegacy;
+			}
+
+			if (textureType == aiTextureType_NONE)
+			{
+				IS_CORE_ERROR("[ModelImporter::GetTexturePath] Unable to find PRB/Legacy textures for material '{}'.", aiMaterial->GetName().C_Str());
+				return std::string();
+			}
+
+			aiString texturePath;
+			aiMaterial->GetTexture(textureType, 0, &texturePath);
+			if (texturePath.length == 0)
+			{
+				IS_CORE_ERROR("[ModelImporter::GetTexturePath] Texture path for texture type '{}' was empty.", aiTextureTypeToString(textureType));
+				return std::string();
+			}
+
+			return std::string(directory) + "/" + texturePath.C_Str();
 		}
     }
 }

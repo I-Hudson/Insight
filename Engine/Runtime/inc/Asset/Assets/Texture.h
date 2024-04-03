@@ -15,11 +15,11 @@ namespace Insight
 
     namespace Runtime
     {
-        class Texture : public Asset
+        class TextureAsset : public Asset
         {
         public:
-            Texture(const AssetInfo* assetInfo);
-            virtual ~Texture() override;
+            TextureAsset(const AssetInfo* assetInfo);
+            virtual ~TextureAsset() override;
 
             u32 GetWidth() const;
             u32 GetHeight() const;
