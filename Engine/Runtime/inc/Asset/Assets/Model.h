@@ -41,8 +41,8 @@ namespace Insight::Runtime
         std::vector<Mesh*> m_meshes;
         std::vector<Material*> m_materials;
 
-        Graphics::RHI_Buffer* m_vertex_buffer;
-        Graphics::RHI_Buffer* m_index_buffer;
+        Graphics::RHI_Buffer* m_vertex_buffer = nullptr;
+        Graphics::RHI_Buffer* m_index_buffer = nullptr;
 
         friend class ModelImporter;
     };

@@ -53,9 +53,12 @@ namespace Insight::Runtime
             Threading::ScopedLock loadedAssetLock(m_loadedAssetLock);
             for (auto& [path, asset] : m_loadedAssets)
             {
+                ASSERT(asset);
                 asset->OnUnload();
             }
         }
+        m_loadedAssets.clear();
+
         for (IAssetImporter*& importer : m_importers)
         {
             Delete(importer);

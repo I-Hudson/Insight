@@ -62,7 +62,9 @@ namespace Insight
             if (m_rhiTexture)
             {
                 Renderer::FreeTexture(m_rhiTexture);
+                m_rhiTexture = nullptr;
             }
+            m_assetState = AssetState::Unloaded;
         }
     }
 }
