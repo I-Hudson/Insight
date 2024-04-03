@@ -39,12 +39,18 @@ namespace Insight
             void* textureBuffer = nullptr;
             int width, height, channels;
 
-            textureBuffer = stbi_load_from_memory(textureData.data(), static_cast<int>(textureData.size()), &width, &height, &channels, STBI_rgb_alpha);
+            {
+                IS_PROFILE_SCOPE("stbi_load_from_memory");
+                textureBuffer = stbi_load_from_memory(textureData.data(), static_cast<int>(textureData.size()), &width, &height, &channels, STBI_rgb_alpha);
+            }
             if (textureBuffer == nullptr)
             {
                 imageLoader = ImageLoader::qoi;
                 qoi_desc qoiDesc;
-                textureBuffer = qoi_decode(textureData.data(), static_cast<int>(textureData.size()), &qoiDesc, 4);
+                {
+                    IS_PROFILE_SCOPE("qoi_decode");
+                    textureBuffer = qoi_decode(textureData.data(), static_cast<int>(textureData.size()), &qoiDesc, 4);
+                }
                 width = qoiDesc.width;
                 height = qoiDesc.height;
                 channels = static_cast<int>(qoiDesc.channels);

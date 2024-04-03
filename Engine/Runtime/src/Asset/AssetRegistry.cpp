@@ -49,6 +49,13 @@ namespace Insight::Runtime
             Delete(assetInfo);
         }
 
+        {
+            Threading::ScopedLock loadedAssetLock(m_loadedAssetLock);
+            for (auto& [path, asset] : m_loadedAssets)
+            {
+                asset->OnUnload();
+            }
+        }
         for (IAssetImporter*& importer : m_importers)
         {
             Delete(importer);
@@ -276,6 +283,15 @@ namespace Insight::Runtime
         }
 
         path = ValidatePath(path);
+
+        {
+            Threading::ScopedLock lock(m_loadedAssetLock);
+            if (auto iter = m_loadedAssets.find(path);
+                iter != m_loadedAssets.end())
+            {
+                return iter->second;
+            }
+        }
 
         const IAssetImporter* importer = nullptr;
         std::string_view extension = FileSystem::GetExtension(path);

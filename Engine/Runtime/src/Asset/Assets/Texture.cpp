@@ -59,7 +59,10 @@ namespace Insight
 
         void TextureAsset::OnUnload()
         {
-
+            if (m_rhiTexture)
+            {
+                Renderer::FreeTexture(m_rhiTexture);
+            }
         }
     }
 }
