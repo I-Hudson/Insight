@@ -21,6 +21,8 @@
 
 #include <future>
 
+//#define THREADED_LOADING
+
 namespace Insight
 {
     namespace Runtime

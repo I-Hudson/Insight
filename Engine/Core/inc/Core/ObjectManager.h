@@ -4,6 +4,9 @@
 
 #include "Threading/SpinLock.h"
 
+#include <unordered_set>
+
+#define OBJECT_SORT_SET
 
 namespace Insight
 {
@@ -32,9 +35,13 @@ namespace Insight
         IObject* GetObject(const Core::GUID& guid) const;
 
     private:
+#ifdef OBJECT_SORT_SET
+        std::unordered_set<IObject*> m_objectItems;
+#else
         ObjectItem* m_objectItems = nullptr;
         u64 m_size = 0;
         u64 m_capacity = 0;
+#endif
         mutable Threading::SpinLock m_objectSpinLock;
     };
 }

@@ -2,6 +2,8 @@
 #include "Asset/Assets/Texture.h"
 #include "Asset/AssetRegistry.h"
 
+#include "FileSystem/FileSystem.h"
+
 #include "Core/Logger.h"
 #include "Core/Profiler.h"
 
@@ -43,6 +45,22 @@ namespace Insight
                 IS_PROFILE_SCOPE("stbi_load_from_memory");
                 textureBuffer = stbi_load_from_memory(textureData.data(), static_cast<int>(textureData.size()), &width, &height, &channels, STBI_rgb_alpha);
             }
+
+#if 0
+            {
+                IS_PROFILE_SCOPE("qoi_encode");
+                qoi_desc qoiDesc = {};
+                qoiDesc.width = width;
+                qoiDesc.height = height;
+                qoiDesc.channels = 4;
+                qoiDesc.colorspace = QOI_SRGB;
+
+                int outLength = -1;
+                void* qoiEncode = qoi_encode(textureBuffer, &qoiDesc, &outLength);
+                FileSystem::SaveToFile((Byte*)qoiEncode, outLength, std::string(path) + ".qoi", FileType::Binary, true);
+            }
+#endif
+
             if (textureBuffer == nullptr)
             {
                 imageLoader = ImageLoader::qoi;
