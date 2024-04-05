@@ -14,7 +14,7 @@ namespace Insight
 
 			u32 threadCount = std::thread::hardware_concurrency();
 			std::lock_guard lock(m_mutex);
-			m_threads.resize(threadCount);
+			m_threads.resize(0);
 			for (size_t i = 0; i < m_threads.size(); ++i)
 			{
 				m_threads.at(i).SetThreadIndex(static_cast<u8>(i));

@@ -89,7 +89,29 @@ namespace Insight
                     const Runtime::ProjectInfo& projectInfo = Runtime::ProjectSystem::Instance().GetProjectInfo();
 
                     Runtime::AssetRegistry::Instance().AddAssetsInFolder(projectInfo.GetContentPath(), m_projectAssetPackage, true, true);
-                    Runtime::ResourceManager::Instance().LoadResourcesInFolder(projectInfo.GetContentPath(), true);
+
+                    {
+                        for (auto path : std::filesystem::directory_iterator(projectInfo.GetContentPath() + "/Main.1_Sponza_/textures"))
+                        {
+                            if (path.path().extension() == ".png")
+                            {
+                                Runtime::AssetRegistry::Instance().LoadAsset2(path.path().string());
+                            }
+                        }
+                    }
+
+                    {
+                        for (auto path : std::filesystem::directory_iterator(projectInfo.GetContentPath() + "/Main.1_Sponza_/textures"))
+                        {
+                            if (path.path().extension() == ".qoi")
+                            {
+                                Runtime::AssetRegistry::Instance().LoadAsset2(path.path().string());
+                            }
+                        }
+                    }
+
+                    Ref<Runtime::Asset> a = Runtime::AssetRegistry::Instance().LoadAsset2("Main.1_Sponza_/NewSponza_Main_glTF_002.gltf");
+                    //Runtime::ResourceManager::Instance().LoadResourcesInFolder(projectInfo.GetContentPath(), true);
 
                     Runtime::AssetRegistry::Instance().SetDebugDirectories(projectInfo.GetIntermediatePath() + "/AssetMeta", projectInfo.GetContentPath());
                     Runtime::ResourceManager::Instance().SetDebugDirectories(projectInfo.GetIntermediatePath() + "/Meta", projectInfo.GetContentPath());
