@@ -12,9 +12,14 @@ call ..\..\vendor\premake\premake5.exe %vsVersion%
 
 if %msBuildType% == GOTO END
 
-SET vsDevCmd2022="C:\Program Files\Microsoft Visual Studio\2022\Preview\Common7\Tools\VsDevCmd.bat"
+SET vsDevCmd2022Preview="C:\Program Files\Microsoft Visual Studio\2022\Preview\Common7\Tools\VsDevCmd.bat"
+SET vsDevCmd2022="C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools\VsDevCmd.bat"
 SET vsDevCmd2019="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\Tools\VsDevCmd.bat"
 
+if exist %vsDevCmd2022Preview% ( 
+    call %vsDevCmd2022Preview%
+    GOTO MSBUILD
+    )
 if exist %vsDevCmd2022% ( 
     call %vsDevCmd2022%
     GOTO MSBUILD

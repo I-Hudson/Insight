@@ -42,15 +42,21 @@ function InsightVendorIncludes.AddIncludes(includeTable, prefix)
         do 
             includeTable[k] = prefix .. v 
     end
-    includeTable["vulkan"] = os.getenv("VULKAN_SDK") .. "/include/"
-
+    local VULKAN_SDK = os.getenv("VULKAN_SDK")
+    if not VULKAN_SDK == nil then
+        includeTable["vulkan"] = VULKAN_SDK .. "/include/"
+    end
 end
 
 function InsightVendorIncludes.AddIncludesToIncludeDirs(includeDirs)
     for k,v in pairs(VendorIncludes) 
         do includeDirs { v }
     end
-    includeDirs { os.getenv("VULKAN_SDK") .. "/include/" }
+    local VULKAN_SDK = os.getenv("VULKAN_SDK")
+    if not VULKAN_SDK == nil then
+        includeDirs { VULKAN_SDK .. "/include/" }
+    end
+   
 end
 
 return InsightVendorIncludes
