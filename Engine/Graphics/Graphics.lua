@@ -106,7 +106,6 @@ project "Insight_Graphics"
         links
         {
             "vulkan-1.lib",
-            "ffx_fsr2_api_vk_x64d.lib",
         }
     end
     
@@ -155,6 +154,13 @@ project "Insight_Graphics"
             "ffx_fsr2_api_x64d.lib",
             "ffx_fsr2_api_dx12_x64d.lib",
         }
+        if VULKAN_SDK == nil then
+        else
+            links
+            {
+                "ffx_fsr2_api_vk_x64d.lib",
+            }
+        end
 
     filter "configurations:Release"  
         defines { "NDEBUG" }    
@@ -164,12 +170,17 @@ project "Insight_Graphics"
             "glslang.lib",
             "MachineIndependent.lib",
             "GenericCodeGen.lib",
-            "OGLCompiler.lib",
             "OSDependent.lib",
             "tracy.lib",
             "assimp.lib",
 
             "ffx_fsr2_api_x64.lib",
-            "ffx_fsr2_api_vk_x64.lib",
             "ffx_fsr2_api_dx12_x64.lib",
         }
+        if VULKAN_SDK == nil then
+        else
+            links
+            {
+                "ffx_fsr2_api_vk_x64.lib",
+            }
+        end
