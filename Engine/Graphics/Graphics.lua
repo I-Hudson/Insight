@@ -101,7 +101,8 @@ project "Insight_Graphics"
         "%{LibDirs.vulkan}",
     }
 
-    if not VULKAN_SDK == nil then
+    if VULKAN_SDK == nil then
+    else
         links
         {
             "vulkan-1.lib",

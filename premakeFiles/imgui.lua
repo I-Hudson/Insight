@@ -64,7 +64,8 @@ project "ImGui"
 		"GLFW",
 	}
 
-	if not VULKAN_SDK == nil then
+	if VULKAN_SDK == nil then
+	else
 		files
 		{
 			folderDirImGui .. "backends/imgui_impl_vulkan.h",

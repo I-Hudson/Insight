@@ -23,7 +23,8 @@ LibDirs["deps_lib"] = "%{wks.location}deps/" .. outputdir .. "/lib/"
 LibDirs["deps_testing_lib"] = "%{wks.location}deps/Debug-windows-x86_64/lib/"
 
 LibDirs["imgui"] = "%{wks.location}vendor/imgui/" .. outputdir .. "ImGui/"
-if not VULKAN_SDK == nil then
+if VULKAN_SDK == nil then
+else
     LibDirs["vulkan"] = VULKAN_SDK .. "/lib/"
 end
 

@@ -42,7 +42,8 @@ LibDirs = {}
 LibDirs["glfw"] ="%{wks.location}/../../Vendor/glfw/lib"
 
 VULKAN_SDK = os.getenv("VULKAN_SDK")
-if not VULKAN_SDK == nil then
+if VULKAN_SDK == nil then
+else
     IncludeDirs["vulkan"] = VULKAN_SDK .. "/include/"
     LibDirs["vulkan"] = VULKAN_SDK .. "/lib/"
 end

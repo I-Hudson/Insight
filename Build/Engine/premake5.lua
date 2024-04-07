@@ -52,7 +52,8 @@ function tprint (tbl, indent)
   LibDirs["imgui"] = "%{wks.location}vendor/imgui/" .. outputdir .. "ImGui/"
   
   VULKAN_SDK = os.getenv("VULKAN_SDK")
-  if not VULKAN_SDK == nil then
+  if VULKAN_SDK == nil then
+  else
     LibDirs["vulkan"] = VULKAN_SDK .. "/lib/"
     end
 
@@ -194,7 +195,8 @@ workspace "Insight"
             "VK_USE_PLATFORM_WIN32_KHR",
         }
 
-        if not VULKAN_SDK == nil then 
+        if VULKAN_SDK == nil then
+        else
             defines
             {
                 "IS_VULKAN_ENABLED",
