@@ -146,8 +146,11 @@ namespace Insight
 			// For thread-safe access of GPU crash tracker state.
 			mutable std::mutex m_mutex;
 		};
+#endif
 	}
 }
+
+#ifdef IS_NVIDIA_AFTERMATH_ENABLED
 
 namespace std
 {

@@ -13,7 +13,7 @@
 
 #include "FileSystem/FileSystem.h"
 
-#include "dxc/dxcapi.h"
+#include "dxcapi.h"
 #include "spirv_reflect.h"
 
 #include <string>

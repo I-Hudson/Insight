@@ -20,9 +20,19 @@ project "Insight_Graphics"
     {
         "IS_EXPORT_GRAPHICS_DLL",
         "COMMAND_LIST_RENDER_BATCH",
-        "IS_NVIDIA_AFTERMATH_ENABLED",
     }
     
+    if os.rename("../../vendor/NVIDIA_Nsight_Aftermath_SDK", "../../vendor/NVIDIA_Nsight_Aftermath_SDK") then
+        defines
+        {
+            "IS_NVIDIA_AFTERMATH_ENABLED",
+        }
+        links
+        {
+            "GFSDK_Aftermath_Lib.x64.lib",
+        }
+    end
+
     includedirs
     {
         "inc",
@@ -96,7 +106,6 @@ project "Insight_Graphics"
         "dxguid.lib",
         "dxcompiler.lib",
         "meshoptimizer.lib",
-        "GFSDK_Aftermath_Lib.x64.lib",
     }
     
     libdirs

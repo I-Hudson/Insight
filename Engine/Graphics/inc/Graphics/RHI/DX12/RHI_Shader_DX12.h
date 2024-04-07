@@ -7,7 +7,7 @@
 #include <map>
 #include <array>
 
-#include "dxc/dxcapi.h"
+#include "dxcapi.h"
 
 namespace Insight
 {
