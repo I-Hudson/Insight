@@ -28,6 +28,6 @@ rem if not exist "%UNZIPLOC%" (
 (
     powershell -Command "Invoke-WebRequest %URL% -OutFile %ZIP%"
     ::call ../Tools/UnZip.bat "%UNZIPLOC%" "%ZIP%"
-    powershell Expand-Archive "%ZIP%" -DestinationPath "%UNZIPLOC%"
+    powershell Expand-Archive "%ZIP%" -DestinationPath "%UNZIPLOC%" -Force
     del /f /q "%ZIP%"
 )
