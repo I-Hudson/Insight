@@ -21,17 +21,6 @@ project "Insight_Graphics"
         "IS_EXPORT_GRAPHICS_DLL",
         "COMMAND_LIST_RENDER_BATCH",
     }
-    
-    if os.rename("../../vendor/NVIDIA_Nsight_Aftermath_SDK", "../../vendor/NVIDIA_Nsight_Aftermath_SDK") then
-        defines
-        {
-            "IS_NVIDIA_AFTERMATH_ENABLED",
-        }
-        links
-        {
-            "GFSDK_Aftermath_Lib.x64.lib",
-        }
-    end
 
     includedirs
     {
@@ -100,7 +89,6 @@ project "Insight_Graphics"
         "imgui.lib",
         "zip.lib",
 
-        "vulkan-1.lib",
         "D3d12.lib",
         "DXGI.lib",
         "dxguid.lib",
@@ -112,6 +100,24 @@ project "Insight_Graphics"
     {
         "%{LibDirs.vulkan}",
     }
+
+    if not VULKAN_SDK == nil then
+        links
+        {
+            "vulkan-1.lib",
+        }
+    end
+    
+    if os.rename("../../vendor/NVIDIA_Nsight_Aftermath_SDK", "../../vendor/NVIDIA_Nsight_Aftermath_SDK") then
+        defines
+        {
+            "IS_NVIDIA_AFTERMATH_ENABLED",
+        }
+        links
+        {
+            "GFSDK_Aftermath_Lib.x64.lib",
+        }
+    end
 
     filter { "kind:SharedLib or SharedLib" }
         postbuildcommands
