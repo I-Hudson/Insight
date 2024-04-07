@@ -106,6 +106,7 @@ project "Insight_Graphics"
         links
         {
             "vulkan-1.lib",
+            "ffx_fsr2_api_vk_x64d.lib",
         }
     end
     
@@ -143,9 +144,7 @@ project "Insight_Graphics"
             "GenericCodeGend.lib",
             "glslangd.lib",
             "glslang-default-resource-limitsd.lib",
-            "HLSLd.lib",
             "MachineIndependentd.lib",
-            "OGLCompilerd.lib",
             "OSDependentd.lib",
             "SPIRVd.lib",
             "SPIRV-Toolsd.lib",
@@ -154,7 +153,6 @@ project "Insight_Graphics"
             "assimpd.lib",
 
             "ffx_fsr2_api_x64d.lib",
-            "ffx_fsr2_api_vk_x64d.lib",
             "ffx_fsr2_api_dx12_x64d.lib",
         }
 

@@ -1,4 +1,4 @@
-@echo off
+rem @echo off
 @setlocal enableextensions
 @cd /d "%~dp0"
 
@@ -21,7 +21,7 @@ call :ValididateInput %MSBuildTypes% "%msBuildType%" "Invalid build type, valid 
 set MSConfigurationTypes="Debug Release"
 call :ValididateInput %MSConfigurationTypes% "%configuration%" "Invalid configuration type, valid configuration types are:"
 
-set MSPlatformTypes="win64"
+set MSPlatformTypes="win64, x64"
 call :ValididateInput %MSPlatformTypes% "%platform%" "Invalid platform type, valid platform types are:"
 
 SET vsDevCmd2022="C:\Program Files\Microsoft Visual Studio\2022\Preview\Common7\Tools\VsDevCmd.bat"

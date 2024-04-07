@@ -10,6 +10,32 @@ call :DOWNLOAD_AND_UNZIP https://www.nuget.org/api/v2/package/Microsoft.Windows.
 call :DOWNLOAD_AND_UNZIP https://github.com/microsoft/DirectXShaderCompiler/releases/download/v1.7.2212/dxc_2022_12_16.zip          %vendorPath%\DirectXShaderCompiler
 call :DOWNLOAD_AND_UNZIP https://github.com/glfw/glfw/releases/download/3.4/glfw-3.4.zip                                            %vendorPath%\glfw
 robocopy "%vendorPath%\glfw\glfw-3.4" "%vendorPath%\glfw" /E /MOV
+
+rem Genreate FSR2 projects and build them.
+cd "%vendorPath%\FidelityFX-FSR2\build"
+SET FSR2GenerateSolutions="0"
+if not exist "DX12" (
+    SET FSR2GenerateSolutions="1"
+)
+if not exist "VK" (
+    SET FSR2GenerateSolutions="1"
+)
+
+if %FSR2GenerateSolutions%=="1" (
+    echo Generating FSR2 solutions
+    call GenerateSolutions.bat
+
+    echo Buildiing FSR2 DX12 solutions
+    call ..\..\..\Build\Engine\Build_Solution.bat %vendorPath%\FidelityFX-FSR2\build\DX12\FSR2_Sample_DX12.sln vs2022 Build Release x64
+    call ..\..\..\Build\Engine\Build_Solution.bat %vendorPath%\FidelityFX-FSR2\build\DX12\FSR2_Sample_DX12.sln vs2022 Build Debug x64
+
+    echo Buildiing FSR2 Vulkan solutions
+    call ..\..\..\Build\Engine\Build_Solution.bat %vendorPath%\FidelityFX-FSR2\build\VK\FSR2_Sample_VK.sln vs2022 Build Release x64
+    call ..\..\..\Build\Engine\Build_Solution.bat %vendorPath%\FidelityFX-FSR2\build\VK\FSR2_Sample_VK.sln vs2022 Build Debug x64
+)
+
+rem Copy all downloaded and unziped lib/dll and built lib/dll into the deps folder. 
+cd "..\..\..\Build\Dependencies"
 call Copy_Vendor_Libs_To_Dependencies.bat
 
 pause
