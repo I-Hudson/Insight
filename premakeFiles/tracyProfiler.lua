@@ -65,9 +65,9 @@ project "tracyProfiler"
 
 	links
 	{
-		"brotlicommon-static.lib",
-		"brotlidec-static.lib",
-		"brotlienc-static.lib",
+		"brotlicommon.lib",
+		"brotlidec.lib",
+		"brotlienc.lib",
 		"capstone.lib",
 		"glfw3.lib",
 
@@ -90,7 +90,7 @@ project "tracyProfiler"
 	filter "configurations:Debug"
 		libdirs
 		{
-			folderDirTracy.. "vcpkg_installed/x64-windows-static/debug/lib"
+			folderDirTracy .. "vcpkg_installed/x64-windows-static/debug/lib"
 		}
 		links
 		{
