@@ -1,3 +1,5 @@
+local VULKAN_SDK = os.getenv("VULKAN_SDK")
+
 project "ImGui"
 	kind "StaticLib"
 	language "C++"
@@ -28,7 +30,6 @@ project "ImGui"
 		folderDirImGui .. "misc/cpp/imgui_stdlib.h",
 		folderDirImGui .. "backends/imgui_impl_glfw.h",
 		folderDirImGui .. "backends/imgui_impl_win32.h",
-		folderDirImGui .. "backends/imgui_impl_vulkan.h",
 		folderDirImGui .. "backends/imgui_impl_dx12.h",
 
 		folderDirImGui .. "imgui.cpp",
@@ -39,7 +40,6 @@ project "ImGui"
 		folderDirImGui .. "misc/cpp/imgui_stdlib.cpp",
 		folderDirImGui .. "backends/imgui_impl_glfw.cpp",
 		folderDirImGui .. "backends/imgui_impl_win32.cpp",
-		folderDirImGui .. "backends/imgui_impl_vulkan.cpp",
 		folderDirImGui .. "backends/imgui_impl_dx12.cpp",
 
 		folderDirImPlot .. "implot.h",
@@ -52,20 +52,40 @@ project "ImGui"
 	{
 		folderDirImGui .. "./",
 		"%{IncludeDirs.glfw}",
-		"%{IncludeDirs.vulkan}",
 	}
 
     libdirs
     {
         "%{LibDirs.glfw}",
-        "%{LibDirs.vulkan}",
     }
 
 	links 
 	{
 		"GLFW",
-		"vulkan-1",
 	}
+
+	if not VULKAN_SDK == nil then
+		files
+		{
+			folderDirImGui .. "backends/imgui_impl_vulkan.h",
+			folderDirImGui .. "backends/imgui_impl_vulkan.cpp",
+		}
+
+		includedirs
+		{
+			"%{IncludeDirs.vulkan}",
+		}
+
+		libdirs
+		{
+			"%{LibDirs.vulkan}",
+		}
+	
+		links 
+		{
+			"vulkan-1",
+		}
+	end
 
 	postbuildcommands
     {

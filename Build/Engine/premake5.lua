@@ -51,8 +51,8 @@ function tprint (tbl, indent)
   
   LibDirs["imgui"] = "%{wks.location}vendor/imgui/" .. outputdir .. "ImGui/"
   
+  VULKAN_SDK = os.getenv("VULKAN_SDK")
   if not VULKAN_SDK == nil then
-    VULKAN_SDK = os.getenv("VULKAN_SDK")
     LibDirs["vulkan"] = VULKAN_SDK .. "/lib/"
     end
 
