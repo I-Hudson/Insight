@@ -1408,6 +1408,7 @@ enum aiComponent
 
 #endif // !! AI_CONFIG_H_INC
 ]])
+os.rename("config.h", folderDirAssimp .. "include/assimp/config.h")
 --renameAndDeleteFile("revision.h", folderDirAssimp .. "include/revision.h")
 end
 

@@ -34,15 +34,18 @@ outputdir_obj = "../bin-int/" .. outputdir
 outputdir_debug = "../bin/" .. outputdir
 output_deps = "../../../deps/".. outputdir
 
-VULKAN_SDK = os.getenv("VULKAN_SDK")
 
 IncludeDirs = {}
 IncludeDirs["glfw"] = "%{wks.location}/../../vendor/glfw/include"
-IncludeDirs["vulkan"] = VULKAN_SDK .. "/include/"
 
 LibDirs = {}
-LibDirs["vulkan"] = VULKAN_SDK .. "/lib/"
 LibDirs["glfw"] ="%{wks.location}/../../Vendor/glfw/lib"
+
+VULKAN_SDK = os.getenv("VULKAN_SDK")
+if not VULKAN_SDK == nil then
+    IncludeDirs["vulkan"] = VULKAN_SDK .. "/include/"
+    LibDirs["vulkan"] = VULKAN_SDK .. "/lib/"
+end
 
 group "Dependices"
         include "../../premakeFiles/assimp.lua"

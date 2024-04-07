@@ -41,18 +41,20 @@ function tprint (tbl, indent)
     return toprint
   end
 
-VULKAN_SDK = os.getenv("VULKAN_SDK")
-
-IncludeDirs = {}
-InsightEngineIncludes.AddIncludes(IncludeDirs, "%{wks.location}")
-InsightVendorIncludes.AddIncludes(IncludeDirs, "%{wks.location}")
-
-LibDirs = {}
-LibDirs["deps_lib"] = "%{wks.location}deps/" .. outputdir .. "/lib/"
-LibDirs["deps_testing_lib"] = "%{wks.location}deps/Debug-windows-x86_64/lib/"
-
-LibDirs["imgui"] = "%{wks.location}vendor/imgui/" .. outputdir .. "ImGui/"
-LibDirs["vulkan"] = VULKAN_SDK .. "/lib/"
+  IncludeDirs = {}
+  InsightEngineIncludes.AddIncludes(IncludeDirs, "%{wks.location}")
+  InsightVendorIncludes.AddIncludes(IncludeDirs, "%{wks.location}")
+  
+  LibDirs = {}
+  LibDirs["deps_lib"] = "%{wks.location}deps/" .. outputdir .. "/lib/"
+  LibDirs["deps_testing_lib"] = "%{wks.location}deps/Debug-windows-x86_64/lib/"
+  
+  LibDirs["imgui"] = "%{wks.location}vendor/imgui/" .. outputdir .. "ImGui/"
+  
+  if not VULKAN_SDK == nil then
+    VULKAN_SDK = os.getenv("VULKAN_SDK")
+    LibDirs["vulkan"] = VULKAN_SDK .. "/lib/"
+    end
 
 workspace "Insight"
     architecture "x64"
@@ -182,7 +184,6 @@ workspace "Insight"
             "IS_PLATFORM_WIN32",
             --"IS_MATHS_DIRECTX_MATHS",
             "IS_DX12_ENABLED",
-            "IS_VULKAN_ENABLED",
             "IS_CPP_WINRT",
 
             "USE_PIX",
@@ -192,6 +193,14 @@ workspace "Insight"
             
             "VK_USE_PLATFORM_WIN32_KHR",
         }
+
+        if not VULKAN_SDK == nil then 
+            defines
+            {
+                "IS_VULKAN_ENABLED",
+            }
+        end
+
         links
         {
             "WinPixEventRuntime.lib",
