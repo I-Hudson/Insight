@@ -75,7 +75,7 @@ workspace "Insight"
     platforms 
     { 
         "Win64",
-        "UWP",
+        --"UWP",
     }
 
     flags
