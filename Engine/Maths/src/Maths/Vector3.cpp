@@ -2,6 +2,10 @@
 #include "Maths/MathsUtils.h"
 #include <limits>
 
+#if defined(IS_MATHS_GLM)
+#include <glm/gtx/norm.hpp>
+#endif 
+
 namespace Insight
 {
 	namespace Maths
@@ -14,20 +18,28 @@ namespace Insight
 		Vector3::Vector3()
 #ifdef IS_MATHS_DIRECTX_MATHS
 			: xmvector(DirectX::XMVectorReplicate(0.0f))
+#elif defined(IS_MATHS_GLM)
+			: vec3(glm::vec3(0, 0, 0))
 #else
 			: x(0.0f), y(0.0f), z(0.0f)
 #endif
 		{ }
+		
 		Vector3::Vector3(float x, float y, float z)
 #ifdef IS_MATHS_DIRECTX_MATHS
 			: xmvector(DirectX::XMVectorSet(x, y, z, 0.0f))
+#elif defined(IS_MATHS_GLM)
+			: vec3(glm::vec3(x, y, z))
 #else
 			: x(x), y(y), z(z)
 #endif
 		{ }
+		
 		Vector3::Vector3(float scalar)
 #ifdef IS_MATHS_DIRECTX_MATHS
 			: xmvector(DirectX::XMVectorSet(scalar,scalar, scalar, 0.0f))
+#elif defined(IS_MATHS_GLM)
+			: vec3(glm::vec3(scalar, scalar, scalar))
 #else
 			: x(scalar), y(scalar), z(scalar)
 #endif
@@ -36,13 +48,18 @@ namespace Insight
 		Vector3::Vector3(const Vector3& other)
 #ifdef IS_MATHS_DIRECTX_MATHS
 			: xmvector(other.xmvector)
+#elif defined(IS_MATHS_GLM)
+			: vec3(glm::vec3(other.vec3))
 #else
 			: x(other.x), y(other.y), z(other.z)
 #endif
 		{ }
+		
 		Vector3::Vector3(Vector3&& other)
 #ifdef IS_MATHS_DIRECTX_MATHS
 			: xmvector(other.xmvector)
+#elif defined(IS_MATHS_GLM)
+			: vec3(glm::vec3(other.vec3))
 #else
 			: x(other.x), y(other.y), z(other.z)
 #endif
@@ -56,9 +73,15 @@ namespace Insight
 		{ }
 		Vector3::Vector3(DirectX::XMVECTOR&& other)
 			: xmvector(other)
-		{
-			other = DirectX::XMVectorReplicate(0.0f);
-		}
+		{ }
+#endif
+#if defined(IS_MATHS_GLM) || defined(IS_TESTING)
+		Vector3::Vector3(const glm::vec3& other)
+			: vec3(other)
+		{ }
+		Vector3::Vector3(glm::vec3&& other)
+			: vec3(other)
+		{ }
 #endif
 
 		Vector3::~Vector3()
@@ -68,6 +91,8 @@ namespace Insight
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
 			return DirectX::XMVectorGetX(DirectX::XMVector3Length(xmvector));
+#elif defined(IS_MATHS_GLM)
+			return glm::length(vec3);
 #else
 			return static_cast<float>(sqrt(LengthSquared()));
 #endif
@@ -76,6 +101,8 @@ namespace Insight
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
 			return DirectX::XMVectorGetX(DirectX::XMVector3LengthSq(xmvector));
+#elif defined(IS_MATHS_GLM)
+			return glm::length2(vec3);
 #else
 			return (x * x) + (y * y) + (z * z);
 #endif
@@ -85,6 +112,8 @@ namespace Insight
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
 			 xmvector = DirectX::XMVector3Normalize(xmvector);
+#elif defined(IS_MATHS_GLM)
+			vec3 = glm::normalize(vec3);
 #else
 			const float length_squared = LengthSquared();
 			if (!(length_squared == 1.0f) && length_squared > 0.0f)
@@ -100,6 +129,8 @@ namespace Insight
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
 			return Vector3(DirectX::XMVector3Normalize(xmvector));
+#elif defined(IS_MATHS_GLM)
+			return glm::normalize(vec3);
 #else
 			const auto length_squared = LengthSquared();
 			if (!(length_squared == 1.0f) && length_squared > 0.0f)
@@ -118,6 +149,8 @@ namespace Insight
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
 			return DirectX::XMVectorGetX(DirectX::XMVector3Dot(xmvector, other.xmvector));
+#elif defined(IS_MATHS_GLM)
+			return glm::dot(vec3, other.vec3);
 #else
 			return (x * other.x) + (y * other.y) + (z * other.z);
 #endif
@@ -145,6 +178,8 @@ namespace Insight
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
 			return DirectX::XMVectorGetX(DirectX::XMVectorEqual(xmvector, other.xmvector));
+#elif defined(IS_MATHS_GLM)
+			return vec3 == other.vec3;
 #else
 			return Equal(other, std::numeric_limits<float>::epsilon());
 #endif
@@ -168,6 +203,8 @@ namespace Insight
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
 			xmvector = DirectX::XMVectorSet(scalar, scalar, scalar, 0.0f);
+#elif defined(IS_MATHS_GLM)
+			vec3 = glm::vec3(scalar);
 #else
 			x = scalar;
 			y = scalar;
@@ -179,6 +216,8 @@ namespace Insight
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
 			xmvector = other.xmvector;
+#elif defined(IS_MATHS_GLM)
+			vec3 = other.vec3;
 #else
 			x = other.x;
 			y = other.y;
@@ -191,6 +230,8 @@ namespace Insight
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
 			return Vector3(DirectX::XMVectorMultiply(xmvector, DirectX::XMVectorSet(scalar, scalar, scalar, 0.0f)));
+#elif defined(IS_MATHS_GLM)
+			return Vector3(vec3 * scalar);
 #else
 			return Vector3(x * scalar, y * scalar, z * scalar);
 #endif
@@ -199,6 +240,8 @@ namespace Insight
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
 			return Vector3(DirectX::XMVectorMultiply(xmvector, other.xmvector));
+#elif defined(IS_MATHS_GLM)
+			return Vector3(vec3 * other.vec3);
 #else
 			return Vector3(x * other.x, y * other.y, z * other.z);
 #endif
@@ -208,6 +251,8 @@ namespace Insight
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
 			return Vector3(DirectX::XMVectorDivide(xmvector, DirectX::XMVectorSet(scalar, scalar, scalar, 0.0f)));
+#elif defined(IS_MATHS_GLM)
+			return Vector3(vec3 / scalar);
 #else
 			return Vector3(x / scalar, y / scalar, z / scalar);
 #endif
@@ -216,6 +261,8 @@ namespace Insight
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
 			return Vector3(DirectX::XMVectorDivide(xmvector, other.xmvector));
+#elif defined(IS_MATHS_GLM)
+			return Vector3(vec3 / other.vec3);
 #else
 			return Vector3(x / other.x, y / other.y, z / other.z);
 #endif
@@ -225,6 +272,8 @@ namespace Insight
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
 			return Vector3(DirectX::XMVectorAdd(xmvector, DirectX::XMVectorSet(scalar, scalar, scalar, 0.0f)));
+#elif defined(IS_MATHS_GLM)
+			return Vector3(vec3 + scalar);
 #else
 			return Vector3(x + scalar, y + scalar, z + scalar);
 #endif
@@ -233,6 +282,8 @@ namespace Insight
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
 			return Vector3(DirectX::XMVectorAdd(xmvector, other.xmvector));
+#elif defined(IS_MATHS_GLM)
+			return Vector3(vec3 + other.vec3);
 #else
 			return Vector3(x + other.x, y + other.y, z + other.z);
 #endif
@@ -242,6 +293,8 @@ namespace Insight
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
 			return Vector3(DirectX::XMVectorSubtract(xmvector, DirectX::XMVectorSet(scalar, scalar, scalar, 0.0f)));
+#elif defined(IS_MATHS_GLM)
+			return Vector3(vec3 - scalar);
 #else
 			return Vector3(x - scalar, y - scalar, z - scalar);
 #endif
@@ -250,6 +303,8 @@ namespace Insight
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
 			return Vector3(DirectX::XMVectorSubtract(xmvector, other.xmvector));
+#elif defined(IS_MATHS_GLM)
+			return Vector3(vec3 - other.vec3);
 #else
 			return Vector3(x - other.x, y - other.y, z - other.z);
 #endif
@@ -302,6 +357,8 @@ namespace Insight
 }
 
 #ifdef IS_TESTING
+#include <glm/glm.hpp>
+#include <glm/gtx/norm.hpp>
 #include "doctest.h"
 namespace test
 {
@@ -319,125 +376,290 @@ namespace test
 
 		TEST_CASE("Constructors")
 		{
-			Vector3 vec3 = Vector3();
-			CHECK(vec3.x == 0.0f);
-			CHECK(vec3.y == 0.0f);
-			CHECK(vec3.z == 0.0f);
+			float x1 = 0.0f;
+			float y1 = 0.0f;
+			float z1 = 0.0f;
+			Vector3 vec = Vector3();
+			CHECK(vec.x == x1);
+			CHECK(vec.y == y1);
+			CHECK(vec.z == z1);
 
-			vec3 = Vector3(24.8f, 64.9f, 7816.f);
-			CHECK(vec3.x == 24.8f);
-			CHECK(vec3.y == 64.9f);
-			CHECK(vec3.z == 7816.f);
+			x1 = 24.8f;
+			y1 = 64.9f;
+			z1 = 256.5f;
+			vec = Vector3(x1, y1, z1);
+			CHECK(vec.x == x1);
+			CHECK(vec.y == y1);
+			CHECK(vec.z == z1);
 
-			vec3 = Vector3(117.117f);
-			CHECK(vec3.x == 117.117f);
-			CHECK(vec3.y == 117.117f);
-			CHECK(vec3.z == 117.117f);
+			x1 = 117.117f;
+			vec = Vector3(x1);
+			CHECK(vec.x == x1);
+			CHECK(vec.y == x1);
+			CHECK(vec.z == x1);
+
+#ifdef IS_MATHS_DIRECTX_MATHS
+			CHECK(x1 == DirectX::XMVectorGetX(vec.xmvector));
+			CHECK(x1 == DirectX::XMVectorGetY(vec.xmvector));
+			CHECK(x1 == DirectX::XMVectorGetZ(vec.xmvector));
+#elif defined(IS_MATHS_GLM)
+			CHECK(x1 == vec.vec3.x);
+			CHECK(x1 == vec.vec3.y);
+			CHECK(x1 == vec.vec3.z);
+#endif
 		}
 
 		TEST_CASE("Length")
 		{
-			Vector3 one = Vector3(10.0f, 5.0f, 25.0f);
-			CHECK(Equals(one.Length(), 27.386f, 0.001f));
-			CHECK(Equals(one.LengthSquared(), 750.0f, 0.001f));
+			const float x1 = 747;
+			const float y1 = 273;
+			const float z1 = 273;
+			glm::vec3 glmVec1 = glm::vec3(x1, y1, z1);
+			Vector3 one = Vector3(x1, y1, z1);
+
+			CHECK(Equals(one.Length(), glm::length(glmVec1), 0.001f));
+			CHECK(Equals(one.LengthSquared(), glm::length2(glmVec1), 0.001f));
 		}
 
 		TEST_CASE("Normalise")
 		{
-			Vector3 one = Vector3(10.0f, 5.0f, 25.0f);
-			CHECK(one.Normalised().Equal(Vector3(0.37f, 0.18f, 0.91f), 0.01f));
+			const float x1 = 9809;
+			const float y1 = 8156;
+			const float z1 = 4834;
+			glm::vec3 glmVec1 = glm::vec3(x1, y1, z1);
+			Vector3 one = Vector3(x1, y1, z1);
+
+			CHECK(one.Normalised() == Vector3(glm::normalize(glmVec1)));
 			one.Normalise();
-			CHECK(one.Equal(Vector3(0.37f, 0.18f, 0.91f), 0.01f));
+			CHECK(one == glm::normalize(glmVec1));
 		}
 
 		TEST_CASE("Dot")
 		{
-			Vector3 one = Vector3(1.0, 0.0f, 0.0f);
-			Vector3 two = Vector3(0.0f, 1.0f, 0.0f);
-			CHECK(one.Dot(two) == 0.0f);
+			const float x1 = 0.2f;
+			const float y1 = 0.7f;
+			const float z1 = 0.4f;
+			
+			const float x2 = -0.5f;
+			const float y2 = 0.1f;
+			const float z2 = -0.15f;
 
-			two = Vector3(-1.0f, 0.0f, 0.0f);
-			CHECK(one.Dot(two) == -1.0f);
+			glm::vec3 glmVec1 = glm::vec3(x1, y1, z1);
+			glm::vec3 glmVec2 = glm::vec3(x2, y2, z2);
+			Vector3 one = Vector3(x1, y1, z1);
+			Vector3 two = Vector3(x2, y2, z2);
+
+			CHECK(Equals(one.Dot(two), glm::dot(glmVec1, glmVec2), 0.001f));
+
+			const float x3 = -1.0f;
+			const float y3 = 0.0f;
+			const float z3 = 0.0f;
+			glmVec2 = glm::vec3(-x3, y3, z3);
+			two = Vector3(-x3, y3, z3);
+			CHECK(Equals(one.Dot(two), glm::dot(glmVec1, glmVec2), 0.001f));
+
+			const float x4 = -6;
+			const float y4 = 8;
+			const float z4 = -5;
+
+			const float x5 = 5;
+			const float y5 = 12;
+			const float z5 = 7;
+
+			glmVec1 = glm::vec3(x4, y4, z4);
+			glmVec2 = glm::vec3(x5, y5, z5);
+			one = Vector3(x4, y4, z4);
+			two = Vector3(x5, y5, z5);
+			float result = one.Dot(two);
+			CHECK(Equals(result, glm::dot(glmVec1, glmVec2), 0.001f));
 		}
 
 		TEST_CASE("Access Operators")
 		{
-			Vector3 one = Vector3(10.0f, 5.0f, 75.24f);
-			CHECK(Equals(one[0], 10.0f, 0.001f));
-			CHECK(Equals(one[1], 5.0f, 0.001f));
-			CHECK(Equals(one[2], 75.24f, 0.001f));
+			const float x1 = 10.0f;
+			const float y1 = 5.0f;
+			const float z1 = -45.0f;
 
-			one[0] = 50.0f;
-			one[1] = 100.0f;
-			one[2] = 69.78f;
-			CHECK(Equals(one[0], 50.0f, 0.001f));
-			CHECK(Equals(one[1], 100.0f, 0.001f));
-			CHECK(Equals(one[2], 69.78f, 0.001f));
+			Vector3 one = Vector3(x1, y1, z1);
+			CHECK(Equals(one[0], x1, 0.001f));
+			CHECK(Equals(one[1], y1, 0.001f));
+			CHECK(Equals(one[2], z1, 0.001f));
+
+			const float x2 = 6589.0f;
+			const float y2 = -457234.0f;
+			const float z2 = 865473.0f;
+			one[0] = x2;
+			one[1] = y2;
+			one[2] = z2;
+			CHECK(Equals(one[0], x2, 0.001f));
+			CHECK(Equals(one[1], y2, 0.001f));
+			CHECK(Equals(one[2], z2, 0.001f));
 		}
 
 		TEST_CASE("Equal")
 		{
-			Vector3 one = Vector3(10.0f, 5.0f, 25.0f);
-			Vector3 two = Vector3(10.0f, 5.0f, 25.0f);
+			const float x1 = 10.0f;
+			const float y1 = 5.0f;
+			const float z1 = -45.0f;
+			Vector3 one = Vector3(x1, y1, z1);
+			Vector3 two = Vector3(x1, y1, z1);
 			CHECK(one == two);
 		}
 
 		TEST_CASE("Not Equal")
 		{
-			Vector3 one = Vector3(10.0f, 5.0f, 25.0f);
-			Vector3 two = Vector3(5.0f, 10.0f, 25.0f);
+			const float x1 = 10.0f;
+			const float y1 = 5.0f;
+			const float z1 = -45.0f;
+
+			const float x2 = 6589.0f;
+			const float y2 = -457234.0f;
+			const float z2 = 865473.0f;
+
+			Vector3 one = Vector3(x1, y1, z1);
+			Vector3 two = Vector3(x2, y2, z2);
 			CHECK(one != two);
 		}
 
 		TEST_CASE("Assign")
 		{
-			Vector3 one = Vector3(10.0f, 5.0f, 25.0f);
-			one = 20.0f;
-			CHECK(Equals(one.x, 20.0f, 0.001f));
-			CHECK(Equals(one.y, 20.0f, 0.001f));
-			CHECK(Equals(one.z, 20.0f, 0.001f));
+			const float x1 = 10.0f;
+			const float y1 = 5.0f;
+			const float z1 = -45.0f;
 
-			Vector3 two(55.0f, 75.8f, 0.458f);
+			Vector3 one = Vector3(x1, y1, z1);
+			const float x2 = 20.0f;
+			one = x2;
+			CHECK(Equals(one.x, x2, 0.001f));
+			CHECK(Equals(one.y, x2, 0.001f));
+			CHECK(Equals(one.z, x2, 0.001f));
+
+			const float x3 = 55.0f;
+			const float y3 = 75.8f;
+			const float z3 = -45.0f;
+			Vector3 two(x3, y3, z3);
 			one = two;
 			CHECK(one == two);
 		}
 
-		TEST_CASE("Multiplcation")
+		TEST_CASE("Multiplication")
 		{
-			Vector3 one = Vector3(10.0f, 50.0f, 100.0f);
-			Vector3 two = Vector3(5.0f, 2.5f, 0.5f);
-			Vector3 result = one * two;
-			CHECK(result.x == 50.0f);
-			CHECK(result.y == 125.0f);
-			CHECK(result.z == 50.0f);
+			const float x1 = 6487.0f;
+			const float y1 = 2575.0f;
+			const float z1 = 845.0f;
 
-			result = one *= Vector3(0.15f, 75.0f, 548.0f);
-			CHECK(one.x == 1.5f);
-			CHECK(one.y == 3750.0f);
-			CHECK(one.z == 54800.0f);
-			
-			CHECK(result.x == one.x);
-			CHECK(result.y == one.y);
-			CHECK(result.z == one.z);
+			const float x2 = 2006.0f;
+			const float y2 = 9618.0f;
+			const float z2 = 7453.0f;
+
+			glm::vec3 glmVec1 = glm::vec3(x1, y1, z1);
+			glm::vec3 glmVec2 = glm::vec3(x2, y2, z2);
+			Vector3 one = Vector3(x1, y1, z1);
+			Vector3 two = Vector3(x2, y2, z2);
+
+			Vector3 resultA = one * two;
+			Vector3 resultB = two * one;
+			CHECK(resultA == glmVec1 * glmVec2);
+			CHECK(resultB == glmVec2 * glmVec1);
+
+			const float x3 = 0.15f;
+			const float y3 = 75.0f;
+			const float z3 = 14.0f;
+			glm::vec3 glmVec3 = glmVec1 *= glm::vec3(x3, y3, z3);
+			resultA = one *= Vector3(x3, y3, z3);
+			CHECK(one == glmVec3);
+			CHECK(resultA == one);
 		}
 
 		TEST_CASE("Divide")
 		{
-			Vector3 one = Vector3(10.0f, 50.0f, 100.0f);
-			Vector3 two = Vector3(5.0f, 2.5f, 0.5f);
-			Vector3 result = one / two;
-			CHECK(result.x == 2.0f);
-			CHECK(result.y == 20.0f);
-			CHECK(result.z == 200.0f);
+			const float x1 = 6487.0f;
+			const float y1 = 2575.0f;
+			const float z1 = 845.0f;
 
-			result = one /= Vector3(50.0f, 5.0f, 1000.0f);
-			CHECK(one.x == 0.2f);
-			CHECK(one.y == 10.0f);
-			CHECK(one.z == 0.1f);
+			const float x2 = 2006.0f;
+			const float y2 = 9618.0f;
+			const float z2 = 7453.0f;
 
-			CHECK(result.x == one.x);
-			CHECK(result.y == one.y);
-			CHECK(result.z == one.z);
+			glm::vec3 glmVec1 = glm::vec3(x1, y1, z1);
+			glm::vec3 glmVec2 = glm::vec3(x2, y2, z2);
+			Vector3 one = Vector3(x1, y1, z1);
+			Vector3 two = Vector3(x2, y2, z2);
+
+			Vector3 resultA = one / two;
+			Vector3 resultB = two / one;
+
+			CHECK(resultA == glmVec1 / glmVec2);
+			CHECK(resultB == glmVec2 / glmVec1);
+
+			const float x3 = 0.15f;
+			const float y3 = 75.0f;
+			const float z3 = 14.0f;
+
+			glm::vec3 glmVec3 = glmVec1 /= glm::vec3(x3, y3, z3);
+			resultA = one /= Vector3(x3, y3, z3);
+			CHECK(resultA == glmVec3);
+		}
+
+		TEST_CASE("Addition")
+		{
+			const float x1 = 6487.0f;
+			const float y1 = 2575.0f;
+			const float z1 = 845.0f;
+
+			const float x2 = 2006.0f;
+			const float y2 = 9618.0f;
+			const float z2 = 7453.0f;
+
+			glm::vec3 glmVec1 = glm::vec3(x1, y1, z1);
+			glm::vec3 glmVec2 = glm::vec3(x2, y2, z2);
+			Vector3 one = Vector3(x1, y1, z1);
+			Vector3 two = Vector3(x2, y2, z2);
+
+			Vector3 resultA = one + two;
+			Vector3 resultB = two + one;
+
+			CHECK(resultA.Equal(glmVec1 + glmVec2, 0.001f));
+			CHECK(resultB.Equal(glmVec2 + glmVec1, 0.001f));
+
+			const float x3 = 0.15f;
+			const float y3 = 75.0f;
+			const float z3 = 14.0f;
+			glm::vec3 glmVec3 = glmVec1 += glm::vec3(x3, y3, z3);
+			resultA = one += Vector3(x3, y3, z3);
+
+			CHECK(resultA.Equal(glmVec3, 0.001f));
+		}
+
+		TEST_CASE("Minus")
+		{
+			const float x1 = 6487.0f;
+			const float y1 = 2575.0f;
+			const float z1 = 845.0f;
+
+			const float x2 = 2006.0f;
+			const float y2 = 9618.0f;
+			const float z2 = 7453.0f;
+
+			glm::vec3 glmVec1 = glm::vec3(x1, y1, z1);
+			glm::vec3 glmVec2 = glm::vec3(x2, y2, z2);
+			Vector3 one = Vector3(x1, y1, z1);
+			Vector3 two = Vector3(x2, y2, z2);
+
+			Vector3 resultA = one - two;
+			Vector3 resultB = two - one;
+
+			CHECK(resultA.Equal(glmVec1 - glmVec2, 0.001f));
+			CHECK(resultB.Equal(glmVec2 - glmVec1, 0.001f));
+
+
+			const float x3 = 952.0f;
+			const float y3 = 111.0f;
+			const float z3 = -785.0f;
+			glm::vec3 glmVec3 = glmVec1 -= glm::vec3(x3, y3, z3);
+			resultA = one -= Vector3(x3, y3, z3);
+
+			CHECK(resultA.Equal(glmVec3, 0.001f));
 		}
 	}
 }

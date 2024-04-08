@@ -14,7 +14,9 @@ project "Insight_Maths"
 
     defines
     {
-        "IS_EXPORT_MATHS_DLL"
+        "IS_EXPORT_MATHS_DLL",
+        --"IS_MATHS_DIRECTX_MATHS",
+        --"IS_MATHS_GLM",
     }
     
     includedirs
@@ -22,6 +24,7 @@ project "Insight_Maths"
         "inc",
         "%{IncludeDirs.spdlog}",
         "%{IncludeDirs.imgui}",
+        "%{IncludeDirs.glm}",
     }
 
     files 
@@ -36,6 +39,7 @@ project "Insight_Maths"
     links
     {
         "imgui.lib",
+        "glm.lib"
     }
     if (profileTool == "pix") then
         links

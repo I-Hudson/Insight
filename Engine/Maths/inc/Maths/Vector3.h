@@ -5,6 +5,9 @@
 #ifdef IS_MATHS_DIRECTX_MATHS
 #include <DirectXMath.h>
 #endif 
+#if defined(IS_MATHS_GLM) || defined(IS_TESTING)
+#include <glm/glm.hpp>
+#endif 
 
 namespace Insight
 {
@@ -15,7 +18,7 @@ namespace Insight
 		public:
 			Vector3();
 			Vector3(float x, float y, float z);
-			Vector3(float value);
+			Vector3(float scalar);
 
 			Vector3(const Vector3& other);
 			Vector3(Vector3&& other);
@@ -23,6 +26,10 @@ namespace Insight
 #ifdef IS_MATHS_DIRECTX_MATHS
 			Vector3(const DirectX::XMVECTOR& other);
 			Vector3(DirectX::XMVECTOR&& other);
+#endif
+#if defined(IS_MATHS_GLM) || defined(IS_TESTING)
+			Vector3(const glm::vec3& other);
+			Vector3(glm::vec3&& other);
 #endif
 
 			~Vector3();
@@ -81,6 +88,9 @@ namespace Insight
 				struct { float data[3]; };
 #ifdef IS_MATHS_DIRECTX_MATHS
 				struct { DirectX::XMVECTOR xmvector; };
+#endif
+#if defined(IS_MATHS_GLM) || defined(IS_TESTING)
+				struct { glm::vec3 vec3; };
 #endif
 			};
 

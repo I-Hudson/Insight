@@ -4,6 +4,9 @@
 
 #ifdef IS_MATHS_DIRECTX_MATHS
 #include <DirectXMath.h>
+#endif
+#if defined(IS_MATHS_GLM) || defined(IS_TESTING)
+#include <glm/glm.hpp>
 #endif 
 
 namespace Insight
@@ -23,6 +26,10 @@ namespace Insight
 #ifdef IS_MATHS_DIRECTX_MATHS
 			Vector2(const DirectX::XMVECTOR& other);
 			Vector2(DirectX::XMVECTOR&& other);
+#endif
+#if defined(IS_MATHS_GLM) || defined(IS_TESTING)
+			Vector2(const glm::vec2& other);
+			Vector2(glm::vec2&& other);
 #endif
 
 			~Vector2();
@@ -74,12 +81,15 @@ namespace Insight
 			const float* Data() const { return &x; }
 			union
 			{
-				struct { float x, y; };
-				struct { float r, g; };
-				struct { float data[2]; };
 #ifdef IS_MATHS_DIRECTX_MATHS
 				struct { DirectX::XMVECTOR xmvector; };
 #endif
+#if defined(IS_MATHS_GLM) || defined(IS_TESTING)
+				struct { glm::vec2 vec2; };
+#endif
+				struct { float x, y; };
+				struct { float r, g; };
+				struct { float data[2]; };
 			};
 
 			static const Vector2 One;
