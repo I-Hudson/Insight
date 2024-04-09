@@ -249,7 +249,7 @@ namespace Insight
 		Matrix4 Matrix4::CreatePerspective(const float fovy, const float aspect, const float zNear, const float zFar)
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
-			return DirectX::XMMatrixPerspectiveFovRH(fovy, aspect, zNear, zFar);
+			return DirectX::XMMatrixPerspectiveFovLH(fovy, aspect, zNear, zFar);
 #elif defined(IS_MATHS_GLM)
 			return glm::perspective(fovy, aspect, zNear, zFar);
 #else
@@ -287,7 +287,7 @@ namespace Insight
 		Matrix4 Matrix4::LookAt(const Vector3& eye, const Vector3& center, const Vector3& up)
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
-			return DirectX::XMMatrixLookAtRH(eye.xmvector, center.xmvector, up.xmvector);
+			return DirectX::XMMatrixLookAtLH(eye.xmvector, center.xmvector, up.xmvector);
 #elif defined(IS_MATHS_GLM)
 			return glm::lookAt(eye.vec3, center.vec3, up.vec3);
 #else
