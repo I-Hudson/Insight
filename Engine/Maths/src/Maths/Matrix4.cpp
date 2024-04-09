@@ -290,6 +290,23 @@ namespace Insight
 #endif
 		}
 
+		Matrix4 Matrix4::LookAt(const Vector3& eye, const Vector3& center, const Vector3& up)
+		{
+#ifdef IS_MATHS_DIRECTX_MATHS
+			return DirectX::XMMatrixLookAtRH(eye.xmvector, center.xmvector, up.xmvector);
+#elif defined(IS_MATHS_GLM)
+			return glm::lookAt(eye, center, up);
+#else
+			Matrix4 Result = Matrix4::Identity;
+			Result[0][0] = static_cast<float>(2) / (right - left);
+			Result[1][1] = static_cast<float>(2) / (top - bottom);
+			Result[2][2] = -static_cast<float>(1);
+			Result[3][0] = -(right + left) / (right - left);
+			Result[3][1] = -(top + bottom) / (top - bottom);
+			return Result;
+#endif
+		}
+
 		Vector4& Matrix4::operator[](int i)
 		{
 			switch (i)

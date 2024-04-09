@@ -57,6 +57,7 @@ namespace Insight
 			static Matrix4 CreatePerspective(const float fovy, const float aspect, const float zNear, const float zFar);
 			static Matrix4 CreateOrthographic(const float left, const float right, const float bottom, const float top);
 			static Matrix4 CreateOrthographic(const float left, const float right, const float bottom, const float top, const float zNear, const float zFar);
+			static Matrix4 LookAt(const Vector3& eye, const Vector3& center, const Vector3& up);
 
 			Vector4& operator[](int i);
 			const Vector4& operator[](int i) const;
