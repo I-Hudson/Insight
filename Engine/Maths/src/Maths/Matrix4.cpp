@@ -229,6 +229,66 @@ namespace Insight
 #endif
 			return *this;
 		}
+		Matrix4 Matrix4::Translate(const Vector4 vector)
+		{
+#ifdef IS_MATHS_DIRECTX_MATHS
+			return DirectX::XMMatrixMultiply(DirectX::XMMatrixTranslationFromVector(vector.xmvector), xmmatrix);
+#elif defined(IS_MATHS_GLM)
+			return glm::translate(mat4 * vector.vec4);
+#else
+			return Matrix4();
+#endif
+		}
+
+		Matrix4 Matrix4::CreatePerspective(const float fovy, const float aspect, const float zNear, const float zFar)
+		{
+#ifdef IS_MATHS_DIRECTX_MATHS
+			return DirectX::XMMatrixPerspectiveFovRH(fovy, aspect, zNear, zFar);
+#elif defined(IS_MATHS_GLM)
+			return glm::perspective(m_fovY, m_aspect, m_nearPlane, m_farPlane);
+#else
+			Matrix4 Result = Matrix4::Identity;
+			Result[0][0] = static_cast<float>(2) / (right - left);
+			Result[1][1] = static_cast<float>(2) / (top - bottom);
+			Result[2][2] = -static_cast<float>(1);
+			Result[3][0] = -(right + left) / (right - left);
+			Result[3][1] = -(top + bottom) / (top - bottom);
+			return Result;
+#endif
+		}
+
+		Matrix4 Matrix4::CreateOrthographic(const float left, const float right, const float bottom, const float top)
+		{
+#ifdef IS_MATHS_DIRECTX_MATHS
+			return DirectX::XMMatrixOrthographicRH(abs(left - right), abs(bottom - top), 0, std::numeric_limits<float>::max());
+#elif defined(IS_MATHS_GLM)
+			return glm::translate(mat4 * vector.vec4);
+#else
+			Matrix4 Result = Matrix4::Identity;
+			Result[0][0] = static_cast<float>(2) / (right - left);
+			Result[1][1] = static_cast<float>(2) / (top - bottom);
+			Result[2][2] = -static_cast<float>(1);
+			Result[3][0] = -(right + left) / (right - left);
+			Result[3][1] = -(top + bottom) / (top - bottom);
+			return Result;
+#endif
+		}
+		Matrix4 Matrix4::CreateOrthographic(const float left, const float right, const float bottom, const float top, const float zNear, const float zFar)
+		{
+#ifdef IS_MATHS_DIRECTX_MATHS
+			return DirectX::XMMatrixOrthographicRH(abs(left - right), abs(bottom - top), zNear, zFar);
+#elif defined(IS_MATHS_GLM)
+			return glm::orth(left, right, bottom, top, nearPlane, farPlane);
+#else
+			Matrix4 Result = Matrix4::Identity;
+			Result[0][0] = static_cast<float>(2) / (right - left);
+			Result[1][1] = static_cast<float>(2) / (top - bottom);
+			Result[2][2] = -static_cast<float>(1);
+			Result[3][0] = -(right + left) / (right - left);
+			Result[3][1] = -(top + bottom) / (top - bottom);
+			return Result;
+#endif
+		}
 
 		Vector4& Matrix4::operator[](int i)
 		{

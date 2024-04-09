@@ -190,6 +190,17 @@ namespace Insight
 			return !(Equal(other, errorRange));
 		}
 
+		Vector2 Vector2::operator-() const
+		{
+#ifdef IS_MATHS_DIRECTX_MATHS
+			return Vector2(DirectX::XMVectorNegate(xmvector));
+#elif defined(IS_MATHS_GLM)
+			return -vec2;
+#else
+			return Vector2(-x, -y);
+#endif
+		}
+
 		Vector2 Vector2::operator=(float value)
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS

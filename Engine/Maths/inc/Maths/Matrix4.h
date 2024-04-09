@@ -51,6 +51,13 @@ namespace Insight
 			/// @return Matrix4
 			Matrix4 Transposed() const { return Matrix4(*this).Transpose(); }
 
+			Matrix4 Translate(const Vector4 vector);
+			Matrix4 Translated(const Vector4 vector) const { return Matrix4(*this).Translate(vector); }
+
+			static Matrix4 CreatePerspective(const float fovy, const float aspect, const float zNear, const float zFar);
+			static Matrix4 CreateOrthographic(const float left, const float right, const float bottom, const float top);
+			static Matrix4 CreateOrthographic(const float left, const float right, const float bottom, const float top, const float zNear, const float zFar);
+
 			Vector4& operator[](int i);
 			const Vector4& operator[](int i) const;
 

@@ -211,6 +211,17 @@ namespace Insight
 			return !(Equal(other, errorRange));
 		}
 
+		Vector4 Vector4::operator-() const
+		{
+#ifdef IS_MATHS_DIRECTX_MATHS
+			return Vector4(DirectX::XMVectorNegate(xmvector));
+#elif defined(IS_MATHS_GLM)
+			return -vec4;
+#else
+			return Vector4(-x, -y, -z, -w);
+#endif
+		}
+
 		Vector4 Vector4::operator=(float scalar)
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
