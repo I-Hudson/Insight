@@ -20,69 +20,81 @@ namespace Insight
 		const Vector2 Vector2::InfinityNeg	= Vector2(-std::numeric_limits<float>::infinity());
 
 		Vector2::Vector2()
+		{ 
 #ifdef IS_MATHS_DIRECTX_MATHS
-			: xmvector(DirectX::XMVectorReplicate(0.0f))
+			xmvector = DirectX::XMVectorReplicate(0.0f);
 #elif defined(IS_MATHS_GLM)
-			: vec2(glm::vec2(0, 0))
+			vec2 = glm::vec2(0, 0);
 #else
-			: x(0.0f), y(0.0f)
+			x = 0.0f;
+			y = 0.0f;
 #endif
-		{ }
+		}
 		Vector2::Vector2(float x, float y)
-#ifdef IS_MATHS_DIRECTX_MATHS
-			: xmvector(DirectX::XMVectorSet(x, y, 0.0f, 0.0f))
-#elif defined(IS_MATHS_GLM)
-			: vec2(glm::vec2(x, y))
-#else
-			: x(x), y(y)
-#endif
-		{ }
-		Vector2::Vector2(float value)
-#ifdef IS_MATHS_DIRECTX_MATHS
-			: xmvector(DirectX::XMVectorSet(value, value, 0.0f, 0.0f))
-#elif defined(IS_MATHS_GLM)
-			: vec2(glm::vec2(value, value))
-#else
-			: x(value), y(value)
-#endif
-		{ }
-
-		Vector2::Vector2(const Vector2& other)
-#ifdef IS_MATHS_DIRECTX_MATHS
-			: xmvector(other.xmvector)
-#elif defined(IS_MATHS_GLM)
-			: vec2(other.vec2)
-#else
-			: x(other.x), y(other.y)
-#endif
-		{ }
-		Vector2::Vector2(Vector2&& other)
-#ifdef IS_MATHS_DIRECTX_MATHS
-			: xmvector(other.xmvector)
-#elif defined(IS_MATHS_GLM)
-			: vec2(other.vec2)
-#else
-			: x(other.x), y(other.y)
-#endif
 		{
-			other = 0.0f;
+#ifdef IS_MATHS_DIRECTX_MATHS
+			xmvector = DirectX::XMVectorSet(x, y, 0.0f, 0.0f);
+#elif defined(IS_MATHS_GLM)
+			vec2 = glm::vec2(x, y);
+#else
+			this.x = x;
+			this.y = y;
+#endif
+		}
+		Vector2::Vector2(float value)
+		{
+#ifdef IS_MATHS_DIRECTX_MATHS
+			xmvector = DirectX::XMVectorSet(value, value, 0.0f, 0.0f);
+#elif defined(IS_MATHS_GLM)
+			vec2 = glm::vec2(value, value);
+#else
+			x = value; 
+			y = value;
+#endif
+		}
+
+		Vector2::Vector2(const Float2& other)
+		{ 
+#ifdef IS_MATHS_DIRECTX_MATHS
+			xmvector = other.xmvector;
+#elif defined(IS_MATHS_GLM)
+			vec2 = other.vec2;
+#else
+			x = other.x;
+			y = other.y;
+#endif
+		}
+		Vector2::Vector2(Float2&& other)
+		{
+#ifdef IS_MATHS_DIRECTX_MATHS
+			xmvector = other.xmvector;
+#elif defined(IS_MATHS_GLM)
+			vec2 = other.vec2;
+#else
+			x = other.x;
+			y = other.y;
+#endif
 		}
 
 #ifdef IS_MATHS_DIRECTX_MATHS
 		Vector2::Vector2(const DirectX::XMVECTOR& other)
-			: xmvector(other)
-		{ }
+		{
+			xmvector = other;
+		}
 		Vector2::Vector2(DirectX::XMVECTOR&& other)
-			: xmvector(other)
-		{ }
+		{
+			xmvector = other;
+		}
 #endif
 #if defined(IS_MATHS_GLM) || defined(IS_TESTING)
 		Vector2::Vector2(const glm::vec2& other)
-			: vec2(other)
-		{ }
+		{ 
+			vec2 = other;
+		}
 		Vector2::Vector2(glm::vec2&& other)
-			: vec2(other)
-		{ }
+		{
+			vec2 = other;
+		}
 #endif
 
 		Vector2::~Vector2()

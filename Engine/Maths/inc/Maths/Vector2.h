@@ -1,27 +1,21 @@
 #pragma once
 
 #include "Maths/Defines.h"
-
-#ifdef IS_MATHS_DIRECTX_MATHS
-#include <DirectXMath.h>
-#endif
-#if defined(IS_MATHS_GLM) || defined(IS_TESTING)
-#include <glm/glm.hpp>
-#endif 
+#include "Maths/Vectors/Float2.h"
 
 namespace Insight
 {
 	namespace Maths
 	{
-		class IS_MATHS Vector2
+		class IS_MATHS Vector2 : public Float2
 		{
 		public:
 			Vector2();
 			Vector2(float x, float y);
 			Vector2(float value);
 
-			Vector2(const Vector2& other);
-			Vector2(Vector2&& other);
+			Vector2(const Float2& other);
+			Vector2(Float2&& other);
 
 #ifdef IS_MATHS_DIRECTX_MATHS
 			Vector2(const DirectX::XMVECTOR& other);
@@ -81,18 +75,6 @@ namespace Insight
 			Vector2 operator-=(const Vector2& other);
 
 			const float* Data() const { return &x; }
-			union
-			{
-#ifdef IS_MATHS_DIRECTX_MATHS
-				struct { DirectX::XMVECTOR xmvector; };
-#endif
-#if defined(IS_MATHS_GLM) || defined(IS_TESTING)
-				struct { glm::vec2 vec2; };
-#endif
-				struct { float x, y; };
-				struct { float r, g; };
-				struct { float data[2]; };
-			};
 
 			static const Vector2 One;
 			static const Vector2 Zero;

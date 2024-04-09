@@ -2,6 +2,7 @@
 
 #include "Maths/Defines.h"
 #include "Vector4.h"
+#include "Vector3.h"
 
 #ifdef IS_MATHS_DIRECTX_MATHS
 #include <DirectXMath.h>

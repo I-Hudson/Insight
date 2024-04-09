@@ -16,72 +16,135 @@ namespace Insight
 		const Vector3 Vector3::InfinityNeg	= Vector3(-std::numeric_limits<float>::infinity());
 
 		Vector3::Vector3()
+		{ 
 #ifdef IS_MATHS_DIRECTX_MATHS
-			: xmvector(DirectX::XMVectorReplicate(0.0f))
+			xmvector = DirectX::XMVectorReplicate(0.0f);
 #elif defined(IS_MATHS_GLM)
-			: vec3(glm::vec3(0, 0, 0))
+			vec3 = glm::vec3(0, 0, 0);
 #else
-			: x(0.0f), y(0.0f), z(0.0f)
+			x = 0.0f;
+			y = 0.0f;
+			z = 0.0f;
 #endif
-		{ }
+		}
 		
 		Vector3::Vector3(float x, float y, float z)
+		{ 
 #ifdef IS_MATHS_DIRECTX_MATHS
-			: xmvector(DirectX::XMVectorSet(x, y, z, 0.0f))
+			xmvector = DirectX::XMVectorSet(x, y, z, 0.0f);
 #elif defined(IS_MATHS_GLM)
-			: vec3(glm::vec3(x, y, z))
+			vec3 = glm::vec3(x, y, z);
 #else
-			: x(x), y(y), z(z)
+			this.x = x; 
+			this.y = y;
+			this.z = z;
 #endif
-		{ }
+		}
 		
 		Vector3::Vector3(float scalar)
+		{ 
 #ifdef IS_MATHS_DIRECTX_MATHS
-			: xmvector(DirectX::XMVectorSet(scalar,scalar, scalar, 0.0f))
+			xmvector = DirectX::XMVectorSet(scalar, scalar, scalar, 0.0f);
 #elif defined(IS_MATHS_GLM)
-			: vec3(glm::vec3(scalar, scalar, scalar))
+			vec3 = glm::vec3(scalar, scalar, scalar);
 #else
-			: x(scalar), y(scalar), z(scalar)
+			x = scalar;
+			y = scalar;
+			z = scalar;
 #endif
-		{ }
+		}
 
-		Vector3::Vector3(const Vector3& other)
-#ifdef IS_MATHS_DIRECTX_MATHS
-			: xmvector(other.xmvector)
-#elif defined(IS_MATHS_GLM)
-			: vec3(glm::vec3(other.vec3))
-#else
-			: x(other.x), y(other.y), z(other.z)
-#endif
-		{ }
-		
-		Vector3::Vector3(Vector3&& other)
-#ifdef IS_MATHS_DIRECTX_MATHS
-			: xmvector(other.xmvector)
-#elif defined(IS_MATHS_GLM)
-			: vec3(glm::vec3(other.vec3))
-#else
-			: x(other.x), y(other.y), z(other.z)
-#endif
+		Vector3::Vector3(const Float2& other, float z)
 		{
-			other = 0;
+#ifdef IS_MATHS_DIRECTX_MATHS
+			xmvector = other.xmvector;
+			xmvector = DirectX::XMVectorSetZ(xmvector, z);
+#else
+			x = other.x;
+			y = other.y;
+			this.z = z;
+#endif
+		}
+		Vector3::Vector3(Float2&& other)
+		{
+#ifdef IS_MATHS_DIRECTX_MATHS
+			xmvector = other.xmvector;
+			xmvector = DirectX::XMVectorSetZ(xmvector, z);
+#else
+			x = other.x;
+			y = other.y;
+			this.z = 0.0f;
+#endif
+		}
+
+		Vector3::Vector3(const Float3& other)
+		{
+#ifdef IS_MATHS_DIRECTX_MATHS
+			xmvector = other.xmvector;
+#else
+			x = other.x;
+			y = other.y;
+			z = other.z;
+#endif
+		}
+		Vector3::Vector3(Float3&& other)
+		{
+#ifdef IS_MATHS_DIRECTX_MATHS
+			xmvector = other.xmvector;
+#else
+			x = other.x;
+			y = other.y;
+			z = other.z;
+#endif
+		}
+
+		Vector3::Vector3(const Float4& other)
+		{
+#ifdef IS_MATHS_DIRECTX_MATHS
+			xmvector = other.xmvector;
+			xmvector = DirectX::XMVectorSetW(xmvector, 0.0f);
+#elif defined(IS_MATHS_GLM)
+			vec3 = glm::vec4(other.vec4.x, other.vec4.y, other.vec4.z);
+#else
+			x = other.x;
+			y = other.y; 
+			z = other.z;
+#endif
+		}
+		
+		Vector3::Vector3(Float4&& other)
+		{
+#ifdef IS_MATHS_DIRECTX_MATHS
+			xmvector = other.xmvector;
+			xmvector = DirectX::XMVectorSetW(xmvector, 0.0f);
+#elif defined(IS_MATHS_GLM)
+			vec3 = glm::vec4(other.vec4.x, other.vec4.y, other.vec4.z);
+#else
+			x = other.x; 
+			y = other.y; 
+			z = other.z;
+#endif
 		}
 
 #ifdef IS_MATHS_DIRECTX_MATHS
 		Vector3::Vector3(const DirectX::XMVECTOR& other)
-			: xmvector(other)
-		{ }
+		{ 
+			xmvector = other;
+		}
 		Vector3::Vector3(DirectX::XMVECTOR&& other)
-			: xmvector(other)
-		{ }
+		{
+			xmvector = other;
+		}
 #endif
 #if defined(IS_MATHS_GLM) || defined(IS_TESTING)
 		Vector3::Vector3(const glm::vec3& other)
-			: vec3(other)
-		{ }
+		{ 
+			vec3 = other;
+		}
 		Vector3::Vector3(glm::vec3&& other)
-			: vec3(other)
-		{ }
+		{ 
+			vec3 = other;
+		}
 #endif
 
 		Vector3::~Vector3()
