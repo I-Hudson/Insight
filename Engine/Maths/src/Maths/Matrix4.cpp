@@ -237,13 +237,14 @@ namespace Insight
 		Matrix4 Matrix4::Translate(const Vector4 vector)
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
-			return DirectX::XMMatrixMultiply(DirectX::XMMatrixTranslationFromVector(vector.xmvector), xmmatrix);
+			xmmatrix = DirectX::XMMatrixMultiply(DirectX::XMMatrixTranslationFromVector(vector.xmvector), xmmatrix);
 #elif defined(IS_MATHS_GLM)
-			return glm::translate(mat4, glm::vec3(vector.vec4));
+			mat4 = glm::translate(mat4, glm::vec3(vector.vec4));
 #else
 			assert(false);
 			return Matrix4();
 #endif
+			return *this;
 		}
 
 		Matrix4 Matrix4::CreatePerspective(const float fovy, const float aspect, const float zNear, const float zFar)
@@ -262,7 +263,7 @@ namespace Insight
 		Matrix4 Matrix4::CreateOrthographic(const float left, const float right, const float bottom, const float top)
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
-			return DirectX::XMMatrixOrthographicRH(abs(left - right), abs(bottom - top), 0, std::numeric_limits<float>::max());
+			return DirectX::XMMatrixOrthographicLH(right - left, top - bottom, 1, 1024);
 #elif defined(IS_MATHS_GLM)
 			return glm::ortho(left, right, bottom, top);
 #else
@@ -274,7 +275,7 @@ namespace Insight
 		Matrix4 Matrix4::CreateOrthographic(const float left, const float right, const float bottom, const float top, const float zNear, const float zFar)
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
-			return DirectX::XMMatrixOrthographicRH(abs(left - right), abs(bottom - top), zNear, zFar);
+			return DirectX::XMMatrixOrthographicLH(abs(left - right), abs(bottom - top), zNear, zFar);
 #elif defined(IS_MATHS_GLM)
 			return glm::ortho(left, right, bottom, top, zNear, zFar);
 #else
@@ -814,6 +815,46 @@ namespace test
 			Matrix4 mat = Matrix_Test;
 			mat.Transpose();
 			CHECK(mat == glm::transpose(glmMatrixTest));
+		}
+
+		TEST_CASE("Translate")
+		{
+			Vector4 vector(24, 58, 31, 45);
+			glm::vec4 glmVector(24, 58, 31, 45);
+
+			Matrix4 translatedMatrix = Matrix_Test.Translated(vector);
+			glm::mat4 glmTranslatedMatrix = glm::translate(glmMatrixTest, glm::vec3(glmVector.xyz));
+			CHECK(translatedMatrix == glmTranslatedMatrix);
+
+			translatedMatrix = Matrix_Test;
+			translatedMatrix.Translate(vector);
+			CHECK(translatedMatrix == glmTranslatedMatrix);
+
+		}
+
+		TEST_CASE("CreatePerspective")
+		{
+			Matrix4 perspecticeMatrix = Matrix4::CreatePerspective(90, 1.2f, 0.1f, 500);
+			glm::mat4 glmPerspecticeMatrix = glm::perspective(90.0f, 1.2f, 0.1f, 500.0f);
+			CHECK(perspecticeMatrix == glmPerspecticeMatrix);
+		}
+
+		TEST_CASE("CreateOrthographic")
+		{
+			Matrix4 orthographicMatrix = Matrix4::CreateOrthographic(-20, 20, -20, 20, 20, 500);
+			glm::mat4 glmOrthographicMatrix = glm::ortho(-20, 20, -20, 20, 20, 500);
+			CHECK(orthographicMatrix == glmOrthographicMatrix);
+		}
+
+		TEST_CASE("LookAt")
+		{
+			glm::vec3 glmEyeVector(25, 25, 25);
+			glm::vec3 glmCenterVector(3, -45, -2);
+			glm::vec3 glmUpVector(3, -45, -2);
+
+			Matrix4 lootAtMatrix = Matrix4::LookAt(glmEyeVector, glmCenterVector, glmUpVector);
+			glm::mat4 glmLootAtMatrix = glm::lookAt(glmEyeVector, glmCenterVector, glmUpVector);
+			CHECK(lootAtMatrix == glmLootAtMatrix);
 		}
 
 		TEST_CASE("operator[]")
