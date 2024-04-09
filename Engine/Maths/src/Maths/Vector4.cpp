@@ -174,8 +174,7 @@ namespace Insight
 		{
 			return data[i];
 		}
-
-		float& Vector4::operator[](unsigned int i)
+		const float& Vector4::operator[](int i) const
 		{
 			return data[i];
 		}
@@ -197,7 +196,14 @@ namespace Insight
 
 		bool Vector4::Equal(const Vector4& other, const float errorRange) const
 		{
-			return Equals(x, other.x, errorRange) && Equals(y, other.y, errorRange) && Equals(z, other.z, errorRange) && Equals(w, other.w, errorRange);
+			const bool xResult = Equals(x, other.x, errorRange);
+			const bool yResult = Equals(y, other.y, errorRange);
+			const bool zResult = Equals(z, other.z, errorRange);
+			const bool wResult = Equals(w, other.w, errorRange);
+			return xResult
+				&& yResult
+				&& zResult
+				&& wResult;
 		}
 
 		bool Vector4::NotEqual(const Vector4& other, const float errorRange) const
@@ -367,6 +373,8 @@ namespace Insight
 #ifdef IS_TESTING
 #include <glm/glm.hpp>
 #include <glm/gtx/norm.hpp>
+#include "Maths/SimpleMath.h"
+#include "Maths/SimpleMath.inl"
 #include "doctest.h"
 namespace test
 {
@@ -692,7 +700,6 @@ namespace test
 
 			CHECK(resultA.Equal(glmVec1 - glmVec2, 0.001f));
 			CHECK(resultB.Equal(glmVec2 - glmVec1, 0.001f));
-
 
 			const float x3 = 952.0f;
 			const float y3 = 111.0f;

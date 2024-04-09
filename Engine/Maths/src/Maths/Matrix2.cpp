@@ -18,8 +18,8 @@ namespace Insight
 			: xmmatrix(DirectX::XMMatrixSet(
 				  0.0f, 0.0f, 0.0f, 0.0f
 				, 0.0f, 0.0f, 0.0f, 0.0f
-				, 0.0f, 0.0f, 0.0f, 0.0f
-				, 0.0f, 0.0f, 0.0f, 0.0f))
+				, 0.0f, 0.0f, 1.0f, 0.0f
+				, 0.0f, 0.0f, 0.0f, 1.0f))
 #else
 			: m_00(0), m_01(0)
 			, m_10(0), m_11(0)
@@ -89,8 +89,8 @@ namespace Insight
 			: xmmatrix(DirectX::XMMatrixSet(
 				other[0].x, other[0].y, 0.0f, 0.0f
 				, other[1].x, other[1].y, 0.0f, 0.0f
-				, 0.0f, 0.0f, 1.0f, 0.0f
-				, 0.0f, 0.0f, 0.0f, 1.0f))
+				, 0.0f, 0.0f, 0.0f, 0.0f
+				, 0.0f, 0.0f, 0.0f, 0.0f))
 #else
 			: mat2(other)
 #endif
@@ -100,8 +100,8 @@ namespace Insight
 			: xmmatrix(DirectX::XMMatrixSet(
 				  other[0].x, other[0].y, 0.0f, 0.0f
 				, other[1].x, other[1].y, 0.0f, 0.0f
-				, 0.0f, 0.0f, 1.0f, 0.0f
-				, 0.0f, 0.0f, 0.0f, 1.0f))
+				, 0.0f, 0.0f, 0.0f, 0.0f
+				, 0.0f, 0.0f, 0.0f, 0.0f))
 #else
 			: mat2(other)
 #endif
@@ -249,9 +249,19 @@ namespace Insight
 #elif defined(IS_MATHS_GLM)
 			return mat2 * other.mat2;
 #else
-			return Matrix2(
-			(other.m_00 * m_00) + (other.m_01 * m_10), (other.m_00 * m_01) + (other.m_01 * m_11),
-			(other.m_10 * m_00) + (other.m_11 * m_10), (other.m_10 * m_01) + (other.m_11 * m_11));
+			Matrix2 m;
+
+			float x = other[0][0];
+			float y = other[0][1];
+			m[0][0] = (x * m_00) + (y * m_10);
+			m[0][1] = (x * m_01) + (y * m_11);
+
+			x = other[1][0];
+			y = other[1][1];
+			m[1][0] = (x * m_00) + (y * m_10);
+			m[1][1] = (x * m_01) + (y * m_11);
+
+			return m;
 #endif
 		}
 
@@ -420,7 +430,9 @@ namespace test
 		{
 			Matrix2 one = Matrix_Test;
 			Matrix2 inv = one.Inversed();
-			CHECK(inv.Equal(glm::inverse(glmMatrixTest), 0.0001f));
+			glm::mat2 glmInv = glm::inverse(glmMatrixTest);
+
+			CHECK(inv.Equal(glmInv, 0.0001f));
 
 			//glm::mat2 glmInv = ;
 			Matrix2 result = inv * one;

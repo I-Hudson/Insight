@@ -2,6 +2,9 @@
 
 #include "Maths/Defines.h"
 
+#include "Maths/Vector2.h"
+#include "Maths/Vector3.h"
+
 #ifdef IS_MATHS_DIRECTX_MATHS
 #include <DirectXMath.h>
 #endif 
@@ -49,7 +52,7 @@ namespace Insight
 			float Dot(const Vector4& other) const;
 
 			float& operator[](int i);
-			float& operator[](unsigned int i);
+			const float& operator[](int i) const;
 
 			bool operator==(const Vector4& other) const;
 			bool operator!=(const Vector4& other) const;
@@ -90,6 +93,13 @@ namespace Insight
 				struct { float x, y, z, w; };
 				struct { float r, g, b, a; };
 				struct { float data[4]; };
+#ifdef IS_MATHS_ENABLE_SWIZZLE
+				struct { Vector2 xy; float z; float w; };
+				struct { float x; Vector2 yz; float w; };
+				struct { float x; float y; Vector2 zw;  };
+				struct { Vector3 xyz; };
+#endif
+
 #ifdef IS_MATHS_DIRECTX_MATHS
 				struct { DirectX::XMVECTOR xmvector; };
 #endif

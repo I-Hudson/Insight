@@ -160,8 +160,7 @@ namespace Insight
 		{
 			return data[i];
 		}
-
-		float& Vector2::operator[](unsigned int i)
+		const float&  Vector2::operator[](int i) const
 		{
 			return data[i];
 		}

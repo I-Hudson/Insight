@@ -160,16 +160,7 @@ namespace Insight
 		{
 			return data[i];
 		}
-
-		float& Vector3::operator[](unsigned int i)
-		{
-			return data[i];
-		}
 		const float& Vector3::operator[](int i) const
-		{
-			return data[i];
-		}
-		const float& Vector3::operator[](unsigned int i) const
 		{
 			return data[i];
 		}

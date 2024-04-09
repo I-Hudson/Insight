@@ -7,6 +7,9 @@
 #ifdef IS_MATHS_DIRECTX_MATHS
 #include <DirectXMath.h>
 #endif
+#if defined(IS_MATHS_GLM) || defined(IS_TESTING)
+#include <glm/glm.hpp>
+#endif 
 
 namespace Insight
 {
@@ -21,11 +24,16 @@ namespace Insight
 			Matrix3(float m00, float m01, float m02,
 				float m10, float m11, float m12,
 				float m20, float m21, float m22);
+			Matrix3(Vector3 v0, Vector3 v1, Vector3 v2);
 			Matrix3(const Matrix3& other);
 			Matrix3(Matrix3&& other);
 #ifdef IS_MATHS_DIRECTX_MATHS
 			Matrix3(const DirectX::XMMATRIX& other);
 			Matrix3(DirectX::XMMATRIX&& other);
+#endif
+#if defined(IS_MATHS_GLM) || defined(IS_TESTING)
+			Matrix3(const glm::mat3& other);
+			Matrix3(glm::mat3&& other);
 #endif
 			~Matrix3();
 
@@ -43,24 +51,25 @@ namespace Insight
 			Matrix3 Transposed() const { return Matrix3(*this).Transpose(); }
 
 			Vector3& operator[](int i);
-			Vector3& operator[](unsigned int i);
 			const Vector3& operator[](int i) const;
-			const Vector3& operator[](unsigned int i) const;
 
 			bool operator==(const Matrix3& other) const;
 			bool operator!=(const Matrix3& other) const;
 
+			bool Equal(const Matrix3& other, const float errorRange) const;
+			bool NotEqual(const Matrix3& other, const float errorRange) const;
+
 			Matrix3 operator=(const Matrix3& other);
 
-			Vector3 operator*(const Vector3& other);
-			Matrix3 operator*(const Matrix3& other);
+			Vector3 operator*(const Vector3& other) const;
+			Matrix3 operator*(const Matrix3& other) const;
 
-			Vector3 operator/(const Vector3& other);
-			Matrix3 operator/(const Matrix3& other);
+			Vector3 operator/(const Vector3& other) const;
+			Matrix3 operator/(const Matrix3& other) const;
 
-			Matrix3 operator-(const Matrix3& other);
+			Matrix3 operator-(const Matrix3& other) const;
 
-			Matrix3 operator+(const Matrix3& other);
+			Matrix3 operator+(const Matrix3& other) const;
 
 			Matrix3 operator*=(const Vector3& other);
 			Matrix3 operator*=(const Matrix3& other);
@@ -98,12 +107,14 @@ namespace Insight
 						m_20, m_21, m_22;
 				};
 #endif
+#if defined(IS_MATHS_GLM) || defined(IS_TESTING)
+				struct { glm::mat3 mat3; };
+#endif
 				struct
 				{
 					Vector3 v0;
 					Vector3 v1;
 					Vector3 v2;
-					Vector3 v3;
 				};
 
 			};

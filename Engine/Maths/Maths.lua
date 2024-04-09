@@ -15,7 +15,7 @@ project "Insight_Maths"
     defines
     {
         "IS_EXPORT_MATHS_DLL",
-        --"IS_MATHS_DIRECTX_MATHS",
+        "IS_MATHS_DIRECTX_MATHS",
         --"IS_MATHS_GLM",
     }
     

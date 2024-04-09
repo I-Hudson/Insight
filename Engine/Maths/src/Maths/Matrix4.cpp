@@ -24,22 +24,17 @@ namespace Insight
 		Matrix4::Matrix4()
 #ifdef IS_MATHS_DIRECTX_MATHS
 			: xmmatrix(DirectX::XMMatrixSet(
-				  1.0f, 0.0f, 0.0f, 0.0f
-				, 0.0f, 1.0f, 0.0f, 0.0f
-				, 0.0f, 0.0f, 1.0f, 0.0f
-				, 0.0f, 0.0f, 0.0f, 1.0f))
+				  0.0f, 0.0f, 0.0f, 0.0f
+				, 0.0f, 0.0f, 0.0f, 0.0f
+				, 0.0f, 0.0f, 0.0f, 0.0f
+				, 0.0f, 0.0f, 0.0f, 0.0f))
 #else
 			: m_00(0.0f), m_01(0.0f), m_02(0.0f), m_03(0.0f)
 			, m_10(0.0f), m_11(0.0f), m_12(0.0f), m_13(0.0f)
 			, m_20(0.0f), m_21(0.0f), m_22(0.0f), m_23(0.0f)
 			, m_30(0.0f), m_31(0.0f), m_32(0.0f), m_33(0.0f)
 #endif
-		{
-			v0 = Vector4::Zero;
-			v1 = Vector4::Zero;
-			v2 = Vector4::Zero;
-			v3 = Vector4::Zero;
-		}
+		{ }
 		Matrix4::Matrix4(	float m00, float m01, float m02, float m03,
 							float m10, float m11, float m12, float m13,
 							float m20, float m21, float m22, float m23,
@@ -56,12 +51,13 @@ namespace Insight
 			, m_20(m20), m_21(m21), m_22(m22), m_23(m23)
 			, m_30(m30), m_31(m31), m_32(m32), m_33(m33)
 #endif
-		{
-			v0 = Vector4(m00, m01, m02, m03);
-			v1 = Vector4(m10, m11, m12, m13);
-			v2 = Vector4(m20, m21, m22, m23);
-			v3 = Vector4(m30, m31, m32, m33);
-		}
+		{ }
+		Matrix4::Matrix4(const Vector4 v0, const Vector4 v1, const Vector4 v2, const Vector4 v3)
+			: v0(v0)
+			, v1(v1)
+			, v2(v2)
+			, v3(v3)
+		{ }
 		Matrix4::Matrix4(const Matrix4& other)
 #ifdef IS_MATHS_DIRECTX_MATHS
 			: xmmatrix(other.xmmatrix)
@@ -81,9 +77,7 @@ namespace Insight
 			, m_20(other.m_20), m_21(other.m_21), m_22(other.m_22), m_23(other.m_23)
 			, m_30(other.m_30), m_31(other.m_31), m_32(other.m_32), m_33(other.m_33)
 #endif
-		{
-			other = Matrix4::Zero;
-		}
+		{ }
 
 #ifdef IS_MATHS_DIRECTX_MATHS
 		Matrix4::Matrix4(const DirectX::XMMATRIX& other)
@@ -91,13 +85,23 @@ namespace Insight
 		{ }
 		Matrix4::Matrix4(DirectX::XMMATRIX&& other)
 			: xmmatrix(other)
-		{
-			DirectX::XMMatrixSet(
-			  1.0f, 0.0f, 0.0f, 0.0f
-			, 0.0f, 1.0f, 0.0f, 0.0f
-			, 0.0f, 0.0f, 1.0f, 0.0f
-			, 0.0f, 0.0f, 0.0f, 1.0f);
-		}
+		{ }
+		Matrix4::Matrix4(const DirectX::XMFLOAT4X4 & other)
+			: xmmatrix(DirectX::XMMatrixSet(
+				  other._11, other._12, other._13, other._14
+				, other._21, other._22, other._23, other._24
+				, other._31, other._32, other._33, other._34
+				, other._41, other._42, other._43, other._44))
+		{ }
+#endif
+#if defined(IS_MATHS_GLM) || defined(IS_TESTING)
+
+		Matrix4::Matrix4(const glm::mat4& other)
+			: mat4(other)
+		{ }
+		Matrix4::Matrix4(glm::mat4&& other)
+			: mat4(other)
+		{ }
 #endif
 
 		Matrix4::~Matrix4()
@@ -108,6 +112,8 @@ namespace Insight
 #ifdef IS_MATHS_DIRECTX_MATHS
 			DirectX::XMVECTOR determinant;
 			xmmatrix = DirectX::XMMatrixInverse(&determinant, xmmatrix);
+#elif defined(IS_MATHS_GLM)
+			mat4 = glm::inverse(mat4);
 #else
 			Matrix4 tran = Transposed();
 
@@ -211,6 +217,8 @@ namespace Insight
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
 			xmmatrix = DirectX::XMMatrixTranspose(xmmatrix);
+#elif defined(IS_MATHS_GLM)
+			mat4 = glm::transpose(mat4);
 #else
 			Matrix4 tran(
 				m_00, m_10, m_20, m_30, 
@@ -223,24 +231,6 @@ namespace Insight
 		}
 
 		Vector4& Matrix4::operator[](int i)
-		{
-			switch (i)
-			{
-			case 0:
-				return v0;
-			case 1:
-				return v1;
-			case 2:
-				return v2;
-			case 3:
-				return v3;
-			default:
-				break;
-			}
-			assert(false);
-			return v0;
-		}
-		Vector4& Matrix4::operator[](unsigned int i)
 		{
 			switch (i)
 			{
@@ -276,41 +266,39 @@ namespace Insight
 			assert(false);
 			return v0;
 		}
-		const Vector4& Matrix4::operator[](unsigned int i) const
-		{
-			switch (i)
-			{
-			case 0:
-				return v0;
-			case 1:
-				return v1;
-			case 2:
-				return v2;
-			case 3:
-				return v3;
-			default:
-				break;
-			}
-			assert(false);
-			return v0;
-		}
 
 		bool Matrix4::operator==(const Matrix4& other) const
 		{
-			return Equals(m_00, other.m_00, 0.001f) && Equals(m_01, other.m_01, 0.001f) && Equals(m_02, other.m_02, 0.001f) && Equals(m_03, other.m_03, 0.001f)
-				&& Equals(m_10, other.m_10, 0.001f) && Equals(m_11, other.m_11, 0.001f) && Equals(m_12, other.m_12, 0.001f) && Equals(m_13, other.m_13, 0.001f)
-				&& Equals(m_20, other.m_20, 0.001f) && Equals(m_21, other.m_21, 0.001f) && Equals(m_22, other.m_22, 0.001f) && Equals(m_23, other.m_23, 0.001f)
-				&& Equals(m_30, other.m_30, 0.001f) && Equals(m_31, other.m_31, 0.001f) && Equals(m_32, other.m_32, 0.001f) && Equals(m_33, other.m_33, 0.001f);
+			return Equals(m_00, other.m_00, 0.1f) && Equals(m_01, other.m_01, 0.1f) && Equals(m_02, other.m_02, 0.1f) && Equals(m_03, other.m_03, 0.1f)
+				&& Equals(m_10, other.m_10, 0.1f) && Equals(m_11, other.m_11, 0.1f) && Equals(m_12, other.m_12, 0.1f) && Equals(m_13, other.m_13, 0.1f)
+				&& Equals(m_20, other.m_20, 0.1f) && Equals(m_21, other.m_21, 0.1f) && Equals(m_22, other.m_22, 0.1f) && Equals(m_23, other.m_23, 0.1f)
+				&& Equals(m_30, other.m_30, 0.1f) && Equals(m_31, other.m_31, 0.1f) && Equals(m_32, other.m_32, 0.1f) && Equals(m_33, other.m_33, 0.1f);
 		}
 		bool Matrix4::operator!=(const Matrix4& other) const
 		{
 			return !(*this == other);
 		}
 
+		bool Matrix4::Equal(const Matrix4& other, const float errorRange) const
+		{
+			bool b = v0.Equal(other.v0, errorRange);
+			bool b1 = v1.Equal(other.v1, errorRange);
+			bool b2 = v2.Equal(other.v2, errorRange);
+			bool b3 = v3.Equal(other.v3, errorRange);
+			return v0.Equal(other.v0, errorRange) && v1.Equal(other.v1, errorRange) && v2.Equal(other.v2, errorRange) && v3.Equal(other.v3, errorRange);
+		}
+
+		bool Matrix4::NotEqual(const Matrix4& other, const float errorRange) const
+		{
+			return !Equal(other, errorRange);
+		}
+
 		Matrix4 Matrix4::operator=(const Matrix4& other)
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
 			xmmatrix = other.xmmatrix;
+#elif defined(IS_MATHS_GLM)
+			mat4 = other.mat4;
 #else
 			m_00 = other.m_00; m_01 = other.m_01; m_02 = other.m_02; m_03 = other.m_03;
 			m_10 = other.m_10; m_11 = other.m_11; m_12 = other.m_12; m_13 = other.m_13;
@@ -320,56 +308,60 @@ namespace Insight
 			return *this;
 		}
 
-		Matrix4 Matrix4::operator*(const Matrix4& other)
+		Matrix4 Matrix4::operator*(const Matrix4& other) const
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
-			return Matrix4(DirectX::XMMatrixMultiply(xmmatrix, other.xmmatrix));
+			return DirectX::XMMatrixMultiply(other.xmmatrix, xmmatrix);
+#elif defined(IS_MATHS_GLM)
+			return mat4 * other.mat4;
 #else
 			Matrix4 m;
 
-			float x = v0[0];
-			float y = v0[1];
-			float z = v0[2];
-			float w = v0[3];
-			m[0][0] = (other.m_00 * x) + (other.m_10 * y) + (other.m_20 * z) + (other.m_30 * w);
-			m[0][1] = (other.m_01 * x) + (other.m_11 * y) + (other.m_21 * z) + (other.m_31 * w);
-			m[0][2] = (other.m_02 * x) + (other.m_12 * y) + (other.m_22 * z) + (other.m_32 * w);
-			m[0][3] = (other.m_03 * x) + (other.m_13 * y) + (other.m_23 * z) + (other.m_33 * w);
+			float x = other[0][0];
+			float y = other[0][1];
+			float z = other[0][2];
+			float w = other[0][3];
+			m[0][0] = (x * m_00) + (y * m_10) + (z * m_20) + (w * m_30);
+			m[0][1] = (x * m_01) + (y * m_11) + (z * m_21) + (w * m_31);
+			m[0][2] = (x * m_02) + (y * m_12) + (z * m_22) + (w * m_32);
+			m[0][3] = (x * m_03) + (y * m_13) + (z * m_23) + (w * m_33);
 
-			x = v1[0];
-			y = v1[1];
-			z = v1[2];
-			w = v1[3];
-			m[1][0] = (other.m_00 * x) + (other.m_10 * y) + (other.m_20 * z) + (other.m_30 * w);
-			m[1][1] = (other.m_01 * x) + (other.m_11 * y) + (other.m_21 * z) + (other.m_31 * w);
-			m[1][2] = (other.m_02 * x) + (other.m_12 * y) + (other.m_22 * z) + (other.m_32 * w);
-			m[1][3] = (other.m_03 * x) + (other.m_13 * y) + (other.m_23 * z) + (other.m_33 * w);
+			x = other[1][0];
+			y = other[1][1];
+			z = other[1][2];
+			w = other[1][3];
+			m[1][0] = (x * m_00) + (y * m_10) + (z * m_20) + (w * m_30);
+			m[1][1] = (x * m_01) + (y * m_11) + (z * m_21) + (w * m_31);
+			m[1][2] = (x * m_02) + (y * m_12) + (z * m_22) + (w * m_32);
+			m[1][3] = (x * m_03) + (y * m_13) + (z * m_23) + (w * m_33);
 
-			x = v2[0];
-			y = v2[1];
-			z = v2[2];
-			w = v2[3];
-			m[2][0] = (other.m_00 * x) + (other.m_10 * y) + (other.m_20 * z) + (other.m_30 * w);
-			m[2][1] = (other.m_01 * x) + (other.m_11 * y) + (other.m_21 * z) + (other.m_31 * w);
-			m[2][2] = (other.m_02 * x) + (other.m_12 * y) + (other.m_22 * z) + (other.m_32 * w);
-			m[2][3] = (other.m_03 * x) + (other.m_13 * y) + (other.m_23 * z) + (other.m_33 * w);
+			x = other[2][0];
+			y = other[2][1];
+			z = other[2][2];
+			w = other[2][3];
+			m[2][0] = (x * m_00) + (y * m_10) + (z * m_20) + (w * m_30);
+			m[2][1] = (x * m_01) + (y * m_11) + (z * m_21) + (w * m_31);
+			m[2][2] = (x * m_02) + (y * m_12) + (z * m_22) + (w * m_32);
+			m[2][3] = (x * m_03) + (y * m_13) + (z * m_23) + (w * m_33);
 
-			x = v3[0];
-			y = v3[1];
-			z = v3[2];
-			w = v3[3];
-			m[3][0] = (other.m_00 * x) + (other.m_10 * y) + (other.m_20 * z) + (other.m_30 * w);
-			m[3][1] = (other.m_01 * x) + (other.m_11 * y) + (other.m_21 * z) + (other.m_31 * w);
-			m[3][2] = (other.m_02 * x) + (other.m_12 * y) + (other.m_22 * z) + (other.m_32 * w);
-			m[3][3] = (other.m_03 * x) + (other.m_13 * y) + (other.m_23 * z) + (other.m_33 * w);
+			x = other[3][0];
+			y = other[3][1];
+			z = other[3][2];
+			w = other[3][3];
+			m[3][0] = (x * m_00) + (y * m_10) + (z * m_20) + (w * m_30);
+			m[3][1] = (x * m_01) + (y * m_11) + (z * m_21) + (w * m_31);
+			m[3][2] = (x * m_02) + (y * m_12) + (z * m_22) + (w * m_32);
+			m[3][3] = (x * m_03) + (y * m_13) + (z * m_23) + (w * m_33);
 
 			return m;
 #endif
 		}
-		Vector4 Matrix4::operator*(const Vector4& other)
+		Vector4 Matrix4::operator*(const Vector4& other) const
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
-			return Vector4(DirectX::XMVector4Transform(other.xmvector, xmmatrix));
+			return DirectX::XMVector4Transform(other.xmvector, xmmatrix);
+#elif defined(IS_MATHS_GLM)
+			return mat4 * other.vec4;
 #else
 			const float x = (m_00 * other.x) + (m_10 * other.y) + (m_20 * other.z) + (m_30 * other.w);
 			const float y = (m_01 * other.x) + (m_11 * other.y) + (m_21 * other.z) + (m_31 * other.w);
@@ -379,31 +371,39 @@ namespace Insight
 #endif
 		}
 
-		Matrix4 Matrix4::operator/(const Matrix4& other)
+		Matrix4 Matrix4::operator/(const Matrix4& other) const
 		{
 			return *this * other.Inversed();
 		}
-		Vector4 Matrix4::operator/(const Vector4& other)
+		Vector4 Matrix4::operator/(const Vector4& other) const
 		{
 			return Inversed() * other;
 		}
 
-		Matrix4 Matrix4::operator-(const Matrix4& other)
+		Matrix4 Matrix4::operator-(const Matrix4& other) const
 		{
+#if defined(IS_MATHS_GLM)
+			return mat4 - other.mat4;
+#else
 			return Matrix4(
-				  m_00 - other.m_00, m_01 - other.m_01, m_02 - other.m_02, m_03 - other.m_03
-				, m_10 - other.m_10, m_11 - other.m_11, m_12 - other.m_12, m_13 - other.m_13
-				, m_20 - other.m_20, m_21 - other.m_21, m_22 - other.m_22, m_23 - other.m_23
-				, m_30 - other.m_30, m_31 - other.m_31, m_32 - other.m_32, m_33 - other.m_33);
+				v0 - other.v0,
+				v1 - other.v1,
+				v2 - other.v2,
+				v3 - other.v3);
+#endif
 		}
 
-		Matrix4 Matrix4::operator+(const Matrix4& other)
+		Matrix4 Matrix4::operator+(const Matrix4& other) const
 		{
+#if defined(IS_MATHS_GLM)
+			return mat4 + other.mat4;
+#else
 			return Matrix4(
-				  m_00 + other.m_00, m_01 + other.m_01, m_02 + other.m_02, m_03 + other.m_03
-				, m_10 + other.m_10, m_11 + other.m_11, m_12 + other.m_12, m_13 + other.m_13
-				, m_20 + other.m_20, m_21 + other.m_21, m_22 + other.m_22, m_23 + other.m_23
-				, m_30 + other.m_30, m_31 + other.m_31, m_32 + other.m_32, m_33 + other.m_33);
+				v0 + other.v0,
+				v1 + other.v1,
+				v2 + other.v2,
+				v3 + other.v3);
+#endif
 		}
 
 		Matrix4 Matrix4::operator*=(const Matrix4& other)
@@ -413,10 +413,10 @@ namespace Insight
 		}
 		Matrix4 Matrix4::operator*=(const Vector4& other)
 		{
-			v0 *= other.x;
-			v1 *= other.y;
-			v2 *= other.z;
-			v3 *= other.w;
+			v0 *= other;
+			v1 *= other;
+			v2 *= other;
+			v3 *= other;
 			return *this;
 		}
 
@@ -426,39 +426,51 @@ namespace Insight
 			return *this;
 		}
 		Matrix4 Matrix4::operator/=(const Vector4& other)
-		{
-			v0 /= other.x;
-			v1 /= other.y;
-			v2 /= other.z;
-			v3 /= other.w;
+		{	
+			v0 /= other;
+			v1 /= other;
+			v2 /= other;
+			v3 /= other;
 			return *this;
 		}
 
 		Matrix4 Matrix4::operator-=(const Matrix4& other)
 		{
+#ifdef IS_MATHS_DIRECTX_MATHS
+			//return Vector4(DirectX::XMVector4Transform(other.xmvector, xmmatrix));
+#elif defined(IS_MATHS_GLM)
+			mat4 -= other.mat4;
+#else
 			*this = Matrix4(*this) - other;
+#endif
 			return *this;
 		}
 		Matrix4 Matrix4::operator-=(const Vector4& other)
 		{
-			v0 -= other.x;
-			v1 -= other.y;
-			v2 -= other.z;
-			v3 -= other.w;
+			v0 -= other;
+			v1 -= other;
+			v2 -= other;
+			v3 -= other;
 			return *this;
 		}
 
 		Matrix4 Matrix4::operator+=(const Matrix4& other)
 		{
+#ifdef IS_MATHS_DIRECTX_MATHS
+			//xmmatrix = Vector4(DirectX::XMVector4Transform(other.xmvector, xmmatrix));
+#elif defined(IS_MATHS_GLM)
+			mat4 += other.mat4;
+#else
 			*this = Matrix4(*this) + other;
+#endif
 			return *this;
 		}
 		Matrix4 Matrix4::operator+=(const Vector4& other)
 		{
-			v0 += other.x;
-			v1 += other.y;
-			v2 += other.z;
-			v3 += other.w;
+			v0 += other;
+			v1 += other;
+			v2 += other;
+			v3 += other;
 			return *this;
 		}
 
@@ -470,224 +482,366 @@ namespace Insight
 }
 
 #ifdef IS_TESTING
-#if 0
 #include "doctest.h"
 namespace test
 {
 	using namespace Insight::Maths;
 	TEST_SUITE("Matrix4")
 	{
+		const float MatrixText_X1 = 4;
+		const float MatrixText_Y1 = 7;
+		const float MatrixText_Z1 = 3;
+		const float MatrixText_W1 = 0;
+
+		const float MatrixText_X2 = 2;
+		const float MatrixText_Y2 = 6;
+		const float MatrixText_Z2 = 9;
+		const float MatrixText_W2 = 0;
+
+		const float MatrixText_X3 = 127;
+		const float MatrixText_Y3 = 26;
+		const float MatrixText_Z3 = 87;
+		const float MatrixText_W3 = 0;
+
+		const float MatrixText_X4 = 785;
+		const float MatrixText_Y4 = 1249;
+		const float MatrixText_Z4 = 8613;
+		const float MatrixText_W4 = 1;
+
+		const float MatrixText_X5 = 578;
+		const float MatrixText_Y5 = 231;
+		const float MatrixText_Z5 = 85;
+		const float MatrixText_W5 = 0;
+
+		const float MatrixText_X6 = 983;
+		const float MatrixText_Y6 = 849;
+		const float MatrixText_Z6 = 826;
+		const float MatrixText_W6 = 0;
+
+		const float MatrixText_X7 = 134;
+		const float MatrixText_Y7 = 487;
+		const float MatrixText_Z7 = 813;
+		const float MatrixText_W7 = 0;
+
+		const float MatrixText_X8 = 218;
+		const float MatrixText_Y8 = 26;
+		const float MatrixText_Z8 = 34;
+		const float MatrixText_W8 = 1;
+
+		const glm::mat4 glmMatrixTest(
+			MatrixText_X1, MatrixText_Y1, MatrixText_Z1, MatrixText_W1,
+			MatrixText_X2, MatrixText_Y2, MatrixText_Z2, MatrixText_W2,
+			MatrixText_X3, MatrixText_Y3, MatrixText_Z3, MatrixText_W3,
+			MatrixText_X4, MatrixText_Y4, MatrixText_Z4, MatrixText_W4);
+
+		const Matrix4 Matrix_Test(
+			MatrixText_X1, MatrixText_Y1, MatrixText_Z1, MatrixText_W1,
+			MatrixText_X2, MatrixText_Y2, MatrixText_Z2, MatrixText_W2,
+			MatrixText_X3, MatrixText_Y3, MatrixText_Z3, MatrixText_W3,
+			MatrixText_X4, MatrixText_Y4, MatrixText_Z4, MatrixText_W4);
+
+
+		const glm::mat4 glmMatrixTest1(
+			MatrixText_X5, MatrixText_Y5, MatrixText_Z5, MatrixText_W5,
+			MatrixText_X6, MatrixText_Y6, MatrixText_Z6, MatrixText_W6,
+			MatrixText_X7, MatrixText_Y7, MatrixText_Z7, MatrixText_W7,
+			MatrixText_X8, MatrixText_Y8, MatrixText_Z8, MatrixText_W8);
+
+		const Matrix4 Matrix_Test1(
+			MatrixText_X5, MatrixText_Y5, MatrixText_Z5, MatrixText_W5,
+			MatrixText_X6, MatrixText_Y6, MatrixText_Z6, MatrixText_W6,
+			MatrixText_X7, MatrixText_Y7, MatrixText_Z7, MatrixText_W7,
+			MatrixText_X8, MatrixText_Y8, MatrixText_Z8, MatrixText_W8);
+
+		TEST_CASE("Size Of")
+		{
+			CHECK(sizeof(Matrix4) == 64);
+		}
+
 		TEST_CASE("Constructors")
 		{
+			float x1 = 0.0f;
+			float y1 = 0.0f;
+			float z1 = 0.0f;
+			float w1 = 0.0f;
+
+			float x2 = 0.0f;
+			float y2 = 0.0f;
+			float z2 = 0.0f;
+			float w2 = 0.0f;
+
+			float x3 = 0.0f;
+			float y3 = 0.0f;
+			float z3 = 0.0f;
+			float w3 = 0.0f;
+
+			float x4 = 0.0f;
+			float y4 = 0.0f;
+			float z4 = 0.0f;
+			float w4 = 0.0f;
+
+			Matrix4 matrix;
+			{
+				CHECK(matrix[0].x == x1);
+				CHECK(matrix[0].y == y1);
+				CHECK(matrix[0].z == z1);
+				CHECK(matrix[0].w == w1);
+
+				CHECK(matrix[1].x == x2);
+				CHECK(matrix[1].y == y2);
+				CHECK(matrix[1].z == z2);
+				CHECK(matrix[1].w == w2);
+
+				CHECK(matrix[2].x == x3);
+				CHECK(matrix[2].y == y3);
+				CHECK(matrix[2].z == z3);
+				CHECK(matrix[2].w == w3);
+
+				CHECK(matrix[3].x == x4);
+				CHECK(matrix[3].y == y4);
+				CHECK(matrix[3].z == z4);
+				CHECK(matrix[3].w == w4);
+			}
+
+			{
+				CHECK(matrix.m_00 == x1);
+				CHECK(matrix.m_01 == y1);
+				CHECK(matrix.m_02 == z1);
+				CHECK(matrix.m_03 == w1);
+
+				CHECK(matrix.m_10 == x2);
+				CHECK(matrix.m_11 == y2);
+				CHECK(matrix.m_12 == z2);
+				CHECK(matrix.m_13 == w2);
+
+				CHECK(matrix.m_20 == x3);
+				CHECK(matrix.m_21 == y3);
+				CHECK(matrix.m_22 == z3);
+				CHECK(matrix.m_23 == w3);
+
+				CHECK(matrix.m_30 == x4);
+				CHECK(matrix.m_31 == y4);
+				CHECK(matrix.m_32 == z4);
+				CHECK(matrix.m_33 == w4);
+			}
+
+			x1 = 1.0f;
+			y1 = 2.0f;
+			z1 = 3.0f;
+			w1 = 4.0f;
+
+			x2 = 5.0f;
+			y2 = 6.0f;
+			z2 = 7.0f;
+			w2 = 8.0f;
+
+			matrix = Matrix4(
+				x1, y1, z1, w1, 
+				x2, y2, z2, w2,
+				x3, y3, z3, w3,
+				x4, y4, z4, w4);
+			{
+				CHECK(matrix[0].x == x1);
+				CHECK(matrix[0].y == y1);
+				CHECK(matrix[0].z == z1);
+				CHECK(matrix[0].w == w1);
+
+				CHECK(matrix[1].x == x2);
+				CHECK(matrix[1].y == y2);
+				CHECK(matrix[1].z == z2);
+				CHECK(matrix[1].w == w2);
+
+				CHECK(matrix[2].x == x3);
+				CHECK(matrix[2].y == y3);
+				CHECK(matrix[2].z == z3);
+				CHECK(matrix[2].w == w3);
+
+				CHECK(matrix[3].x == x4);
+				CHECK(matrix[3].y == y4);
+				CHECK(matrix[3].z == z4);
+				CHECK(matrix[3].w == w4);
+			}
+
+			{
+				CHECK(matrix.m_00 == x1);
+				CHECK(matrix.m_01 == y1);
+				CHECK(matrix.m_02 == z1);
+				CHECK(matrix.m_03 == w1);
+
+				CHECK(matrix.m_10 == x2);
+				CHECK(matrix.m_11 == y2);
+				CHECK(matrix.m_12 == z2);
+				CHECK(matrix.m_13 == w2);
+
+				CHECK(matrix.m_20 == x3);
+				CHECK(matrix.m_21 == y3);
+				CHECK(matrix.m_22 == z3);
+				CHECK(matrix.m_23 == w3);
+
+				CHECK(matrix.m_30 == x4);
+				CHECK(matrix.m_31 == y4);
+				CHECK(matrix.m_32 == z4);
+				CHECK(matrix.m_33 == w4);
+			}
+
+			Matrix4 matrix2(matrix);
+			{
+				CHECK(matrix2[0].x == x1);
+				CHECK(matrix2[0].y == y1);
+				CHECK(matrix2[0].z == z1);
+				CHECK(matrix2[0].w == w1);
+
+				CHECK(matrix2[1].x == x2);
+				CHECK(matrix2[1].y == y2);
+				CHECK(matrix2[1].z == z2);
+				CHECK(matrix2[1].w == w2);
+
+				CHECK(matrix2[2].x == x3);
+				CHECK(matrix2[2].y == y3);
+				CHECK(matrix2[2].z == z3);
+				CHECK(matrix2[2].w == w3);
+
+				CHECK(matrix2[3].x == x4);
+				CHECK(matrix2[3].y == y4);
+				CHECK(matrix2[3].z == z4);
+				CHECK(matrix2[3].w == w4);
+			}
+
+			{
+				CHECK(matrix2.m_00 == x1);
+				CHECK(matrix2.m_01 == y1);
+				CHECK(matrix2.m_02 == z1);
+				CHECK(matrix2.m_03 == w1);
+
+				CHECK(matrix2.m_10 == x2);
+				CHECK(matrix2.m_11 == y2);
+				CHECK(matrix2.m_12 == z2);
+				CHECK(matrix2.m_13 == w2);
+
+				CHECK(matrix2.m_20 == x3);
+				CHECK(matrix2.m_21 == y3);
+				CHECK(matrix2.m_22 == z3);
+				CHECK(matrix2.m_23 == w3);
+
+				CHECK(matrix2.m_30 == x4);
+				CHECK(matrix2.m_31 == y4);
+				CHECK(matrix2.m_32 == z4);
+				CHECK(matrix2.m_33 == w4);
+			}
 		}
 
 		TEST_CASE("Inverse")
 		{
-			Matrix4 matrix(
-				4, 5, 3, 7,
-				5, 2, 4, 9,
-				10, 2, 3, 1,
-				1, 5, 7, 1);
-			Matrix4 inv = matrix.Inversed();
-			Matrix4 result = matrix * inv;
-			CHECK(result == Matrix4::Identity);
+			Matrix4 one = Matrix_Test1;
+			Matrix4 inv = one.Inversed();
+			glm::mat4 glmInv = glm::inverse(glmMatrixTest1);
+			CHECK(inv.Equal(glmInv, 0.1f));
+
+			Matrix4 result = inv * one;
+			CHECK(result.Equal(Matrix4::Identity, 0.1f));
 		}
 
 		TEST_CASE("Transpose")
 		{
-			Matrix4 matrix(
-				4, 5, 3, 7,
-				5, 2, 4, 9,
-				10, 2, 3, 1,
-				1, 5, 7, 1);
-			matrix.Transpose();
-			CHECK(Equals(matrix.m_00, 4.0f));
-			CHECK(Equals(matrix.m_01, 5.0f));
-			CHECK(Equals(matrix.m_02, 10.0f));
-			CHECK(Equals(matrix.m_03, 1.0f));
-
-			CHECK(Equals(matrix.m_10, 5.0f));
-			CHECK(Equals(matrix.m_11, 2.0f));
-			CHECK(Equals(matrix.m_12, 2.0f));
-			CHECK(Equals(matrix.m_13, 5.0f));
-
-			CHECK(Equals(matrix.m_20, 3.0f));
-			CHECK(Equals(matrix.m_21, 4.0f));
-			CHECK(Equals(matrix.m_22, 3.0f));
-			CHECK(Equals(matrix.m_23, 7.0f));
-
-			CHECK(Equals(matrix.m_30, 7.0f));
-			CHECK(Equals(matrix.m_31, 9.0f));
-			CHECK(Equals(matrix.m_32, 1.0f));
-			CHECK(Equals(matrix.m_33, 1.0f));
+			CHECK(Matrix_Test.Transposed() == glm::transpose(glmMatrixTest));
+			Matrix4 mat = Matrix_Test;
+			mat.Transpose();
+			CHECK(mat == glm::transpose(glmMatrixTest));
 		}
 
 		TEST_CASE("operator[]")
 		{
-			Matrix4 matrix(
-				4, 5, 3, 7,
-				5, 2, 4, 9,
-				10, 2, 3, 1,
-				1, 5, 7, 1);
-			Vector4 first_row = matrix[0];
-			Vector4 second_row = matrix[1];
-			CHECK(first_row == Vector4(4, 5, 3, 7));
-			CHECK(second_row == Vector4(5, 2, 4, 9));
+			Matrix4 one = Matrix_Test;
+			Vector4 first_row = one[0];
+			Vector4 second_row = one[1];
+			Vector4 thrid_row = one[2];
+			Vector4 four_row = one[3];
 
-			matrix[0][1] = 45;
-			first_row = matrix[0];
-			CHECK(first_row == Vector4(4, 45, 3, 7));
+			CHECK(first_row == Matrix_Test[0]);
+			CHECK(second_row == Matrix_Test[1]);
+			CHECK(thrid_row == Matrix_Test[2]);
+			CHECK(four_row == Matrix_Test[3]);
 
-			Matrix4 inv = matrix.Inversed();
-			Matrix4 result = matrix * inv;
-			CHECK(result == Matrix4::Identity);
+			one[0][1] = 45;
+			first_row = one[0];
+			CHECK(first_row.y == 45);
+
+			Matrix4 inv = one.Inversed();
+			Matrix4 result = inv * one;
+			CHECK(result.Equal(Matrix4::Identity, 0.1f));
 		}
 
 		TEST_CASE("Multiplication")
 		{
-			Matrix4 one(
-				4, 5, 3, 7,
-				5, 2, 4, 9,
-				10, 2, 3, 1,
-				1, 5, 7, 1);
-			Matrix4 two(
-				1, 2, 8, 3,
-				2, 4, 4, 1,
-				20, 1, 10, 1,
-				1, 5, 7, 1);
+			Matrix4 one = Matrix_Test;
+			Matrix4 two = Matrix_Test1;
 
 			Matrix4 result = one * two;
-			CHECK(Equals(result.m_00, 81.000f, 0.0001f));
-			CHECK(Equals(result.m_01, 66.000f, 0.0001f));
-			CHECK(Equals(result.m_02, 131.000f, 0.0001f));
-			CHECK(Equals(result.m_03, 27.000f, 0.0001f));
+			CHECK(result.Equal(glmMatrixTest * glmMatrixTest1, 0.1f));
 
-			CHECK(Equals(result.m_10,  98.000f, 0.0001f));
-			CHECK(Equals(result.m_11,  67.000f, 0.0001f));
-			CHECK(Equals(result.m_12, 151.000f, 0.0001f));
-			CHECK(Equals(result.m_13,  30.000f, 0.0001f));
+			Vector4 vec = Vector4(5, 7, 15, 4);
+			glm::vec4 glmVec = glm::vec4(vec.x, vec.y, vec.z, vec.w);
+			glm::mat4 glmMat = glm::mat4(glmMatrixTest) *= glmVec;
 
-			CHECK(Equals(result.m_20,  75.000f, 0.0001f));
-			CHECK(Equals(result.m_21,  36.000f, 0.0001f));
-			CHECK(Equals(result.m_22, 125.000f, 0.0001f));
-			CHECK(Equals(result.m_23,  36.000f, 0.0001f));
-
-			CHECK(Equals(result.m_30, 152.000f, 0.0001f));
-			CHECK(Equals(result.m_31,  34.000f, 0.0001f));
-			CHECK(Equals(result.m_32, 105.00f, 0.0001f));
-			CHECK(Equals(result.m_33,  16.000f, 0.0001f));
-
-			Vector4 vec = Vector4(5, 7, 10, 1);
 			result = one *= vec;
-			CHECK(Equals(result.m_00, 20.000f, 0.001f));
-			CHECK(Equals(result.m_01, 25.000f, 0.001f));
-			CHECK(Equals(result.m_02, 15.000f, 0.001f));
-			CHECK(Equals(result.m_03, 35.00f, 0.001f));
+			CHECK(result.Equal(glmMat, 0.1f));
+			CHECK(result.Equal(one, 0.1f));
 
-			CHECK(Equals(result.m_10, 35.000f, 0.001f));
-			CHECK(Equals(result.m_11, 14.000f, 0.001f));
-			CHECK(Equals(result.m_12, 28.000f, 0.001f));
-			CHECK(Equals(result.m_13, 63.000f, 0.001f));
-
-			CHECK(Equals(result.m_20, 100.000f, 0.001f));
-			CHECK(Equals(result.m_21, 20.000f, 0.001f));
-			CHECK(Equals(result.m_22, 30.000f, 0.001f));
-			CHECK(Equals(result.m_23, 10.000f, 0.001f));
-
-			CHECK(Equals(result.m_30, 1.000f, 0.001f));
-			CHECK(Equals(result.m_31, 5.000f, 0.001f));
-			CHECK(Equals(result.m_32, 7.000f, 0.001f));
-			CHECK(Equals(result.m_33, 1.000f, 0.001f));
-
-			CHECK(result == one);
-
-			one = Matrix4(
-				4, 5, 3, 7,
-				5, 2, 4, 9,
-				10, 2, 3, 1,
-				1, 5, 7, 1);
-			Vector4 result_vec = one * vec;
-			CHECK(Equals(result_vec.x, 156.000f, 0.001f));
-			CHECK(Equals(result_vec.y,  64.000f, 0.001f));
-			CHECK(Equals(result_vec.z,  80.000f, 0.001f));
-			CHECK(Equals(result_vec.w, 109.000f, 0.001f));
+			CHECK((Matrix_Test * vec) == (glmMatrixTest * glmVec));
 		}
 
 		TEST_CASE("Division")
 		{
-			Matrix4 one(
-				4, 5, 3, 7,
-				5, 2, 4, 9,
-				10, 2, 3, 1,
-				27, 3, -85, 5);
-			Matrix4 two(
-				1, 2, 8, 3,
-				2, 4, 34, 1,
-				20, 1, 10, 89,
-				1, 5, 7, 5.8f);
+			Matrix4 one = Matrix_Test;
+			Matrix4 two = Matrix_Test1;
+
+			glm::mat4 g = glmMatrixTest;
+
+			glm::mat4 glmMat = glmMatrixTest / glmMatrixTest1;
+			glm::mat4 glmMat1 = glmMatrixTest1 / glmMatrixTest;
 
 			Matrix4 result = one / two;
-			CHECK(Equals(result.m_00, 35.088f, 0.001f));
-			CHECK(Equals(result.m_01, -6.406f, 0.001f));
-			CHECK(Equals(result.m_02, -0.523f, 0.001f));
-			CHECK(Equals(result.m_03, -7.805f, 0.001f));
+			Matrix4 result1 = two / one;
+			CHECK(result.Equal(glmMat, 0.1f));
+			CHECK(result1.Equal(glmMat1, 0.1f));
 
-			CHECK(Equals(result.m_10, 35.519f, 0.001f));
-			CHECK(Equals(result.m_11, -6.321f, 0.001f));
-			CHECK(Equals(result.m_12, -0.460f, 0.001f));
-			CHECK(Equals(result.m_13, -8.658f, 0.001f));
-
-			CHECK(Equals(result.m_20, 114.772f, 0.001f));
-			CHECK(Equals(result.m_21, -20.477f, 0.001f));
-			CHECK(Equals(result.m_22, -1.752f, 0.001f));
-			CHECK(Equals(result.m_23, -28.776f, 0.001f));
-
-			CHECK(Equals(result.m_30, 375.839f, 0.001f));
-			CHECK(Equals(result.m_31, -70.199f, 0.001f));
-			CHECK(Equals(result.m_32, -5.801f, 0.001f));
-			CHECK(Equals(result.m_33, -92.415f, 0.001f));
-
-			one /= two;
-			CHECK(one == result);
-
-			Vector4 vec = Vector4(5, 7, 10, 4);
-			result = two /= vec;
-			CHECK(Equals(result.m_00, 0.2f, 0.001f));
-			CHECK(Equals(result.m_01, 0.4f, 0.001f));
-			CHECK(Equals(result.m_02, 1.6f, 0.001f));
-			CHECK(Equals(result.m_03, 0.6f, 0.001f));
-
-			CHECK(Equals(result.m_10, 0.285f, 0.001f));
-			CHECK(Equals(result.m_11, 0.571f, 0.001f));
-			CHECK(Equals(result.m_12, 4.857f, 0.001f));
-			CHECK(Equals(result.m_13, 0.142f, 0.001f));
-
-			CHECK(Equals(result.m_20, 2.f, 0.001f));
-			CHECK(Equals(result.m_21, 0.1f, 0.001f));
-			CHECK(Equals(result.m_22, 1.f, 0.001f));
-			CHECK(Equals(result.m_23, 8.9f, 0.001f));
-
-			CHECK(Equals(result.m_30, 0.25f, 0.001f));
-			CHECK(Equals(result.m_31, 1.25f, 0.001f));
-			CHECK(Equals(result.m_32, 1.75f, 0.001f));
-			CHECK(Equals(result.m_33, 1.45f, 0.001f));
-
-			CHECK(result == two);
+			Vector4 vec = Vector4(5, 7, 15, 4);
+			glmMat = glm::mat4(glmMatrixTest) /= glm::vec4(vec.x, vec.y, vec.z, vec.w);
+			result = one /= vec;
+			CHECK(result.Equal(glmMat, 0.1f));
 		}
 
-		/*TEST_CASE("Subtraction")
+		TEST_CASE("Subtraction")
 		{
-			Matrix4 one = Matrix4(5, 10,
-								 25, 9);
-			Vector4 vec = Vector4(5, 7);
-			Matrix4 result = one -= vec;
-			CHECK(Equals(result.m_00, 0.0f, 0.001f));
-			CHECK(Equals(result.m_01, 5.0f, 0.001f));
-			CHECK(Equals(result.m_10, 18.0f, 0.001f));
-			CHECK(Equals(result.m_11, 2.0f, 0.001f));
-			CHECK(result == one);
-		}*/
+			Matrix4 one = Matrix_Test;
+			Matrix4 two = glmMatrixTest1;
+
+			Matrix4 result = one - two;
+			CHECK(result.Equal(glmMatrixTest - glmMatrixTest1, 0.1f));
+
+			Vector4 vec = Vector4(5, 7, 15, 4);
+			glm::vec4 glmVec = glm::vec4(vec.x, vec.y, vec.z, vec.w);
+			glm::mat4 glmMat = glm::mat4(glmMatrixTest) -= glmVec;
+			result = one -= vec;
+			CHECK(result.Equal(glmMat, 0.1f));
+			CHECK(result.Equal(one, 0.1f));
+		}
+
+		TEST_CASE("Addition")
+		{
+			Matrix4 one = Matrix_Test;
+			Matrix4 two = Matrix_Test1;
+
+			Matrix4 result = one + two;
+			CHECK(result.Equal(glmMatrixTest + glmMatrixTest1, 0.1f));
+
+			Vector4 vec = Vector4(5, 7, 15, 4);
+			glm::vec4 glmVec = glm::vec4(vec.x, vec.y, vec.z, vec.w);
+			glm::mat4 glmMat = glm::mat4(glmMatrixTest) += glmVec;
+			result = one += vec;
+			CHECK(result.Equal(glmMat, 0.1f));
+			CHECK(result.Equal(one, 0.1f));
+		}
 	}
 }
-#endif
 #endif

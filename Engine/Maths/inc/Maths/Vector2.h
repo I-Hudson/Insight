@@ -43,7 +43,7 @@ namespace Insight
 			float Dot(const Vector2& other) const;
 
 			float& operator[](int i);
-			float& operator[](unsigned int i);
+			const float& operator[](int i) const;
 
 			bool operator==(const Vector2& other) const;
 			bool operator!=(const Vector2& other) const;

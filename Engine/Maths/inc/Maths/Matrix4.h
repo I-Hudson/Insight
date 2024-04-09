@@ -6,6 +6,9 @@
 #ifdef IS_MATHS_DIRECTX_MATHS
 #include <DirectXMath.h>
 #endif
+#if defined(IS_MATHS_GLM) || defined(IS_TESTING)
+#include <glm/glm.hpp>
+#endif 
 
 namespace Insight
 {
@@ -21,11 +24,17 @@ namespace Insight
 				float m10, float m11, float m12, float m_13,
 				float m20, float m21, float m22, float m_23,
 				float m30, float m31, float m32, float m_33);
+			Matrix4(const Vector4 v0, const Vector4 v1, const Vector4 v2, const Vector4 v3);
 			Matrix4(const Matrix4& other);
 			Matrix4(Matrix4&& other);
 #ifdef IS_MATHS_DIRECTX_MATHS
 			Matrix4(const DirectX::XMMATRIX& other);
 			Matrix4(DirectX::XMMATRIX&& other);
+			Matrix4(const DirectX::XMFLOAT4X4& other);
+#endif
+#if defined(IS_MATHS_GLM) || defined(IS_TESTING)
+			Matrix4(const glm::mat4& other);
+			Matrix4(glm::mat4&& other);
 #endif
 			~Matrix4();
 
@@ -43,24 +52,25 @@ namespace Insight
 			Matrix4 Transposed() const { return Matrix4(*this).Transpose(); }
 
 			Vector4& operator[](int i);
-			Vector4& operator[](unsigned int i);
 			const Vector4& operator[](int i) const;
-			const Vector4& operator[](unsigned int i) const;
 
 			bool operator==(const Matrix4& other) const;
 			bool operator!=(const Matrix4& other) const;
 
+			bool Equal(const Matrix4& other, const float errorRange) const;
+			bool NotEqual(const Matrix4& other, const float errorRange) const;
+
 			Matrix4 operator=(const Matrix4& other);
 
-			Matrix4 operator*(const Matrix4& other);
-			Vector4 operator*(const Vector4& other);
+			Matrix4 operator*(const Matrix4& other) const;
+			Vector4 operator*(const Vector4& other) const;
 
-			Matrix4 operator/(const Matrix4& other);
-			Vector4 operator/(const Vector4& other);
+			Matrix4 operator/(const Matrix4& other) const;
+			Vector4 operator/(const Vector4& other) const;
 
-			Matrix4 operator-(const Matrix4& other);
+			Matrix4 operator-(const Matrix4& other) const;
 
-			Matrix4 operator+(const Matrix4& other);
+			Matrix4 operator+(const Matrix4& other) const;
 
 			Matrix4 operator*=(const Matrix4& other);
 			/// @brief Multiple each row of the matrix by the vector as a scaler.
@@ -93,6 +103,9 @@ namespace Insight
 #ifdef IS_MATHS_DIRECTX_MATHS
 				// Vector4 is off size XMVECTOR which is a vector 4.
 				struct { DirectX::XMMATRIX xmmatrix; };
+#endif
+#if defined(IS_MATHS_GLM) || defined(IS_TESTING)
+				struct { glm::mat4 mat4; };
 #endif
 				struct
 				{

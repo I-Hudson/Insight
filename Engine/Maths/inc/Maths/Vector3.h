@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Maths/Defines.h"
+#include "Maths/Vector2.h"
 
 #ifdef IS_MATHS_DIRECTX_MATHS
 #include <DirectXMath.h>
@@ -43,9 +44,7 @@ namespace Insight
 			float Dot(const Vector3& other) const;
 
 			float& operator[](int i);
-			float& operator[](unsigned int i);
 			const float& operator[](int i) const;
-			const float& operator[](unsigned int i) const;
 
 			bool operator==(const Vector3& other) const;
 			bool operator!=(const Vector3& other) const;
@@ -86,6 +85,10 @@ namespace Insight
 				struct { float x, y, z; };
 				struct { float r, g, b; };
 				struct { float data[3]; };
+#ifdef IS_MATHS_ENABLE_SWIZZLE
+				struct { Vector2 xy; float z;  };
+				struct { float x;  Vector2 yz; };
+#endif
 #ifdef IS_MATHS_DIRECTX_MATHS
 				struct { DirectX::XMVECTOR xmvector; };
 #endif
