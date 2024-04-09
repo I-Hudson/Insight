@@ -5,6 +5,11 @@
 
 #include <cassert>
 
+#if defined(IS_MATHS_GLM) || defined(IS_TESTING)
+#include <glm/ext/matrix_transform.hpp>
+#include <glm/ext/matrix_clip_space.hpp>
+#endif
+
 namespace Insight
 {
 	namespace Maths
@@ -234,7 +239,7 @@ namespace Insight
 #ifdef IS_MATHS_DIRECTX_MATHS
 			return DirectX::XMMatrixMultiply(DirectX::XMMatrixTranslationFromVector(vector.xmvector), xmmatrix);
 #elif defined(IS_MATHS_GLM)
-			return glm::translate(mat4 * vector.vec4);
+			return glm::translate(mat4, glm::vec3(vector.vec4));
 #else
 			return Matrix4();
 #endif
@@ -245,7 +250,7 @@ namespace Insight
 #ifdef IS_MATHS_DIRECTX_MATHS
 			return DirectX::XMMatrixPerspectiveFovRH(fovy, aspect, zNear, zFar);
 #elif defined(IS_MATHS_GLM)
-			return glm::perspective(m_fovY, m_aspect, m_nearPlane, m_farPlane);
+			return glm::perspective(fovy, aspect, zNear, zFar);
 #else
 			Matrix4 Result = Matrix4::Identity;
 			Result[0][0] = static_cast<float>(2) / (right - left);
@@ -262,7 +267,7 @@ namespace Insight
 #ifdef IS_MATHS_DIRECTX_MATHS
 			return DirectX::XMMatrixOrthographicRH(abs(left - right), abs(bottom - top), 0, std::numeric_limits<float>::max());
 #elif defined(IS_MATHS_GLM)
-			return glm::translate(mat4 * vector.vec4);
+			return glm::ortho(left, right, bottom, top);
 #else
 			Matrix4 Result = Matrix4::Identity;
 			Result[0][0] = static_cast<float>(2) / (right - left);
@@ -278,7 +283,7 @@ namespace Insight
 #ifdef IS_MATHS_DIRECTX_MATHS
 			return DirectX::XMMatrixOrthographicRH(abs(left - right), abs(bottom - top), zNear, zFar);
 #elif defined(IS_MATHS_GLM)
-			return glm::orth(left, right, bottom, top, nearPlane, farPlane);
+			return glm::ortho(left, right, bottom, top, zNear, zFar);
 #else
 			Matrix4 Result = Matrix4::Identity;
 			Result[0][0] = static_cast<float>(2) / (right - left);
@@ -295,7 +300,7 @@ namespace Insight
 #ifdef IS_MATHS_DIRECTX_MATHS
 			return DirectX::XMMatrixLookAtRH(eye.xmvector, center.xmvector, up.xmvector);
 #elif defined(IS_MATHS_GLM)
-			return glm::lookAt(eye, center, up);
+			return glm::lookAt(eye.vec3, center.vec3, up.vec3);
 #else
 			Matrix4 Result = Matrix4::Identity;
 			Result[0][0] = static_cast<float>(2) / (right - left);

@@ -36,10 +36,10 @@ namespace Insight
 #ifdef IS_MATHS_DIRECTX_MATHS
 			xmvector = DirectX::XMVectorSet(x, y, z, w);
 #else
-			this.x = x;
-			this.y = y;
-			this.z = z;
-			this.w = w;
+			(*this).x = x;
+			(*this).y = y;
+			(*this).z = z;
+			(*this).w = w;
 #endif
 		}
 		
@@ -64,8 +64,8 @@ namespace Insight
 #else
 			x = other.x;
 			y = other.y;
-			this.z = z;
-			this.w = w;
+			(*this).z = z;
+			(*this).w = w;
 #endif
 		}
 		Vector4::Vector4(Float2&& other)
@@ -90,7 +90,7 @@ namespace Insight
 			x = other.x;
 			y = other.y;
 			z = other.z;
-			this.w = w;
+			w = w;
 #endif
 		}
 		Vector4::Vector4(Float3&& other)

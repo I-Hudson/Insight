@@ -62,7 +62,7 @@ namespace Insight
 #else
 			x = other.x;
 			y = other.y;
-			this.z = z;
+			z = z;
 #endif
 		}
 		Vector3::Vector3(Float2&& other)
@@ -73,7 +73,7 @@ namespace Insight
 #else
 			x = other.x;
 			y = other.y;
-			this.z = 0.0f;
+			z = 0.0f;
 #endif
 		}
 
@@ -104,7 +104,7 @@ namespace Insight
 			xmvector = other.xmvector;
 			xmvector = DirectX::XMVectorSetW(xmvector, 0.0f);
 #elif defined(IS_MATHS_GLM)
-			vec3 = glm::vec4(other.vec4.x, other.vec4.y, other.vec4.z);
+			vec3 = glm::vec3(other.vec4.x, other.vec4.y, other.vec4.z);
 #else
 			x = other.x;
 			y = other.y; 
@@ -118,7 +118,7 @@ namespace Insight
 			xmvector = other.xmvector;
 			xmvector = DirectX::XMVectorSetW(xmvector, 0.0f);
 #elif defined(IS_MATHS_GLM)
-			vec3 = glm::vec4(other.vec4.x, other.vec4.y, other.vec4.z);
+			vec3 = glm::vec3(other.vec4.x, other.vec4.y, other.vec4.z);
 #else
 			x = other.x; 
 			y = other.y; 
