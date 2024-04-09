@@ -241,6 +241,7 @@ namespace Insight
 #elif defined(IS_MATHS_GLM)
 			return glm::translate(mat4, glm::vec3(vector.vec4));
 #else
+			assert(false);
 			return Matrix4();
 #endif
 		}
@@ -253,11 +254,7 @@ namespace Insight
 			return glm::perspective(fovy, aspect, zNear, zFar);
 #else
 			Matrix4 Result = Matrix4::Identity;
-			Result[0][0] = static_cast<float>(2) / (right - left);
-			Result[1][1] = static_cast<float>(2) / (top - bottom);
-			Result[2][2] = -static_cast<float>(1);
-			Result[3][0] = -(right + left) / (right - left);
-			Result[3][1] = -(top + bottom) / (top - bottom);
+			assert(false);
 			return Result;
 #endif
 		}
@@ -270,11 +267,7 @@ namespace Insight
 			return glm::ortho(left, right, bottom, top);
 #else
 			Matrix4 Result = Matrix4::Identity;
-			Result[0][0] = static_cast<float>(2) / (right - left);
-			Result[1][1] = static_cast<float>(2) / (top - bottom);
-			Result[2][2] = -static_cast<float>(1);
-			Result[3][0] = -(right + left) / (right - left);
-			Result[3][1] = -(top + bottom) / (top - bottom);
+			assert(false);
 			return Result;
 #endif
 		}
@@ -286,11 +279,7 @@ namespace Insight
 			return glm::ortho(left, right, bottom, top, zNear, zFar);
 #else
 			Matrix4 Result = Matrix4::Identity;
-			Result[0][0] = static_cast<float>(2) / (right - left);
-			Result[1][1] = static_cast<float>(2) / (top - bottom);
-			Result[2][2] = -static_cast<float>(1);
-			Result[3][0] = -(right + left) / (right - left);
-			Result[3][1] = -(top + bottom) / (top - bottom);
+			assert(false);
 			return Result;
 #endif
 		}
@@ -303,11 +292,7 @@ namespace Insight
 			return glm::lookAt(eye.vec3, center.vec3, up.vec3);
 #else
 			Matrix4 Result = Matrix4::Identity;
-			Result[0][0] = static_cast<float>(2) / (right - left);
-			Result[1][1] = static_cast<float>(2) / (top - bottom);
-			Result[2][2] = -static_cast<float>(1);
-			Result[3][0] = -(right + left) / (right - left);
-			Result[3][1] = -(top + bottom) / (top - bottom);
+			assert(false);
 			return Result;
 #endif
 		}

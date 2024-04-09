@@ -15,7 +15,7 @@
 #endif
 
 #define IS_MATHS_ENABLE_SWIZZLE
-#define _XM_NO_INTRINSICS_
+
 //#define IS_MATHS_DIRECTX_MATHS
 
 #define IS_UNUSED(x) (void)x
