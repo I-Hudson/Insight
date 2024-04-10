@@ -136,13 +136,17 @@ namespace Insight
             const ECS::Camera camera = m_editorCameraComponent->GetCamera();
             const Maths::Matrix4 cameraTransform = m_editorCameraComponent->GetViewMatrix();
 
-            RenderFrame renderFrame = App::Engine::Instance().GetSystemRegistry().GetSystem<Runtime::GraphicsSystem>()->GetRenderFrame();
+            RenderFrame renderFrame;
+            {
+                IS_PROFILE_SCOPE("Copy render frame");
+                renderFrame = App::Engine::Instance().GetSystemRegistry().GetSystem<Runtime::GraphicsSystem>()->GetRenderFrame();
+            }
             renderFrame.SetCameraForAllWorlds(camera, cameraTransform);
             renderFrame.Sort();
 
             RenderData renderData =
             {
-                renderFrame,
+                std::move(renderFrame),
                 GetBufferFrame(),
                 GetBufferSamplers()
             };
@@ -154,6 +158,7 @@ namespace Insight
 
             Graphics::RenderGraph::Instance().AddPreRender([this](Graphics::RenderGraph& renderGraph, Graphics::RHI_CommandList* cmdList)
                 {
+                    IS_PROFILE_SCOPE("Upload WorldViewWindow Buffer Frame");
                     m_renderingData.FrameView = cmdList->UploadUniform(m_renderingData.BufferFrame);
                 });
 
@@ -525,6 +530,8 @@ namespace Insight
 
         void WorldViewWindow::BindCommonResources(Graphics::RHI_CommandList* cmd_list, RenderData& renderData)
         {
+            IS_PROFILE_FUNCTION();
+
             cmd_list->SetUniform(0, 0, renderData.FrameView);
 
             cmd_list->SetSampler(4, 0, renderData.BufferSamplers.Shadow_Sampler);
@@ -535,6 +542,8 @@ namespace Insight
 
         Graphics::BufferFrame WorldViewWindow::GetBufferFrame() const
         {
+            IS_PROFILE_FUNCTION();
+
             Graphics::BufferFrame bufferFrame;
             bufferFrame.Proj_View = m_editorCameraComponent->GetProjectionViewMatrix();
             bufferFrame.Projection = m_editorCameraComponent->GetProjectionMatrix();
@@ -550,6 +559,8 @@ namespace Insight
 
         Graphics::BufferSamplers WorldViewWindow::GetBufferSamplers() const
         {
+            IS_PROFILE_FUNCTION();
+
             Graphics::BufferSamplers bufferSamplers;
             Graphics::RHI_SamplerCreateInfo sampler_create_info = { };
             sampler_create_info.MagFilter = Graphics::Filter::Linear;
