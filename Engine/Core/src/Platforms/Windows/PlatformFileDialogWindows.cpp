@@ -8,10 +8,7 @@
 
 #include "Platforms/Platform.h"
 #include "Core/Logger.h"
-#include "Core/StringUtils.h"
-
-#include <sstream>
-#include <Shlwapi.h>
+#include "Core/Assets.h"
 
 namespace Insight
 {

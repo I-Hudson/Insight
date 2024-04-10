@@ -15,6 +15,8 @@ project "Insight_Core"
     defines
     {
         "IS_EXPORT_CORE_DLL",
+        "SPDLOG_COMPILED_LIB",
+        "SPDLOG_SHARED_LIB",
     }
     
     includedirs
@@ -42,6 +44,7 @@ project "Insight_Core"
         "imgui.lib",
         "glm.lib",
         "zip.lib",
+        "spdlog.lib",
     }
     if (profileTool == "pix") then
         links

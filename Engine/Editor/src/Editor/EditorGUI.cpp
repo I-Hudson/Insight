@@ -52,7 +52,7 @@ namespace Insight::Editor::EditorGUI
     }
 
 
-    void Editor::EditorGUI::ObjectFieldSource(const char* id, const char* payload, Reflect::Type type)
+    void ObjectFieldSource(const char* id, const char* payload, Reflect::Type type)
     {
         if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
         {

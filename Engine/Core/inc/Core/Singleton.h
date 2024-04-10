@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Platforms/Platform.h"
+#include "Core/Assets.h"
 
 namespace Insight
 {

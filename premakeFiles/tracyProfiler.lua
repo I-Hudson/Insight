@@ -65,9 +65,9 @@ project "tracyProfiler"
 
 	links
 	{
-		"brotlicommon.lib",
-		"brotlidec.lib",
-		"brotlienc.lib",
+		"brotlicommon-static.lib",
+		"brotlidec-static.lib",
+		"brotlienc-static.lib",
 		"capstone.lib",
 		"glfw3.lib",
 

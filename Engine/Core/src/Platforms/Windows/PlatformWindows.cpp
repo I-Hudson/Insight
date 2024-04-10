@@ -3,7 +3,11 @@
 #ifdef IS_PLATFORM_WINDOWS
 
 #include "Core/Logger.h"
+#include "Core/Assets.h"
+
 #include "Platforms/Platform.h"
+
+#include <algorithm>
 
 #include <windows.h>
 #include <intrin.h>
@@ -378,7 +382,7 @@ namespace Insight
 				s_cpuInformation.IsAVX2 = cpuID7.EBX()  & AVX2_POS;
 
 				std::string upVId = s_cpuInformation.Vendor;
-				for_each(upVId.begin(), upVId.end(), [](char& in) { in = ::toupper(in); });
+				std::for_each(upVId.begin(), upVId.end(), [](char& in) { in = ::toupper(in); });
 				int mNumSMT = 0;
 				// Get num of cores
 				if (upVId.find("INTEL") != std::string::npos)

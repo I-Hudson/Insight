@@ -2,6 +2,7 @@
 #include "FileSystem/FileSystem.h"
 
 #include "Platforms/Platform.h"
+#include "Core/Assets.h"
 
 #include <fstream>
 #include <istream>

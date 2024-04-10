@@ -1,3 +1,4 @@
+#pragma once
 #include "Editor/Premake/PremakeProjectTemplateData.h"
 
 namespace Insight::Editor

@@ -1,4 +1,5 @@
 #include "Core/SystemRegistry.h"
+#include "Core/Assets.h"
 #include "Algorithm/Vector.h"
 
 namespace Insight

@@ -22,7 +22,7 @@ int main(int argc, char** argv)
 	Insight::Core::Logger::Init();
 
 #ifdef TEST_ENABLED
-	const char* args[] = { "-d", "--order-by=suite", "--no-breaks=true", "--reporters=console" };
+	const char* args[] = { "-d", "--order-by=suite", "--no-breaks=false", "--reporters=console" };
 	doctest::Context context = doctest::Context(ARRAYSIZE(args), args);
 	const int result = context.run();
 	return result;

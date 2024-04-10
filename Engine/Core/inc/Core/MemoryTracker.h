@@ -2,6 +2,7 @@
 
 #include "Defines.h"
 #include "Core/Singleton.h"
+#include "Core/TypeAlias.h"
 
 #include <unordered_map>
 #include <unordered_set>

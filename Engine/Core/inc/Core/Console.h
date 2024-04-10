@@ -1,9 +1,11 @@
 #pragma once
 
 #include "Core/Defines.h"
+#include "Core/TypeAlias.h"
 #include "Core/Singleton.h"
 
 #include <unordered_map>
+#include <string>
 
 namespace Insight
 {

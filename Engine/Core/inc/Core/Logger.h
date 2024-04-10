@@ -1,7 +1,11 @@
 #pragma once
 
 #include "Core/Defines.h"
+
+#pragma warning( push )
+#pragma warning( disable : 4275 )
 #include "spdlog/spdlog.h"
+#pragma warning( pop )
 
 namespace Insight
 {
@@ -14,9 +18,10 @@ namespace Insight
 		{
 		public:
 			static void Init();
+			static void Destroy();
 
-			inline static std::shared_ptr<spdlog::logger>& GetCoreFileLogger() { return s_CoreLogger; }
-			inline static std::shared_ptr<spdlog::logger>& GetClientFileLogger() { return s_ClientLogger; }
+			FORCE_INLINE static std::shared_ptr<spdlog::logger>& GetCoreFileLogger() { return s_CoreLogger; }
+			FORCE_INLINE static std::shared_ptr<spdlog::logger>& GetClientFileLogger() { return s_ClientLogger; }
 
 		private:
 			static std::shared_ptr<spdlog::logger> s_CoreLogger;

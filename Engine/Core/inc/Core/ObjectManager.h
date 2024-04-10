@@ -1,6 +1,8 @@
 #pragma once
 
+#include "Core/TypeAlias.h"
 #include "Core/Singleton.h"
+#include "Core/GUID.h"
 
 #include "Threading/SpinLock.h"
 
