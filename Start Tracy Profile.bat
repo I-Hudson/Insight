@@ -1,0 +1,1 @@
+start bin/Debug-windows-x86_64/tracyProfiler/tracyProfiler.exe
