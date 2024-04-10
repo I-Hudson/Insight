@@ -73,7 +73,7 @@ namespace Insight
 
 				if (sizeInBytes > GetSize())
 				{
-					IS_CORE_ERROR("[RHI_Buffer_Vulkan::Upload] Upload size '{}' is too big avaliable size '{}'.", sizeInBytes, GetSize());
+					IS_LOG_CORE_ERROR("[RHI_Buffer_Vulkan::Upload] Upload size '{}' is too big avaliable size '{}'.", sizeInBytes, GetSize());
 					return {};
 				}
 

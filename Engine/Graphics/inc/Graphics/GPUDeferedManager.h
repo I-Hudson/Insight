@@ -3,6 +3,7 @@
 #include "Graphics/Defines.h"
 
 #include "Core/Singleton.h"
+#include "Core/TypeAlias.h"
 
 #include <vector>
 #include <functional>

@@ -411,7 +411,7 @@ namespace Insight
 
 			void RHI_CommandList_DX12::SetLineWidth(float width)
 			{
-				IS_CORE_INFO("[ RHI_CommandList_DX12::SetLineWidth] Not implemented.");
+				IS_LOG_CORE_INFO("[ RHI_CommandList_DX12::SetLineWidth] Not implemented.");
 			}
 
 			void RHI_CommandList_DX12::SetVertexBuffer(RHI_Buffer* buffer)

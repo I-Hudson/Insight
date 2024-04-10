@@ -1,4 +1,5 @@
 #include "Input/XInputManager.h"
+#include "Platforms/Platform.h"
 
 #if defined(IS_PLATFORM_WINDOWS) 
 
@@ -132,7 +133,7 @@ namespace Insight
 			InputDevice_Controller* device = m_inputSystem->GetController(controllerIndex);
 			if (!device)
 			{
-				IS_CORE_ERROR("[XInputManager::ProcessVibration] Trying to process controller index '{}', controller at index is not valid.", controllerIndex);
+				IS_LOG_CORE_ERROR("[XInputManager::ProcessVibration] Trying to process controller index '{}', controller at index is not valid.", controllerIndex);
 				return;
 			}
 
@@ -193,7 +194,7 @@ namespace Insight
 			InputDevice_Controller* device = m_inputSystem->GetController(controllerIndex);
 			if (!device)
 			{
-				IS_CORE_ERROR("[XInputManager::ProcessVibration] Trying to process controller index '{}', controller at index is not valid.", controllerIndex);
+				IS_LOG_CORE_ERROR("[XInputManager::ProcessVibration] Trying to process controller index '{}', controller at index is not valid.", controllerIndex);
 				return;
 			}
 			XINPUT_VIBRATION state = {};
@@ -202,7 +203,7 @@ namespace Insight
 			DWORD dwResult = XInputSetState(controllerIndex, &state);
 			if (dwResult != ERROR_SUCCESS)
 			{
-				IS_CORE_ERROR("[XInputManager::ProcessVibration] XInputSetState failed.");
+				IS_LOG_CORE_ERROR("[XInputManager::ProcessVibration] XInputSetState failed.");
 			}
 		}
 

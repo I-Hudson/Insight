@@ -2,7 +2,7 @@
 #include "Graphics/RHI/RHI_CommandList.h"
 #include "Graphics/RHI/RHI_Texture.h"
 
-#include "Platforms/Platform.h"
+#include "Core/Asserts.h"
 
 #include "Event/EventSystem.h"
 

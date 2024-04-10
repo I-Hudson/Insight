@@ -30,12 +30,12 @@ namespace Insight
             // Check return_value to determine what happened.
             if (compressed_data_size <= 0)
             {
-                IS_CORE_ERROR("A 0 or negative result from LZ4_compress_default() indicates a failure trying to compress the data.");
+                IS_LOG_CORE_ERROR("A 0 or negative result from LZ4_compress_default() indicates a failure trying to compress the data.");
                 return false;
             }
             if (compressed_data_size > 0)
             {
-                IS_CORE_INFO("[Compression::Compress] We successfully compressed some data! Ratio: {0:.2f}",
+                IS_LOG_CORE_INFO("[Compression::Compress] We successfully compressed some data! Ratio: {0:.2f}",
                     (float)compressed_data_size / src_size);
             }
 

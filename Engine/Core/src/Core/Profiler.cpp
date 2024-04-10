@@ -31,11 +31,11 @@ namespace Insight
 				DurationSec elapsedTime = timer.GetElapsedTime();
 				if (elapsedTime.count() >= timeoutSecs)
 				{
-					IS_CORE_WARN("[WaitForProfiler] Timeout reached.");
+					IS_LOG_CORE_WARN("[WaitForProfiler] Timeout reached.");
 					break;
 				}
 				timer.Continue();
-				IS_CORE_INFO("[WaitForProfiler] Elapsed time seconds: {}", elapsedTime.count());
+				IS_LOG_CORE_INFO("[WaitForProfiler] Elapsed time seconds: {}", elapsedTime.count());
 			}
 #endif
 		}

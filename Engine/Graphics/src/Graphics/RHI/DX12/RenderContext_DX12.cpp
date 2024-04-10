@@ -119,7 +119,7 @@ namespace Insight
 				createCommandQueueResult = m_device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&m_queues[GPUQueue_Compute]));
 				if (createCommandQueueResult != S_OK)
 				{
-					IS_CORE_WARN("[GPUDevice_DX12::Init] Queue not supproted: {}, HR: {}",
+					IS_LOG_CORE_WARN("[GPUDevice_DX12::Init] Queue not supproted: {}, HR: {}",
 						(int)D3D12_COMMAND_LIST_TYPE_COMPUTE, HrToString(createCommandQueueResult));
 				}
 
@@ -127,7 +127,7 @@ namespace Insight
 				createCommandQueueResult = m_device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&m_queues[GPUQueue_Transfer]));
 				if (createCommandQueueResult != S_OK)
 				{
-					IS_CORE_WARN("[GPUDevice_DX12::Init] Queue not supproted: {}, HR: {}",
+					IS_LOG_CORE_WARN("[GPUDevice_DX12::Init] Queue not supproted: {}, HR: {}",
 						(int)D3D12_COMMAND_LIST_TYPE_COPY, HrToString(createCommandQueueResult));
 				}
 
@@ -412,7 +412,7 @@ namespace Insight
 									m_gpuCrashTracker->DeviceLost();
 
 									HRESULT deviceRemovedReason = m_device->GetDeviceRemovedReason();
-									IS_CORE_ERROR("[RenderContext_DX12::PostRender] Device has been removed. Reason: '{}'.", deviceRemovedReason);
+									IS_LOG_CORE_ERROR("[RenderContext_DX12::PostRender] Device has been removed. Reason: '{}'.", deviceRemovedReason);
 								}
 							}
 
@@ -460,7 +460,7 @@ namespace Insight
 				if (FAILED(hr) || !allowTearing)
 				{
 					tearingSupported = false;
-					IS_CORE_WARN("[RenderContext_DX12::CreateSwapchain]: Variable refresh rate displays not supported. Fallback to VSync.\n");
+					IS_LOG_CORE_WARN("[RenderContext_DX12::CreateSwapchain]: Variable refresh rate displays not supported. Fallback to VSync.\n");
 					desc.PresentMode = SwapchainPresentModes::VSync;
 				}
 				else
@@ -516,7 +516,7 @@ namespace Insight
 							// Transitions to fullscreen mode can fail when running apps over
 							// terminal services or for some other unexpected reason.  Consider
 							// notifying the user in some way when this happens.
-							IS_CORE_ERROR("[RenderContext_DX12::CreateSwapchain] Fullscreen transition failed.");
+							IS_LOG_CORE_ERROR("[RenderContext_DX12::CreateSwapchain] Fullscreen transition failed.");
 							FAIL_ASSERT();
 						}
 					}

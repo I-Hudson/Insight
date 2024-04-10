@@ -58,7 +58,7 @@ namespace Insight
 
 			if (!context)
 			{
-				IS_CORE_ERROR("[RenderContext* RenderContext::New] Unable to create a RenderContext.");
+				IS_LOG_CORE_ERROR("[RenderContext* RenderContext::New] Unable to create a RenderContext.");
 				return context;
 			}
 
@@ -279,7 +279,7 @@ namespace Insight
 
 			if (!m_resourceCaches.empty())
 			{
-				IS_CORE_WARN("[RenderContext::BaseDestroy] Not all RHI_ResourceCache's have been release with 'FreeResourceCache'. Please do this.");
+				IS_LOG_CORE_WARN("[RenderContext::BaseDestroy] Not all RHI_ResourceCache's have been release with 'FreeResourceCache'. Please do this.");
 				for (auto& cache : m_resourceCaches)
 				{
 					cache->Release();

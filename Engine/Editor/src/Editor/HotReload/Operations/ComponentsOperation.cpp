@@ -111,7 +111,7 @@ namespace Insight::Editor
                         {
                             if (member.GetValueType() != Reflect::EReflectValueType::Pointer)
                             {
-                                IS_CORE_WARN("[ComponentsOperation::FindAllComponents] Member '{0}::{1}' is value type '{2}'. Linking only works with pointers."
+                                IS_LOG_CORE_WARN("[ComponentsOperation::FindAllComponents] Member '{0}::{1}' is value type '{2}'. Linking only works with pointers."
                                     , typeInfo.GetTypeId().GetTypeName().data(), member.GetMemberName().data(), member.GetType().GetTypeName().data());
                                 continue;
                             }
@@ -148,7 +148,7 @@ namespace Insight::Editor
             ECS::Entity* ecsEntity = entity.World->GetEntityByGUID(entityGuid);
             if (!ecsEntity)
             {
-                IS_CORE_ERROR("[ComponentsOperation::RemoveComponents] Unable to find Entity with guid: '{0}'", entityGuid.ToString());
+                IS_LOG_CORE_ERROR("[ComponentsOperation::RemoveComponents] Unable to find Entity with guid: '{0}'", entityGuid.ToString());
                 continue;
             }
 
@@ -166,7 +166,7 @@ namespace Insight::Editor
             ECS::Entity* ecsEntity = entity.World->GetEntityByGUID(entityGuid);
             if (!ecsEntity)
             {
-                IS_CORE_ERROR("[ComponentsOperation::AddComponents] Unable to find Entity with guid: '{0}'", entityGuid.ToString());
+                IS_LOG_CORE_ERROR("[ComponentsOperation::AddComponents] Unable to find Entity with guid: '{0}'", entityGuid.ToString());
                 continue;
             }
 

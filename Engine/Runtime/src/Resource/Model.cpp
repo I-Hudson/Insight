@@ -152,7 +152,7 @@ namespace Insight
 		{
 			if (!ModelLoader::ExportModel(this, file_path))
 			{
-				IS_CORE_ERROR("[Model::Save] Model failed to save to disk. Filepath '{}'.", file_path);
+				IS_LOG_CORE_ERROR("[Model::Save] Model failed to save to disk. Filepath '{}'.", file_path);
 			}
 		}
 	}

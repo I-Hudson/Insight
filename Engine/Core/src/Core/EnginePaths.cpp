@@ -1,6 +1,6 @@
 #include "Core/EnginePaths.h"
 
-#include "Core/Assets.h"
+#include "Core/Asserts.h"
 
 #include "FileSystem/FileSystem.h"
 #include <filesystem>

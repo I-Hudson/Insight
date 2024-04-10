@@ -119,7 +119,7 @@ namespace Insight
             {
                 if (referenceLink.GetReferenceLinkType() == ResourceReferenceLinkType::Dependent_Owner)
                 {
-                    //IS_CORE_INFO("");
+                    //IS_LOG_CORE_INFO("");
                 }
             }
         }
@@ -271,7 +271,7 @@ namespace Insight
             const AssetInfo* assetInfo = AssetRegistry::Instance().GetAsset(resourceId.GetPath());
             if (!assetInfo)
             {
-                IS_CORE_WARN("[ResourceDatabase::AddResource] Unable to find asset with path '{}'.", resourceId.GetPath());
+                IS_LOG_CORE_WARN("[ResourceDatabase::AddResource] Unable to find asset with path '{}'.", resourceId.GetPath());
                 return nullptr;
             }
 
@@ -374,7 +374,7 @@ namespace Insight
             std::string path = resourceId.GetPath();
             if (path == "E:/User/Documents/SourceControl/Github/C++Porjects/Insight/DemoProject/Content/Main.1_Sponza/NewSponza_Main_Yup_002.fbx/arch_stones_01")
             {
-                IS_CORE_INFO("");
+                IS_LOG_CORE_INFO("");
             }
 
             {
@@ -477,7 +477,7 @@ namespace Insight
             // editor to allow for correct tracking and updating of data.
             if (!m_missingResources.empty())
             {
-                IS_CORE_WARN("[ResourceDatabase::FindMissingResources] There are missing resources. Trying to find them.");
+                IS_LOG_CORE_WARN("[ResourceDatabase::FindMissingResources] There are missing resources. Trying to find them.");
             
                 if (ProjectSystem::Instance().IsProjectOpen())
                 {
@@ -536,17 +536,17 @@ namespace Insight
                                 }
                                 else
                                 {
-                                    IS_CORE_ERROR("[ResourceDatabase::FindMissingResources] Was unable to find resource '{}'.", mapIter->first.GetPath());
+                                    IS_LOG_CORE_ERROR("[ResourceDatabase::FindMissingResources] Was unable to find resource '{}'.", mapIter->first.GetPath());
                                 }
                             }
                             else
                             {
-                                IS_CORE_ERROR("[ResourceDatabase::FindMissingResources] Unable to deserialise meta file.");
+                                IS_LOG_CORE_ERROR("[ResourceDatabase::FindMissingResources] Unable to deserialise meta file.");
                             }
                         }
                         else
                         {
-                            IS_CORE_ERROR("[ResourceDatabase::FindMissingResources] Missing '{}' file.", c_MetaFileExtension);
+                            IS_LOG_CORE_ERROR("[ResourceDatabase::FindMissingResources] Missing '{}' file.", c_MetaFileExtension);
                         }
 
                     }
@@ -555,10 +555,10 @@ namespace Insight
 
             if (!resourcesFound.empty())
             {
-                IS_CORE_INFO("[ResourceDatabase::FindMissingResources] Resources found:");
+                IS_LOG_CORE_INFO("[ResourceDatabase::FindMissingResources] Resources found:");
                 for (const ResourceId& resourceId : resourcesFound)
                 {
-                    IS_CORE_INFO("\t'{}'", resourceId.GetPath());
+                    IS_LOG_CORE_INFO("\t'{}'", resourceId.GetPath());
                     AddResource(resourceId);
                 }
             }

@@ -54,7 +54,7 @@ namespace Insight
 
 			if (!entity.IsVaild())
 			{
-				IS_CORE_ERROR("[EntityManager::RemoveEntity] Entity '{}', is invalid.", entity.GetId());
+				IS_LOG_CORE_ERROR("[EntityManager::RemoveEntity] Entity '{}', is invalid.", entity.GetId());
 				return;
 			}
 
@@ -68,7 +68,7 @@ namespace Insight
 		{
 			if (!entity.IsVaild())
 			{
-				IS_CORE_ERROR("[EntityManager::AddComponentToEntity] Entity '{}', is invalid.", entity.GetId());
+				IS_LOG_CORE_ERROR("[EntityManager::AddComponentToEntity] Entity '{}', is invalid.", entity.GetId());
 				return;
 			}
 
@@ -86,7 +86,7 @@ namespace Insight
 		{
 			if (!entity.IsVaild())
 			{
-				IS_CORE_ERROR("[EntityManager::RemoveComponentFromEntity] Entity '{}', is invalid.", entity.GetId());
+				IS_LOG_CORE_ERROR("[EntityManager::RemoveComponentFromEntity] Entity '{}', is invalid.", entity.GetId());
 				return;
 			}
 
@@ -105,7 +105,7 @@ namespace Insight
 		{
 			if (!entity.IsVaild())
 			{
-				IS_CORE_ERROR("[EntityManager::EntityHasComponent] Entity '{}', is invalid.", entity.GetId());
+				IS_LOG_CORE_ERROR("[EntityManager::EntityHasComponent] Entity '{}', is invalid.", entity.GetId());
 				return false;
 			}
 			const EntityData& data = GetEntityData(entity);
@@ -127,7 +127,7 @@ namespace Insight
 
 			if (!entity.IsVaild())
 			{
-				IS_CORE_ERROR("[EntityManager::RemoveEntity] Entity '{}', is invalid.", entity.GetId());
+				IS_LOG_CORE_ERROR("[EntityManager::RemoveEntity] Entity '{}', is invalid.", entity.GetId());
 				return EntityData();
 			}
 
@@ -140,7 +140,7 @@ namespace Insight
 
 			if (!entity.IsVaild())
 			{
-				IS_CORE_ERROR("[EntityManager::RemoveEntity] Entity '{}', is invalid.", entity.GetId());
+				IS_LOG_CORE_ERROR("[EntityManager::RemoveEntity] Entity '{}', is invalid.", entity.GetId());
 				return EntityData();
 			}
 
@@ -340,14 +340,14 @@ namespace Insight
 			Entity* e = GetEntityByGUID(entityGuid);
 			if (e == nullptr)
 			{
-				IS_CORE_ERROR("[EntityManager::AddComponentToEntity] Unable to find entity with guid '{}'.", entityGuid.ToString());
+				IS_LOG_CORE_ERROR("[EntityManager::AddComponentToEntity] Unable to find entity with guid '{}'.", entityGuid.ToString());
 				return nullptr;
 			}
 
 			ECS::Component* component = e->AddComponentByName(componentTypeName);
 			if (component == nullptr)
 			{
-				IS_CORE_ERROR("[EntityManager::AddComponentToEntity] Unable to add component with typename '{}'.", componentTypeName);
+				IS_LOG_CORE_ERROR("[EntityManager::AddComponentToEntity] Unable to add component with typename '{}'.", componentTypeName);
 				return nullptr;
 			}
 			component->m_guid = componentGuid;

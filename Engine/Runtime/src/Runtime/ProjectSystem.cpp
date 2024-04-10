@@ -65,7 +65,7 @@ namespace Insight
 
             if (FileSystem::Exists(projectFilePath))
             {
-                //IS_CORE_WARN("[ProjectSystem::CreateProject] Unable to create project at '{}'.", projectPath);
+                //IS_LOG_CORE_WARN("[ProjectSystem::CreateProject] Unable to create project at '{}'.", projectPath);
                 //return false;
             }
 
@@ -118,7 +118,7 @@ namespace Insight
 
             if (!foundProjectFile)
             {
-                IS_CORE_WARN("[ProjectSystem::OpenProject] '{}' is not a valid project path. Please give the path to the '.isproject' file or folder that file is in.", projectPath);
+                IS_LOG_CORE_WARN("[ProjectSystem::OpenProject] '{}' is not a valid project path. Please give the path to the '.isproject' file or folder that file is in.", projectPath);
                 return false;
             }
 

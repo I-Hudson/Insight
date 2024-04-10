@@ -99,11 +99,11 @@ namespace Insight
 
 				if (status == GFSDK_Aftermath_CrashDump_Status_Finished)
 				{
-					IS_CORE_INFO("Aftermath finished processing the crash dump.\n");
+					IS_LOG_CORE_INFO("Aftermath finished processing the crash dump.\n");
 				}
 				else
 				{
-					IS_CORE_INFO("Unexpected crash dump status after timeout: %d\n", static_cast<int>(status));
+					IS_LOG_CORE_INFO("Unexpected crash dump status after timeout: %d\n", static_cast<int>(status));
 				}
 			}
 		}

@@ -22,7 +22,7 @@ namespace Insight
 #ifndef OBJECT_SORT_SET
         if (m_size > 0)
         {
-            IS_CORE_ERROR("[ObjectManager::~ObjectManager] Not all objects are unregistered.");
+            IS_LOG_CORE_ERROR("[ObjectManager::~ObjectManager] Not all objects are unregistered.");
         }
      
         if (m_objectItems)

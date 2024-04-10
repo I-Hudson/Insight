@@ -150,7 +150,7 @@ namespace Insight
 				if (!m_modules[moduleIndex])
 				{
 					code->Release();
-					IS_CORE_ERROR("Shader compilation failed.");
+					IS_LOG_CORE_ERROR("Shader compilation failed.");
 					return;
 				}
 				code->Release();

@@ -175,7 +175,7 @@ namespace Insight
 
 			if (m_allocLists.find(cmdList) == m_allocLists.end())
 			{
-				//IS_CORE_ERROR("[RHI_CommandListAllocator::ReturnCommandList] CommandList is not in the allocated list. Command lists should be obtained by 'GetCommandList'.");
+				//IS_LOG_CORE_ERROR("[RHI_CommandListAllocator::ReturnCommandList] CommandList is not in the allocated list. Command lists should be obtained by 'GetCommandList'.");
 				return false;
 			}
 

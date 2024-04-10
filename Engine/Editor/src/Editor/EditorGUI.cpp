@@ -25,7 +25,7 @@ namespace Insight::Editor::EditorGUI
             if (payloadData.empty())
             {
                 // Payload data is empty, we should always be sending something.
-                IS_CORE_WARN("[EditorGUI::VerifyObjectFieldPayload] No payload data was given. Returning.");
+                IS_LOG_CORE_WARN("[EditorGUI::VerifyObjectFieldPayload] No payload data was given. Returning.");
                 return false;
             }
 
@@ -34,14 +34,14 @@ namespace Insight::Editor::EditorGUI
                 Reflect::Type payloadType(typeName, std::stoull(typeSize));
                 if (!payloadType.IsValid())
                 {
-                    IS_CORE_WARN("[EditorGUI::VerifyObjectFieldPayload] Type given '{}' is valid, payload type is not valid, no type checking will be performed. Returning.",
+                    IS_LOG_CORE_WARN("[EditorGUI::VerifyObjectFieldPayload] Type given '{}' is valid, payload type is not valid, no type checking will be performed. Returning.",
                         type.GetTypeName().data());
                     return false;
                 }
 
                 if (type != payloadType)
                 {
-                    IS_CORE_WARN("[EditorGUI::VerifyObjectFieldPayload] Type given '{}' is not compatible with payload type '{}'. Returning.",
+                    IS_LOG_CORE_WARN("[EditorGUI::VerifyObjectFieldPayload] Type given '{}' is not compatible with payload type '{}'. Returning.",
                         type.GetTypeName().data(), payloadType.GetTypeName().data());
                     return false;
                 }

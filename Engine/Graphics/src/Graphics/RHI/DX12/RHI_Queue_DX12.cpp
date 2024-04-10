@@ -40,7 +40,7 @@ namespace Insight
                     HRESULT createCommandQueueResult = m_dxDevice->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&m_dxQueue));
                     if (createCommandQueueResult != S_OK)
                     {
-                        IS_CORE_WARN("[HI_Queue_DX12::Initialise] Queue not supported: {}, HR: {}",
+                        IS_LOG_CORE_WARN("[HI_Queue_DX12::Initialise] Queue not supported: {}, HR: {}",
                             (int)D3D12_COMMAND_LIST_TYPE_DIRECT, HrToString(createCommandQueueResult));
                     }
                 }

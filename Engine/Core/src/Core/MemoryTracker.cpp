@@ -65,12 +65,12 @@ namespace Insight
                 for (const auto& pair : m_allocations)
                 {
                     const MemoryTrackedAlloc& alloc = pair.second;
-                    IS_CORE_ERROR("Allocation leak:");
-                    IS_CORE_ERROR("\tPtr: {}", alloc.Ptr);
-                    IS_CORE_ERROR("\tName: {}", m_allocationToName[alloc.Ptr]);
-                    IS_CORE_ERROR("\tSize: {}", alloc.Size);
-                    IS_CORE_ERROR("\tType: {}", (int)alloc.Type);
-                    IS_CORE_ERROR("\tCallstack: ");
+                    IS_LOG_CORE_ERROR("Allocation leak:");
+                    IS_LOG_CORE_ERROR("\tPtr: {}", alloc.Ptr);
+                    IS_LOG_CORE_ERROR("\tName: {}", m_allocationToName[alloc.Ptr]);
+                    IS_LOG_CORE_ERROR("\tSize: {}", alloc.Size);
+                    IS_LOG_CORE_ERROR("\tType: {}", (int)alloc.Type);
+                    IS_LOG_CORE_ERROR("\tCallstack: ");
                     for (int i = c_CallStackCount - 1; i >= 0; --i)
                     {
                         const std::string& str = alloc.CallStack[i];
@@ -79,7 +79,7 @@ namespace Insight
                             continue;
                         }
 
-                        IS_CORE_ERROR("\t\t{}", str);
+                        IS_LOG_CORE_ERROR("\t\t{}", str);
                     }
                 }
             }
@@ -88,11 +88,11 @@ namespace Insight
             const char* TotalAllocatedBytesText = "Total allocated bytes: '{}'";
             if (m_totalAllocatedInBytes > 0)
             {
-                IS_CORE_ERROR(TotalAllocatedBytesText, m_totalAllocatedInBytes);
+                IS_LOG_CORE_ERROR(TotalAllocatedBytesText, m_totalAllocatedInBytes);
             }
             else
             {
-                IS_CORE_INFO(TotalAllocatedBytesText, m_totalAllocatedInBytes);
+                IS_LOG_CORE_INFO(TotalAllocatedBytesText, m_totalAllocatedInBytes);
             }
 
             m_totalAllocatedInBytes = 0;

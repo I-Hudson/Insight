@@ -169,7 +169,7 @@ namespace Insight
 
 			if (m_glfwInit)
 			{
-				IS_CORE_INFO("[Window::Init] Init already called.");
+				IS_LOG_CORE_INFO("[Window::Init] Init already called.");
 				return true;
 			}
 
@@ -184,7 +184,7 @@ namespace Insight
 
 			glfwSetErrorCallback([](int error_code, const char* description)
 				{
-					IS_CORE_ERROR("ErrorCode: {}\n Description: {}", error_code, description);
+					IS_LOG_CORE_ERROR("ErrorCode: {}\n Description: {}", error_code, description);
 				});
 
 			if (Core::CommandLineArgs::GetCommandLineValue(CMD_START_WINDOW_MINIMISED)->GetBool())
@@ -442,7 +442,7 @@ namespace Insight
 					auto iter = GLFW_KEYBOARD_BUTTONS_TO_INTERNAL.find(static_cast<u32>(key));
 					if (iter == GLFW_KEYBOARD_BUTTONS_TO_INTERNAL.end())
 					{
-						IS_CORE_ERROR("[Window.glfwSetKeyCallback] Unrecognised key '{}'.", key);
+						IS_LOG_CORE_ERROR("[Window.glfwSetKeyCallback] Unrecognised key '{}'.", key);
 						return;
 					}
 					Input::KeyboardButtons keyboardButton = iter->second;

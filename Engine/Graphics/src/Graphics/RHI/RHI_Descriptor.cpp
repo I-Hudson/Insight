@@ -480,7 +480,7 @@ namespace Insight
 				{
 					if (descriptorBinding->Size != size)
 					{
-						IS_CORE_WARN("[DescriptorAllocator::SetUniform] Size mismatch. Descriptor expects '{0}', provided '{1}'\n Set: {2}, Binding: {3}."
+						IS_LOG_CORE_WARN("[DescriptorAllocator::SetUniform] Size mismatch. Descriptor expects '{0}', provided '{1}'\n Set: {2}, Binding: {3}."
 							, descriptorBinding->Size, size, set, binding);
 					}
 					//if (descriptorBinding->RHI_Buffer_View != bufferView)
@@ -501,7 +501,7 @@ namespace Insight
 
 			if (!buffer_view.IsValid())
 			{
-				IS_CORE_ERROR("[DescriptorAllocator::SetUniform] Trying to set a uniform which buffer view is invalid.");
+				IS_LOG_CORE_ERROR("[DescriptorAllocator::SetUniform] Trying to set a uniform which buffer view is invalid.");
 				return;
 			}
 
@@ -659,7 +659,7 @@ namespace Insight
 			}
 			if (!descriptor_set)
 			{
-				//IS_CORE_ERROR("[GPUDescriptorAllocator::CheckSetAndBindingBounds] Set: '{}' is out of range.", set);
+				//IS_LOG_CORE_ERROR("[GPUDescriptorAllocator::CheckSetAndBindingBounds] Set: '{}' is out of range.", set);
 				return false;
 			}
 
@@ -675,7 +675,7 @@ namespace Insight
 
 			if (!foundBinding)
 			{
-				//IS_CORE_ERROR("[DescriptorAllocator::CheckSetAndBindingBounds] Binding: '{0}' is out of range.", binding);
+				//IS_LOG_CORE_ERROR("[DescriptorAllocator::CheckSetAndBindingBounds] Binding: '{0}' is out of range.", binding);
 				return false;
 			}
 			return true;

@@ -7,12 +7,12 @@ namespace Insight
 #define IS_ASSERT_ENABLED
 #ifdef IS_ASSERT_ENABLED
 
-	void IS_CORE AssetPrintError(const char* format, ...);
+	void IS_CORE AssertPrintError(const char* format, ...);
 
 #define ASSERT_MSG(condition, message, ...)																												\
 	if (!(condition))																																	\
 	{																																					\
-		AssetPrintError("ASSERT:\nFILE: '%s', \nLINE: '%i', \nCondition: '%s', \nMessage: '%s'", __FILE__, __LINE__, #condition, message, __VA_ARGS__);																													\
+		AssertPrintError("ASSERT:\nFILE: '%s', \nLINE: '%i', \nCondition: '%s', \nMessage: '%s'", __FILE__, __LINE__, #condition, message, __VA_ARGS__);																													\
 	}
 
 #define ASSERT(condition) ASSERT_MSG(condition, "")

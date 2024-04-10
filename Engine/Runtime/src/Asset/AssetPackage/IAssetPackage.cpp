@@ -50,7 +50,7 @@ namespace Insight
         {
             if (HasAsset(path))
             {
-                IS_CORE_INFO("[IAssetPackage::AddAsset] Asset at path '{}' already added to this package.", path.data());
+                IS_LOG_CORE_INFO("[IAssetPackage::AddAsset] Asset at path '{}' already added to this package.", path.data());
                 return GetAsset(path);
             }
 
@@ -249,22 +249,22 @@ namespace Insight
         {
             if (!assetInfo)
             {
-                IS_CORE_WARN("[AssetRegistry::UpdateMetaData] AssetInfo is null.");
+                IS_LOG_CORE_WARN("[AssetRegistry::UpdateMetaData] AssetInfo is null.");
                 return false;
             }
             else if (!assetInfo->EnableMetaData)
             {
-                IS_CORE_WARN("[AssetRegistry::UpdateMetaData] AssetInfo has MetaData disabled. No data is stored on disk for this asset.");
+                IS_LOG_CORE_WARN("[AssetRegistry::UpdateMetaData] AssetInfo has MetaData disabled. No data is stored on disk for this asset.");
                 return false;
             }
             else if (!assetInfo->IsValid())
             {
-                IS_CORE_WARN("[AssetRegistry::UpdateMetaData] AssetInfo is not valid.");
+                IS_LOG_CORE_WARN("[AssetRegistry::UpdateMetaData] AssetInfo is not valid.");
                 return false;
             }
             else if (assetInfo->IsEngineFormat)
             {
-                IS_CORE_WARN("[AssetRegistry::UpdateMetaData] AssetInfo is an engine format.");
+                IS_LOG_CORE_WARN("[AssetRegistry::UpdateMetaData] AssetInfo is an engine format.");
                 return false;
             }
             return true;

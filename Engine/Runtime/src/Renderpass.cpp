@@ -192,7 +192,7 @@ namespace Insight
 							entity->GetComponent<ECS::TransformComponent>()->SetTransform(transform);
 						}
 
-						IS_CORE_INFO("Model '{}' added to scene.", modelsToAddToScene.at(i).first->GetFileName());
+						IS_LOG_CORE_INFO("Model '{}' added to scene.", modelsToAddToScene.at(i).first->GetFileName());
 					}
 				}
 			}
@@ -324,7 +324,7 @@ namespace Insight
 							entity->GetComponent<ECS::TransformComponent>()->SetTransform(transform);
 						}
 
-						IS_CORE_INFO("Model '{}' added to scene.", modelsToAddToScene.at(i).first->GetFileName());
+						IS_LOG_CORE_INFO("Model '{}' added to scene.", modelsToAddToScene.at(i).first->GetFileName());
 					}
 				}
 			}

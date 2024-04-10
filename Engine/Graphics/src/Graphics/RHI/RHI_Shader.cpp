@@ -238,7 +238,7 @@ namespace Insight
 			// IDxcCompiler3::Compile will always return an error buffer, but its length will be zero if there are no warnings or errors.
 			if (pErrors != nullptr && pErrors->GetStringLength() != 0)
 			{
-				IS_CORE_ERROR(fmt::format("Shader compilation failed : \n\n{}", pErrors->GetStringPointer()));
+				IS_LOG_CORE_ERROR(fmt::format("Shader compilation failed : \n\n{}", pErrors->GetStringPointer()));
 			}
 			pErrors->Release();
 
@@ -248,7 +248,7 @@ namespace Insight
 			// IDxcCompiler3::Compile will always return an error buffer, but its length will be zero if there are no warnings or errors.
 			if (pErrors != nullptr && pErrors->GetStringLength() != 0)
 			{
-				IS_CORE_ERROR(fmt::format("Shader compilation failed : \n\nName: {} \n\n Error:", name, pErrors->GetStringPointer()));
+				IS_LOG_CORE_ERROR(fmt::format("Shader compilation failed : \n\nName: {} \n\n Error:", name, pErrors->GetStringPointer()));
 			}
 			pErrors->Release();
 
@@ -296,7 +296,7 @@ namespace Insight
 		{
 			if (!ShaderReflectionResults)
 			{
-				IS_CORE_ERROR("[ShaderCompiler::GetDescriptorSets] Trying to extract descriptors but no shader has been compiled.");
+				IS_LOG_CORE_ERROR("[ShaderCompiler::GetDescriptorSets] Trying to extract descriptors but no shader has been compiled.");
 				return;
 			}
 
@@ -527,7 +527,7 @@ namespace Insight
 		{
 			if (!ShaderReflectionResults)
 			{
-				IS_CORE_ERROR("[ShaderCompiler::GetInputLayout] Trying to get the input layout but no shader has been compiled.");
+				IS_LOG_CORE_ERROR("[ShaderCompiler::GetInputLayout] Trying to get the input layout but no shader has been compiled.");
 				return std::vector<ShaderInputLayout>();
 			}
 

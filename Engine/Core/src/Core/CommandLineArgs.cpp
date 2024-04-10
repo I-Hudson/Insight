@@ -67,13 +67,13 @@ namespace Insight
 
 				if (key.empty() || value.empty())
 				{
-					IS_CORE_WARN("[CommandLineArgs::ParseCommandLine] Key '{}' and/or value '{}' is empty.", key, value);
+					IS_LOG_CORE_WARN("[CommandLineArgs::ParseCommandLine] Key '{}' and/or value '{}' is empty.", key, value);
 					continue;
 				}
 
 				if (m_args.find(key) != m_args.end())
 				{
-					IS_CORE_WARN("[CommandLineArgs::ParseCommandLine] Key '{}' already defined with value '{}'. Second definition ignored.", key, value);
+					IS_LOG_CORE_WARN("[CommandLineArgs::ParseCommandLine] Key '{}' already defined with value '{}'. Second definition ignored.", key, value);
 					continue;
 				}
 
@@ -99,7 +99,7 @@ namespace Insight
 			file.open(file_path);
 			if (!file.is_open())
 			{
-				IS_CORE_WARN("[CommandLineArgs::ParseCommandLine] File '{} was unabled to be opened.'", file_path);
+				IS_LOG_CORE_WARN("[CommandLineArgs::ParseCommandLine] File '{} was unabled to be opened.'", file_path);
 				return;
 			}
 			std::stringstream buffer;

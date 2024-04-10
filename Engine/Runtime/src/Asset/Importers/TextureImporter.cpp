@@ -27,7 +27,7 @@ namespace Insight
             std::vector<Byte> textureData = AssetRegistry::Instance().LoadAssetData(path);
             if (textureData.empty())
             {
-                IS_CORE_ERROR("[TextureImporter::Import] Texture data from path '{}' was empty.", path);
+                IS_LOG_CORE_ERROR("[TextureImporter::Import] Texture data from path '{}' was empty.", path);
                 return Ref<Asset>();
             }
 

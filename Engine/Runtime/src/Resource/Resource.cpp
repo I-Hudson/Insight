@@ -215,13 +215,13 @@ namespace Insight
 		void IResource::Print() const
 		{
 			std::lock_guard lock(m_mutex);
-			IS_CORE_INFO("Resource:");
-			IS_CORE_INFO("\tType: {}", GetResourceTypeId().GetTypeName());
-			IS_CORE_INFO("\tSource path: {}", m_source_file_path);
-			IS_CORE_INFO("\tFile path: {}", m_file_path);
-			IS_CORE_INFO("\tState: {}", ERsourceStatesToString(m_resource_state));
-			IS_CORE_INFO("\tStorage type: {}", ResourceStorageTypesToString(m_storage_type));
-			IS_CORE_INFO("\n");
+			IS_LOG_CORE_INFO("Resource:");
+			IS_LOG_CORE_INFO("\tType: {}", GetResourceTypeId().GetTypeName());
+			IS_LOG_CORE_INFO("\tSource path: {}", m_source_file_path);
+			IS_LOG_CORE_INFO("\tFile path: {}", m_file_path);
+			IS_LOG_CORE_INFO("\tState: {}", ERsourceStatesToString(m_resource_state));
+			IS_LOG_CORE_INFO("\tStorage type: {}", ResourceStorageTypesToString(m_storage_type));
+			IS_LOG_CORE_INFO("\n");
 		}
 
 		bool IResource::IsEngineFormat() const
@@ -258,7 +258,7 @@ namespace Insight
 			if (resource
 				&& resource->GetResourceState() != EResoruceStates::Loading)
 			{
-				IS_CORE_ERROR("[IResource::AddReferenceResource] Attempted load on resource '{0}' failed.", file_path);
+				IS_LOG_CORE_ERROR("[IResource::AddReferenceResource] Attempted load on resource '{0}' failed.", file_path);
 			}
 			return resource;
 		}

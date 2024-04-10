@@ -45,7 +45,7 @@ namespace Insight
                     assetPackage->m_zipHandle = zip_open(assetPackage->m_packagePath.c_str(), ZIP_DEFAULT_COMPRESSION_LEVEL, 'r');
                     if (!assetPackage->m_zipHandle)
                     {
-                        //IS_CORE_ERROR("[AssetPackageSerialiser] Failed to open zip at '{}'.", assetPackage->m_packagePath.c_str());
+                        //IS_LOG_CORE_ERROR("[AssetPackageSerialiser] Failed to open zip at '{}'.", assetPackage->m_packagePath.c_str());
                         return;
                     }
 

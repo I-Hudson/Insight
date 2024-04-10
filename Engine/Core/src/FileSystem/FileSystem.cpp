@@ -20,7 +20,7 @@ namespace Insight
         std::filesystem::create_directories(GetAbsolutePath(path), errorCode);
         if (errorCode)
         {
-            IS_CORE_ERROR("[FileSystem::CreateFolder] Error code: '{}', Message: '{}'.", errorCode.value(), errorCode.message());
+            IS_LOG_CORE_ERROR("[FileSystem::CreateFolder] Error code: '{}', Message: '{}'.", errorCode.value(), errorCode.message());
         }
     }
 
@@ -47,7 +47,7 @@ namespace Insight
         }
         catch (std::system_error& error)
         {
-            IS_CORE_ERROR("[FileSystem::SaveToFile] Exceptions '{}'.", error.what());
+            IS_LOG_CORE_ERROR("[FileSystem::SaveToFile] Exceptions '{}'.", error.what());
         }
 
         if (!fileStream.is_open())
@@ -63,7 +63,7 @@ namespace Insight
         }
         catch (std::system_error& error)
         {
-            IS_CORE_ERROR("[FileSystem::ReadFromFile] Exceptions '{}'.", error.what());
+            IS_LOG_CORE_ERROR("[FileSystem::ReadFromFile] Exceptions '{}'.", error.what());
         }
 
         return true;
@@ -104,7 +104,7 @@ namespace Insight
         }
         catch (std::system_error& error)
         {
-            IS_CORE_ERROR("[FileSystem::ReadFromFile] Exceptions '{}'.", error.what());
+            IS_LOG_CORE_ERROR("[FileSystem::ReadFromFile] Exceptions '{}'.", error.what());
         }
 
         if (!fileStream.is_open())
@@ -123,7 +123,7 @@ namespace Insight
         }
         catch (std::system_error& error)
         {
-            IS_CORE_ERROR("[FileSystem::ReadFromFile] Exceptions '{}'.", error.what());
+            IS_LOG_CORE_ERROR("[FileSystem::ReadFromFile] Exceptions '{}'.", error.what());
         }
 
         return fileData;
@@ -367,7 +367,7 @@ namespace Insight
         std::filesystem::path fsPath = std::filesystem::relative(path, basePath, errorCode);
         if (errorCode)
         {
-            IS_CORE_ERROR("[FileSystem::GetRelativePath] Error code: '{}', Message: '{}'.", errorCode.value(), errorCode.message());
+            IS_LOG_CORE_ERROR("[FileSystem::GetRelativePath] Error code: '{}', Message: '{}'.", errorCode.value(), errorCode.message());
         }
         std::string absPath = fsPath.string();
         PathToUnix(absPath);

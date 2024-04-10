@@ -92,7 +92,7 @@ namespace Insight::Editor
     {
         if (solutionPath.empty() || !FileSystem::Exists(solutionPath))
         {
-            IS_CORE_ERROR("[PremakeSolutionGenerator::GenerateIDESolution] Unable to generate solution as required premake file '{}' does not exist.", solutionPath);
+            IS_LOG_CORE_ERROR("[PremakeSolutionGenerator::GenerateIDESolution] Unable to generate solution as required premake file '{}' does not exist.", solutionPath);
             return;
         }
 

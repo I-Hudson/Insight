@@ -84,7 +84,7 @@ namespace Insight::Runtime
 
         if (!FileSystem::Exists(pathWithExtension))
         {
-            IS_CORE_ERROR("[AssetRegistry::LoadAssetPackage] No asset package was at path '{}'.", pathWithExtension.data());
+            IS_LOG_CORE_ERROR("[AssetRegistry::LoadAssetPackage] No asset package was at path '{}'.", pathWithExtension.data());
             return nullptr;
         }
 
@@ -136,7 +136,7 @@ namespace Insight::Runtime
         {
             if (!FileSystem::Exists(path))
             {
-                IS_CORE_ERROR("[AssetRegistry::AddAsset] Path '{}' doesn't exist.", path.data());
+                IS_LOG_CORE_ERROR("[AssetRegistry::AddAsset] Path '{}' doesn't exist.", path.data());
                 return nullptr;
             }
             else if (!FileSystem::IsFile(path))
@@ -150,7 +150,7 @@ namespace Insight::Runtime
             }
             /*else if (!ResourceLoaderRegister::GetLoaderFromExtension(fileExtension))
             {
-                IS_CORE_ERROR("[AssetRegistry::AddAsset] Path '{}' doesn't have a compatible loader.", path.data());
+                IS_LOG_CORE_ERROR("[AssetRegistry::AddAsset] Path '{}' doesn't have a compatible loader.", path.data());
                 return nullptr;
             }*/
         }
@@ -308,14 +308,14 @@ namespace Insight::Runtime
         }
         if (importer == nullptr)
         {
-            IS_CORE_ERROR("[AssetRegistry::LoadAsset2] 'Importer' is nullptr for extension '{}'.", extension);
+            IS_LOG_CORE_ERROR("[AssetRegistry::LoadAsset2] 'Importer' is nullptr for extension '{}'.", extension);
             return Ref<Asset>();
         }
 
         const AssetInfo* assetInfo = GetAssetInfo(path);
         if (assetInfo == nullptr)
         {
-            IS_CORE_ERROR("[AssetRegistry::LoadAsset2] Unable to get AssetInfo from path '{}'.", path);
+            IS_LOG_CORE_ERROR("[AssetRegistry::LoadAsset2] Unable to get AssetInfo from path '{}'.", path);
             return Ref<Asset>();
         }
 
@@ -367,7 +367,7 @@ namespace Insight::Runtime
                 return FileSystem::ReadFromFile(absPath);
             }
         }
-        IS_CORE_ERROR("[AssetRegistry::LoadAsset] Unable to load asset from path '{}'.", absPath.data());
+        IS_LOG_CORE_ERROR("[AssetRegistry::LoadAsset] Unable to load asset from path '{}'.", absPath.data());
         return {};
     }
 
@@ -386,7 +386,7 @@ namespace Insight::Runtime
                return FileSystem::ReadFromFile(absPath);
             }
         }
-        IS_CORE_ERROR("[AssetRegistry::LoadAsset] Unable to load asset from path '{}'.", absPath.data());
+        IS_LOG_CORE_ERROR("[AssetRegistry::LoadAsset] Unable to load asset from path '{}'.", absPath.data());
         return {};
     }
 
@@ -499,7 +499,7 @@ namespace Insight::Runtime
 
         if (!FileSystem::IsDirectory(absFolderPath))
         {
-            IS_CORE_ERROR("[AssetRegistry::AddAssetsInFolder] Path '{}' is not a directory.", absFolderPath);
+            IS_LOG_CORE_ERROR("[AssetRegistry::AddAssetsInFolder] Path '{}' is not a directory.", absFolderPath);
             return;
         }
 
@@ -644,22 +644,22 @@ namespace Insight::Runtime
     {
         if (!assetInfo)
         {
-            IS_CORE_WARN("[AssetRegistry::UpdateMetaData] AssetInfo is null.");
+            IS_LOG_CORE_WARN("[AssetRegistry::UpdateMetaData] AssetInfo is null.");
             return false;
         }
         else if (!assetInfo->EnableMetaData)
         {
-            IS_CORE_WARN("[AssetRegistry::UpdateMetaData] AssetInfo has MetaData disabled. No data is stored on disk for this asset.");
+            IS_LOG_CORE_WARN("[AssetRegistry::UpdateMetaData] AssetInfo has MetaData disabled. No data is stored on disk for this asset.");
             return false;
         }
         else if (!assetInfo->IsValid())
         {
-            IS_CORE_WARN("[AssetRegistry::UpdateMetaData] AssetInfo is not valid.");
+            IS_LOG_CORE_WARN("[AssetRegistry::UpdateMetaData] AssetInfo is not valid.");
             return false;
         }
         else if (assetInfo->IsEngineFormat)
         {
-            IS_CORE_WARN("[AssetRegistry::UpdateMetaData] AssetInfo is an engine format.");
+            IS_LOG_CORE_WARN("[AssetRegistry::UpdateMetaData] AssetInfo is an engine format.");
             return false;
         }
         return true;

@@ -130,7 +130,7 @@ namespace Insight
 					messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT ||
 					messageSeverity & VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT)
 				{
-					IS_CORE_ERROR("Id: {}\n Name: {}\n Msg: {}", pCallbackData->messageIdNumber, pCallbackData->pMessageIdName, pCallbackData->pMessage);
+					IS_LOG_CORE_ERROR("Id: {}\n Name: {}\n Msg: {}", pCallbackData->messageIdNumber, pCallbackData->pMessageIdName, pCallbackData->pMessage);
 				}
 
 				/// The return value of this callback controls whether the Vulkan call that caused the validation message will be aborted or not
@@ -148,7 +148,7 @@ namespace Insight
 
 				if (m_instnace && m_device)
 				{
-					IS_CORE_ERROR("[RenderContext_Vulkan::Init] Context already inited.");
+					IS_LOG_CORE_ERROR("[RenderContext_Vulkan::Init] Context already inited.");
 					return true;
 				}
 
@@ -289,7 +289,7 @@ namespace Insight
 
 				char* stats;
 				vmaBuildStatsString(m_vmaAllocator, &stats, true);
-				IS_CORE_INFO("VMA: {}.", stats);
+				IS_LOG_CORE_INFO("VMA: {}.", stats);
 				Delete(stats);
 				//VmaFree(m_vmaAllocator, stats);
 
@@ -476,7 +476,7 @@ namespace Insight
 				{
 					if (error != VK_SUCCESS)
 					{
-						IS_CORE_ERROR("[IMGUI] Error: {}", static_cast<u32>(error));
+						IS_LOG_CORE_ERROR("[IMGUI] Error: {}", static_cast<u32>(error));
 					}
 				};
 				ImGui_ImplVulkan_Init(&init_info, static_cast<VkRenderPass>(renderpass.Resource));
@@ -1125,15 +1125,15 @@ namespace Insight
 				extensionProperties.resize(extensionCount);
 				vkEnumerateDeviceExtensionProperties(m_adapter, nullptr, &extensionCount, extensionProperties.data());
 
-				IS_CORE_INFO("Device layers:");
+				IS_LOG_CORE_INFO("Device layers:");
 				for (size_t i = 0; i < layerProperties.size(); ++i)
 				{
-					IS_CORE_INFO("{}", layerProperties[i].layerName);
+					IS_LOG_CORE_INFO("{}", layerProperties[i].layerName);
 				}
-				IS_CORE_INFO("Device extensions:");
+				IS_LOG_CORE_INFO("Device extensions:");
 				for (size_t i = 0; i < extensionProperties.size(); ++i)
 				{
-					IS_CORE_INFO("{}", extensionProperties[i].extensionName);
+					IS_LOG_CORE_INFO("{}", extensionProperties[i].extensionName);
 				}
 
 				if (includeAll)

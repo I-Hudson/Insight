@@ -444,7 +444,7 @@ namespace Insight::Editor
                             {
                                 //m_is_hovering_item = true;
                                 //m_hovered_item_path = item.GetPath();
-                                IS_CORE_INFO("Item right click: {}", assetInfo->FileName);
+                                IS_LOG_CORE_INFO("Item right click: {}", assetInfo->FileName);
                             }
 
                             //ItemClick(&item);
@@ -470,7 +470,7 @@ namespace Insight::Editor
                     if (directoryIteratorErrorCode)
                     {
                         m_currentDirectory = Runtime::ProjectSystem::Instance().GetProjectInfo().GetContentPath();
-                        IS_CORE_ERROR("[ContentWindow::CentreArea] Directory iterator error code '{}'.", directoryIteratorErrorCode.message());
+                        IS_LOG_CORE_ERROR("[ContentWindow::CentreArea] Directory iterator error code '{}'.", directoryIteratorErrorCode.message());
                     }
 
                     if (!new_line)
@@ -805,7 +805,7 @@ namespace Insight::Editor
         {
             if (ImGui::MenuItem("Create New C++ Class"))
             {
-                IS_INFO("Create new C++ Class");
+                IS_LOG_INFO("Create new C++ Class");
                 m_showGeneralMenu = false;
             }
             else if (ImGui::MenuItem("Create World"))

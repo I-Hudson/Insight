@@ -57,7 +57,7 @@ namespace Insight
 			{
 				return extensionItr->second;
 			}
-			IS_CORE_WARN("[ResourceTypeIdToResource::CreateResource] No resource with extension '{0}' registered.", fileExtension);
+			IS_LOG_CORE_WARN("[ResourceTypeIdToResource::CreateResource] No resource with extension '{0}' registered.", fileExtension);
 			return ResourceTypeId();
 		}
 
@@ -78,13 +78,13 @@ namespace Insight
 				return itr->second(filePath);
 			}
 			FAIL_ASSERT();
-			IS_CORE_WARN("[ResourceTypeIdToResource::CreateResource] ");
+			IS_LOG_CORE_WARN("[ResourceTypeIdToResource::CreateResource] ");
 			return nullptr;
 		}
 
 		void ResourceRegister::RegisterResourceAlreadyRegsiteredLog(const char* type)
 		{
-			IS_CORE_WARN("[ResourceTypeIdToResource::RegisterResource] Resource type is already registered '{}'.", type);
+			IS_LOG_CORE_WARN("[ResourceTypeIdToResource::RegisterResource] Resource type is already registered '{}'.", type);
 		}
 	}
 }

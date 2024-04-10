@@ -26,11 +26,11 @@ namespace Insight
 			AddComponent<ExampleComponentPrint>(e);
 			AddComponent<TagComponent>(e);
 
-			IS_CORE_INFO("Entity has TransformComponent: {}", m_entityManager.HasComponent(e, ComponentTypeToId<TransformComponent>()));
-			IS_CORE_INFO("Entity component count: {}", m_entityManager.GetComponentCount(e));
+			IS_LOG_CORE_INFO("Entity has TransformComponent: {}", m_entityManager.HasComponent(e, ComponentTypeToId<TransformComponent>()));
+			IS_LOG_CORE_INFO("Entity component count: {}", m_entityManager.GetComponentCount(e));
 
 			RemoveComponent<TransformComponent>(e);
-			IS_CORE_INFO("Entity has TransformComponent: {}", m_entityManager.HasComponent(e, ComponentTypeToId<TransformComponent>()));
+			IS_LOG_CORE_INFO("Entity has TransformComponent: {}", m_entityManager.HasComponent(e, ComponentTypeToId<TransformComponent>()));
 		}
 
 		Entity ECS::GetOwnerEntity(ComponentHandle componentHandle)

@@ -35,12 +35,12 @@ namespace Insight
         // Begin - ISerialisable
         void AssetPackageFileSystem::Serialise(Serialisation::ISerialiser* serialiser)
         {
-            IS_CORE_WARN("[AssetPackageFileSystem::Serialise] Can't serialise a file system asset package.");
+            IS_LOG_CORE_WARN("[AssetPackageFileSystem::Serialise] Can't serialise a file system asset package.");
         }
 
         void AssetPackageFileSystem::Deserialise(Serialisation::ISerialiser* serialiser)
         {
-            IS_CORE_WARN("[AssetPackageFileSystem::Serialise] Can't deserialise a file system asset package. All files are already on disk in there raw format.");
+            IS_LOG_CORE_WARN("[AssetPackageFileSystem::Serialise] Can't deserialise a file system asset package. All files are already on disk in there raw format.");
         }
         // End - ISerialisable
     }

@@ -208,7 +208,7 @@ namespace Insight
 
 			if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 			{
-				IS_CORE_ERROR("Assimp model load: {0}", importer.GetErrorString());
+				IS_LOG_CORE_ERROR("Assimp model load: {0}", importer.GetErrorString());
 				return false;
 			}
 
@@ -292,7 +292,7 @@ namespace Insight
 
 			if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 			{
-				IS_CORE_ERROR("Assimp model load: {0}", importer.GetErrorString());
+				IS_LOG_CORE_ERROR("Assimp model load: {0}", importer.GetErrorString());
 				return false;
 			}
 
@@ -314,7 +314,7 @@ namespace Insight
 			//Assimp::Exporter exporter;
 			//if (exporter.Export(nullptr, "", file_path) != aiReturn_SUCCESS)
 			//{
-			//	IS_CORE_ERROR("[ModelLoader::ExportModel] Assimp error code '{}'.", exporter.GetErrorString());
+			//	IS_LOG_CORE_ERROR("[ModelLoader::ExportModel] Assimp error code '{}'.", exporter.GetErrorString());
 				return false;
 			//}
 			//return true;
@@ -828,15 +828,15 @@ namespace Insight
 			//meshopt_remapVertexBuffer(dst_vertices.data(), loader_data.Vertices.data(), index_count, sizeof(Graphics::Vertex), remap.data());
 
 			/// Vertex cache optimization - reordering triangles to maximize cache locality
-			IS_INFO("Optimizing vertex cache...");
+			IS_LOG_INFO("Optimizing vertex cache...");
 			meshopt_optimizeVertexCache(temp_indices.data(), loader_data.Indices.data(), index_count, vertex_count);
 
 			/// Overdraw optimizations - reorders triangles to minimize overdraw from all directions
-			IS_INFO("Optimizing overdraw...");
+			IS_LOG_INFO("Optimizing overdraw...");
 			meshopt_optimizeOverdraw(loader_data.Indices.data(), temp_indices.data(), index_count, glm::value_ptr(loader_data.Vertices.data()->Position), vertex_count, vertex_size, 1.05f);
 
 			/// Vertex fetch optimization - reorders triangles to maximize memory access locality
-			IS_INFO("Optimizing vertex fetch...");
+			IS_LOG_INFO("Optimizing vertex fetch...");
 			meshopt_optimizeVertexFetch(loader_data.Vertices.data(), loader_data.Indices.data(), index_count, temp_vertices.data(), vertex_count, vertex_size);
 
 			//loader_data.Vertices = dst_vertices;

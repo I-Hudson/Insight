@@ -29,14 +29,14 @@ namespace Insight
 			Component* component = ownerEntity->GetComponentByName(CameraComponent::Type_Name);
 			if (!component)
 			{
-				IS_WARN("[FreeCameraControllerComponent::OnBegin] No Camera component found on entity guid: '{0}', name: '{1}'.", ownerEntity->GetGUID().ToString(), ownerEntity->GetName());
+				IS_LOG_WARN("[FreeCameraControllerComponent::OnBegin] No Camera component found on entity guid: '{0}', name: '{1}'.", ownerEntity->GetGUID().ToString(), ownerEntity->GetName());
 				return;
 			}
 
 			CameraComponent* cameraComponent = static_cast<CameraComponent*>(component);
 			if (!cameraComponent)
 			{
-				IS_WARN("[FreeCameraControllerComponent::OnBegin] Cast to camera component failed. Component type is '{0}'.", component->GetTypeName());
+				IS_LOG_WARN("[FreeCameraControllerComponent::OnBegin] Cast to camera component failed. Component type is '{0}'.", component->GetTypeName());
 				return;
 			}
 			m_cameraComponent = cameraComponent;

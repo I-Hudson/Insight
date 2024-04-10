@@ -31,7 +31,7 @@ namespace Insight::Runtime
 
         if (resource == nullptr || !AssetRegistry::Instance().GetAsset(resource->GetFilePath()))
         {
-            IS_CORE_WARN("[TextLoader::Load] resource is null or file path '{}' does not exist.", resource != nullptr ? resource->GetFilePath() : "NULL");
+            IS_LOG_CORE_WARN("[TextLoader::Load] resource is null or file path '{}' does not exist.", resource != nullptr ? resource->GetFilePath() : "NULL");
             return false;
         }
 
@@ -45,7 +45,7 @@ namespace Insight::Runtime
 
 		if (pixelsData.Data.empty())
 		{
-			IS_CORE_ERROR("stbi errro: '%s'.", stbi_failure_reason());
+			IS_LOG_CORE_ERROR("stbi errro: '%s'.", stbi_failure_reason());
 			texture->m_resource_state = EResoruceStates::Failed_To_Load;
 			return false;
 		}

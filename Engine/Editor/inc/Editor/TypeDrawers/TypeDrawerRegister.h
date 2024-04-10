@@ -26,7 +26,7 @@ namespace Insight
                 std::string typeDrawerTypeName = T::GetTypeName();
                 if (m_drawers.find(typeDrawerTypeName) != m_drawers.end())
                 {
-                    IS_CORE_WARN("[TypeDrawerRegister::RegisterDrawer] TypeDrawer already registed for '{}'.", typeDrawerTypeName);
+                    IS_LOG_CORE_WARN("[TypeDrawerRegister::RegisterDrawer] TypeDrawer already registed for '{}'.", typeDrawerTypeName);
                     return;
                 }
                 m_drawers[typeDrawerTypeName] = ::New<T>();

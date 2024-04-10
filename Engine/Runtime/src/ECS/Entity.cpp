@@ -108,7 +108,7 @@ namespace Insight
 			{
 				return itr->second();
 			}
-			IS_CORE_WARN("[ComponentRegistry::CreateComponent] ComponentType: '{0}', is unregistered.", component_type);
+			IS_LOG_CORE_WARN("[ComponentRegistry::CreateComponent] ComponentType: '{0}', is unregistered.", component_type);
 			return nullptr;
 		}
 
@@ -183,7 +183,7 @@ namespace Insight
 		{
 			if (index >= m_children.size())
 			{
-				IS_CORE_WARN("[Entity::RemoveChild] No child entity at index '{}'.", index);
+				IS_LOG_CORE_WARN("[Entity::RemoveChild] No child entity at index '{}'.", index);
 				return;
 			}
 			/// Remove the entity from the ecs world (delete the entity from memory)
@@ -225,7 +225,7 @@ namespace Insight
 		{
 			if (index >= m_children.size())
 			{
-				IS_CORE_WARN("[Entity::RemoveChild] No child entity at index '{}'.", index);
+				IS_LOG_CORE_WARN("[Entity::RemoveChild] No child entity at index '{}'.", index);
 				return nullptr;
 			}
 			return m_children.at(index);
@@ -236,7 +236,7 @@ namespace Insight
 			Component* component = GetComponentByName(component_type);
 			if (component && !component->m_allow_multiple)
 			{
-				IS_CORE_WARN("[Entity::AddComponentByName] Trying to add '{}'. ComponentType can not have multiple attached.", component_type);
+				IS_LOG_CORE_WARN("[Entity::AddComponentByName] Trying to add '{}'. ComponentType can not have multiple attached.", component_type);
 				return component;
 			}
 			
@@ -280,7 +280,7 @@ namespace Insight
 
 			if (!componentToRemove.IsValid())
 			{
-				IS_CORE_WARN("[Entity::RemoveComponentByGuid] Trying to remove a component which doesn't exists.");
+				IS_LOG_CORE_WARN("[Entity::RemoveComponentByGuid] Trying to remove a component which doesn't exists.");
 				return;
 			}
 
@@ -307,7 +307,7 @@ namespace Insight
 			}
 			else
 			{
-				IS_CORE_INFO("[Entity::RemoveComponentByName] Tried to remove component '{}'. Component doesn't exists.", component_type);
+				IS_LOG_CORE_INFO("[Entity::RemoveComponentByName] Tried to remove component '{}'. Component doesn't exists.", component_type);
 			}
 		}
 

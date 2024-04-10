@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core/Assets.h"
+#include "Core/Asserts.h"
 
 namespace Insight
 {

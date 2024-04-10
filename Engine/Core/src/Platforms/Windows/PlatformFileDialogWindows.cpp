@@ -8,7 +8,7 @@
 
 #include "Platforms/Platform.h"
 #include "Core/Logger.h"
-#include "Core/Assets.h"
+#include "Core/Asserts.h"
 
 namespace Insight
 {
@@ -66,7 +66,7 @@ namespace Insight
             DWORD errorCode = CommDlgExtendedError();
             if (errorCode != 0)
             {
-                IS_CORE_ERROR("[PlatformFileDialogWindows::Show] Error code: {}.", errorCode);
+                IS_LOG_CORE_ERROR("[PlatformFileDialogWindows::Show] Error code: {}.", errorCode);
             }
 
             return false;
@@ -125,7 +125,7 @@ namespace Insight
             hr = openDialogHandle->GetResult(&item);
             if (hr != S_OK)
             {
-                IS_CORE_ERROR("[PlatformFileDialogWindows::OpenDialog] Unable to get selected item.");
+                IS_LOG_CORE_ERROR("[PlatformFileDialogWindows::OpenDialog] Unable to get selected item.");
                 item->Release();
                 openDialogHandle->Release();
                 return false;
@@ -135,7 +135,7 @@ namespace Insight
             hr = item->GetDisplayName(SIGDN_FILESYSPATH, &filePath);
             if (hr != S_OK)
             {
-                IS_CORE_ERROR("[PlatformFileDialogWindows::OpenDialog] Unable to get selected item display name.");
+                IS_LOG_CORE_ERROR("[PlatformFileDialogWindows::OpenDialog] Unable to get selected item display name.");
                 item->Release();
                 openDialogHandle->Release();
                 return false;
@@ -196,7 +196,7 @@ namespace Insight
             hr = saveDialogHandle->GetResult(&item);
             if (hr != S_OK)
             {
-                IS_CORE_ERROR("[PlatformFileDialogWindows::OpenDialog] Unable to get selected item.");
+                IS_LOG_CORE_ERROR("[PlatformFileDialogWindows::OpenDialog] Unable to get selected item.");
                 item->Release();
                 saveDialogHandle->Release();
                 return false;
@@ -206,7 +206,7 @@ namespace Insight
             hr = item->GetDisplayName(SIGDN_FILESYSPATH, &filePath);
             if (hr != S_OK)
             {
-                IS_CORE_ERROR("[PlatformFileDialogWindows::OpenDialog] Unable to get selected item display name.");
+                IS_LOG_CORE_ERROR("[PlatformFileDialogWindows::OpenDialog] Unable to get selected item display name.");
                 item->Release();
                 saveDialogHandle->Release();
                 return false;

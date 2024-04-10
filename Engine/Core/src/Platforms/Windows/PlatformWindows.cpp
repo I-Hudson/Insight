@@ -3,7 +3,7 @@
 #ifdef IS_PLATFORM_WINDOWS
 
 #include "Core/Logger.h"
-#include "Core/Assets.h"
+#include "Core/Asserts.h"
 
 #include "Platforms/Platform.h"
 
@@ -126,7 +126,7 @@ namespace Insight
 
 			if (!CreateProcessA("C:\\Windows\\System32\\cmd.exe", (char*)command, NULL, NULL, TRUE, 0, NULL, NULL, &info, &processInfo))
 			{
-				IS_CORE_ERROR("[PackageBuild::BuildSolution] Unable to compile solution: '{0}'.", GetLastError());
+				IS_LOG_CORE_ERROR("[PackageBuild::BuildSolution] Unable to compile solution: '{0}'.", GetLastError());
 				success = false;
 			}
 			WaitForSingleObject(processInfo.hProcess, INFINITE);
@@ -182,7 +182,7 @@ namespace Insight
 			if (SymInitialize(process, NULL, FALSE) == FALSE)
 			{
 				DWORD error = GetLastError();
-				IS_CORE_ERROR("[PlatformWindows::GetCallStack] Failed to call SymInitialize. Error: {}", error);
+				IS_LOG_CORE_ERROR("[PlatformWindows::GetCallStack] Failed to call SymInitialize. Error: {}", error);
 				return std::vector<std::string>();
 			}
 
@@ -259,7 +259,7 @@ namespace Insight
 				else
 				{
 					DWORD error = GetLastError();
-					///IS_CORE_ERROR("[PlatformWindows::GetCallStack] Failed to resolve address {}: {}\n", frame.AddrPC.Offset, error);
+					///IS_LOG_CORE_ERROR("[PlatformWindows::GetCallStack] Failed to resolve address {}: {}\n", frame.AddrPC.Offset, error);
 					f.name = "Unknown Function";
 				}
 
@@ -275,7 +275,7 @@ namespace Insight
 				else
 				{
 					DWORD error = GetLastError();
-					///IS_CORE_ERROR("[PlatformWindows::GetCallStack] Failed to resolve line for: {0:x}, {}\n", frame.AddrPC.Offset, error);
+					///IS_LOG_CORE_ERROR("[PlatformWindows::GetCallStack] Failed to resolve line for: {0:x}, {}\n", frame.AddrPC.Offset, error);
 					f.line = 0;
 				}
 
@@ -455,7 +455,7 @@ namespace Insight
 				}
 				else 
 				{
-					IS_CORE_INFO("Unexpected vendor id.");
+					IS_LOG_CORE_INFO("Unexpected vendor id.");
 				}
 
 				if (cpuID0.EAX() >= 0x16)

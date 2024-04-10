@@ -185,7 +185,7 @@ namespace Insight::Editor
 #endif
         if (!FileSystem::Exists(folderPath))
         {
-            IS_CORE_ERROR("[HotReloadSystem::FindNewestProjectDynamicLibrary] Folder path '{}' doesn't exists. Make sure the project solution is building correctly.", folderPath);
+            IS_LOG_CORE_ERROR("[HotReloadSystem::FindNewestProjectDynamicLibrary] Folder path '{}' doesn't exists. Make sure the project solution is building correctly.", folderPath);
             return "";
         }
 

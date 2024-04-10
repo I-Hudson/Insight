@@ -24,13 +24,13 @@ namespace Insight::Editor
     {
         if (IsLoaded())
         {
-            IS_CORE_ERROR("[HotReloadLibrary::Load] Unable to load library at '{0}' as a library is already loaded. Please 'Unload' before trying to load a new library.", libraryPath);
+            IS_LOG_CORE_ERROR("[HotReloadLibrary::Load] Unable to load library at '{0}' as a library is already loaded. Please 'Unload' before trying to load a new library.", libraryPath);
             return;
         }
 
         if (!FileSystem::Exists(libraryPath))
         {
-            IS_CORE_ERROR("[HotReloadLibrary::Load] Unable to load library at '{0}' as the path is invalid.", libraryPath);
+            IS_LOG_CORE_ERROR("[HotReloadLibrary::Load] Unable to load library at '{0}' as the path is invalid.", libraryPath);
             return;
         }
 
@@ -45,7 +45,7 @@ namespace Insight::Editor
         }
         else
         {
-            IS_CORE_ERROR("[HotReloadLibrary::Load] Unable to load library at '{0}'. Unknown why.", libraryPath);
+            IS_LOG_CORE_ERROR("[HotReloadLibrary::Load] Unable to load library at '{0}'. Unknown why.", libraryPath);
         }
 
         Core::EventSystem::Instance().DispatchEventNow(MakeRPtr<HotReloadLibraryLoaded>());
@@ -55,7 +55,7 @@ namespace Insight::Editor
     {
         if (!IsLoaded())
         {
-            IS_CORE_INFO("[HotReloadLibrary::Unload] Library is already unloaded.");
+            IS_LOG_CORE_INFO("[HotReloadLibrary::Unload] Library is already unloaded.");
             return;
         }
 
@@ -76,7 +76,7 @@ namespace Insight::Editor
     {
         if (!IsLoaded())
         {
-            IS_CORE_INFO("[HotReloadLibrary::GetMetaData] Library is not loaded.");
+            IS_LOG_CORE_INFO("[HotReloadLibrary::GetMetaData] Library is not loaded.");
             return {};
         }
         auto getMetaData = Platform::GetDynamicFunction<HotReloadMetaData>(m_libraryHandle, ProjectModule::c_GetMetaData);

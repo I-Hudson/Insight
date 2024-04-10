@@ -20,7 +20,7 @@ namespace Insight::Runtime
     {
         if (resource == nullptr || !FileSystem::Exists(resource->GetFilePath()))
         {
-            IS_CORE_WARN("[TextLoader::Load] resource is null or file path '{}' does not exist.", resource->GetFilePath());
+            IS_LOG_CORE_WARN("[TextLoader::Load] resource is null or file path '{}' does not exist.", resource->GetFilePath());
             return false;
         }
 

@@ -18,7 +18,7 @@ namespace Insight
 			}
 			else
 			{
-				IS_CORE_ERROR(R"([EventSystem::AddEventListener] Trying to set an event func for event type '{}'. But one 
+				IS_LOG_CORE_ERROR(R"([EventSystem::AddEventListener] Trying to set an event func for event type '{}'. But one 
 					already exists)", (int)eventType);
 				return;
 			}

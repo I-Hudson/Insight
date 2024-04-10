@@ -46,7 +46,7 @@ namespace Insight
 		{
 			IS_PROFILE_FUNCTION();
 
-			IS_CORE_INFO("Runtime Version {}.{}.{}.", 
+			IS_LOG_CORE_INFO("Runtime Version {}.{}.{}.", 
 				ENGINE_VERSION_MAJOIR, ENGINE_VERSION_MINOR, ENGINE_VERSION_PATCH);
 
 			const std::string cmdLinePath = "./cmdline.txt";

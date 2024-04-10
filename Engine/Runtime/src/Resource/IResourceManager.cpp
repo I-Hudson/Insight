@@ -252,14 +252,14 @@ namespace Insight
 
             if (!resourceId)
             {
-                IS_CORE_ERROR("[IResourceManager::LoadSync] Invalid 'ResourceId' was given and no resource Id could be found the file '{}'.", resourceId.GetPath());
+                IS_LOG_CORE_ERROR("[IResourceManager::LoadSync] Invalid 'ResourceId' was given and no resource Id could be found the file '{}'.", resourceId.GetPath());
                 return nullptr;
             }
 
             const IResourceLoader* loader = ResourceLoaderRegister::GetLoaderFromExtension(FileSystem::GetExtension(resourceId.GetPath()));
             if (!loader)
             {
-                IS_CORE_WARN("[IResourceManager::StartLoading] Resource '{}' failed to load as no loader could be found.", resourceId.GetPath());
+                IS_LOG_CORE_WARN("[IResourceManager::StartLoading] Resource '{}' failed to load as no loader could be found.", resourceId.GetPath());
                 return nullptr;
             }
             else if (loader->GetResourceTypeId() != resourceId)
@@ -407,7 +407,7 @@ namespace Insight
 
             if (!guid.IsValid())
             {
-                IS_CORE_WARN("[IResourceManager::Load] Invalid Guid.");
+                IS_LOG_CORE_WARN("[IResourceManager::Load] Invalid Guid.");
                 return nullptr;
             }
 
@@ -489,13 +489,13 @@ namespace Insight
 
             if (!resource)
             {
-                IS_CORE_WARN("[IResourceManager::UnloadResource] The resource '{0}' is not valid (null). The Resource isn't tracked by the ResourceDatabase.", resourceId.GetPath());
+                IS_LOG_CORE_WARN("[IResourceManager::UnloadResource] The resource '{0}' is not valid (null). The Resource isn't tracked by the ResourceDatabase.", resourceId.GetPath());
                 return;
             }
 
             if (resource->GetResourceState() != EResoruceStates::Loaded)
             {
-                IS_CORE_WARN("[IResourceManager::Unload] 'resource' current state is '{0}'. Resource must be loaded to be unloaded."
+                IS_LOG_CORE_WARN("[IResourceManager::Unload] 'resource' current state is '{0}'. Resource must be loaded to be unloaded."
                     , ERsourceStatesToString(resource->GetResourceState()));
                 return;
             }
@@ -600,7 +600,7 @@ namespace Insight
             const IResourceLoader* loader = ResourceLoaderRegister::GetLoaderFromResource(resource);
             if (!loader)
             {
-                IS_CORE_WARN("[IResourceManager::StartLoading] Resource '{}' failed to load as no loader could be found.", resource->GetFileName());
+                IS_LOG_CORE_WARN("[IResourceManager::StartLoading] Resource '{}' failed to load as no loader could be found.", resource->GetFileName());
             }
 
             std::function<void(IResource* resource, const IResourceLoader* loader, const bool threaded)> resourceLoadFunc = 

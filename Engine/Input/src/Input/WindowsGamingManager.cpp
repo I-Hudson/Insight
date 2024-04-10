@@ -146,7 +146,7 @@ namespace Insight
 			InputDevice_Controller* device = m_inputSystem->GetController(controllerIndex);
 			if (!device)
 			{
-				IS_CORE_ERROR("[XInputManager::ProcessVibration] Trying to process controller index '{}', controller at index is not valid.", controllerIndex);
+				IS_LOG_CORE_ERROR("[XInputManager::ProcessVibration] Trying to process controller index '{}', controller at index is not valid.", controllerIndex);
 				return;
 			}
 
@@ -167,7 +167,7 @@ namespace Insight
 			auto gamepad = winrt::Windows::Gaming::Input::Gamepad::FromGameController(m_connectControllers.at(controllerIndex));
 			if (gamepad == nullptr)
 			{
-				IS_CORE_ERROR("[WindowsGamingManager::ProcessInput] Controller at index '{}' was unable to create winrt::Windows::Gaming::Input::Gamepad.", controllerIndex);
+				IS_LOG_CORE_ERROR("[WindowsGamingManager::ProcessInput] Controller at index '{}' was unable to create winrt::Windows::Gaming::Input::Gamepad.", controllerIndex);
 				return;
 			}
 
@@ -214,7 +214,7 @@ namespace Insight
 			InputDevice_Controller* device = m_inputSystem->GetController(controllerIndex);
 			if (!device)
 			{
-				IS_CORE_ERROR("[XInputManager::ProcessVibration] Trying to process controller index '{}', controller at index is not valid.", controllerIndex);
+				IS_LOG_CORE_ERROR("[XInputManager::ProcessVibration] Trying to process controller index '{}', controller at index is not valid.", controllerIndex);
 				return;
 			}
 

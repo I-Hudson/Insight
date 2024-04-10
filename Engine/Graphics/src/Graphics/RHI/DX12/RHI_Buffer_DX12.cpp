@@ -83,7 +83,7 @@ namespace Insight
 
 				if (sizeInBytes > GetSize())
 				{
-					IS_CORE_ERROR("[RHI_Buffer_DX12::Upload] Upload size '{}' is too big available size '{}'.", sizeInBytes, GetSize());
+					IS_LOG_CORE_ERROR("[RHI_Buffer_DX12::Upload] Upload size '{}' is too big available size '{}'.", sizeInBytes, GetSize());
 					return {};
 				}
 

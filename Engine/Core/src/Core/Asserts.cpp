@@ -1,4 +1,4 @@
-#include "Core/Assets.h"
+#include "Core/Asserts.h"
 
 #ifdef IS_PLATFORM_WINDOWS
 #include <stdarg.h>
@@ -9,7 +9,7 @@
 
 namespace Insight
 {
-	void AssetPrintError(const char* format, ...)
+	void AssertPrintError(const char* format, ...)
 	{
 #ifdef IS_PLATFORM_WINDOWS
 		char buffer[2048];

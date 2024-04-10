@@ -124,13 +124,13 @@ namespace Insight
 			{
 				if (!Algorithm::VectorIndexWithinRange(m_components, componentId))
 				{
-					IS_CORE_WARN("[ComponentTypeArray::RemoveComponent] ComponentId '{}' is out of range. Enter a valid ComponentId.");
+					IS_LOG_CORE_WARN("[ComponentTypeArray::RemoveComponent] ComponentId '{}' is out of range. Enter a valid ComponentId.");
 					return false;
 				}
 
 				if (m_freeList.find(componentId) != m_freeList.end())
 				{
-					IS_CORE_WARN("[ComponentTypeArray::RemoveComponent] ComponentId '{}' is already within the free list.");
+					IS_LOG_CORE_WARN("[ComponentTypeArray::RemoveComponent] ComponentId '{}' is already within the free list.");
 					return false;
 				}
 
@@ -148,7 +148,7 @@ namespace Insight
 
 				if (m_freeList.find(componentId) != m_freeList.end())
 				{
-					IS_CORE_WARN("[ComponentTypeArray::RemoveComponent] ComponentId '{}' is already within the free list.");
+					IS_LOG_CORE_WARN("[ComponentTypeArray::RemoveComponent] ComponentId '{}' is already within the free list.");
 					return nullptr;
 				}
 

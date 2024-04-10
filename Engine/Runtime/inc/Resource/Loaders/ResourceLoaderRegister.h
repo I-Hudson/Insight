@@ -39,7 +39,7 @@ namespace Insight
 				                                                                                       return resourceLoader->GetResourceTypeId() == loader->GetResourceTypeId();
 																									   }))
 				{
-					IS_CORE_ERROR("[ResourceLoaderRegister::RegisterResourceLoader] Trying to add a new loader for ResourceTypeId '{}' when one already exists.",
+					IS_LOG_CORE_ERROR("[ResourceLoaderRegister::RegisterResourceLoader] Trying to add a new loader for ResourceTypeId '{}' when one already exists.",
 					              resourceLoader->GetResourceTypeId().GetTypeName());
 					Delete(resourceLoader);
 				}

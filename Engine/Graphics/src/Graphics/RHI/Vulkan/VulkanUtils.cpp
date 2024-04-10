@@ -1,7 +1,7 @@
 #if defined(IS_VULKAN_ENABLED)
 
 #include "Graphics/RHI/Vulkan/VulkanUtils.h"
-#include "Platforms/Platform.h"
+#include "Core/Asserts.h"
 
 #ifdef IS_PLATFORM_WINDOWS
 #ifndef WIN32_LEAN_AND_MEAN

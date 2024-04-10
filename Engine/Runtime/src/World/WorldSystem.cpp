@@ -200,7 +200,7 @@ namespace Insight
                     return m_activeWorlds.at(sceneIdx);
                 }
             }
-            IS_CORE_ERROR("[WorldSystem::GetActiveScene] No active scene found.");
+            IS_LOG_CORE_ERROR("[WorldSystem::GetActiveScene] No active scene found.");
             return TObjectPtr<World>();
         }
 

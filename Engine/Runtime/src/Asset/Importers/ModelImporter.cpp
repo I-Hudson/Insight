@@ -190,7 +190,7 @@ namespace Insight
 
 			if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 			{
-				IS_CORE_ERROR("[ModelImporter::Import] Assimp model load: {0}", importer.GetErrorString());
+				IS_LOG_CORE_ERROR("[ModelImporter::Import] Assimp model load: {0}", importer.GetErrorString());
 				return Ref<Asset>();
 			}
 
@@ -406,7 +406,7 @@ namespace Insight
 
 			if (textureType == aiTextureType_NONE)
 			{
-				IS_CORE_ERROR("[ModelImporter::GetTexturePath] Unable to find PRB/Legacy textures for material '{}'.", aiMaterial->GetName().C_Str());
+				IS_LOG_CORE_ERROR("[ModelImporter::GetTexturePath] Unable to find PRB/Legacy textures for material '{}'.", aiMaterial->GetName().C_Str());
 				return std::string();
 			}
 
@@ -414,7 +414,7 @@ namespace Insight
 			aiMaterial->GetTexture(textureType, 0, &texturePath);
 			if (texturePath.length == 0)
 			{
-				IS_CORE_ERROR("[ModelImporter::GetTexturePath] Texture path for texture type '{}' was empty.", aiTextureTypeToString(textureType));
+				IS_LOG_CORE_ERROR("[ModelImporter::GetTexturePath] Texture path for texture type '{}' was empty.", aiTextureTypeToString(textureType));
 				return std::string();
 			}
 
