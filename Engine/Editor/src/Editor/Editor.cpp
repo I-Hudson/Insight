@@ -91,21 +91,27 @@ namespace Insight
                     Runtime::AssetRegistry::Instance().AddAssetsInFolder(projectInfo.GetContentPath(), m_projectAssetPackage, true, true);
 
                     {
-                        for (auto path : std::filesystem::directory_iterator(projectInfo.GetContentPath() + "/Main.1_Sponza_/textures"))
+                        if (FileSystem::Exists(projectInfo.GetContentPath() + "/Main.1_Sponza_/textures"))
                         {
-                            if (path.path().extension() == ".png")
+                            for (auto path : std::filesystem::directory_iterator(projectInfo.GetContentPath() + "/Main.1_Sponza_/textures"))
                             {
-                                Runtime::AssetRegistry::Instance().LoadAsset2(path.path().string());
+                                if (path.path().extension() == ".png")
+                                {
+                                    Runtime::AssetRegistry::Instance().LoadAsset2(path.path().string());
+                                }
                             }
                         }
                     }
 
                     {
-                        for (auto path : std::filesystem::directory_iterator(projectInfo.GetContentPath() + "/Main.1_Sponza_/textures"))
+                        if (FileSystem::Exists(projectInfo.GetContentPath() + "/Main.1_Sponza_/textures"))
                         {
-                            if (path.path().extension() == ".qoi")
+                            for (auto path : std::filesystem::directory_iterator(projectInfo.GetContentPath() + "/Main.1_Sponza_/textures"))
                             {
-                                Runtime::AssetRegistry::Instance().LoadAsset2(path.path().string());
+                                if (path.path().extension() == ".qoi")
+                                {
+                                    Runtime::AssetRegistry::Instance().LoadAsset2(path.path().string());
+                                }
                             }
                         }
                     }

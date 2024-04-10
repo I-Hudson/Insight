@@ -7,6 +7,9 @@
 
 #include "ECS/Components/CameraComponent.h"
 
+#include "Maths/Vector2.h"
+#include "Maths/Vector4.h"
+
 #include "Core/TypeAlias.h"
 
 #include <glm/mat4x4.hpp>
@@ -24,11 +27,11 @@ namespace Insight
 
 		struct BufferFrame
 		{
-			glm::mat4 Proj_View = { };
-			glm::mat4 Projection = { };
-			glm::mat4 View = { };
-			glm::mat4 View_Inverted = { };
-			glm::mat4 Projection_View_Inverted = { };
+			Maths::Matrix4 Proj_View = { };
+			Maths::Matrix4 Projection = { };
+			Maths::Matrix4 View = { };
+			Maths::Matrix4 View_Inverted = { };
+			Maths::Matrix4 Projection_View_Inverted = { };
 
 			glm::vec2 Render_Resolution = {};
 			float pad0 = 0.0f;
@@ -51,14 +54,14 @@ namespace Insight
 		static const u8 s_Cascade_Count = 4;
 		struct BufferLight
 		{
-			glm::mat4 ProjView[s_Cascade_Count];
-			glm::mat4 Projection[s_Cascade_Count];
-			glm::mat4 View[s_Cascade_Count];
+			Maths::Matrix4 ProjView[s_Cascade_Count];
+			Maths::Matrix4 Projection[s_Cascade_Count];
+			Maths::Matrix4 View[s_Cascade_Count];
 			float SplitDepth[s_Cascade_Count];
 
-			glm::vec4 Light_Direction = { };
-			glm::vec4 Light_Colour = glm::vec4(1, 1, 1, 1);
-			glm::vec2 Resolution = { };
+			Maths::Vector4 Light_Direction = { };
+			Maths::Vector4 Light_Colour = Maths::Vector4(1, 1, 1, 1);
+			Maths::Vector2 Resolution = { };
 
 			float pad0 = 0.0f;
 			float pad1 = 0.0f;

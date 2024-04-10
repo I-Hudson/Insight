@@ -56,7 +56,7 @@ namespace Insight
     struct IS_RUNTIME RenderCamrea
     {
         ECS::Camera Camra; 
-        glm::mat4 Transform;
+        Maths::Matrix4 Transform;
         bool IsSet = false;
     };
 
@@ -65,8 +65,8 @@ namespace Insight
     {
         RenderWorld() = default;
         
-        void SetMainCamera(ECS::Camera mainCamera, glm::mat4 transform);
-        void AddCamrea(ECS::Camera camera, glm::mat4 transform);
+        void SetMainCamera(ECS::Camera mainCamera, const Maths::Matrix4 transform);
+        void AddCamrea(ECS::Camera camera, const Maths::Matrix4 transform);
 
         /// @brief The main rendering camera for this world.
         RenderCamrea MainCamera;
@@ -97,7 +97,7 @@ namespace Insight
         /// @return RenderWorld
         void CreateRenderFrameFromWorldSystem(Runtime::WorldSystem* worldSystem);
         void Sort();
-        void SetCameraForAllWorlds(ECS::Camera mainCamera, glm::mat4 transform);
+        void SetCameraForAllWorlds(ECS::Camera mainCamera, const Maths::Matrix4 transform);
 
     private:
         void Clear();

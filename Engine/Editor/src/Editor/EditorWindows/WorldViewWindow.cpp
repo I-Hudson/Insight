@@ -90,8 +90,8 @@ namespace Insight
                 std::unordered_set<Core::GUID> selectedEntites = worldEntitiesWindow->GetSelectedEntities();
                 if (!selectedEntites.empty())
                 {
-                    glm::mat4 viewMatrix = m_editorCameraComponent->GetCamera().GetInvertedViewMatrix();
-                    glm::mat4 projectionMatrix = m_editorCameraComponent->GetProjectionMatrix();
+                    Maths::Matrix4 viewMatrix = m_editorCameraComponent->GetCamera().GetInvertedViewMatrix();
+                    Maths::Matrix4 projectionMatrix = m_editorCameraComponent->GetProjectionMatrix();
 
                     ECS::Entity* entity = Runtime::WorldSystem::Instance().GetEntityByGUID(*selectedEntites.begin());
                     ECS::TransformComponent* transformComponent = entity->GetComponent<ECS::TransformComponent>();
@@ -130,7 +130,7 @@ namespace Insight
         void WorldViewWindow::SetupRenderGraphPasses()
         {
             const ECS::Camera camera = m_editorCameraComponent->GetCamera();
-            const glm::mat4 cameraTransform = m_editorCameraComponent->GetViewMatrix();
+            const Maths::Matrix4 cameraTransform = m_editorCameraComponent->GetViewMatrix();
 
             RenderFrame renderFrame = App::Engine::Instance().GetSystemRegistry().GetSystem<Runtime::GraphicsSystem>()->GetRenderFrame();
             renderFrame.SetCameraForAllWorlds(camera, cameraTransform);

@@ -121,8 +121,8 @@ namespace Insight
 
 			m_buffer_frame = {};
 			aspect = (float)Window::Instance().GetWidth() / (float)Window::Instance().GetHeight();
-			m_buffer_frame.Projection = glm::perspective(glm::radians(90.0f), aspect, 0.1f, 1024.0f);
-			m_buffer_frame.View = glm::mat4(1.0f);
+			m_buffer_frame.Projection = Maths::Matrix4::CreatePerspective(glm::radians(90.0f), aspect, 0.1f, 1024.0f);
+			m_buffer_frame.View = Maths::Matrix4::Identity;
 			MainCameraFrustum = Graphics::Frustum(m_buffer_frame.View, m_buffer_frame.Projection, Main_Camera_Far_Plane);
 
 			RenderContext* render_context = &RenderContext::Instance();
@@ -229,18 +229,19 @@ namespace Insight
 					m_taaJitterX = (m_taaJitterX / static_cast<float>(renderResolution.x));
 					m_taaJitterY = (m_taaJitterY / static_cast<float>(renderResolution.y));
 
-					glm::mat4 translation = glm::translate(glm::mat4(1.0f), glm::vec3(m_taaJitterX, m_taaJitterY, 0.0f));
+					Maths::Matrix4 translation = Maths::Matrix4::Identity.Translated(Maths::Vector4(m_taaJitterX, m_taaJitterY, 0.0f, 0.0f));
+					glm::mat4 trans = glm::translate(glm::mat4(1.0f), glm::vec3(m_taaJitterX, m_taaJitterY, 0.0f));
 					m_buffer_frame.Projection = m_buffer_frame.Projection * translation;
 
 					if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan)
 					{
-						glm::mat4 proj = m_buffer_frame.Projection;
+						Maths::Matrix4 proj = m_buffer_frame.Projection;
 						proj[1][1] *= -1;
-						m_buffer_frame.Proj_View = proj * glm::inverse(m_buffer_frame.View);
+						m_buffer_frame.Proj_View = proj * m_buffer_frame.View.Inversed();
 					}
 					else
 					{
-						m_buffer_frame.Proj_View = m_buffer_frame.Projection * glm::inverse(m_buffer_frame.View);
+						m_buffer_frame.Proj_View = m_buffer_frame.Projection * m_buffer_frame.View.Inversed();
 					}
 				}
 			}
@@ -353,18 +354,19 @@ namespace Insight
 				m_taaJitterX = (m_taaJitterX / static_cast<float>(renderResolution.x));
 				m_taaJitterY = (m_taaJitterY / static_cast<float>(renderResolution.y));
 
-				glm::mat4 translation = glm::translate(glm::mat4(1.0f), glm::vec3(m_taaJitterX, m_taaJitterY, 0.0f));
+				Maths::Matrix4 translation = Maths::Matrix4::Identity.Translated(Maths::Vector4(m_taaJitterX, m_taaJitterY, 0.0f, 0.0f));
+				glm::mat4 trans = glm::translate(glm::mat4(1.0f), glm::vec3(m_taaJitterX, m_taaJitterY, 0.0f));
 				m_buffer_frame.Projection = m_buffer_frame.Projection * translation;
 
 				if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan)
 				{
-					glm::mat4 proj = m_buffer_frame.Projection;
+					Maths::Matrix4 proj = m_buffer_frame.Projection;
 					proj[1][1] *= -1;
-					m_buffer_frame.Proj_View = proj * glm::inverse(m_buffer_frame.View);
+					m_buffer_frame.Proj_View = proj * m_buffer_frame.View.Inversed();
 				}
 				else
 				{
-					m_buffer_frame.Proj_View = m_buffer_frame.Projection * glm::inverse(m_buffer_frame.View);
+					m_buffer_frame.Proj_View = m_buffer_frame.Projection * m_buffer_frame.View.Inversed();
 				}
 			}
 
@@ -1529,35 +1531,35 @@ namespace Insight
 			{
 				float splitDist = cascadeSplits[i];
 
-				glm::vec3 frustumCorners[8] =
+				Maths::Vector3 frustumCorners[8] =
 				{
-					glm::vec3(-1.0f,  1.0f, -1.0f),
-					glm::vec3(1.0f,  1.0f, -1.0f),
-					glm::vec3(1.0f, -1.0f, -1.0f),
-					glm::vec3(-1.0f, -1.0f, -1.0f),
-					glm::vec3(-1.0f,  1.0f,  1.0f),
-					glm::vec3(1.0f,  1.0f,  1.0f),
-					glm::vec3(1.0f, -1.0f,  1.0f),
-					glm::vec3(-1.0f, -1.0f,  1.0f),
+					Maths::Vector3(-1.0f,  1.0f, -1.0f),
+					Maths::Vector3(1.0f,  1.0f, -1.0f),
+					Maths::Vector3(1.0f, -1.0f, -1.0f),
+					Maths::Vector3(-1.0f, -1.0f, -1.0f),
+					Maths::Vector3(-1.0f,  1.0f,  1.0f),
+					Maths::Vector3(1.0f,  1.0f,  1.0f),
+					Maths::Vector3(1.0f, -1.0f,  1.0f),
+					Maths::Vector3(-1.0f, -1.0f,  1.0f),
 				};
 
 				/// Project frustum corners into world space
-				glm::mat4 invCam = glm::inverse(buffer_frame.Proj_View);
+				Maths::Matrix4 invCam = buffer_frame.Proj_View.Inversed();
 				for (u32 i = 0; i < 8; ++i)
 				{
-					glm::vec4 invCorner = invCam * glm::vec4(frustumCorners[i], 1.0f);
-					frustumCorners[i] = invCorner / invCorner.w;
+					Maths::Vector4 invCorner = invCam * Maths::Vector4(frustumCorners[i], 1.0f);
+					frustumCorners[i] = Maths::Vector3((invCorner / invCorner.w));
 				}
 
 				for (u32 i = 0; i < 4; ++i)
 				{
-					glm::vec3 dist = frustumCorners[i + 4] - frustumCorners[i];
+					Maths::Vector3 dist = frustumCorners[i + 4] - frustumCorners[i];
 					frustumCorners[i + 4] = frustumCorners[i] + (dist * splitDist);
 					frustumCorners[i] = frustumCorners[i] + (dist * lastSplitDist);
 				}
 
 				/// Get frustum center
-				glm::vec3 frustumCenter = glm::vec3(0.0f);
+				Maths::Vector3 frustumCenter = Maths::Vector3(0.0f);
 				for (u32 i = 0; i < 8; ++i)
 				{
 					frustumCenter += frustumCorners[i];
@@ -1567,27 +1569,31 @@ namespace Insight
 				float radius = 0.0f;
 				for (u32 i = 0; i < 8; ++i)
 				{
-					float distance = glm::length(frustumCorners[i] - frustumCenter);
+					float distance = (frustumCorners[i] - frustumCenter).Length();
+					float glmDistance = glm::length(glm::vec3(frustumCorners[i].x, frustumCorners[i].y, frustumCorners[i].z) - glm::vec3(frustumCenter.x, frustumCenter.y, frustumCenter.z));
 					radius = glm::max(radius, distance);
 				}
 				radius = std::ceil(radius * 16.0f) / 16.0f;
 
-				glm::vec3 maxExtents = glm::vec3(radius);
-				glm::vec3 minExtents = -maxExtents;
+				Maths::Vector3 maxExtents = Maths::Vector3(radius);
+				glm::vec3 v;
+				v = -v;
+				Maths::Vector3 minExtents = -maxExtents;
 
-				glm::mat4 reverse_z = glm::mat4(1.0f);
+				Maths::Matrix4 reverse_z = Maths::Matrix4::Identity;
 				reverse_z[2][2] = -1;
 				reverse_z[2][3] = 1;
 
 				/// Construct our matrixs required for the light.
-				glm::vec3 lightDirection = dir_light_direction;
-				glm::vec3 lightPosition = frustumCenter - glm::normalize(lightDirection) * -minExtents.z;
-				glm::mat4 lightViewMatrix = glm::lookAt(lightPosition, frustumCenter, glm::vec3(0.0f, 1.0f, 0.0f));
-				glm::mat4 lightOrthoMatrix = glm::ortho(minExtents.x, maxExtents.x, minExtents.y, maxExtents.y, 0.0f, maxExtents.z - minExtents.z);
+				Maths::Vector3 lightDirection(0.5f, -0.7f, 0.5f);
+				Maths::Vector3 lightPosition = frustumCenter - lightDirection.Normalised() * -minExtents.z;
+				Maths::Matrix4 lightViewMatrix = Maths::Matrix4::LookAt(lightPosition, frustumCenter, Maths::Vector3(0.0f, 1.0f, 0.0f));
+				Maths::Matrix4 lightOrthoMatrix = Maths::Matrix4::CreateOrthographic(minExtents.x, maxExtents.x, minExtents.y, maxExtents.y, 0.0f, maxExtents.z - minExtents.z);
 
 				if (Reverse_Z_For_Depth)
 				{
-					glm::mat4 proj = glm::ortho(minExtents.x, maxExtents.x, minExtents.y, maxExtents.y, maxExtents.z - minExtents.z, 0.0f);
+					Maths::Matrix4 proj = Maths::Matrix4::CreateOrthographic(minExtents.x, maxExtents.x, minExtents.y, maxExtents.y, maxExtents.z - minExtents.z, 0.0f);
+					//glm::ortho(minExtents.x, maxExtents.x, minExtents.y, maxExtents.y, maxExtents.z - minExtents.z, 0.0f);
 					lightOrthoMatrix = reverse_z * lightOrthoMatrix;
 					lightOrthoMatrix = proj;
 				}
@@ -1604,7 +1610,7 @@ namespace Insight
 					outCascades.ProjView[i] = lightOrthoMatrix * lightViewMatrix;
 					outCascades.Projection[i] = lightOrthoMatrix;
 					outCascades.View[i] = lightViewMatrix;
-					outCascades.Light_Direction = glm::vec4(glm::normalize(frustumCenter - lightPosition), 0.0);
+					outCascades.Light_Direction = Maths::Vector4((frustumCenter - lightPosition).Normalised(), 0.0);
 				}
 				lastSplitDist = cascadeSplits[i];
 			}

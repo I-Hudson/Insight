@@ -30,7 +30,7 @@ namespace Insight
 			m_cameraType = CameraType::Orthographic;
 			m_nearPlane = nearPlane;
 			m_farPlane = farPlane;
-			m_projection = glm::ortho(left, right, bottom, top, m_nearPlane, m_farPlane);
+			m_projection = Maths::Matrix4::CreateOrthographic(left, right, bottom, top, 0, std::numeric_limits<float>::max());
 			ComputeProjectionMatrix();
 		}
 
@@ -39,7 +39,7 @@ namespace Insight
 			m_invertView = invertViewMatrix;
 		}
 
-		void Camera::SetViewMatrix(glm::mat4 viewMatrix)
+		void Camera::SetViewMatrix(Maths::Matrix4 viewMatrix)
 		{
 			m_view = viewMatrix;
 			ComputeProjectionViewMatrix();
@@ -70,15 +70,55 @@ namespace Insight
 			ComputeProjectionMatrix();
 		}
 
-		glm::mat4 Camera::GetInvertedProjectionViewMatrix() const
+		Maths::Matrix4 Camera::GetInvertedProjectionViewMatrix() const
 		{
 			if (m_invertView)
 			{
-				return glm::inverse(m_projection * glm::inverse(m_view));
+				float _00 = m_view[0][0];
+				float _01 = m_view[0][1];
+				float _02 = m_view[0][2];
+				float _03 = m_view[0][3];
+
+				float _10 = m_view[1][0];
+				float _11 = m_view[1][1];
+				float _12 = m_view[1][2];
+				float _13 = m_view[1][3];
+
+				float _20 = m_view[2][0];
+				float _21 = m_view[2][1];
+				float _22 = m_view[2][2];
+				float _23 = m_view[2][3];
+
+				float _30 = m_view[3][0];
+				float _31 = m_view[3][1];
+				float _32 = m_view[3][2];
+				float _33 = m_view[3][3];
+
+				glm::mat4 glmView(
+					m_view[0][0], m_view[0][1], m_view[0][2], m_view[0][3],
+					m_view[1][0], m_view[1][1], m_view[1][2], m_view[1][3],
+					m_view[2][0], m_view[2][1], m_view[2][2], m_view[2][3],
+					m_view[3][0], m_view[3][1], m_view[3][2], m_view[3][3]);
+
+				glm::mat4 glmProj(
+					m_projection[0][0], m_projection[0][1], m_projection[0][2], m_projection[0][3],
+					m_projection[1][0], m_projection[1][1], m_projection[1][2], m_projection[1][3],
+					m_projection[2][0], m_projection[2][1], m_projection[2][2], m_projection[2][3],
+					m_projection[3][0], m_projection[3][1], m_projection[3][2], m_projection[3][3]);
+
+				glm::mat4 glmViewInv = glm::inverse(glmView);
+				glm::mat4 glmProjView = glmProj * glmViewInv;
+				glm::mat4 glmProjViewInv =  glm::inverse(glmProjView);
+
+				Maths::Matrix4 viewInv = m_view.Inversed();
+				Maths::Matrix4 projView = m_projection * viewInv;
+				Maths::Matrix4 projViewInv = projView.Inversed();
+				return projViewInv;
 			}
 			else
 			{
-				return glm::inverse(m_projection * m_view);
+				return (m_projection * m_view).Inversed();
+				//return glm::inverse(m_projection * m_view);
 			}
 		}
 
@@ -97,7 +137,7 @@ namespace Insight
 			if (m_cameraType == CameraType::Perspective)
 			{
 				m_aspect = std::max(0.1f, m_aspect);
-				m_projection = glm::perspective(m_fovY, m_aspect, m_nearPlane, m_farPlane);
+				m_projection = Maths::Matrix4::CreatePerspective(m_fovY, m_aspect, m_nearPlane, m_farPlane);
 			}
 			ComputeProjectionViewMatrix();
 			ComputeFrustm();
@@ -105,7 +145,7 @@ namespace Insight
 
 		void Camera::ComputeProjectionViewMatrix()
 		{
-			glm::mat4 proj = m_projection;
+			Maths::Matrix4 proj = m_projection;
 			if (Graphics::RenderContext::Instance().GetGraphicsAPI() == Graphics::GraphicsAPI::Vulkan)
 			{
 				proj[1][1] *= -1;
@@ -113,7 +153,7 @@ namespace Insight
 
 			if (m_invertView)
 			{
-				m_projectionView = proj * glm::inverse(m_view);
+				m_projectionView = proj * m_view.Inversed();
 			}
 			else
 			{
@@ -179,23 +219,29 @@ namespace Insight
 			m_camera.SetFovY(fovy);
 		}
 
-		glm::mat4 CameraComponent::GetProjectionViewMatrix() const
+		Maths::Matrix4 CameraComponent::GetProjectionViewMatrix() const
 		{
 			// Call 'GetViewMatrix' to update the camera's view matrix.
 			GetViewMatrix();
 			return m_camera.GetProjectionViewMatrix();
 		}
 
-		glm::mat4 CameraComponent::GetViewMatrix() const
+		Maths::Matrix4 CameraComponent::GetViewMatrix() const
 		{
 			TransformComponent* transformComponent = static_cast<TransformComponent*>(GetOwnerEntity()->GetComponentByName(TransformComponent::Type_Name));
 			if (transformComponent != nullptr)
 			{
-				const_cast<Camera&>(m_camera).SetViewMatrix(transformComponent->GetTransform());
+				glm::mat4 transformMatrix = transformComponent->GetTransform();
+				Maths::Matrix4 m(
+					transformMatrix[0][0], transformMatrix[0][1], transformMatrix[0][2], transformMatrix[0][3],
+					transformMatrix[1][0], transformMatrix[1][1], transformMatrix[1][2], transformMatrix[1][3],
+					transformMatrix[2][0], transformMatrix[2][1], transformMatrix[2][2], transformMatrix[2][3],
+					transformMatrix[3][0], transformMatrix[3][1], transformMatrix[3][2], transformMatrix[3][3]);
+				const_cast<Camera&>(m_camera).SetViewMatrix(m);
 			}
 			else
 			{
-				const_cast<Camera&>(m_camera).SetViewMatrix(glm::mat4(1.0f));
+				const_cast<Camera&>(m_camera).SetViewMatrix(Maths::Matrix4::Identity);
 			}
 			return m_camera.GetViewMatrix();
 		}

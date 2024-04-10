@@ -24,6 +24,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "Graphics/Defines.h"
 #include "Graphics/BoundingBox.h"
 
+#include "Maths/Matrix4.h"
+
 #include <glm/vec3.hpp>
 #include <glm/mat4x4.hpp>
 
@@ -63,6 +65,7 @@ namespace Insight
         public:
             Frustum() = default;
             Frustum(const glm::mat4& mView, const glm::mat4& mProjection, float screenDepth);
+            Frustum(const Maths::Matrix4& mView, const Maths::Matrix4& mProjection, float screenDepth);
             ~Frustum() = default;
 
             bool IsVisible(const glm::vec3& center, const glm::vec3& extent, bool ignore_near_plane = false) const;

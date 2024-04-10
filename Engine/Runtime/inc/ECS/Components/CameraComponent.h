@@ -4,7 +4,7 @@
 #include "ECS/Entity.h"
 #include "Graphics/Frustum.h"
 
-#include <glm/ext/matrix_float4x4.hpp>
+#include "Maths/Matrix4.h"
 
 #include "Generated/CameraComponent_reflect_generated.h"
 
@@ -31,25 +31,25 @@ namespace Insight
 			void CreateOrthographic(float left, float right, float bottom, float top, float nearPlane, float farPlane);
 
 			void SetInvertViewMatrix(bool invertViewMatrix);
-			void SetViewMatrix(glm::mat4 viewMatrix);
+			void SetViewMatrix(const Maths::Matrix4 viewMatrix);
 
 			void SetNearPlane(float nearPlane);
 			void SetFarPlane(float farPlane);
 			void SetAspect(float aspect);
 			void SetFovY(float fovy);
 
-			glm::mat4 GetProjectionViewMatrix()         const { return m_projectionView; }
-			glm::mat4 GetProjectionMatrix()             const { return m_projection; }
-			glm::mat4 GetViewMatrix()                   const { return m_view; }
+			Maths::Matrix4 GetProjectionViewMatrix()			const { return m_projectionView; }
+			Maths::Matrix4 GetProjectionMatrix()				const { return m_projection; }
+			Maths::Matrix4 GetViewMatrix()						const { return m_view; }
 
-			glm::mat4 GetInvertedProjectionViewMatrix()	const;
-			glm::mat4 GetInvertedViewMatrix()	        const { return glm::inverse(m_view); }
+			Maths::Matrix4 GetInvertedProjectionViewMatrix()	const;
+			Maths::Matrix4 GetInvertedViewMatrix()				const { return m_view.Inversed(); }
 
-			CameraType GetCameraType()                  const { return m_cameraType; }
-			float GetNearPlane()                        const { return m_nearPlane; }
-			float GetFarPlane()                         const { return m_farPlane; }
-			float GetAspect()                           const { return m_aspect; }
-			float GetFovY()                             const { return m_fovY; }
+			CameraType GetCameraType()							const { return m_cameraType; }
+			float GetNearPlane()								const { return m_nearPlane; }
+			float GetFarPlane()									const { return m_farPlane; }
+			float GetAspect()									const { return m_aspect; }
+			float GetFovY()										const { return m_fovY; }
 
 			bool IsVisible(const glm::vec3& center, const glm::vec3& extent, bool ignore_near_plane = false) const;
 			bool IsVisible(const Graphics::BoundingBox& boundingbox) const;
@@ -61,9 +61,9 @@ namespace Insight
 			void ComputeFrustm();
 
 		private:
-			glm::mat4 m_projectionView = glm::mat4(1.0f);
-			glm::mat4 m_projection = glm::mat4(1.0f);
-			glm::mat4 m_view = glm::mat4(1.0f);
+			Maths::Matrix4 m_projectionView = Maths::Matrix4::Identity;
+			Maths::Matrix4 m_projection = Maths::Matrix4::Identity;
+			Maths::Matrix4 m_view = Maths::Matrix4::Identity;
 
 			CameraType m_cameraType = CameraType::Unknown;
 			Graphics::Frustum m_frusum;
@@ -100,19 +100,19 @@ namespace Insight
 			void SetAspect(float aspect);
 			void SetFovY(float fovy);
 
-			glm::mat4 GetProjectionViewMatrix()         const;
-			glm::mat4 GetProjectionMatrix()             const { return m_camera.GetProjectionMatrix(); }
-			glm::mat4 GetViewMatrix()                   const;
+			Maths::Matrix4 GetProjectionViewMatrix()			const;
+			Maths::Matrix4 GetProjectionMatrix()				const { return m_camera.GetProjectionMatrix(); }
+			Maths::Matrix4 GetViewMatrix()						const;
 
-			glm::mat4 GetInvertedProjectionViewMatrix()	const { return m_camera.GetInvertedProjectionViewMatrix(); }
-			glm::mat4 GetInvertedViewMatrix()	        const { return m_camera.GetInvertedViewMatrix(); }
+			Maths::Matrix4 GetInvertedProjectionViewMatrix()	const { return m_camera.GetInvertedProjectionViewMatrix(); }
+			Maths::Matrix4 GetInvertedViewMatrix()				const { return m_camera.GetInvertedViewMatrix(); }
 
-			Camera GetCamera()							const { return m_camera; }
-			CameraType GetCameraType()                  const { return m_camera.GetCameraType(); }
-			float GetNearPlane()                        const { return m_camera.GetNearPlane(); }
-			float GetFarPlane()                         const { return m_camera.GetFarPlane(); }
-			float GetAspect()                           const { return m_camera.GetAspect(); }
-			float GetFovY()                             const { return m_camera.GetFovY(); }
+			Camera GetCamera()									const { return m_camera; }
+			CameraType GetCameraType()							const { return m_camera.GetCameraType(); }
+			float GetNearPlane()								const { return m_camera.GetNearPlane(); }
+			float GetFarPlane()									const { return m_camera.GetFarPlane(); }
+			float GetAspect()									const { return m_camera.GetAspect(); }
+			float GetFovY()										const { return m_camera.GetFovY(); }
 
 			Graphics::Frustum GetFrustum()  const;
 

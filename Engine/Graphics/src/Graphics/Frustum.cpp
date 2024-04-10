@@ -191,6 +191,63 @@ namespace Insight
             //m_planes[5].Normalize();
         }
 
+        Frustum::Frustum(const Maths::Matrix4& view, const Maths::Matrix4& projection, float screenDepth)
+        {
+            IS_PROFILE_FUNCTION();
+            // Calculate the minimum Z distance in the frustum.
+            const float z_min = -projection[3][2] / projection[2][2];
+            const float r = screenDepth / (screenDepth - z_min);
+            Maths::Matrix4 projection_updated = projection;
+            projection_updated[2][2] = r;
+            projection_updated[3][2] = -r * z_min;
+
+            // Create the frustum matrix from the view matrix and updated projection matrix.
+            const Maths::Matrix4 projection_view = projection_updated * view.Inversed();
+
+            // Calculate near plane of frustum.
+            m_planes[0].normal.x = projection_view[0][3] + projection_view[0][2];
+            m_planes[0].normal.y = projection_view[1][3] + projection_view[1][2];
+            m_planes[0].normal.z = projection_view[2][3] + projection_view[2][2];
+            m_planes[0].d = projection_view[3][3] + projection_view[3][2];
+            m_planes[0].Normalize();
+
+            // Calculate far plane of frustum.
+            m_planes[1].normal.x = projection_view[0][3] - projection_view[0][2];
+            m_planes[1].normal.y = projection_view[1][3] - projection_view[1][2];
+            m_planes[1].normal.z = projection_view[2][3] - projection_view[2][2];
+            m_planes[1].d = projection_view[3][3] - projection_view[3][2];
+            m_planes[1].Normalize();
+
+            // Calculate left plane of frustum.
+            m_planes[2].normal.x = projection_view[0][3] + projection_view[0][0];
+            m_planes[2].normal.y = projection_view[1][3] + projection_view[1][0];
+            m_planes[2].normal.z = projection_view[2][3] + projection_view[2][0];
+            m_planes[2].d = projection_view[3][3] + projection_view[3][0];
+            m_planes[2].Normalize();
+
+            // Calculate right plane of frustum.
+            m_planes[3].normal.x = projection_view[0][3] - projection_view[0][0];
+            m_planes[3].normal.y = projection_view[1][3] - projection_view[1][0];
+            m_planes[3].normal.z = projection_view[2][3] - projection_view[2][0];
+            m_planes[3].d = projection_view[3][3] - projection_view[3][0];
+            m_planes[3].Normalize();
+
+            // Calculate top plane of frustum.
+            m_planes[4].normal.x = projection_view[0][3] - projection_view[0][1];
+            m_planes[4].normal.y = projection_view[1][3] - projection_view[1][1];
+            m_planes[4].normal.z = projection_view[2][3] - projection_view[2][1];
+            m_planes[4].d = projection_view[3][3] - projection_view[3][1];
+            m_planes[4].Normalize();
+
+            // Calculate bottom plane of frustum.
+            m_planes[5].normal.x = projection_view[0][3] + projection_view[0][1];
+            m_planes[5].normal.y = projection_view[1][3] + projection_view[1][1];
+            m_planes[5].normal.z = projection_view[2][3] + projection_view[2][1];
+            m_planes[5].d = projection_view[3][3] + projection_view[3][1];
+            m_planes[5].Normalize();
+        }
+
+
         bool Frustum::IsVisible(const glm::vec3& center, const glm::vec3& extent, bool ignore_near_plane /*= false*/) const
         {
             IS_PROFILE_FUNCTION();

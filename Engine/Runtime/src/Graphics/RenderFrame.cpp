@@ -46,12 +46,12 @@ namespace Insight
     //=====================================================
     // RenderWorld
     //=====================================================
-    void RenderWorld::SetMainCamera(ECS::Camera mainCamera, glm::mat4 transform)
+    void RenderWorld::SetMainCamera(ECS::Camera mainCamera, const Maths::Matrix4 transform)
     {
         MainCamera = RenderCamrea{ std::move(mainCamera), std::move(transform), true};
     }
 
-    void RenderWorld::AddCamrea(ECS::Camera camera, glm::mat4 transform)
+    void RenderWorld::AddCamrea(ECS::Camera camera, const Maths::Matrix4 transform)
     {
         Cameras.push_back(RenderCamrea{ std::move(camera), std::move(transform), true });
     }
@@ -195,7 +195,7 @@ namespace Insight
     {
         RenderWorlds.clear();
         MainCamera = {};
-        MainCamera.Transform = glm::mat4(0);
+        MainCamera.Transform = Maths::Matrix4::Zero;
     }
 
     void RenderFrame::SortOpaqueMeshes()
@@ -212,7 +212,7 @@ namespace Insight
 
                         glm::vec3 const& positionA = meshA.Transform[3].xyz;
                         glm::vec3 const& positionB = meshB.Transform[3].xyz;
-                        glm::vec3 const& cameraPositon = world.MainCamera.Transform[3].xyz;
+                        glm::vec3 const& cameraPositon = glm::vec3(world.MainCamera.Transform[3].x, world.MainCamera.Transform[3].y, world.MainCamera.Transform[3].z);
                         return glm::distance(positionA, cameraPositon) < glm::distance(positionB, cameraPositon);
                     });
             }
@@ -234,14 +234,14 @@ namespace Insight
 
                         glm::vec3 const& positionA = meshA.Transform[3].xyz;
                         glm::vec3 const& positionB = meshB.Transform[3].xyz;
-                        glm::vec3 const& cameraPositon = world.MainCamera.Transform[3].xyz;
+                        glm::vec3 const& cameraPositon = glm::vec3(world.MainCamera.Transform[3].x, world.MainCamera.Transform[3].y, world.MainCamera.Transform[3].z);
                         return glm::distance(positionA, cameraPositon) < glm::distance(positionB, cameraPositon);
                     });
             }
         }
     }
 
-    void RenderFrame::SetCameraForAllWorlds(ECS::Camera mainCamera, glm::mat4 transform)
+    void RenderFrame::SetCameraForAllWorlds(ECS::Camera mainCamera, const Maths::Matrix4 transform)
     {
         for (RenderWorld& world : RenderWorlds)
         {
