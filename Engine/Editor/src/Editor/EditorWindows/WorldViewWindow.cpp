@@ -109,6 +109,8 @@ namespace Insight
 
         void WorldViewWindow::ContentWindowDragTarget()
         {
+            IS_PROFILE_FUNCTION();
+
             std::string resourceGuidString;
             if (EditorGUI::ObjectFieldTarget(ContentWindow::c_ContentWindowResourceDragSource, resourceGuidString, Runtime::IResource::GetStaticTypeInfo().GetType()))
             {
@@ -129,6 +131,8 @@ namespace Insight
 
         void WorldViewWindow::SetupRenderGraphPasses()
         {
+            IS_PROFILE_FUNCTION();
+
             const ECS::Camera camera = m_editorCameraComponent->GetCamera();
             const Maths::Matrix4 cameraTransform = m_editorCameraComponent->GetViewMatrix();
 
@@ -163,6 +167,8 @@ namespace Insight
 
         void WorldViewWindow::GBufferDepthPrepass()
         {
+            IS_PROFILE_FUNCTION();
+
             struct WorldDepthPrepassData
             {
                 glm::ivec2 RenderResolution;
@@ -264,6 +270,8 @@ namespace Insight
 
         void WorldViewWindow::GBufferPass()
         {
+            IS_PROFILE_FUNCTION();
+
             struct WorldGBufferData
             {
                 glm::ivec2 RenderResolution;
@@ -395,6 +403,8 @@ namespace Insight
 
         void WorldViewWindow::TransparentGBufferPass()
         {
+            IS_PROFILE_FUNCTION();
+
             struct WorldTransparentGBufferData
             {
                 glm::ivec2 RenderResolution;

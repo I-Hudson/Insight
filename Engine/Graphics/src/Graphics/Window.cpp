@@ -249,6 +249,8 @@ namespace Insight
 
 		void Window::Update()
 		{
+			IS_PROFILE_FUNCTION();
+
 			ASSERT(Platform::IsMainThread());
 			for (auto& inputs: m_windowInputs)
 			{

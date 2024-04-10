@@ -1,6 +1,7 @@
 #include "Editor/FileDialog.h"
 
 #include "Core/EnginePaths.h"
+#include "Core/Profiler.h"
 
 #include "Resource/Texture2D.h"
 #include "Editor/EditorResourceManager.h"
@@ -201,6 +202,8 @@ namespace Insight
 
         bool FileDialog::Update(std::string* result)
         {
+            IS_PROFILE_FUNCTION();
+
             if (!m_isVisable)
             {
                 return false;

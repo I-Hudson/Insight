@@ -140,7 +140,6 @@ namespace Insight
 					Graphics::RenderContext::Instance().ImGuiBeginFrame();
 					GPUProfiler::Instance().GetFrameData().Draw();
 
-
 					{
 						IS_PROFILE_SCOPE("EventSystem");
 						m_eventSystem.Update();

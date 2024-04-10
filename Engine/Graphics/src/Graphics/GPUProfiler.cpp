@@ -107,6 +107,8 @@ namespace Insight
 
     void GPUProfileFrame::EndProfile(Graphics::RHI_CommandList* cmdList)
     {
+        IS_PROFILE_FUNCTION();
+
         std::lock_guard lock(m_mutex);
         m_renderContext->MarkTimeStamp(cmdList);
 
@@ -120,6 +122,8 @@ namespace Insight
 
     void GPUProfileFrame::Draw() const
     {
+        IS_PROFILE_FUNCTION();
+
         std::lock_guard lock(m_mutex);
         if (ImGui::Begin("GPUProfiler"))
         {
