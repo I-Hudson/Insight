@@ -83,6 +83,17 @@ namespace Insight
                 ImGui::Text("Vendor: %s", vendor_name.data());
                 ImGui::Text("Device: %s", device_name.data());
                 ImGui::Text("VRAM: %u MB", PhysicalDeviceInformation::Instance().VRam_Size / 1024 / 1024);
+                if (ImGui::CollapsingHeader("VRam"))
+                {
+                    RHI_MemoryInfo rhiMemoryInfo = RenderContext::Instance().GetVRamInfo();
+                    ImGui::Text("   Block Count: %u",          rhiMemoryInfo.BlockCount);
+                    ImGui::Text("   Allocation Count: %u",     rhiMemoryInfo.AllocationCount);
+                    ImGui::Text("   Block Bytes: %u MB",       rhiMemoryInfo.BlockBytes / 1024 / 1024);
+                    ImGui::Text("   Allocation Bytes: %u MB",  rhiMemoryInfo.AllocationBytes / 1024 / 1024);
+                    ImGui::Text("   Free Bytes: %u MB",        (rhiMemoryInfo.BlockBytes - rhiMemoryInfo.AllocationBytes) / 1024 / 1024);
+                    ImGui::Text("   Usage Bytes: %u MB",       rhiMemoryInfo.UsageBytes / 1024 / 1024);
+                    ImGui::Text("   Budget Bytes: %u MB",      rhiMemoryInfo.BudgetBytes / 1024 / 1024);
+                }
 
                 ImGui::Text("Render Timer: %f", renderTime);
                 ImGui::Text("Average Render Timer: %f", averageRenderTimer);

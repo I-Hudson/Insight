@@ -15,6 +15,7 @@
 #include "Graphics/RHI/RHI_ResourceRenderTracker.h"
 #include "Graphics/RHI/RHI_UploadQueue.h"
 #include "Graphics/RHI/RHI_PipelineManager.h"
+#include "Graphics/RHI/RHI_MemoryInfo.h"
 
 #include "Graphics/RenderStats.h"
 #include "Graphics/GPUProfiler.h"
@@ -220,19 +221,21 @@ namespace Insight
 			void EnabledRenderOption(RenderOptions option);
 			void DisableRenderOption(RenderOptions option);
 
-			CommandListManager& GetCommandListManager()               { return m_commandListManager.Get(); }
-			RHI_DescriptorLayoutManager& GetDescriptorLayoutManager() { return m_descriptorLayoutManager; }
-			RHI_ShaderManager& GetShaderManager()                     { return m_shaderManager; }
-			RHI_RenderpassManager& GetRenderpassManager()             { return m_renderpassManager; }
-			RHI_DescriptorSetManager& GetDescriptorSetManager()       { return m_descriptorSetManager.Get(); }
-			RHI_SamplerManager& GetSamplerManager()                   { return *m_samplerManager; }
-			RHI_ResourceRenderTracker& GetResourceRenderTracker()     { return m_resource_tracker; }
+			CommandListManager& GetCommandListManager()					{ return m_commandListManager.Get(); }
+			RHI_DescriptorLayoutManager& GetDescriptorLayoutManager()	{ return m_descriptorLayoutManager; }
+			RHI_ShaderManager& GetShaderManager()						{ return m_shaderManager; }
+			RHI_RenderpassManager& GetRenderpassManager()				{ return m_renderpassManager; }
+			RHI_DescriptorSetManager& GetDescriptorSetManager()			{ return m_descriptorSetManager.Get(); }
+			RHI_SamplerManager& GetSamplerManager()						{ return *m_samplerManager; }
+			RHI_ResourceRenderTracker& GetResourceRenderTracker()		{ return m_resource_tracker; }
 
-			RHI_PipelineManager& GetPipelineManager()                 { return m_pipelineManager; }
-			RHI_PipelineLayoutManager& GetPipelineLayoutManager()     { return m_pipelineLayoutManager; }
+			RHI_PipelineManager& GetPipelineManager()					{ return m_pipelineManager; }
+			RHI_PipelineLayoutManager& GetPipelineLayoutManager()		{ return m_pipelineLayoutManager; }
 
-			GPUDeferedManager& GetDeferredManager()                   { return m_gpu_defered_manager; }
-			RHI_UploadQueue& GetUploadQueue()                         { return m_uploadQueue; }
+			GPUDeferedManager& GetDeferredManager()						{ return m_gpu_defered_manager; }
+			RHI_UploadQueue& GetUploadQueue()							{ return m_uploadQueue; }
+
+			RHI_MemoryInfo GetVRamInfo() const							{ return m_rhiMemoryInfo.GetRenderCompeted(); }
 
 #ifdef IS_RESOURCE_HANDLES_ENABLED
 			virtual RHI_Handle<Texture> CreateTexture(const Texture texture) { FAIL_ASSERT(); return {}; }
@@ -308,6 +311,8 @@ namespace Insight
 
 			RHI_PipelineManager m_pipelineManager;
 			RHI_PipelineLayoutManager m_pipelineLayoutManager;
+
+			FrameResource<RHI_MemoryInfo> m_rhiMemoryInfo;
 
 			FrameResource<DescriptorAllocator> m_frameDescriptorAllocator;
 

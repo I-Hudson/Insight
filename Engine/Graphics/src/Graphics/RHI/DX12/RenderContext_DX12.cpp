@@ -348,6 +348,12 @@ namespace Insight
 				IS_PROFILE_FUNCTION();
 				std::lock_guard lock(m_lock);
 
+				RHI_MemoryInfo& rhiMemoryInfo = m_rhiMemoryInfo.Get();
+				D3D12MA::Budget pLocalBudget;
+				D3D12MA::Budget pNonLocalBudget;
+				m_d3d12MA->GetBudget(&pLocalBudget, &pNonLocalBudget);
+				Platform::MemCopy(&rhiMemoryInfo, &pLocalBudget, sizeof(pLocalBudget));
+
 				{
 					IS_PROFILE_SCOPE("Fence wait");
 					m_graphicsQueue.Wait(m_submitFenceValues.Get());

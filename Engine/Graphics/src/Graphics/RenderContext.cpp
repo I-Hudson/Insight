@@ -78,6 +78,8 @@ namespace Insight
 			context->m_renderGraph->Init(context);
 			context->m_frameDescriptorAllocator.Setup();
 
+			context->m_rhiMemoryInfo.Setup();
+
 #ifdef RENDERGRAPH_V2_ENABLED
 			context->m_renderGraphV2 = ::New<RenderGraphV2>();
 			context->m_renderGraphV2->Init(context);
