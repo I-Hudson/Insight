@@ -47,6 +47,7 @@ namespace Insight
 			static Core::CPUInformation GetCPUInformation();
 			static Core::MemoryInformation GetMemoryInformation();
 
+
 			static void* LoadDynamicLibrary(std::string_view path);
 			static void FreeDynamicLibrary(void*& library);
 
@@ -71,6 +72,15 @@ namespace Insight
 
 		private:
 			static void* GetDynamicFunctionVoid(void* library, const char* functionName);
+
+			static unsigned int GetOSVersion();
+			static bool GetDriverPath(wchar_t* pDriverPath, const wchar_t* driverFilePath64);
+
+#ifdef AMD_Ryzen_Master_SDK
+			static int AMDQueryDrvService();
+			static bool AMDInstallDriver();
+			static bool AMDIsSupportedProcessor();
+#endif
 
 		private:
 			static Core::MemoryInformation s_memoryInformation;

@@ -21,6 +21,19 @@
 #include <rpc.h>
 #include <Objbase.h>
 #include <CommCtrl.h>
+#include <ShlObj.h>
+#include <lmwksta.h>
+#pragma comment(lib, "Netapi32.lib")
+#include <lmapibuf.h>
+#include <VersionHelpers.h>
+
+#ifdef AMD_Ryzen_Master_SDK
+#include <IPlatform.h>
+#include <IDevice.h>
+#include <IDeviceManager.h>
+#include <ICPUEx.h>
+#include <IBIOSEx.h>
+#endif
 
 namespace Insight
 {
@@ -531,7 +544,46 @@ namespace Insight
 				}
 				s_cpuInformation.Initialised = true;
 			}
-			return s_cpuInformation;
+			Core::CPUInformation info = s_cpuInformation;
+
+#ifdef AMD_Ryzen_Master_SDK
+			const bool isUserAnAdmin = IsUserAnAdmin();
+			const unsigned int OSVersion = GetOSVersion();
+			const bool AuthenticAMD = info.Vendor == "AuthenticAMD";
+			if (false
+				&& isUserAnAdmin
+				&& OSVersion >= 10
+				&& AuthenticAMD)
+			{
+				bool ryzenMasterSDKDriver = AMDQueryDrvService() == 0;
+				if (!ryzenMasterSDKDriver)
+				{
+					ryzenMasterSDKDriver = AMDInstallDriver();
+				}
+
+				if (ryzenMasterSDKDriver
+					&& AMDIsSupportedProcessor())
+				{
+					IPlatform& rPlatform = GetPlatform();
+					bool bRetCode = rPlatform.Init();
+					if (bRetCode)
+					{
+						IDeviceManager& rDeviceManager = rPlatform.GetIDeviceManager();
+						ICPUEx* obj = (ICPUEx*)rDeviceManager.GetDevice(dtCPU, 0);
+						if (obj)
+						{
+							CPUParameters cpuParameters;
+							if (obj->GetCPUParameters(cpuParameters) == 0)
+							{
+								info.SpeedInMHz = cpuParameters.dPeakSpeed;
+							}
+						}
+					}
+				}
+			}
+#else
+#endif
+			return info;
 		}
 
 		Core::MemoryInformation PlatformWindows::GetMemoryInformation()
@@ -601,6 +653,378 @@ namespace Insight
 			return procAddress;
 		}
 
+		unsigned int PlatformWindows::GetOSVersion()
+		{
+			DWORD major = 0;
+			DWORD minor = 0;
+			LPBYTE pinfoRawData;
+			if (IsWindowsServer())
+			{
+				return false;
+			}
+			if (0 == NetWkstaGetInfo(NULL, 100, &pinfoRawData))
+			{
+				WKSTA_INFO_100* pworkstationInfo = (WKSTA_INFO_100*)pinfoRawData;
+				major = pworkstationInfo->wki100_ver_major;
+				minor = pworkstationInfo->wki100_ver_minor;
+				::NetApiBufferFree(pinfoRawData);
+			}
+			return major;
+		}
+
+		bool PlatformWindows::GetDriverPath(wchar_t* pDriverPath, const wchar_t* driverFilePath64)
+		{
+#define LOG_PROCESS_ERROR(__CONDITION__)		\
+	do											\
+	{											\
+		if (!(__CONDITION__))					\
+		{										\
+			goto Exit0;							\
+		}										\
+	} while (false)
+
+			wchar_t* pTemp = _wgetenv(L"AMDRMMONITORSDKPATH");
+			wchar_t driverPath[200] = { '\0' };
+			size_t iDriverPathLength = 0;
+
+			LOG_PROCESS_ERROR(pTemp);
+
+			iDriverPathLength = wcslen(pTemp);
+			wcsncpy(driverPath, pTemp, iDriverPathLength);
+			driverPath[iDriverPathLength] = '\0';
+
+			wsprintf(pDriverPath, L"%s%s", driverPath, driverFilePath64);
+			return true;
+		Exit0:
+			return false;
+
+#undef LOG_PROCESS_ERROR
+		}
+
+#ifdef AMD_Ryzen_Master_SDK
+#define RM_SER_NAME L##"AMDRyzenMasterDriverV22"
+#define AOD_DRIVER_NAME		L"AMDRyzenMasterDriverV22"
+#define DRIVER_FILE_PATH_64	L"bin\\AMDRyzenMasterDriver.sys"
+
+		int PlatformWindows::AMDQueryDrvService()
+		{
+			SERVICE_STATUS ServiceStatus;
+			SC_HANDLE hSCM = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
+			if (!hSCM)
+				return -1;
+
+			SC_HANDLE hOpenService = OpenService(hSCM, RM_SER_NAME, SC_MANAGER_ALL_ACCESS);
+			if (GetLastError() == ERROR_SERVICE_DOES_NOT_EXIST)
+			{
+				CloseServiceHandle(hOpenService);
+				CloseServiceHandle(hSCM);
+				return   -1;
+			}
+			QueryServiceStatus(hOpenService, &ServiceStatus);
+			if (ServiceStatus.dwCurrentState != SERVICE_RUNNING)
+			{
+				CloseServiceHandle(hOpenService);
+				CloseServiceHandle(hSCM);
+				return -1;
+			}
+
+			CloseServiceHandle(hOpenService);
+			CloseServiceHandle(hSCM);
+			return 0;
+		}
+
+		bool PlatformWindows::AMDInstallDriver()
+		{
+#define LOG_PROCESS_ERROR(__CONDITION__)		\
+	do											\
+	{											\
+		if (!(__CONDITION__))					\
+		{										\
+			goto Exit0;							\
+		}										\
+	} while (false)
+
+			bool bRetCode = false;
+			bool bResult = false;
+			DWORD dwLastError;
+			SC_HANDLE hSCManager = NULL;
+			SC_HANDLE hService = NULL;
+			wchar_t szDriverPath[256];
+
+
+			HANDLE m_hDriver = CreateFile(L"\\\\.\\" AOD_DRIVER_NAME,
+				GENERIC_READ | GENERIC_WRITE,
+				FILE_SHARE_READ | FILE_SHARE_WRITE,
+				NULL,
+				OPEN_EXISTING,
+				FILE_ATTRIBUTE_NORMAL,
+				NULL);
+
+			if (m_hDriver == INVALID_HANDLE_VALUE)
+			{
+				bRetCode = GetDriverPath(szDriverPath, DRIVER_FILE_PATH_64);
+				LOG_PROCESS_ERROR(bRetCode);
+
+				hSCManager = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
+				LOG_PROCESS_ERROR(hSCManager);
+
+				// Install the driver
+				hService = CreateService(hSCManager,
+					AOD_DRIVER_NAME, AOD_DRIVER_NAME, SERVICE_ALL_ACCESS, SERVICE_KERNEL_DRIVER,
+					SERVICE_AUTO_START, SERVICE_ERROR_NORMAL, szDriverPath,
+					NULL, NULL, NULL, NULL, NULL);
+				if (hService == NULL)
+				{
+					dwLastError = GetLastError();
+					if (dwLastError == ERROR_SERVICE_EXISTS)
+						hService = OpenService(hSCManager, AOD_DRIVER_NAME, SERVICE_ALL_ACCESS);
+					else if (dwLastError == ERROR_SERVICE_MARKED_FOR_DELETE)
+					{
+						hService = OpenService(hSCManager, AOD_DRIVER_NAME, SERVICE_ALL_ACCESS);
+						SERVICE_STATUS ServiceStatus;
+						ControlService(hService, SERVICE_CONTROL_STOP, &ServiceStatus);
+
+						hService = CreateService(hSCManager,
+							AOD_DRIVER_NAME, AOD_DRIVER_NAME, SERVICE_ALL_ACCESS, SERVICE_KERNEL_DRIVER,
+							SERVICE_DEMAND_START, SERVICE_ERROR_NORMAL, szDriverPath,
+							NULL, NULL, NULL, NULL, NULL);
+					}
+					else
+						printf("InstallDriver: error code returned from CreateService is: %d", GetLastError());
+				}
+				LOG_PROCESS_ERROR(hService);
+
+				// Start the driver
+				BOOL bRet = StartService(hService, 0, NULL);
+				if (!bRet)
+				{
+					dwLastError = GetLastError();
+					if (dwLastError == ERROR_PATH_NOT_FOUND)
+					{
+						bRet = DeleteService(hService);
+						LOG_PROCESS_ERROR(bRet);
+
+						CloseServiceHandle(hService);
+
+						hService = CreateService(hSCManager,
+							AOD_DRIVER_NAME, AOD_DRIVER_NAME, SERVICE_ALL_ACCESS, SERVICE_KERNEL_DRIVER,
+							SERVICE_AUTO_START, SERVICE_ERROR_NORMAL, szDriverPath,
+							NULL, NULL, NULL, NULL, NULL);
+						LOG_PROCESS_ERROR(hService);
+
+						bRet = StartService(hService, 0, NULL);
+						LOG_PROCESS_ERROR(bRet);
+					}
+
+					if (dwLastError != ERROR_SERVICE_ALREADY_RUNNING)
+					{
+						LOG_PROCESS_ERROR(bRet);
+					}
+				}
+
+				// Try to create the file again
+				m_hDriver = CreateFile(L"\\\\.\\" AOD_DRIVER_NAME,
+					GENERIC_READ | GENERIC_WRITE,
+					FILE_SHARE_READ | FILE_SHARE_WRITE,
+					NULL,
+					OPEN_EXISTING,
+					FILE_ATTRIBUTE_NORMAL,
+					NULL);
+				LOG_PROCESS_ERROR(m_hDriver != INVALID_HANDLE_VALUE);
+			}
+
+
+			bResult = true;
+
+		Exit0:
+			if (m_hDriver != INVALID_HANDLE_VALUE)
+				CloseHandle(m_hDriver);
+
+			if (hSCManager)
+				CloseServiceHandle(hSCManager);
+			if (hService)
+				CloseServiceHandle(hService);
+
+
+			return bResult;
+
+#undef LOG_PROCESS_ERROR
+		}
+
+		bool PlatformWindows::AMDIsSupportedProcessor()
+		{
+			enum CPU_PackageType
+			{
+				cptFP5 = 0,
+				cptAM5 = 0,
+				cptFP7 = 1,
+				cptFL1 = 1,
+				cptFP8 = 1,
+				cptAM4 = 2,
+				cptFP7r2 = 2,
+				cptAM5_B0 = 3,
+				cptSP3 = 4,
+				cptFP7_B0 = 4,
+				cptFP7R2_B0 = 5,
+				cptSP3r2 = 7,
+				cptSP6 = 8,
+				cptUnknown = 0xF
+			};
+
+			bool retBool = false;
+			int CPUInfo[4] = { -1 };
+			__cpuid(CPUInfo, 0x80000001);
+			unsigned long uCPUID = CPUInfo[0];
+			CPU_PackageType pkgType = (CPU_PackageType)((CPUInfo[1] >> 28) & 0x0F);
+
+			switch (pkgType)
+			{
+			case cptFP5:
+				//case cptAM5:
+				switch (uCPUID)
+				{
+				case 0x00810F80:
+				case 0x00810F81:
+				case 0x00860F00:
+				case 0x00860F01:
+				case 0x00A50F00:
+				case 0x00A50F01:
+				case 0x00860F81:
+				case 0x00A60F00:
+				case 0x00A60F01:
+				case 0x00A60F10:
+				case 0x00A60F11:
+				case 0x00A60F12:
+				case 0x00A70F80:
+				case 0x00A70F52:
+					retBool = true;
+					break;
+				default:
+					break;
+				}
+				break;
+
+			case cptAM4:
+			case cptFP7R2_B0:
+				switch (uCPUID)
+				{
+				case 0x00800F00:
+				case 0x00800F10:
+				case 0x00800F11:
+				case 0x00800F12:
+
+				case 0x00810F10:
+				case 0x00810F11:
+
+				case 0x00800F82:
+				case 0x00800F83:
+
+				case 0x00870F00:
+				case 0x00870F10:
+
+				case 0x00810F80:
+				case 0x00810F81:
+
+				case 0x00860F00:
+				case 0x00860F01:
+
+				case 0x00A20F00:
+				case 0x00A20F10:
+				case 0x00A20F12:
+
+				case 0x00A50F00:
+				case 0x00A50F01:
+
+					//cptFP7r2
+				case 0x00A40F00:
+				case 0x00A40F40:
+				case 0x00A40F41:
+
+				case 0x00A70F00:
+				case 0x00A70F40:
+				case 0x00A70F41:
+				case 0x00A70F42:
+				case 0x00A70F80:
+
+				case 0x00A70F52:
+				case 0x00A70FC0:
+					retBool = true;
+					break;
+				default:
+					break;
+				}
+				break;
+
+			case cptSP3r2:
+				switch (uCPUID)
+				{
+				case 0x00800F10:
+				case 0x00800F11:
+				case 0x00800F12:
+
+				case 0x00800F82:
+				case 0x00800F83:
+				case 0x00830F00:
+				case 0x00830F10:
+					retBool = true;
+					break;
+				default:
+					break;
+				}
+				break;
+
+			case cptFP7:
+				//case cptFL1:
+				//case cptFP8:
+				//case cptFP7_B0:
+			case cptSP3:
+				switch (uCPUID)
+				{
+				case 0x00A40F00:
+				case 0x00A40F40:
+				case 0x00A40F41:
+
+				case 0x00A60F11:
+				case 0x00A60F12:
+					retBool = true;
+					break;
+				case 0x00A00F80:
+				case 0x00A00F82:
+
+				case 0x00A70F00:
+				case 0x00A70F40:
+				case 0x00A70F41:
+				case 0x00A70F42:
+				case 0x00A70F80:
+				case 0x00A70F52:
+				case 0x00A70FC0:
+					retBool = true;
+					break;
+				default:
+					break;
+				}
+				break;
+
+			case cptSP6:
+				switch (uCPUID)
+				{
+				case 0x00A10F81:
+				case 0x00A10F80:
+					retBool = true;
+					break;
+				}
+				break;
+
+			default:
+				break;
+			}
+			return retBool;
+		}
+
+#undef RM_SER_NAME
+#undef AOD_DRIVER_NAME
+#undef DRIVER_FILE_PATH_64
+#endif
 	}
 }
 #endif /// IS_PLATFORM_WINDOWS

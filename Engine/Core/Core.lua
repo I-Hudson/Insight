@@ -1,5 +1,7 @@
 require("premake5")
 
+local AMD_Ryzen_Master_SDK = os.getenv("AMDRMMONITORSDKPATH")
+
 project "Insight_Core"  
     location "./"
 
@@ -97,6 +99,29 @@ project "Insight_Core"
         }
 
     filter "platforms:Win64"
+        if AMD_Ryzen_Master_SDK == nil then
+        else
+            defines
+            {
+                "AMD_Ryzen_Master_SDK",
+            }
+            includedirs
+            {
+                AMD_Ryzen_Master_SDK .. "/include",
+            }
+            links
+            {
+                "Platform.lib",
+                "Device.lib",
+            }
+            prebuildcommands
+            {
+                "{COPY} \"" .. AMD_Ryzen_Master_SDK .. "/bin/Platform.dll\" \"%{wks.location}deps/".. outputdir..  "/dll/\"\n",
+                "{COPY} \"" .. AMD_Ryzen_Master_SDK .. "/lib/Platform.lib\" \"%{wks.location}deps/".. outputdir..  "/lib/\"\n",
+                "{COPY} \"" .. AMD_Ryzen_Master_SDK .. "/bin/Device.dll\" \"%{wks.location}deps/".. outputdir..  "/dll/\"\n",
+                "{COPY} \"" .. AMD_Ryzen_Master_SDK .. "/lib/Device.lib\" \"%{wks.location}deps/".. outputdir..  "/lib/\"\n",
+            }
+        end
         links
         {
             "Ole32.lib",
