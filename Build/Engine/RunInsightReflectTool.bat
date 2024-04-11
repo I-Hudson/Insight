@@ -9,3 +9,5 @@ if not exist "%InsightReflectToolExe%" (
 )
 echo Running Insight Reflect Tool to generate files...
 start /b /d "%cd%\..\..\bin\Release-windows-x86_64\InsightReflectTool" InsightReflectTool.exe Type=Engine ReflectPath=../../../Engine/ GenerateProjectFileOutputPath=../../../Engine
+
+pause

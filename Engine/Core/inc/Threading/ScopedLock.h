@@ -11,11 +11,11 @@ namespace Insight
             ScopedLock(TLock& lock)
                 : m_lock(lock)
             {
-                m_lock.Lock();
+                m_lock.lock();
             }
             ~ScopedLock()
             {
-                m_lock.Unlock();
+                m_lock.unlock();
             }
 
         private:

@@ -112,14 +112,15 @@ namespace Insight
             /// This unordered_map acts as the owner all of the pointers.
             std::unordered_map<std::string, AssetInfo*> m_pathToAssetInfo;
 
+            mutable std::mutex m_assetPackagesLock;
             std::vector<IAssetPackage*> m_assetPackages;
 
             std::vector<IAssetImporter*> m_importers;
-            Threading::SpinLock m_loadedAssetLock;
+            std::mutex m_loadedAssetLock;
             std::unordered_map<std::string, Ref<Asset>> m_loadedAssets;
 
-            std::unordered_map<Core::GUID, std::unordered_set<const IObject*>> m_assetToObjects;
             mutable std::mutex m_assetToObjectGuid;
+            std::unordered_map<Core::GUID, std::unordered_set<const IObject*>> m_assetToObjects;
 
             //std::unordered_map<Core::GUID, AssetInfo*> m_guidToAssetInfoLookup;
             //std::unordered_map<std::string, Core::GUID> m_pathToGuidLookup;

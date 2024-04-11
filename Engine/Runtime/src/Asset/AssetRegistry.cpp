@@ -288,7 +288,7 @@ namespace Insight::Runtime
         path = ValidatePath(path);
 
         {
-            Threading::ScopedLock lock(m_loadedAssetLock);
+            std::lock_guard lock(m_loadedAssetLock);
             if (auto iter = m_loadedAssets.find(path);
                 iter != m_loadedAssets.end())
             {
@@ -331,6 +331,7 @@ namespace Insight::Runtime
     {
 #define GET_ASSET_INFO_DIRECT_FROM_ASSET_PACKAGE
 #ifdef GET_ASSET_INFO_DIRECT_FROM_ASSET_PACKAGE
+        Threading::ScopedLock lock(m_assetPackagesLock);
         for (size_t i = 0; i < m_assetPackages.size(); ++i)
         {
             const AssetInfo* assetInfo = m_assetPackages[i]->GetAsset(path);
@@ -456,6 +457,7 @@ namespace Insight::Runtime
             return nullptr;
         }
 
+        Threading::ScopedLock lock(m_assetPackagesLock);
         for (IAssetPackage* package : m_assetPackages)
         {
             if (package && package->GetPath() == path)
@@ -468,6 +470,7 @@ namespace Insight::Runtime
 
     IAssetPackage* AssetRegistry::GetAssetPackageFromName(std::string_view name) const
     {
+        Threading::ScopedLock lock(m_assetPackagesLock);
         for (IAssetPackage* package : m_assetPackages)
         {
             if (package && package->GetName() == name)
@@ -480,6 +483,7 @@ namespace Insight::Runtime
 
     std::vector<IAssetPackage*> AssetRegistry::GetAllAssetPackages() const
     {
+        Threading::ScopedLock lock(m_assetPackagesLock);
         return m_assetPackages;
     }
 
@@ -537,6 +541,7 @@ namespace Insight::Runtime
 
     IAssetPackage* AssetRegistry::GetAssetPackageFromAsset(const AssetInfo* assetInfo) const
     {
+        Threading::ScopedLock lock(m_assetPackagesLock);
         for (IAssetPackage* package: m_assetPackages)
         {
             if (package && package->HasAsset(assetInfo))
@@ -626,7 +631,10 @@ namespace Insight::Runtime
             break;   
         }
         
-        m_assetPackages.push_back(newPackage);
+        {
+            Threading::ScopedLock lock(m_assetPackagesLock);
+            m_assetPackages.push_back(newPackage);
+        }
         return newPackage;
     }
 

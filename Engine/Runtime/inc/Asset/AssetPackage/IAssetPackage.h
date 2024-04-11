@@ -74,6 +74,8 @@ namespace Insight
             std::string m_packageName;
             AssetPackageType m_packageType;
 
+            mutable std::mutex m_packageLock;
+
             std::vector<AssetInfo*> m_assetInfos;
         };
     }

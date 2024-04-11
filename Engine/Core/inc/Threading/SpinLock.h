@@ -11,7 +11,7 @@ namespace Insight
         class IS_CORE SpinLock
         {
         public:
-            FORCE_INLINE void Lock()
+            FORCE_INLINE void lock()
             {
                 while (m_state.test_and_set(std::memory_order_acquire))
                 {
@@ -19,7 +19,7 @@ namespace Insight
                 }
             }
 
-            FORCE_INLINE void Unlock()
+            FORCE_INLINE void unlock()
             {
                 m_state.clear(std::memory_order_release);
             }

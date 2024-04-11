@@ -33,16 +33,19 @@ namespace Insight
 
         std::string_view IAssetPackage::GetPath() const
         {
+            std::lock_guard lock(m_packageLock);
             return m_packagePath;
         }
 
         std::string_view IAssetPackage::GetName() const
         {
+            std::lock_guard lock(m_packageLock);
             return m_packageName;
         }
 
         AssetPackageType IAssetPackage::GetPackageType() const
         {
+            std::lock_guard lock(m_packageLock);
             return m_packageType;
         }
 
@@ -67,6 +70,7 @@ namespace Insight
                 assetInfo->PackageName = m_packageName;
                 assetInfo->PackagePath = m_packagePath;
 
+                std::lock_guard lock(m_packageLock);
                 m_assetInfos.push_back(assetInfo);
                 return assetInfo;
             }
@@ -94,6 +98,7 @@ namespace Insight
             {
                 return;
             }
+            std::lock_guard lock(m_packageLock);
             assetInfo->AssetPackage = nullptr;
             assetInfo->PackageName.clear();
             assetInfo->PackagePath.clear();
@@ -107,6 +112,7 @@ namespace Insight
 
         bool IAssetPackage::HasAsset(const Core::GUID& guid) const
         {
+            std::lock_guard lock(m_packageLock);
             return Algorithm::VectorContainsIf(m_assetInfos, [&guid](const AssetInfo* assetInfo)
                 {
                     if (!assetInfo)
@@ -137,6 +143,7 @@ namespace Insight
 
         const AssetInfo* IAssetPackage::GetAsset(const Core::GUID& guid) const
         {
+            std::lock_guard lock(m_packageLock);
             if (auto iter = Algorithm::VectorFindIf(m_assetInfos, [&guid](const AssetInfo* assetInfo)
                 {
                     return guid == assetInfo->Guid;
@@ -197,6 +204,8 @@ namespace Insight
 
         void IAssetPackage::BuildPackage(std::string_view path)
         {
+            std::lock_guard lock(m_packageLock);
+
             AssetPackageZip buildPackage(m_packagePath, m_packageName);
             buildPackage.m_assetInfos = m_assetInfos;
 
@@ -207,6 +216,7 @@ namespace Insight
 
         Core::GUID IAssetPackage::GetGuidFromPath(std::string_view path) const
         {
+            std::lock_guard lock(m_packageLock);
             if (auto iter = Algorithm::VectorFindIf(m_assetInfos, [&path](const AssetInfo* assetInfo)
                 {
                     return path == assetInfo->GetFullFilePath();
