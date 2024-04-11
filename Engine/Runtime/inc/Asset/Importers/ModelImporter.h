@@ -26,6 +26,7 @@ namespace Insight
             std::vector<MeshNode*> Children;
             Mesh* Mesh;
             std::string_view Directory;
+            std::string_view FileName;
         };
 
 

@@ -7,6 +7,7 @@
 
 #include "Core/Logger.h"
 #include "Core/Profiler.h"
+#include "FileSystem/FileSystem.h"
 
 #include "Platforms/Platform.h"
 
@@ -218,6 +219,7 @@ namespace Insight
 			AssimpLoaderData loader_data;
 			loader_data.Model = model;
 			loader_data.Directoy = file_path.substr(0, file_path.find_last_of('/'));
+			loader_data.FileName = FileSystem::GetFileName(file_path);
 			ProcessNode(scene->mRootNode, scene, "", loader_data);
 			GenerateLODsForModel(loader_data);
 			std::move(loader_data.Materials.begin(), loader_data.Materials.end(), std::back_inserter(loader_data.Model->m_materials));
@@ -299,6 +301,7 @@ namespace Insight
 			AssimpLoaderData loader_data;
 			loader_data.Mesh = mesh;
 			loader_data.Directoy = file_path.substr(0, file_path.find_last_of('/'));
+			loader_data.FileName = FileSystem::GetFileName(file_path);
 			loader_data.Mesh->m_lods.at(0).Vertex_buffer = Renderer::CreateVertexBuffer(1, 0);
 			loader_data.Mesh->m_lods.at(0).Index_buffer = Renderer::CreateIndexBuffer(1);
 			ProcessNode(scene->mRootNode, scene, "", loader_data, false);
@@ -332,6 +335,9 @@ namespace Insight
 
 					AssimpLoaderData mesh_data;
 					ProcessMesh(aiMesh, aiScene, mesh_data);
+					const std::string vertexBufferName = loader_data.FileName + "_" + aiNode->mName.C_Str() + "_Veretx";
+					const std::string indexBufferName = loader_data.FileName + "_" + aiNode->mName.C_Str() + "_Index";
+
 					//Optimize(mesh_data);
 					if (aiScene->HasMaterials() && aiMesh->mMaterialIndex < aiScene->mNumMaterials)
 					{
@@ -386,7 +392,9 @@ namespace Insight
 						GenerateLODsForMesh(mesh_data, new_mesh);
 
 						new_mesh->m_lods.at(0).Vertex_buffer = Renderer::CreateVertexBuffer(mesh_data.Vertices.size() * sizeof(Graphics::Vertex), sizeof(Graphics::Vertex));
+						new_mesh->m_lods.at(0).Vertex_buffer->SetName(vertexBufferName);
 						new_mesh->m_lods.at(0).Index_buffer = Renderer::CreateIndexBuffer(mesh_data.Indices.size() * sizeof(u32));
+						new_mesh->m_lods.at(0).Index_buffer->SetName(indexBufferName);
 
 						new_mesh->m_lods.at(0).Vertex_count = static_cast<u32>(mesh_data.Vertices.size());
 						new_mesh->m_lods.at(0).Index_count = static_cast<u32>(mesh_data.Indices.size());
@@ -414,7 +422,9 @@ namespace Insight
 						std::move(mesh_data.Indices.begin(), mesh_data.Indices.end(), std::back_inserter(loader_data.Indices));
 #else
 						Graphics::RHI_Buffer* vertexBuffer = Renderer::CreateVertexBuffer(mesh_data.Vertices.size() * sizeof(Graphics::Vertex), sizeof(Graphics::Vertex));
+						vertexBuffer->SetName(vertexBufferName);
 						Graphics::RHI_Buffer* indexBuffer = Renderer::CreateIndexBuffer(mesh_data.Indices.size() * sizeof(u32));
+						indexBuffer->SetName(indexBufferName);
 
 						vertexBuffer->Upload(mesh_data.Vertices.data(), mesh_data.Vertices.size() * sizeof(Graphics::Vertex));
 						indexBuffer->Upload(mesh_data.Indices.data(), mesh_data.Indices.size() * sizeof(u32));

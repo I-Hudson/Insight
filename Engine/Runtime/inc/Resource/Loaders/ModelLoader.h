@@ -93,6 +93,7 @@ namespace Insight
 				std::vector<Material*> Materials;
 
 				std::string Directoy;
+				std::string FileName;
 
 				u64 MeshIndex = 0;
 

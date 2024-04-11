@@ -8,6 +8,8 @@
 #include "Core/Logger.h"
 #include "Core/Profiler.h"
 
+#include "FileSystem/FileSystem.h"
+
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
@@ -205,6 +207,7 @@ namespace Insight
 				for (size_t i = 0; i < meshNodes.size(); ++i)
 				{
 					meshNodes[i]->Directory = assetInfo->FilePath;
+					meshNodes[i]->FileName = assetInfo->FileName;
 				}
 			}
 
