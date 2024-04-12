@@ -11,6 +11,7 @@ namespace Insight
 		struct LoadPixelData
 		{
 			std::vector<Byte> Data;
+			PixelFormat Format;
 			int Width;
 			int Height;
 			int Depth;

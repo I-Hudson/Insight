@@ -68,7 +68,7 @@ namespace Insight
 
 			static RHI_Texture* New();
 
-			void LoadFromData(Byte* data, u32 width, u32 height, u32 depth, u32 channels);
+			void LoadFromData(Byte* data, u32 width, u32 height, u32 depth, u32 channels, u32 textureSize = 0);
 
 			RHI_TextureInfo  GetInfo					(u32 mip = 0)	const { if (mip < m_infos.size()) { return m_infos.at(mip); }				return {}; }
 			int				 GetWidth					(u32 mip = 0)	const { if (mip < m_infos.size()) { return m_infos.at(mip).Width; }			return -1; }
@@ -111,6 +111,7 @@ namespace Insight
 		
 		public:
 			bool m_hasAlpha = false;
+			PixelFormat m_pixelFormat;
 		};
 	}
 }

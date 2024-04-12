@@ -35,11 +35,20 @@ namespace Insight
 			return nullptr;
 		}
 
-		void RHI_Texture::LoadFromData(Byte* data, u32 width, u32 height, u32 depth, u32 channels)
+		void RHI_Texture::LoadFromData(Byte* data, u32 width, u32 height, u32 depth, u32 channels, u32 textureSize)
 		{
 			IS_PROFILE_FUNCTION();
 
-			const u64 size_in_bytes = width * height * depth * channels;
+			u64 size_in_bytes = 0;
+			if (textureSize == 0)
+			{
+				size_in_bytes = width* height* depth* channels;
+			}
+			else
+			{
+				size_in_bytes = textureSize;
+			}
+
 			if (data == nullptr || size_in_bytes == 0)
 			{
 				return;
@@ -50,7 +59,7 @@ namespace Insight
 			createInfo.Width = width;
 			createInfo.Height = height;
 			createInfo.Depth = depth;
-			createInfo.Format = PixelFormat::R8G8B8A8_UNorm;
+			createInfo.Format = m_pixelFormat;
 			createInfo.ImageUsage = ImageUsageFlagsBits::Sampled | ImageUsageFlagsBits::TransferDst;
 
 #ifdef RHI_TEXTURE_DEFER_ENABLED

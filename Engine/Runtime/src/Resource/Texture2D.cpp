@@ -1,5 +1,6 @@
 #include "Resource/Texture2D.h"
 #include "Graphics/RenderContext.h"
+#include "Graphics/PixelFormatExtensions.h"
 
 #include "Resource/Loaders/ResourceLoaderRegister.h"
 #include "Resource/Loaders/TextureLoader.h"
@@ -31,11 +32,14 @@ namespace Insight
 				Renderer::FreeTexture(m_rhi_texture);
 			}
 
-			ASSERT(textureSize == GetWidth() * GetHeight() * GetDepth() * 4);
+			ASSERT(PixelFormatExtensions::IsCompressedBC(GetFormat()) ||
+				(!PixelFormatExtensions::IsCompressedBC(GetFormat()) && textureSize == GetWidth() * GetHeight() * GetDepth() * 4));
+
 			m_rhi_texture = Renderer::CreateTexture();
 			m_rhi_texture->SetName(std::string(FileSystem::GetFileName(m_file_path)));
 			m_rhi_texture->OnUploadCompleted.Bind<&Texture2D::OnRHITextureUploadCompleted>(this);
-			m_rhi_texture->LoadFromData((Byte*)textureData, GetWidth(), GetHeight(), GetDepth(), 4);
+			m_rhi_texture->m_pixelFormat = m_metaData.PixelFormat;
+			m_rhi_texture->LoadFromData((Byte*)textureData, GetWidth(), GetHeight(), GetDepth(), 4, textureSize);
 		}
 
 		std::vector<Byte> Texture2D::GetPixels() const

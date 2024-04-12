@@ -209,6 +209,7 @@ namespace Insight
 				io.Fonts->AddFontFromMemoryTTF(fontData, fontDataSize, 16.0f, &icons_config, icons_ranges);
 
 				io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
+				m_font_texture->m_pixelFormat = PixelFormat::B8G8R8A8_UNorm;
 				m_font_texture->LoadFromData(pixels, width, height, 1, 4);
 
 				ImTextureID texture_id = m_font_texture;

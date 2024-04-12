@@ -1,5 +1,23 @@
 local local_post_build_commands = post_build_commands
 
+--- Check if a file or directory exists in this path
+function exists(file)
+    local ok, err, code = os.rename(file, file)
+    if not ok then
+       if code == 13 then
+          -- Permission denied, but it exists
+          return true
+       end
+    end
+    return ok, err
+ end
+ 
+ --- Check if a directory exists in this path
+ function isdir(path)
+    -- "/" works on both Unix and Windows
+    return exists(path.."/")
+ end
+
 project "Insight_Runtime"  
     configurations { "Debug", "Release" } 
     location "./"
@@ -101,6 +119,28 @@ project "Insight_Runtime"
             "{COPY} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".lib\" \"%{wks.location}deps/".. outputdir..  "/lib/\"\n",
             "{COPY} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".pdb\" \"%{wks.location}deps/".. outputdir..  "/pdb/\"\n",
         }
+
+    filter "platforms:Win64"
+        local NVIDIATextureToolsPath="C:/Program Files/NVIDIA Corporation/NVIDIA Texture Tools"      
+        --if isdir(NVIDIATextureToolsPath) then
+            defines
+            {
+                "NVIDIA_Texture_Tools",
+            }
+            includedirs
+            {
+                NVIDIATextureToolsPath .. "/include",
+            }
+            links
+            {
+                "nvtt30205.lib",
+            }
+            prebuildcommands
+            {
+                "{COPY} \"" .. NVIDIATextureToolsPath .. "/lib/x64-v142/nvtt30205.lib\" \"%{wks.location}deps/".. outputdir..  "/lib/\"\n",
+                "{COPY} \"" .. NVIDIATextureToolsPath .. "/nvtt30205.dll\" \"%{wks.location}deps/".. outputdir..  "/dll/\"\n",
+            }
+        --end    
 
     filter "configurations:Debug or configurations:Testing"
         defines { "DEBUG" }  
