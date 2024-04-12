@@ -1,21 +1,25 @@
 local local_post_build_commands = post_build_commands
 
 --- Check if a file or directory exists in this path
-function exists(file)
+function fileExists(file)
     local ok, err, code = os.rename(file, file)
     if not ok then
        if code == 13 then
-          -- Permission denied, but it exists
+          --print "Permission denied, but it exists"
           return true
+       elseif code == 5 then
+        --print "Permission denied, but it exists"
+        return true
        end
     end
-    return ok, err
+    return false
  end
  
  --- Check if a directory exists in this path
  function isdir(path)
     -- "/" works on both Unix and Windows
-    return exists(path.."/")
+    local result = fileExists(path)
+    return result
  end
 
 project "Insight_Runtime"  
@@ -122,7 +126,7 @@ project "Insight_Runtime"
 
     filter "platforms:Win64"
         local NVIDIATextureToolsPath="C:/Program Files/NVIDIA Corporation/NVIDIA Texture Tools"      
-        --if isdir(NVIDIATextureToolsPath) then
+        if isdir(NVIDIATextureToolsPath) == true then
             defines
             {
                 "NVIDIA_Texture_Tools",
@@ -140,7 +144,7 @@ project "Insight_Runtime"
                 "{COPY} \"" .. NVIDIATextureToolsPath .. "/lib/x64-v142/nvtt30205.lib\" \"%{wks.location}deps/".. outputdir..  "/lib/\"\n",
                 "{COPY} \"" .. NVIDIATextureToolsPath .. "/nvtt30205.dll\" \"%{wks.location}deps/".. outputdir..  "/dll/\"\n",
             }
-        --end    
+        end    
 
     filter "configurations:Debug or configurations:Testing"
         defines { "DEBUG" }  
