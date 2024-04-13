@@ -1,3 +1,25 @@
+-- Check if a file or directory exists in this path
+function fileExists(file)
+    local ok, err, code = os.rename(file, file)
+    if not ok then
+       if code == 13 then
+          --print "Permission denied, but it exists"
+          return true
+       elseif code == 5 then
+        --print "Permission denied, but it exists"
+        return true
+       end
+    end
+    return false
+ end
+ 
+ --- Check if a directory exists in this path
+ function isdir(path)
+    -- "/" works on both Unix and Windows
+    local result = fileExists(path)
+    return result
+ end
+
 local local_post_build_commands = post_build_commands
 
 project "Insight_Graphics"  
@@ -135,20 +157,37 @@ project "Insight_Graphics"
             "{COPY} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".pdb\" \"%{wks.location}deps/".. outputdir..  "/pdb/\"\n",
         }
 
+    filter "platforms:Win64"
+        local renderDocPath = "C:/Program Files/RenderDoc"
+        if isdir(renderDocPath) then
+            defines
+            {
+                "RENDER_DOC_API",
+            }
+            includedirs
+            {
+                renderDocPath,
+            }
+            prebuildcommands
+            {
+                "{COPY} \"" .. renderDocPath .. "/renderdoc.dll\" \"%{wks.location}deps/".. outputdir..  "/dll/\"\n",
+            }
+        end
+
     filter "configurations:Debug or configurations:Testing"
         defines { "DEBUG" }
         symbols "On" 
         links
         {
-            "GenericCodeGend.lib",
-            "glslangd.lib",
-            "glslang-default-resource-limitsd.lib",
-            "MachineIndependentd.lib",
-            "OSDependentd.lib",
-            "SPIRVd.lib",
-            "SPIRV-Toolsd.lib",
-            "SPIRV-Tools-optd.lib",
-            "SPVRemapperd.lib",
+            "GenericCodeGen.lib",
+            "glslang.lib",
+            "glslang-default-resource-limits.lib",
+            "MachineIndependent.lib",
+            "OSDependent.lib",
+            "SPIRV.lib",
+            "SPIRV-Tools.lib",
+            "SPIRV-Tools-opt.lib",
+            "SPVRemapper.lib",
             "assimpd.lib",
 
             "ffx_fsr2_api_x64d.lib",

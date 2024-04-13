@@ -15,6 +15,8 @@
 
 #include "Asset/AssetRegistry.h"
 
+#include "Graphics/RenderDocAPI.h"
+
 #include "Core/Profiler.h"
 
 #include <imgui.h>
@@ -107,6 +109,7 @@ namespace Insight
                     }
                     ImGui::EndMenu();
                 }
+                DrawRenderDocMenu();
                 ImGui::EndMainMenuBar();
 
                 m_fileDialog.Update();
@@ -169,6 +172,27 @@ namespace Insight
                 {
                     activeWorld->Destroy();
                 }
+            }
+        }
+
+        void MenuBar::DrawRenderDocMenu() const
+        {
+            if (Graphics::RenderDocAPI::Instance().IsInitialised()
+                && ImGui::BeginMenu("RenderDoc"))
+            {
+                if (ImGui::MenuItem("Capture"))
+                {
+                    Graphics::RenderDocAPI::Instance().Capture();
+                }
+                if (ImGui::MenuItem("Enable Overlay"))
+                {
+                    Graphics::RenderDocAPI::Instance().EnableOverlay();
+                }
+                if (ImGui::MenuItem("Disable Overlay"))
+                {
+                    Graphics::RenderDocAPI::Instance().DisableOverlay();
+                }
+                ImGui::EndMenu();
             }
         }
     }

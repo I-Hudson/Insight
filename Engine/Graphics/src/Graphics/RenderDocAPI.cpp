@@ -1,0 +1,148 @@
+#include "Graphics/RenderDocAPI.h"
+
+#include "Core/Logger.h"
+
+#include "Platforms/Platform.h"
+
+namespace Insight
+{
+	namespace Graphics
+	{
+		RenderDocAPI::RenderDocAPI()
+		{ }
+
+		RenderDocAPI::~RenderDocAPI()
+		{
+			if (m_initialised)
+			{
+#ifdef RENDER_DOC_API
+				m_initialised = false;
+				m_captureState = CaptureState::None;
+
+				Platform::FreeDynamicLibrary(m_renderDocDll);
+				m_renderDocAPI = nullptr;
+				m_renderDocDll = nullptr;
+#endif
+			}
+		}
+
+		bool RenderDocAPI::Initialise()
+		{
+			if (m_initialised)
+			{
+				return true;
+			}
+
+#ifdef RENDER_DOC_API
+			m_renderDocDll = Platform::LoadDynamicLibrary("renderdoc.dll");
+			if (!m_renderDocDll)
+			{
+				IS_LOG_CORE_ERROR("[RenderDocAPI::Initialise] Unable to load renderdoc.dll.");
+				return false;
+			}
+
+			pRENDERDOC_GetAPI getApiFunc =
+				Platform::GetDynamicFunction<int, RENDERDOC_Version, void**>(m_renderDocDll, "RENDERDOC_GetAPI");
+			if (!getApiFunc)
+			{
+				IS_LOG_CORE_ERROR("[RenderDocAPI::Initialise] Unable to get RenderDoc's 'GetAPI' function from renderdoc.dll.");
+				return false;
+			}
+
+
+			int getAPIResult = getApiFunc(eRENDERDOC_API_Version_1_1_2, (void**)&m_renderDocAPI);
+			if (getAPIResult != 1)
+			{
+				IS_LOG_CORE_ERROR("[RenderDocAPI::Initialise] RenderDoc GetAPI returned '{}', either the RenderDoc vesion is not supported or invalid argurments.", getAPIResult);
+				return false;
+			}
+
+			m_renderDocAPI->SetCaptureFilePathTemplate("RenderDoc Captures/cap");
+#endif
+			DisableOverlay();
+			m_initialised = true;
+			return m_initialised;
+		}
+
+		bool RenderDocAPI::IsInitialised() const
+		{
+			return m_initialised;
+		}
+
+		void RenderDocAPI::EnableOverlay()
+		{
+			if (m_initialised)
+			{
+#ifdef RENDER_DOC_API
+				const u32 bits = RENDERDOC_OverlayBits::eRENDERDOC_Overlay_Enabled
+					| RENDERDOC_OverlayBits::eRENDERDOC_Overlay_Default;
+				m_renderDocAPI->MaskOverlayBits(0, bits);
+#endif
+			}
+		}
+
+		void RenderDocAPI::DisableOverlay()
+		{
+			if (m_initialised)
+			{
+#ifdef RENDER_DOC_API
+				const u32 bits = ~RENDERDOC_OverlayBits::eRENDERDOC_Overlay_Enabled;
+				m_renderDocAPI->MaskOverlayBits(bits, 0);
+#endif
+			}
+		}
+
+		void RenderDocAPI::Capture()
+		{
+			if (m_initialised
+				&& m_captureState == CaptureState::None)
+			{
+				m_captureState = CaptureState::Requested;
+			}
+		}
+
+		bool RenderDocAPI::IsCapturing() const
+		{
+			u32 frameCapturing = 0;
+			if (m_captureState == CaptureState::Running && m_initialised)
+			{
+#ifdef RENDER_DOC_API
+				frameCapturing = m_renderDocAPI->IsFrameCapturing();
+#endif
+			}
+			return frameCapturing == 1;
+		}
+
+		bool RenderDocAPI::CaptureRequested() const
+		{
+			return m_captureState == CaptureState::Requested;
+		}
+
+		void RenderDocAPI::StartCapture()
+		{
+			if (m_captureState == CaptureState::Requested && m_initialised)
+			{
+#ifdef RENDER_DOC_API
+				m_renderDocAPI->StartFrameCapture(NULL, NULL);
+#endif
+				m_captureState = CaptureState::Running;
+			}
+		}
+
+		void RenderDocAPI::EndCapture()
+		{
+			if (m_captureState == CaptureState::Running && m_initialised)
+			{
+#ifdef RENDER_DOC_API
+				const u32 captureSuccessful = m_renderDocAPI->EndFrameCapture(NULL, NULL);
+				if (captureSuccessful == 0)
+				{
+					IS_LOG_CORE_ERROR("[RenderDocAPI::EndCapture] RenderDoc capture unsuccessful.");
+				}
+#endif
+				m_captureState = CaptureState::None;
+
+			}
+		}
+	}
+}

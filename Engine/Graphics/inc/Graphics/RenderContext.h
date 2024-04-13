@@ -19,6 +19,7 @@
 
 #include "Graphics/RenderStats.h"
 #include "Graphics/GPUProfiler.h"
+#include "Graphics/RenderDocAPI.h"
 
 #ifdef IS_RESOURCE_HANDLES_ENABLED
 #include "Graphics/Resources/Texture.h"
@@ -323,6 +324,7 @@ namespace Insight
 
 			PhysicalDeviceInformation m_physical_device_info;
 			RenderStats m_renderStats;
+			RenderDocAPI m_renderDocAPI;
 
 			glm::ivec2 m_swapchainBufferSize;
 

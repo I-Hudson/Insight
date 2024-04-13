@@ -79,6 +79,7 @@ namespace Insight
 			context->m_frameDescriptorAllocator.Setup();
 
 			context->m_rhiMemoryInfo.Setup();
+			context->m_renderDocAPI.Initialise();
 
 #ifdef RENDERGRAPH_V2_ENABLED
 			context->m_renderGraphV2 = ::New<RenderGraphV2>();
@@ -349,6 +350,11 @@ namespace Insight
 		{
 			IS_PROFILE_FUNCTION();
 
+			if (m_renderDocAPI.CaptureRequested())
+			{
+				m_renderDocAPI.StartCapture();
+			}
+
 			bool prepareRenderer = PrepareRender();
 
 			RHI_CommandList* cmdList = nullptr;
@@ -378,6 +384,11 @@ namespace Insight
 			m_gpuProfiler.EndFrame(cmdList);
 			cmdList->Close();
 			PostRender(cmdList);
+
+			if (m_renderDocAPI.IsCapturing())
+			{
+				m_renderDocAPI.EndCapture();
+			}
 
 			++m_frameCount;
 		}

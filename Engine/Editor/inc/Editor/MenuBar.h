@@ -24,6 +24,8 @@ namespace Insight
 
             void WorldItems();
 
+            void DrawRenderDocMenu() const;
+
         private:
             EditorWindowManager* m_editorWindowManager;
             FileDialog m_fileDialog;
