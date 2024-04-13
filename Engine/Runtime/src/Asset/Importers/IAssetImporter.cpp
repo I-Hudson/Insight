@@ -17,7 +17,12 @@ namespace Insight
         {
             for (size_t i = 0; i < m_validFileExtensions.size(); ++i)
             {
-                if (strcmp(m_validFileExtensions[i], fileExtension) == 0) 
+                std::string inFileExtension = fileExtension;
+                ToLower(inFileExtension);
+                std::string importerFileExtension = m_validFileExtensions[i];
+                ToLower(importerFileExtension);
+
+                if (inFileExtension == importerFileExtension)
                 {
                     return true;
                 }

@@ -8,7 +8,7 @@ void RemoveWhilteSpaces(std::string& str)
 	auto a = std::remove_if(str.begin(), str.end(), isspace);
 }
 
-void ToLowwer(std::string& str)
+void ToLower(std::string& str)
 {
 	std::transform(str.begin(), str.end(), str.begin(), [](char c)
 		{

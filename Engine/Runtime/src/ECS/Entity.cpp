@@ -129,8 +129,8 @@ namespace Insight
 			// Sort the string in ascending order. Make strings all lower case to not worry about ASCII uppercase vs lowercase.
 			std::sort(componentTypeNames.begin(), componentTypeNames.end(), [](std::string a, std::string b)
 				{
-					ToLowwer(a);
-					ToLowwer(b);
+					ToLower(a);
+					ToLower(b);
 					return a < b;
 				});
 

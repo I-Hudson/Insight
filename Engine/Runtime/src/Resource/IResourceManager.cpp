@@ -317,7 +317,9 @@ namespace Insight
 
         TObjectPtr<IResource> IResourceManager::LoadSync(std::string_view filepath, bool convertToEngineFormat)
         {
-            std::string_view fileExtension = FileSystem::GetExtension(filepath);
+            std::string fileExtension = std::string(FileSystem::GetExtension(filepath));
+            ToLower(fileExtension);
+
             const Runtime::IResourceLoader* loader = Runtime::ResourceLoaderRegister::GetLoaderFromExtension(fileExtension);
             if (!loader)
             {

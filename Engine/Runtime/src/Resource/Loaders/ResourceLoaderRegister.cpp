@@ -54,10 +54,13 @@ namespace Insight
 
         const IResourceLoader* ResourceLoaderRegister::GetLoaderFromExtension(std::string_view fileExtension)
         {
+            std::string lowerFileExtension = std::string(fileExtension);
+            ToLower(lowerFileExtension);
+
             for (size_t i = 0; i < s_resourceLoaders.size(); ++i)
             {
                 const IResourceLoader* loader = s_resourceLoaders.at(i);
-                if (Algorithm::VectorContains(loader->GetAcceptedFileExtensions(), fileExtension))
+                if (Algorithm::VectorContains(loader->GetAcceptedFileExtensions(), lowerFileExtension))
                 {
                     return loader;
                 }

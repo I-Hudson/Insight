@@ -62,8 +62,8 @@ namespace Insight
 				std::string key = equal_index != std::string::npos ? arg.substr(0, equal_index) : "";
 				std::string value = equal_index != std::string::npos ? arg.substr(arg.find('=') + 1) : "";
 
-				ToLowwer(key);
-				ToLowwer(value);
+				ToLower(key);
+				ToLower(value);
 
 				if (key.empty() || value.empty())
 				{
@@ -151,7 +151,7 @@ namespace Insight
 
 		Ptr<CommandLineValue> CommandLineArgs::GetCommandLineValue(std::string key)
 		{
-			ToLowwer(key);
+			ToLower(key);
 			if (auto itr = m_args.find(key); itr != m_args.end())
 			{
 				return &const_cast<CommandLineValue&>(itr->second);
