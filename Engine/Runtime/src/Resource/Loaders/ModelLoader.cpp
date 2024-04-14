@@ -876,10 +876,12 @@ namespace Insight
 			if (!(*vertex_buffer))
 			{
 				*vertex_buffer = Renderer::CreateVertexBuffer(cpu_vertex_buffer_size, sizeof(Graphics::Vertex));
+				(*vertex_buffer)->SetName(loader_data.FileName + "1/1__Veretx");
 			}
 			if (!(*index_buffer))
 			{
 				*index_buffer = Renderer::CreateIndexBuffer(cpu_index_buffer_size);
+				(*index_buffer)->SetName(loader_data.FileName + "1/1__Index");
 			}
 
 			if (cpu_vertex_buffer_size > (*vertex_buffer)->GetSize())
