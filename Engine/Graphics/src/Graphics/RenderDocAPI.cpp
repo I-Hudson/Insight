@@ -59,8 +59,8 @@ namespace Insight
 
 			m_renderDocAPI->SetCaptureFilePathTemplate("RenderDoc Captures/cap");
 #endif
-			DisableOverlay();
 			m_initialised = true;
+			DisableOverlay();
 			return m_initialised;
 		}
 
