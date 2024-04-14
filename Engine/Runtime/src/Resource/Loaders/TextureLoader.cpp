@@ -79,9 +79,9 @@ namespace Insight::Runtime
 		Byte* textureData = nullptr;
 
 #ifdef NVIDIA_Texture_Tools
-		const bool kEnableNVTT = false;
-		if (kEnableNVTT)
-		{
+		const bool kEnableNVTT = true;
+		//if (kEnableNVTT)
+		//{
 			struct nvttCompressHandler : nvtt::OutputHandler
 			{
 				virtual ~nvttCompressHandler() override
@@ -152,7 +152,7 @@ namespace Insight::Runtime
 			//context.outputHeader(image, 1, compressionOptions, outputOptions); // output DDS header
 			bool nvttCompress = context.compress(image, 0, 0, compressionOptions, outputOptions); // output compressed image
 
-			if (nvttLoadFromMemory && nvttCompress)
+			if (kEnableNVTT && nvttLoadFromMemory && nvttCompress)
 			{
 				textureIsLoaded = true;
 				width = outputHandler.Width;
@@ -161,7 +161,7 @@ namespace Insight::Runtime
 				textureSize = outputHandler.Size;
 				textureData = outputHandler.BufferData.data();
 			}
-		}
+		//}
 #endif
 
 		if (!textureIsLoaded)

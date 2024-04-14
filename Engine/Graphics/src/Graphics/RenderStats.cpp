@@ -91,8 +91,8 @@ namespace Insight
                     ImGui::Text("   Block Bytes: %u MB",       rhiMemoryInfo.BlockBytes / 1024 / 1024);
                     ImGui::Text("   Allocation Bytes: %u MB",  rhiMemoryInfo.AllocationBytes / 1024 / 1024);
                     ImGui::Text("   Free Bytes: %u MB",        (rhiMemoryInfo.BlockBytes - rhiMemoryInfo.AllocationBytes) / 1024 / 1024);
-                    ImGui::Text("   Usage Bytes: %u MB",       rhiMemoryInfo.UsageBytes / 1024 / 1024);
-                    ImGui::Text("   Budget Bytes: %u MB",      rhiMemoryInfo.BudgetBytes / 1024 / 1024);
+                    ImGui::Text("   Est Usage Bytes: %u MB",       rhiMemoryInfo.UsageBytes / 1024 / 1024);
+                    ImGui::Text("   Est Budget Bytes: %u MB",      rhiMemoryInfo.BudgetBytes / 1024 / 1024);
                 }
 
                 ImGui::Text("Render Timer: %f", renderTime);
