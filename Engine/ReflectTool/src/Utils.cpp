@@ -102,6 +102,51 @@ namespace InsightReflectTool
             return files;
         }
 
+        std::vector<std::string> GetAllFilesWithTypeRecersive(const std::string_view type, const Reflect::Parser::FileParser& fileParser)
+        {
+            std::vector<std::string> files;
+            for (const auto& fileParsed : fileParser.GetAllFileParsedData())
+            {
+                if (fileParsed.parserOptions.DoNotReflect)
+                {
+                    continue;
+                }
+
+                for (const auto& reflectData : fileParsed.ReflectData)
+                {
+                    if (CheckFileInheritsType(type, reflectData.Inheritance))
+                    {
+                        files.push_back(fileParsed.FilePath + "/" + fileParsed.FileName + ".h");
+                    }
+                }
+            }
+            return files;
+        }
+
+        bool CheckFileInheritsType(const std::string_view type, const std::vector<Reflect::Parser::ReflectInheritanceData>& inheritanceData)
+        {
+            bool result = std::find_if(inheritanceData.begin(), inheritanceData.end(),
+                [type](const Reflect::Parser::ReflectInheritanceData& a)
+                {
+                    return type == a.Name;
+                }) != inheritanceData.end();
+
+            if (result)
+            {
+                return true;
+            }
+
+            for (size_t i = 0; i < inheritanceData.size(); ++i)
+            {
+                if (CheckFileInheritsType(type, inheritanceData[i].Inheritances))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         std::vector<Reflect::Parser::ReflectContainerData> GetAllDerivedTypesFromBaseType(std::string_view baseType, const Reflect::Parser::FileParser& fileParser)
         {
             std::vector<Reflect::Parser::ReflectContainerData> classes;

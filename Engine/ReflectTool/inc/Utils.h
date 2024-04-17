@@ -39,7 +39,12 @@ namespace InsightReflectTool
 
         void ValidateOutputPath(std::string_view path);
 
-        std::vector<std::string> GetAllFilesWithType(std::string_view type, const Reflect::Parser::FileParser& fileParser);
+        std::vector<std::string> GetAllFilesWithType(const std::string_view type, const Reflect::Parser::FileParser& fileParser);
+        std::vector<std::string> GetAllFilesWithTypeRecersive(const std::string_view type, const Reflect::Parser::FileParser& fileParser);
+
+        bool CheckFileInheritsType(std::string_view type, const std::vector<Reflect::Parser::ReflectInheritanceData>& inheritanceData);
+
         std::vector<Reflect::Parser::ReflectContainerData> GetAllDerivedTypesFromBaseType(std::string_view baseType, const Reflect::Parser::FileParser& fileParser);
+    
     }
 }

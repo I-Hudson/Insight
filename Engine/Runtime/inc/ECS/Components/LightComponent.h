@@ -32,6 +32,6 @@ namespace Insight
 	OBJECT_SERIALISER(ECS::LightComponent, 1,
 		SERIALISE_PROPERTY(Maths::Vector3, m_lightColour, 1, 0)
 		SERIALISE_PROPERTY(float, m_intensity, 1, 0)
-		SERIALISE_BASE(ECS::Component, 2, 0)
+		SERIALISE_BASE(ECS::Component, 1, 0)
 	);
 }

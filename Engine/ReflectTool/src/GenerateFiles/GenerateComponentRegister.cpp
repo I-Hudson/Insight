@@ -15,7 +15,7 @@ namespace InsightReflectTool
 {
     bool GenerateComponentRegister::Generate(const Reflect::Parser::FileParser& fileParser, std::string_view outFilePath, const Reflect::ReflectAddtionalOptions& options) const
     {
-        std::vector<std::string> componentFiles = Utils::GetAllFilesWithType("Component", fileParser);
+        std::vector<std::string> componentFiles = Utils::GetAllFilesWithTypeRecersive("Component", fileParser);
         std::vector<Reflect::Parser::ReflectContainerData> componentClasses = Utils::GetAllDerivedTypesFromBaseType("Component", fileParser);
 
         std::vector<Reflect::Parser::ReflectContainerData> validComponentClasses;
