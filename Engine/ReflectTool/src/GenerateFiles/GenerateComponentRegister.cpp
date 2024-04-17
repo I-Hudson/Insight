@@ -3,10 +3,13 @@
 #include "Utils.h"
 
 #include "Editor/HotReload/HotReloadExportFunctions.h"
+#include "Runtime/Defines.h"
 
 #include <CodeGenerate/CodeGenerate.h>
 
 #include <filesystem>
+
+#define TEXT(x) #x
 
 namespace InsightReflectTool
 {
@@ -14,6 +17,18 @@ namespace InsightReflectTool
     {
         std::vector<std::string> componentFiles = Utils::GetAllFilesWithType("Component", fileParser);
         std::vector<Reflect::Parser::ReflectContainerData> componentClasses = Utils::GetAllDerivedTypesFromBaseType("Component", fileParser);
+
+        std::vector<Reflect::Parser::ReflectContainerData> validComponentClasses;
+        for (size_t i = 0; i < componentClasses.size(); ++i)
+        {
+            const Reflect::Parser::ReflectContainerData& reflectData = componentClasses[i];
+            if (const auto iter = std::find(reflectData.ContainerProps.begin(), reflectData.ContainerProps.end(), TEXT(IHT_ABSTRACT_COMPONENT));
+                iter == reflectData.ContainerProps.end())
+            {
+                validComponentClasses.push_back(reflectData);
+            }
+        }
+        componentClasses = std::move(validComponentClasses);
 
         std::fstream file;
         std::string absPath = std::filesystem::absolute(outFilePath).string();

@@ -48,6 +48,7 @@ namespace Insight
             const u32 pixelFormatByteSize = PixelFormatExtensions::SizeInBytes(m_pixelFormat);
             ASSERT(dataSize == GetWidth() * GetHeight() * GetDepth() * m_channels);
             m_rhiTexture = Renderer::CreateTexture();
+            m_rhiTexture->m_pixelFormat = m_pixelFormat;
             m_rhiTexture->SetName(m_assetInfo->FileName);
             m_rhiTexture->LoadFromData((Byte*)data, GetWidth(), GetHeight(), GetDepth(), m_channels);
         }

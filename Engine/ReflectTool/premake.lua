@@ -8,6 +8,8 @@ project "InsightReflectTool"
     objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
     debugdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 
+    debugargs { "Type=Engine ReflectPath=../../../Engine/ GenerateProjectFileOutputPath=../../../Engine" }
+
     defines
     {
         "REFLECT_TYPE_INFO_ENABLED",
@@ -17,6 +19,7 @@ project "InsightReflectTool"
     {
         "inc",
         "%{IncludeDirs.insight_editor}",
+        "%{IncludeDirs.InsightRuntime}",
         "%{IncludeDirs.reflect}",
     }
 
@@ -29,7 +32,7 @@ project "InsightReflectTool"
         "src/**.cpp",
         "src/**.inl",
 
-        "../Editor/inc/Editor/HotReload/HotReloadExportFunctions.h.h", 
+        "../Editor/inc/Editor/HotReload/HotReloadExportFunctions.h", 
     }
 
     filter "system:Windows"

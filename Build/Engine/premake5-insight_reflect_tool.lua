@@ -1,5 +1,8 @@
 local profileTool="tracy"
 
+local InsightEngineIncludes = require "lua/InsightEngineIncludes"
+local InsightVendorIncludes = require "lua/InsightVendorIncludes"
+
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 outputdir_target = "%{wks.location}bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 outputdir_obj = "%{wks.location}bin-int/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
@@ -16,6 +19,9 @@ IncludeDirs["insight_editor"] = "%{wks.location}Engine/Editor/inc"
 IncludeDirs["reflect"] = "%{wks.location}vendor/Reflect/Reflect/inc"
 IncludeDirs["tracy"] = "%{wks.location}vendor/tracy"
 IncludeDirs["pix"] = "%{wks.location}vendor/winpixeventruntime/Include"
+InsightEngineIncludes.AddIncludes(IncludeDirs, "%{wks.location}")
+InsightVendorIncludes.AddIncludes(IncludeDirs, "%{wks.location}")
+
 
 LibDirs = {}
 LibDirs["deps_lib"] = "%{wks.location}deps/" .. outputdir .. "/lib/"
@@ -38,7 +44,7 @@ workspace "InsightReflectTool"
     platforms 
     { 
         "Win64", 
-        "Linux",
+        --"Linux",
     }
 
     flags

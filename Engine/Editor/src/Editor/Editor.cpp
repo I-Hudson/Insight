@@ -91,7 +91,8 @@ namespace Insight
                     Runtime::AssetRegistry::Instance().AddAssetsInFolder(projectInfo.GetContentPath(), m_projectAssetPackage, true, true);
 
                     {
-                        if (FileSystem::Exists(projectInfo.GetContentPath() + "/Main.1_Sponza_/textures"))
+                        if (false
+                            && FileSystem::Exists(projectInfo.GetContentPath() + "/Main.1_Sponza_/textures"))
                         {
                             for (auto path : std::filesystem::directory_iterator(projectInfo.GetContentPath() + "/Main.1_Sponza_/textures"))
                             {
@@ -104,7 +105,8 @@ namespace Insight
                     }
 
                     {
-                        if (FileSystem::Exists(projectInfo.GetContentPath() + "/Main.1_Sponza_/textures"))
+                        if (false
+                            && FileSystem::Exists(projectInfo.GetContentPath() + "/Main.1_Sponza_/textures"))
                         {
                             for (auto path : std::filesystem::directory_iterator(projectInfo.GetContentPath() + "/Main.1_Sponza_/textures"))
                             {
