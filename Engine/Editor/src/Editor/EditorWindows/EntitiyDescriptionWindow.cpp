@@ -215,7 +215,7 @@ namespace Insight
                     const ITypeDrawer* typeDrawer = TypeDrawerRegister::Instance().GetDrawer(member.GetType().GetTypeName().data());
                     if (typeDrawer)
                     {
-                        typeDrawer->Draw(member.GetMemberPointer());
+                        typeDrawer->Draw(member.GetMemberPointer(), member.GetMemberName());
                     }
                 }
             }

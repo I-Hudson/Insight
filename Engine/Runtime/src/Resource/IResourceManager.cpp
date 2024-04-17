@@ -636,13 +636,13 @@ namespace Insight
                             if (loader->Load(resource))
                             {
                                 resource->m_resource_state = EResoruceStates::Loaded;
-                                IS_LOG_CORE_INFO("[IResourceManager::StartLoading] '%s' loaded.", resource->GetFileName().c_str());
+                                IS_LOG_CORE_INFO("[IResourceManager::StartLoading] '{}' loaded.", resource->GetFileName().c_str());
                             }
                             else
                             {
                                 // Something has gone wrong when trying to load the resource.
                                 resource->m_resource_state = EResoruceStates::Failed_To_Load;
-                                IS_LOG_CORE_INFO("[IResourceManager::StartLoading] '%s' failed to load.", resource->GetFileName().c_str());
+                                IS_LOG_CORE_INFO("[IResourceManager::StartLoading] '{}' failed to load.", resource->GetFileName().c_str());
                             }
                         }
                     }

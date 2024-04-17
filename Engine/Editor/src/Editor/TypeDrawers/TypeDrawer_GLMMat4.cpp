@@ -15,7 +15,7 @@ namespace Insight
             return typeName;
         }
 
-        void TypeDrawer_GLMMat4::Draw(void* data) const
+        void TypeDrawer_GLMMat4::Draw(void* data, const std::string_view label) const
         {
 #define ARRAY_TO_GLM(row, array) mat4[row][0] = array[0]; mat4[row][1] = array[1]; mat4[row][2] = array[2]; mat4[row][3] = array[3];
 

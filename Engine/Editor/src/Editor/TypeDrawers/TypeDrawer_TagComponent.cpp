@@ -15,7 +15,7 @@ namespace Insight
             return ECS::TagComponent::Type_Name;
         }
 
-        void TypeDrawer_TagComponent::Draw(void* data) const
+        void TypeDrawer_TagComponent::Draw(void* data, const std::string_view label) const
         {
             ECS::TagComponent* tagComponentPointer = static_cast<ECS::TagComponent*>(data);
             ECS::TagComponent& tagComponent = *tagComponentPointer;
