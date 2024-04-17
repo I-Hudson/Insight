@@ -53,6 +53,14 @@ namespace Insight
         std::vector<u64> TransparentMeshIndex;
     };
 
+    struct RenderSpotLight
+    {
+        Maths::Vector3 Position;
+        Maths::Vector3 LightColour;
+        float Intensity;
+        float Radius;
+    };
+
     struct IS_RUNTIME RenderCamrea
     {
         ECS::Camera Camra; 
@@ -75,6 +83,8 @@ namespace Insight
 
         /// @brief All meshes within the world.
         std::vector<RenderMesh> Meshes;
+
+        std::vector<RenderSpotLight> SpotLights;
 
         std::vector<u64> OpaqueMeshIndexs;
         std::vector<u64> TransparentMeshIndexs;

@@ -136,7 +136,7 @@ namespace Insight
 			xmvector = other;
 		}
 #endif
-#if defined(IS_MATHS_GLM) || defined(IS_TESTING)
+#if defined(IS_MATHS_GLM) || defined(IS_MATHS_CONSTRUCTOR_GLM) || defined(IS_TESTING)
 		Vector3::Vector3(const glm::vec3& other)
 		{ 
 			vec3 = other;

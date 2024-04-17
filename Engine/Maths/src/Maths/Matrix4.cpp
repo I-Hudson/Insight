@@ -99,7 +99,7 @@ namespace Insight
 				, other._41, other._42, other._43, other._44))
 		{ }
 #endif
-#if defined(IS_MATHS_GLM) || defined(IS_TESTING)
+#if defined(IS_MATHS_GLM) || defined(IS_MATHS_CONSTRUCTOR_GLM) || defined(IS_TESTING)
 
 		Matrix4::Matrix4(const glm::mat4& other)
 			: mat4(other)

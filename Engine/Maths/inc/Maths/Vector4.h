@@ -8,9 +8,6 @@
 #ifdef IS_MATHS_DIRECTX_MATHS
 #include <DirectXMath.h>
 #endif 
-#if defined(IS_MATHS_GLM) || defined(IS_TESTING)
-#include <glm/glm.hpp>
-#endif 
 
 namespace Insight
 {
@@ -39,7 +36,7 @@ namespace Insight
 			Vector4(const DirectX::XMVECTOR& other);
 			Vector4(DirectX::XMVECTOR&& other);
 #endif
-#if defined(IS_MATHS_GLM) || defined(IS_TESTING)
+#if defined(IS_MATHS_GLM) || defined(IS_MATHS_CONSTRUCTOR_GLM) || defined(IS_TESTING)
 			Vector4(const glm::vec4& other);
 			Vector4(glm::vec4&& other);
 #endif

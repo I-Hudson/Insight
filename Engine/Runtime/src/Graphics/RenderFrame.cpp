@@ -5,6 +5,7 @@
 
 #include "ECS/Components/TransformComponent.h"
 #include "ECS/Components/MeshComponent.h"
+#include "ECS/Components/SpotLightComponent.h"
 
 #include "Core/Profiler.h"
 
@@ -176,6 +177,17 @@ namespace Insight
                             renderWorld.OpaqueMeshIndexs.push_back(meshIndex);
                         }
                     }
+                }
+                if (entity->HasComponent<ECS::SpotLightComponent>())
+                {
+                    ECS::SpotLightComponent* spotLightComponent = entity->GetComponent<ECS::SpotLightComponent>();
+                    RenderSpotLight spotLight;
+                    spotLight.Position = transformComponent->GetPosition();
+                    spotLight.LightColour = spotLightComponent->GetLightColour();
+                    spotLight.Intensity = spotLightComponent->GetIntensity();
+                    spotLight.Radius = spotLightComponent->GetRadius();
+
+                    renderWorld.SpotLights.push_back(std::move(spotLight));
                 }
             }
             RenderWorlds.push_back(std::move(renderWorld));

@@ -68,7 +68,7 @@ namespace Insight
 			: xmmatrix(other)
 		{ }
 #endif
-#if defined(IS_MATHS_GLM) || defined(IS_TESTING)
+#if defined(IS_MATHS_GLM) || defined(IS_MATHS_CONSTRUCTOR_GLM) || defined(IS_TESTING)
 		Matrix2::Matrix2(const glm::mat2& other)
 #ifdef IS_MATHS_DIRECTX_MATHS
 			/* 

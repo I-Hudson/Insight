@@ -7,7 +7,7 @@
 #ifdef IS_MATHS_DIRECTX_MATHS
 #include <DirectXMath.h>
 #endif
-#if defined(IS_MATHS_GLM) || defined(IS_TESTING)
+#if defined(IS_MATHS_GLM) || defined(IS_MATHS_CONSTRUCTOR_GLM) || defined(IS_TESTING)
 #include <glm/glm.hpp>
 #endif 
 
@@ -33,7 +33,7 @@ namespace Insight
 			Matrix4(DirectX::XMMATRIX&& other);
 			Matrix4(const DirectX::XMFLOAT4X4& other);
 #endif
-#if defined(IS_MATHS_GLM) || defined(IS_TESTING)
+#if defined(IS_MATHS_GLM) || defined(IS_MATHS_CONSTRUCTOR_GLM) || defined(IS_TESTING)
 			Matrix4(const glm::mat4& other);
 			Matrix4(glm::mat4&& other);
 #endif
@@ -113,7 +113,7 @@ namespace Insight
 				// Vector4 is off size XMVECTOR which is a vector 4.
 				struct { DirectX::XMMATRIX xmmatrix; };
 #endif
-#if defined(IS_MATHS_GLM) || defined(IS_TESTING)
+#if defined(IS_MATHS_GLM) || defined(IS_MATHS_CONSTRUCTOR_GLM) || defined(IS_TESTING)
 				struct { glm::mat4 mat4; };
 #endif
 				struct

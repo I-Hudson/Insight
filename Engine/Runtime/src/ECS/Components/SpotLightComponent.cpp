@@ -12,5 +12,11 @@ namespace Insight
 		{ }
 
 		IS_SERIALISABLE_CPP(SpotLightComponent)
+
+		float SpotLightComponent::GetRadius() const
+		{
+			return m_radius;
+		}
+
 	}
 }

@@ -7,7 +7,7 @@
 #ifdef IS_MATHS_DIRECTX_MATHS
 #include <DirectXMath.h>
 #endif
-#if defined(IS_MATHS_GLM) || defined(IS_TESTING)
+#if defined(IS_MATHS_GLM) || defined(IS_MATHS_CONSTRUCTOR_GLM) || defined(IS_TESTING)
 #include <glm/glm.hpp>
 #endif 
 
@@ -29,7 +29,7 @@ namespace Insight
 			Matrix2(const DirectX::XMMATRIX& other);
 			Matrix2(DirectX::XMMATRIX&& other);
 #endif
-#if defined(IS_MATHS_GLM) || defined(IS_TESTING)
+#if defined(IS_MATHS_GLM) || defined(IS_MATHS_CONSTRUCTOR_GLM) || defined(IS_TESTING)
 			Matrix2(const glm::mat2& other);
 			Matrix2(glm::mat2&& other);
 #endif
@@ -106,7 +106,7 @@ namespace Insight
 						m_10, m_11;
 				};
 #endif
-#if defined(IS_MATHS_GLM) || defined(IS_TESTING)
+#if defined(IS_MATHS_GLM) || defined(IS_MATHS_CONSTRUCTOR_GLM) || defined(IS_TESTING)
 				struct { glm::mat2 mat2; };
 #endif
 				struct

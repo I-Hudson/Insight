@@ -12,5 +12,16 @@ namespace Insight
 		{ }
 
 		IS_SERIALISABLE_CPP(LightComponent)
+
+		Maths::Vector3 LightComponent::GetLightColour() const
+		{
+			return m_lightColour;
+		}
+
+		float LightComponent::GetIntensity() const
+		{
+			return m_intensity;
+		}
+
 	}
 }

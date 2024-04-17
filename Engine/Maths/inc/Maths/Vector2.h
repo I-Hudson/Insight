@@ -21,7 +21,7 @@ namespace Insight
 			Vector2(const DirectX::XMVECTOR& other);
 			Vector2(DirectX::XMVECTOR&& other);
 #endif
-#if defined(IS_MATHS_GLM) || defined(IS_TESTING)
+#if defined(IS_MATHS_GLM) || defined(IS_MATHS_CONSTRUCTOR_GLM) || defined(IS_TESTING)
 			Vector2(const glm::vec2& other);
 			Vector2(glm::vec2&& other);
 #endif

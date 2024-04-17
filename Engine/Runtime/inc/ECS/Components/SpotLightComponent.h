@@ -20,7 +20,9 @@ namespace Insight
 			SpotLightComponent();
 			virtual ~SpotLightComponent() override;
 
-			IS_SERIALISABLE_H(SpotLightComponent)
+			IS_SERIALISABLE_H(SpotLightComponent);
+
+			float GetRadius() const;
 
 		private:
 			REFLECT_PROPERTY(EditorVisible)
