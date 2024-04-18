@@ -27,7 +27,9 @@ namespace Insight
 			float GetIntensity() const;
 
 		private:
+			REFLECT_PROPERTY(EditorVisible)
 			Maths::Vector3 m_lightColour = Maths::Vector3::One;
+			REFLECT_PROPERTY(EditorVisible)
 			float m_intensity = 1.0f;
 		};
 	}

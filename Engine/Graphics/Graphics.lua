@@ -57,6 +57,7 @@ project "Insight_Graphics"
         "%{IncludeDirs.glfw}",
         "%{IncludeDirs.glm}",
         "%{IncludeDirs.imgui}",
+        "%{IncludeDirs.reflect}",
         "%{IncludeDirs.zip}",
         "%{IncludeDirs.spdlog}",
         "%{IncludeDirs.vma}",

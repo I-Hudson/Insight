@@ -25,6 +25,7 @@ project "Insight_Maths"
         "%{IncludeDirs.spdlog}",
         "%{IncludeDirs.imgui}",
         "%{IncludeDirs.glm}",
+        "%{IncludeDirs.reflect}",
     }
 
     files 

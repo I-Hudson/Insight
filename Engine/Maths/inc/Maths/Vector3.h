@@ -7,7 +7,9 @@
 
 #ifdef IS_MATHS_DIRECTX_MATHS
 #include <DirectXMath.h>
-#endif 
+#endif
+
+#include <Reflect.h>
 
 namespace Insight
 {
@@ -15,6 +17,7 @@ namespace Insight
 	{
 		class Vector4;
 
+		REFLECT_CLASS();
 		class IS_MATHS Vector3 : public Float3
 		{
 		public:
