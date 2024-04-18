@@ -9,6 +9,8 @@
 #include <DirectXMath.h>
 #endif 
 
+#include <Reflect.h>
+
 namespace Insight
 {
 	namespace Maths
@@ -16,6 +18,7 @@ namespace Insight
 		class Vector3;
 
 		/// @brief Vector 4 maths class.
+		REFLECT_CLASS(REFLECT_LOOKUP_ONLY);
 		class IS_MATHS Vector4 : public Float4
 		{
 		public:

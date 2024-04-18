@@ -3,10 +3,13 @@
 #include "Maths/Defines.h"
 #include "Maths/Vectors/Float2.h"
 
+#include <Reflect.h>
+
 namespace Insight
 {
 	namespace Maths
 	{
+		REFLECT_CLASS(REFLECT_LOOKUP_ONLY);
 		class IS_MATHS Vector2 : public Float2
 		{
 		public:

@@ -17,7 +17,7 @@ namespace Insight
 	{
 		class Vector4;
 
-		REFLECT_CLASS();
+		REFLECT_CLASS(REFLECT_LOOKUP_ONLY);
 		class IS_MATHS Vector3 : public Float3
 		{
 		public:
