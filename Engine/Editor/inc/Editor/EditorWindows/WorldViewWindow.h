@@ -42,6 +42,7 @@ namespace Insight
             void GBufferDepthPrepass();
             void GBufferPass();
             void TransparentGBufferPass();
+            void LightPass();
 
             void BindCommonResources(Graphics::RHI_CommandList* cmd_list, RenderData& renderData);
 

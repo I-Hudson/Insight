@@ -1484,6 +1484,10 @@ namespace Insight
 			shaderData = Runtime::AssetRegistry::Instance().LoadAsset(EnginePaths::GetResourcePath() + "/Shaders/hlsl/Swapchain.hlsl");
 			shaderDesc = ShaderDesc("Swapchain", shaderData, ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
 			RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
+
+			shaderData = Runtime::AssetRegistry::Instance().LoadAsset(EnginePaths::GetResourcePath() + "/Shaders/hlsl/LightPass.hlsl");
+			shaderDesc = ShaderDesc("LightPass", shaderData, ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
+			RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
 		}
 
 		void Renderpass::BindCommonResources(RHI_CommandList* cmd_list, BufferFrame& buffer_frame, BufferSamplers& buffer_samplers)

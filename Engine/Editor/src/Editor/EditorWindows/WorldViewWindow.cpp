@@ -14,6 +14,8 @@
 #include "ECS/Components/TransformComponent.h"
 #include "ECS/Components/FreeCameraControllerComponent.h"
 
+#include "Core/Logger.h"
+
 #include <imgui.h>
 #include <ImGuizmo.h>
 
@@ -64,7 +66,15 @@ namespace Insight
 
             SetupRenderGraphPasses();
 
-            Graphics::RHI_Texture* worldViewTexture = Graphics::RenderGraph::Instance().GetRenderCompletedRHITexture("EditorWorldColourRT");
+            const char* editorOutputItems[] =
+            {
+                "EditorWorldColourRT",
+                "EditorWorldLightRT"
+            };
+            static int editorOutput = 0;
+            ImGui::Combo("Editor Output", &editorOutput, editorOutputItems, ARRAY_COUNT(editorOutputItems));
+
+            Graphics::RHI_Texture* worldViewTexture = Graphics::RenderGraph::Instance().GetRenderCompletedRHITexture(editorOutputItems[editorOutput]);
             if (worldViewTexture == nullptr)
             {
                 return;
@@ -168,6 +178,7 @@ namespace Insight
             }
             GBufferPass();
             TransparentGBufferPass();
+            LightPass();
         }
 
         void WorldViewWindow::GBufferDepthPrepass()
@@ -524,6 +535,107 @@ namespace Insight
                         }
 
                     }
+                    cmdList->EndRenderpass();
+                }, std::move(passData));
+        }
+
+        void WorldViewWindow::LightPass()
+        {
+            IS_PROFILE_FUNCTION();
+
+            struct WorldTransparentGBufferData
+            {
+                glm::ivec2 RenderResolution;
+                RenderFrame RenderFrame;
+            };
+
+            WorldTransparentGBufferData passData;
+            passData.RenderResolution = glm::ivec2(ImGui::GetWindowSize().x, ImGui::GetWindowSize().y);
+            passData.RenderFrame = App::Engine::Instance().GetSystemRegistry().GetSystem<Runtime::GraphicsSystem>()->GetRenderFrame();
+
+            Graphics::RenderGraph::Instance().AddPass<WorldTransparentGBufferData>("EditorWorldLightPass",
+                [](WorldTransparentGBufferData& data, Graphics::RenderGraphBuilder& builder)
+                {
+                    IS_PROFILE_SCOPE("EditorWorldLightPass pass setup");
+
+                    const u32 renderResolutionX = builder.GetRenderResolution().x;
+                    const u32 renderResolutionY = builder.GetRenderResolution().y;
+
+                    Graphics::RHI_TextureInfo textureCreateInfo = Graphics::RHI_TextureInfo::Tex2D(
+                          renderResolutionX
+                        , renderResolutionY
+                        , PixelFormat::R8G8B8A8_UNorm
+                        , Graphics::ImageUsageFlagsBits::ColourAttachment | Graphics::ImageUsageFlagsBits::Sampled);
+                    Graphics::RGTextureHandle lightRT = builder.CreateTexture("EditorWorldLightRT", textureCreateInfo);
+                    builder.WriteTexture(lightRT);
+
+                    Graphics::RGTextureHandle colourRT = builder.GetTexture("EditorWorldColourRT");
+                    builder.ReadTexture(colourRT);
+                    Graphics::RGTextureHandle depth = builder.GetTexture("EditorWorldDepthStencilRT");
+                    builder.ReadTexture(depth);
+
+                    Graphics::ShaderDesc shaderDesc("LightPass", {}, Graphics::ShaderStageFlagBits::ShaderStage_Vertex | Graphics::ShaderStageFlagBits::ShaderStage_Pixel);
+                    builder.SetShader(shaderDesc);
+
+                    Graphics::PipelineStateObject pso = { };
+                    {
+                        IS_PROFILE_SCOPE("SetPipelineStateObject");
+                        pso.Name = "EditorLightPass";
+                        pso.CullMode = Graphics::CullMode::Front;
+                        pso.FrontFace = Graphics::FrontFace::CounterClockwise;
+                        pso.ShaderDescription = shaderDesc;
+                    }
+                    builder.SetPipeline(pso);
+
+                    builder.SetViewport(renderResolutionX, renderResolutionY);
+                    builder.SetScissor(renderResolutionX, renderResolutionY);
+                },
+                [this](WorldTransparentGBufferData& data, Graphics::RenderGraph& render_graph, Graphics::RHI_CommandList* cmdList)
+                {
+                    IS_PROFILE_SCOPE("EditorLightPass pass execute");
+
+                    Graphics::PipelineStateObject pso = render_graph.GetPipelineStateObject("EditorWorldLightPass");
+                    cmdList->BindPipeline(pso, nullptr);
+                    cmdList->BeginRenderpass(render_graph.GetRenderpassDescription("EditorWorldLightPass"));
+
+                    {
+                        IS_PROFILE_SCOPE("Set Buffer Frame Uniform");
+                        BindCommonResources(cmdList, m_renderingData);
+                    }
+
+                    cmdList->SetTexture(6, 0, render_graph.GetRHITexture(render_graph.GetTexture("EditorWorldColourRT")));
+                    cmdList->SetTexture(6, 1, render_graph.GetRHITexture(render_graph.GetTexture("EditorWorldDepthStencilRT")));
+                    //cmdList->SetTexture(1, 7, render_graph.GetRHITexture(""));
+
+                    for (const RenderWorld& world : data.RenderFrame.RenderWorlds)
+                    {
+                        struct SpotLightBuffer
+                        {
+                            int SpotLightSize;
+                            RenderSpotLight SpotLights[32];
+                        };
+
+                        SpotLightBuffer spotLightBuffer;
+                        for (size_t i = 0; i < world.SpotLights.size(); ++i)
+                        {
+                            if (i >= 32)
+                            {
+                                IS_LOG_CORE_WARN("Only 32 spot lights are supported.");
+                                break;
+                            }
+
+                            spotLightBuffer.SpotLights[i] = world.SpotLights[i];
+                        }
+                        spotLightBuffer.SpotLightSize = world.SpotLights.size();
+
+                        Graphics::RHI_BufferView spotLightRHIBuffer = cmdList->UploadUniform(spotLightBuffer);
+                        cmdList->SetUniform(6, 0, spotLightRHIBuffer);
+
+                        cmdList->Draw(3, 1, 0, 0);
+
+                        break;
+                    }
+
                     cmdList->EndRenderpass();
                 }, std::move(passData));
         }
