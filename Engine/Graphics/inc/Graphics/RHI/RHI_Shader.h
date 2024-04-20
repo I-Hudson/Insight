@@ -9,6 +9,7 @@
 
 #include <vector>
 #include <map>
+#include <mutex>
 #include <unordered_map>
 
 struct IDxcBlob;
@@ -28,6 +29,7 @@ namespace Insight
 		public:
 			virtual ~RHI_Shader() { }
 
+			const ShaderDesc& GetDesc() const { return m_desc; }
 			bool IsCompiled() const { return m_compiled; }
 			std::vector<DescriptorSet> GetDescriptorSets() const { return m_descriptor_sets; }
 			PushConstant GetPushConstant() const { return m_push_constant; }
@@ -39,6 +41,7 @@ namespace Insight
 			virtual void Destroy() = 0;
 
 		protected:
+			ShaderDesc m_desc;
 			bool m_compiled = false;
 			std::vector<DescriptorSet> m_descriptor_sets;
 			PushConstant m_push_constant;
@@ -56,10 +59,12 @@ namespace Insight
 
 			void SetRenderContext(RenderContext* context) { m_context = context; }
 			RHI_Shader* GetOrCreateShader(ShaderDesc desc);
+			std::vector<RHI_Shader*> GetAllShaders() const;
 			void Destroy();
 
 		private:
 			std::map<u64, RHI_Shader*> m_shaders;
+			mutable std::mutex m_shaderLock;
 			RenderContext* m_context{ nullptr };
 		};
 

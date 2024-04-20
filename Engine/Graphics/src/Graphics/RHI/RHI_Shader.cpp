@@ -37,12 +37,10 @@ namespace Insight
 
 
 		RHI_ShaderManager::RHI_ShaderManager()
-		{
-		}
+		{ }
 
 		RHI_ShaderManager::~RHI_ShaderManager()
-		{
-		}
+		{ }
 
 		RHI_Shader* RHI_ShaderManager::GetOrCreateShader(ShaderDesc desc)
 		{
@@ -50,7 +48,10 @@ namespace Insight
 			{
 				return nullptr;
 			}
+
 			const u64 hash = desc.GetHash();
+
+			std::lock_guard shaderLock(m_shaderLock);
 			auto itr = m_shaders.find(hash);
 			if (itr != m_shaders.end())
 			{
@@ -59,13 +60,26 @@ namespace Insight
 
 			RHI_Shader* shader = RHI_Shader::New();
 			shader->Create(m_context, desc);
+			shader->m_desc = desc;
 			m_shaders[hash] = shader;
 
 			return shader;
 		}
 
+		std::vector<RHI_Shader*> RHI_ShaderManager::GetAllShaders() const
+		{
+			std::vector<RHI_Shader*> shaders;
+			std::lock_guard shaderLock(m_shaderLock);
+			for (auto& [desc, shader] : m_shaders)
+			{
+				shaders.push_back(shader);
+			}
+			return shaders;
+		}
+
 		void RHI_ShaderManager::Destroy()
 		{
+			std::lock_guard shaderLock(m_shaderLock);
 			for (auto& pair : m_shaders)
 			{
 				pair.second->Destroy();
