@@ -139,7 +139,7 @@ namespace Insight
 				{
 					IS_LOG_CORE_ERROR("[RenderDocAPI::EndCapture] RenderDoc capture unsuccessful.");
 				}
-				//m_renderDocAPI->LaunchReplayUI(0, "");
+				m_renderDocAPI->LaunchReplayUI(1, "");
 #endif
 				m_captureState = CaptureState::None;
 

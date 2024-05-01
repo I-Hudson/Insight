@@ -564,7 +564,7 @@ namespace Insight
                     Graphics::RHI_TextureInfo textureCreateInfo = Graphics::RHI_TextureInfo::Tex2D(
                           renderResolutionX
                         , renderResolutionY
-                        , PixelFormat::R8G8B8A8_UNorm
+                        , PixelFormat::R32G32B32A32_Float
                         , Graphics::ImageUsageFlagsBits::ColourAttachment | Graphics::ImageUsageFlagsBits::Sampled);
                     Graphics::RGTextureHandle lightRT = builder.CreateTexture("EditorWorldLightRT", textureCreateInfo);
                     builder.WriteTexture(lightRT);
@@ -583,6 +583,8 @@ namespace Insight
                         pso.Name = "EditorLightPass";
                         pso.CullMode = Graphics::CullMode::Front;
                         pso.FrontFace = Graphics::FrontFace::CounterClockwise;
+                        pso.DepthTest = false;
+                        pso.BlendEnable = false;
                         pso.ShaderDescription = shaderDesc;
                     }
                     builder.SetPipeline(pso);

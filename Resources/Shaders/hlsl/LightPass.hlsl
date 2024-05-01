@@ -37,22 +37,26 @@ VertexOutput VSMain(uint id : SV_VertexID)
 
 float4 PSMain(VertexOutput input) : SV_TARGET
 {
-	float3 DepthPosition = EditorDepthTexture.Sample(Clamp_Sampler, input.UV).xyz;
-    float3 worldPosition = reconstruct_position(input.UV, DepthPosition.r, bf_Camera_Projection_View_Inverted);
+	float DepthValue = EditorDepthTexture.Sample(Clamp_Sampler, input.UV).r;
+    float3 worldPosition = reconstruct_position(input.UV, DepthValue, bf_Camera_Projection_View_Inverted);
 	float3 albedo = (EditorColourTexture.Sample(Clamp_Sampler, input.UV).xyz) * 0.25f;
 
-    for (int spotLightIdx = 0; spotLightIdx < SpotLightSize; ++spotLightIdx)
+    for (int spotLightIdx = 0; spotLightIdx < SpotLightSize; spotLightIdx++)
     {
         const float lightDistance = distance(
-            float4(SpotLights[spotLightIdx].Position.xyz, 0.0f), 
-            float4(worldPosition, 0.0f));
+            float4(SpotLights[spotLightIdx].Position.xyz, 1.0f), 
+            float4(worldPosition, 1.0f));
 
         if (lightDistance < SpotLights[spotLightIdx].Radius)
         {
+            albedo = float3(SpotLightSize,0,0);
         }
-            albedo += float3(1.0f, 1.0f, 1.0f);
+    }
+    if (DepthValue == 1.0f)
+    {
+       // return float4(0,0,0,1);
     }
     //albedo += float3(0.2f, 0.2f, 0.2f);
-	return float4(albedo, 1.0f);
+	return float4(DepthValue,DepthValue,DepthValue, 1.0f);
 	//return float4(0.5, 1.0, 1.0, 1.0);
 }
