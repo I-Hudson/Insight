@@ -5,7 +5,7 @@
 
 #include "ECS/Components/TransformComponent.h"
 #include "ECS/Components/MeshComponent.h"
-#include "ECS/Components/SpotLightComponent.h"
+#include "ECS/Components/PointLightComponent.h"
 
 #include "Core/Profiler.h"
 
@@ -178,16 +178,16 @@ namespace Insight
                         }
                     }
                 }
-                if (entity->HasComponent<ECS::SpotLightComponent>())
+                if (entity->HasComponent<ECS::PointLightComponent>())
                 {
-                    ECS::SpotLightComponent* spotLightComponent = entity->GetComponent<ECS::SpotLightComponent>();
-                    RenderSpotLight spotLight;
-                    spotLight.Position = transformComponent->GetPosition();
-                    spotLight.LightColour = spotLightComponent->GetLightColour();
-                    spotLight.Intensity = spotLightComponent->GetIntensity();
-                    spotLight.Radius = spotLightComponent->GetRadius();
+                    ECS::PointLightComponent* pointLightComponent = entity->GetComponent<ECS::PointLightComponent>();
+                    RenderPointLight pointLight;
+                    pointLight.Position = transformComponent->GetPosition();
+                    pointLight.LightColour = pointLightComponent->GetLightColour();
+                    pointLight.Intensity = pointLightComponent->GetIntensity();
+                    pointLight.Radius = pointLightComponent->GetRadius();
 
-                    renderWorld.SpotLights.push_back(std::move(spotLight));
+                    renderWorld.PointLights.push_back(std::move(pointLight));
                 }
             }
             RenderWorlds.push_back(std::move(renderWorld));

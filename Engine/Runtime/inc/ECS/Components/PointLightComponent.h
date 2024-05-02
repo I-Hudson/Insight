@@ -4,23 +4,23 @@
 
 #include "ECS/Components/LightComponent.h"
 
-#include "Generated/SpotLightComponent_reflect_generated.h"
+#include "Generated/PointLightComponent_reflect_generated.h"
 
 namespace Insight
 {
 	namespace ECS
 	{
 		REFLECT_CLASS()
-		class IS_RUNTIME SpotLightComponent : public LightComponent
+		class IS_RUNTIME PointLightComponent : public LightComponent
 		{
 			REFLECT_GENERATED_BODY()
 		public:
-			IS_COMPONENT(SpotLightComponent);
+			IS_COMPONENT(PointLightComponent);
 
-			SpotLightComponent();
-			virtual ~SpotLightComponent() override;
+			PointLightComponent();
+			virtual ~PointLightComponent() override;
 
-			IS_SERIALISABLE_H(SpotLightComponent);
+			IS_SERIALISABLE_H(PointLightComponent);
 
 			float GetRadius() const;
 
@@ -30,7 +30,7 @@ namespace Insight
 		};
 	}
 
-	OBJECT_SERIALISER(ECS::SpotLightComponent, 1,
+	OBJECT_SERIALISER(ECS::PointLightComponent, 1,
 		SERIALISE_PROPERTY(float, m_radius, 1, 0)
 		SERIALISE_BASE(ECS::LightComponent, 1, 0)
 	);

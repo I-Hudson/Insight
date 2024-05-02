@@ -611,17 +611,17 @@ namespace Insight
 
                     for (const RenderWorld& world : data.RenderFrame.RenderWorlds)
                     {
-                        struct SpotLightBuffer
+                        struct PointLightBuffer
                         {
-                            int SpotLightSize;
+                            int PointLightSize;
                             int __pad0;
                             int __pad1;
                             int __pad2;
-                            RenderSpotLight SpotLights[32];
+                            RenderPointLight PointLights[32];
                         };
 
-                        SpotLightBuffer spotLightBuffer;
-                        for (size_t i = 0; i < world.SpotLights.size(); ++i)
+                        PointLightBuffer pointLightBuffer;
+                        for (size_t i = 0; i < world.PointLights.size(); ++i)
                         {
                             if (i >= 32)
                             {
@@ -629,11 +629,11 @@ namespace Insight
                                 break;
                             }
 
-                            spotLightBuffer.SpotLights[i] = world.SpotLights[i];
+                            pointLightBuffer.PointLights[i] = world.PointLights[i];
                         }
-                        spotLightBuffer.SpotLightSize = world.SpotLights.size();
+                        pointLightBuffer.PointLightSize = world.PointLights.size();
 
-                        Graphics::RHI_BufferView spotLightRHIBuffer = cmdList->UploadUniform(spotLightBuffer);
+                        Graphics::RHI_BufferView spotLightRHIBuffer = cmdList->UploadUniform(pointLightBuffer);
                         cmdList->SetUniform(6, 0, spotLightRHIBuffer);
 
                         cmdList->Draw(3, 1, 0, 0);

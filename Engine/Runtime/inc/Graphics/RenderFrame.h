@@ -53,7 +53,7 @@ namespace Insight
         std::vector<u64> TransparentMeshIndex;
     };
 
-    struct RenderSpotLight
+    struct RenderPointLight
     {
         Maths::Vector3 Position;
         Maths::Vector3 LightColour;
@@ -84,7 +84,7 @@ namespace Insight
         /// @brief All meshes within the world.
         std::vector<RenderMesh> Meshes;
 
-        std::vector<RenderSpotLight> SpotLights;
+        std::vector<RenderPointLight> PointLights;
 
         std::vector<u64> OpaqueMeshIndexs;
         std::vector<u64> TransparentMeshIndexs;

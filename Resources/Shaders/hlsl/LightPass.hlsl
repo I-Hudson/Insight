@@ -3,7 +3,7 @@
 Texture2D<float4> EditorColourTexture : register(t0, space6);
 Texture2D<float4> EditorDepthTexture : register(t1, space6);
 
-struct RenderSpotLight
+struct RenderPointLight
 {
     float3 Position;
     float __pad0;
@@ -13,13 +13,13 @@ struct RenderSpotLight
     float Radius;
 };
 
-cbuffer SpotLightBuffers : register(b0, space6)
+cbuffer PointLightBuffers : register(b0, space6)
 {
-    int SpotLightSize;
+    int PointLightSize;
     int __pad0;
     int __pad1;
     int __pad2;
-    RenderSpotLight SpotLights[32];
+    RenderPointLight PointLights[32];
 }
 
 struct VertexOutput
@@ -49,11 +49,11 @@ float4 PSMain(VertexOutput input) : SV_TARGET
 
     float3 currentAlbedo = float3(0, 0, 0);
 
-    if (SpotLightSize > 0)
+    if (PointLightSize > 0)
     {
-        for (int spotLightIdx = 0; spotLightIdx < SpotLightSize; spotLightIdx++)
+        for (int lightIdx = 0; lightIdx < PointLightSize; lightIdx++)
         {
-            const RenderSpotLight light = SpotLights[spotLightIdx];
+            const RenderPointLight light = PointLights[lightIdx];
 
             const float lightDistance = distance(
                 float4(light.Position, 1.0f), 
