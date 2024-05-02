@@ -14,7 +14,7 @@ namespace Insight
         void TypeDrawer_Float::Draw(void* data, const std::string_view label) const
         {
             float* fData = static_cast<float*>(data);
-            ImGui::InputFloat(label.data(), fData);
+            ImGui::DragFloat(label.data(), fData);
         }
     }
 }

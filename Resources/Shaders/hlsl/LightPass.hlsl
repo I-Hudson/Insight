@@ -5,8 +5,10 @@ Texture2D<float4> EditorDepthTexture : register(t1, space6);
 
 struct RenderSpotLight
 {
-    float4 Position;
-    float4 LightColour;
+    float3 Position;
+    float __pad0;
+    float3 LightColour;
+    float __pad1;
     float Intensity;
     float Radius;
 };
@@ -14,6 +16,9 @@ struct RenderSpotLight
 cbuffer SpotLightBuffers : register(b0, space6)
 {
     int SpotLightSize;
+    int __pad0;
+    int __pad1;
+    int __pad2;
     RenderSpotLight SpotLights[32];
 }
 
@@ -37,26 +42,30 @@ VertexOutput VSMain(uint id : SV_VertexID)
 
 float4 PSMain(VertexOutput input) : SV_TARGET
 {
-	float DepthValue = EditorDepthTexture.Sample(Clamp_Sampler, input.UV).r;
-    float3 worldPosition = reconstruct_position(input.UV, DepthValue, bf_Camera_Projection_View_Inverted);
-	float3 albedo = (EditorColourTexture.Sample(Clamp_Sampler, input.UV).xyz) * 0.25f;
+	const float DepthValue = EditorDepthTexture.Sample(Clamp_Sampler, input.UV).r;
+    const float3 worldPosition = reconstruct_position(input.UV, DepthValue, bf_Camera_Projection_View_Inverted);
+	const float3 albedo = (EditorColourTexture.Sample(Clamp_Sampler, input.UV).xyz);
+    const float3 ambientAlbedo = albedo * 0.15;
 
-    for (int spotLightIdx = 0; spotLightIdx < SpotLightSize; spotLightIdx++)
+    float3 currentAlbedo = float3(0, 0, 0);
+
+    if (SpotLightSize > 0)
     {
-        const float lightDistance = distance(
-            float4(SpotLights[spotLightIdx].Position.xyz, 1.0f), 
-            float4(worldPosition, 1.0f));
-
-        if (lightDistance < SpotLights[spotLightIdx].Radius)
+        for (int spotLightIdx = 0; spotLightIdx < SpotLightSize; spotLightIdx++)
         {
-            albedo = float3(SpotLightSize,0,0);
+            const RenderSpotLight light = SpotLights[spotLightIdx];
+
+            const float lightDistance = distance(
+                float4(light.Position, 1.0f), 
+                float4(worldPosition, 1.0f));
+
+            if (lightDistance < light.Radius)
+            {
+                const float radius = lightDistance / light.Radius;
+                const float attenuation = smoothstep(1.0, 0.0, radius);
+                currentAlbedo += (albedo * attenuation) * light.Intensity;
+            }
         }
     }
-    if (DepthValue == 1.0f)
-    {
-       // return float4(0,0,0,1);
-    }
-    //albedo += float3(0.2f, 0.2f, 0.2f);
-	return float4(DepthValue,DepthValue,DepthValue, 1.0f);
-	//return float4(0.5, 1.0, 1.0, 1.0);
+	return float4(ambientAlbedo + currentAlbedo, 1.0f);
 }

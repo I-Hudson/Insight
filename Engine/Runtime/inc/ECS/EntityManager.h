@@ -92,7 +92,7 @@ namespace Insight
 			Runtime::World* m_world = nullptr;
 #endif
 			std::vector<UPtr<Entity>> m_entities;
-			std::shared_mutex m_lock;
+			mutable std::shared_mutex m_lock;
 		};
 #endif
 	}

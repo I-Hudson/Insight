@@ -168,6 +168,8 @@ namespace Insight
 			m_world = other.m_world;
 			other.m_world = nullptr;
 #endif
+			std::lock_guard lock(m_lock);
+			std::lock_guard otherLock(other.m_lock);
 			std::for_each(other.m_entities.begin(), other.m_entities.end(), [this](UPtr<Entity>& entity)
 				{
 					m_entities.push_back(std::move(entity));
@@ -213,23 +215,32 @@ namespace Insight
 
 		void EntityManager::RemoveEntity(Entity*& entity)
 		{
-			std::lock_guard lock(m_lock);
-
-			u32 index = 0;
 			UPtr<Entity> entityToDelete;
-			for (UPtr<Entity>& e : m_entities)
 			{
-				if (e == entity)
+				std::lock_guard lock(m_lock);
+
+				u32 index = 0;
+				for (UPtr<Entity>& e : m_entities)
 				{
-					entityToDelete = std::move(e);
-					break;
+					if (e == entity)
+					{
+						entityToDelete = std::move(e);
+						break;
+					}
+					++index;
 				}
-				++index;
+				ASSERT(entityToDelete.IsValid());
+				m_entities.erase(m_entities.begin() + index);
 			}
-			ASSERT(entityToDelete.IsValid());
-			m_entities.erase(m_entities.begin() + index);
 
 			entityToDelete->Destroy();
+
+			for (size_t childIdx = 0; childIdx < entityToDelete->m_children.size(); ++childIdx)
+			{
+				Entity* childEntity = entityToDelete->m_children[childIdx].Get();
+				RemoveEntity(childEntity);
+			}
+
 			entityToDelete.Reset();
 		}
 
@@ -262,17 +273,22 @@ namespace Insight
 		void EntityManager::Destroy()
 		{
 			IS_PROFILE_FUNCTION();
-			for (UPtr<Entity>& e :  m_entities)
+
 			{
-				e->Destroy(); 
-				e.Reset();
+				std::lock_guard lock(m_lock);
+				for (UPtr<Entity>& e : m_entities)
+				{
+					e->Destroy();
+					e.Reset();
+				}
+				m_entities.resize(0);
 			}
-			m_entities.resize(0);
 		}
 
 		Ptr<Entity> EntityManager::GetEntityByName(std::string_view entity_name) const
 		{
 			IS_PROFILE_FUNCTION();
+			std::lock_guard lock(m_lock);
 			for (const UPtr<Entity>& e : m_entities)
 			{
 				if (e->GetName() == entity_name) 
@@ -286,8 +302,8 @@ namespace Insight
 		std::vector<Ptr<ECS::Entity>> EntityManager::GetAllEntitiesWithComponentByName(std::string_view component_type) const
 		{
 			IS_PROFILE_FUNCTION();
-
 			std::vector<Ptr<ECS::Entity>> entities;
+			std::lock_guard lock(m_lock);
 			for (const UPtr<Entity>& e : m_entities)
 			{
 				if (e->GetComponentByName(component_type) != nullptr)
@@ -300,6 +316,7 @@ namespace Insight
 
 		std::vector<Ptr<ECS::Entity>> EntityManager::GetAllEntities() const
 		{
+			std::lock_guard lock(m_lock);
 			std::vector<Ptr<ECS::Entity>> entities;
 			entities.reserve(m_entities.size());
 			for (const UPtr<Entity>& e : m_entities)
@@ -311,6 +328,7 @@ namespace Insight
 
 		ECS::Entity* EntityManager::GetEntityByGUID(const Core::GUID& guid) const
 		{
+			std::lock_guard lock(m_lock);
 			for (const UPtr<Entity>& e : m_entities)
 			{
 				if (e->GetGUID() == guid)

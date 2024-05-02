@@ -40,7 +40,7 @@ namespace Insight
 		void TypeDrawer_Vector4::Draw(void* data, const std::string_view label) const
 		{
 			Maths::Vector4* vec4 = static_cast<Maths::Vector4*>(data);
-			ImGui::DragFloat3(label.data(), vec4->data);
+			ImGui::DragFloat4(label.data(), vec4->data);
 		}
 	}
 }

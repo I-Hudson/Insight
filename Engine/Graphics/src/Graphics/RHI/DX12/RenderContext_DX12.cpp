@@ -415,7 +415,10 @@ namespace Insight
 							{
 								if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET)
 								{
-									m_gpuCrashTracker->DeviceLost();
+									if (m_gpuCrashTracker)
+									{
+										m_gpuCrashTracker->DeviceLost();
+									}
 
 									HRESULT deviceRemovedReason = m_device->GetDeviceRemovedReason();
 									IS_LOG_CORE_ERROR("[RenderContext_DX12::PostRender] Device has been removed. Reason: '{}'.", deviceRemovedReason);

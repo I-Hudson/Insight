@@ -614,6 +614,9 @@ namespace Insight
                         struct SpotLightBuffer
                         {
                             int SpotLightSize;
+                            int __pad0;
+                            int __pad1;
+                            int __pad2;
                             RenderSpotLight SpotLights[32];
                         };
 
