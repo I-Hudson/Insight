@@ -12,7 +12,7 @@ namespace Insight
         class IS_EDITOR ITypeDrawer
         {
         public:
-            virtual void Draw(void* data, const std::string_view label = "") const = 0;
+            virtual void Draw(void* data, const Reflect::MemberInfo& memberInfo, const std::string_view label = "") const = 0;
         };
     }
 }

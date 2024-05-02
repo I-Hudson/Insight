@@ -368,7 +368,7 @@ namespace Insight
 
 						auto memberIter = Algorithm::VectorFindIf(members, [&propertyName](const Reflect::MemberInfo& member)
 							{
-								return member.GetMemberName() == propertyName;
+								return member.GetName() == propertyName;
 							});
 
 						if (memberIter != members.end())
@@ -386,7 +386,7 @@ namespace Insight
 					serialiser->StartArray("DynamicProperties", dynamicPropertiesSize);
 					for (const Reflect::MemberInfo& member : members)
 					{
-						serialiser->Write("Name", std::string(member.GetMemberName()));
+						serialiser->Write("Name", std::string(member.GetName()));
 
 						std::vector<Byte> memberData;
 						memberData.resize(member.GetType().GetTypeSize());

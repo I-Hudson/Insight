@@ -155,7 +155,7 @@ namespace Insight
             const ITypeDrawer* componentTypeDrawer = TypeDrawerRegister::Instance().GetDrawer(component->GetTypeName());
             if (componentTypeDrawer)
             {
-                componentTypeDrawer->Draw(component);
+                componentTypeDrawer->Draw(component, {});
             }
             else
             {
@@ -186,7 +186,7 @@ namespace Insight
                         {
                             inputText = member.GetType().GetPrettyTypeName();
                         }
-                        ImGui::InputText(member.GetMemberName().data(), &inputText, ImGuiInputTextFlags_ReadOnly);
+                        ImGui::InputText(member.GetName().data(), &inputText, ImGuiInputTextFlags_ReadOnly);
 
                         std::string payloadData;
                         if (EditorGUI::ObjectFieldTarget("EDW_COMPONENT_DRAG_DROP", payloadData, member.GetType()))
@@ -215,7 +215,7 @@ namespace Insight
                     const ITypeDrawer* typeDrawer = TypeDrawerRegister::Instance().GetDrawer(member.GetType().GetTypeName().data());
                     if (typeDrawer)
                     {
-                        typeDrawer->Draw(member.GetMemberPointer(), member.GetMemberName());
+                        typeDrawer->Draw(member.GetMemberPointer(), member, member.GetName());
                     }
                 }
             }

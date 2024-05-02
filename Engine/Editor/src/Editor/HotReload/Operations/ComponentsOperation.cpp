@@ -112,7 +112,7 @@ namespace Insight::Editor
                             if (member.GetValueType() != Reflect::EReflectValueType::Pointer)
                             {
                                 IS_LOG_CORE_WARN("[ComponentsOperation::FindAllComponents] Member '{0}::{1}' is value type '{2}'. Linking only works with pointers."
-                                    , typeInfo.GetTypeId().GetTypeName().data(), member.GetMemberName().data(), member.GetType().GetTypeName().data());
+                                    , typeInfo.GetTypeId().GetTypeName().data(), member.GetName().data(), member.GetType().GetTypeName().data());
                                 continue;
                             }
 

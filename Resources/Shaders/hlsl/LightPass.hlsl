@@ -11,15 +11,14 @@ struct RenderPointLight
     float __pad1;
     float Intensity;
     float Radius;
+    float __pad2;
+    float __pad3;
 };
 
 cbuffer PointLightBuffers : register(b0, space6)
 {
-    int PointLightSize;
-    int __pad0;
-    int __pad1;
-    int __pad2;
     RenderPointLight PointLights[32];
+    int PointLightSize;
 }
 
 struct VertexOutput
@@ -63,7 +62,9 @@ float4 PSMain(VertexOutput input) : SV_TARGET
             {
                 const float radius = lightDistance / light.Radius;
                 const float attenuation = smoothstep(1.0, 0.0, radius);
-                currentAlbedo += (albedo * attenuation) * light.Intensity;
+                const float3 albedoLightColour = albedo * light.LightColour;
+                const float3 albedoAttenuation = albedoLightColour * attenuation;
+                currentAlbedo += albedoAttenuation * light.Intensity;
             }
         }
     }

@@ -613,11 +613,8 @@ namespace Insight
                     {
                         struct PointLightBuffer
                         {
-                            int PointLightSize;
-                            int __pad0;
-                            int __pad1;
-                            int __pad2;
                             RenderPointLight PointLights[32];
+                            int PointLightSize;
                         };
 
                         PointLightBuffer pointLightBuffer;

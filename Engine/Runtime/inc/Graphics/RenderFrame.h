@@ -59,6 +59,8 @@ namespace Insight
         Maths::Vector3 LightColour;
         float Intensity;
         float Radius;
+        float __pad0;
+        float __pad1;
     };
 
     struct IS_RUNTIME RenderCamrea

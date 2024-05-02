@@ -27,7 +27,7 @@ namespace Insight
 			float GetIntensity() const;
 
 		private:
-			REFLECT_PROPERTY(EditorVisible)
+			REFLECT_PROPERTY(EditorVisible, Meta(ClampMin(0.0), ClampMax(1.0)))
 			Maths::Vector3 m_lightColour = Maths::Vector3::One;
 			REFLECT_PROPERTY(EditorVisible)
 			float m_intensity = 1.0f;
