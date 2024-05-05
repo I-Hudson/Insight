@@ -18,6 +18,7 @@ namespace Insight
 	namespace Runtime
 	{
 		class Material;
+		class ModelImporter;
 		class ModelLoader;
 		class Model;
 
@@ -83,6 +84,7 @@ namespace Insight
 			glm::mat4 m_transform_offset = glm::mat4(1.0f);
 
 			friend class ModelLoader;
+			friend class ModelImporter;
 			friend struct RenderMesh;
 			friend class Model;
 		};

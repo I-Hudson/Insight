@@ -109,7 +109,7 @@ namespace Insight
                     }
                     ImGui::EndMenu();
                 }
-                DrawRenderDocMenu();
+                DrawProfileMenu();
                 ImGui::EndMainMenuBar();
 
                 m_fileDialog.Update();
@@ -175,7 +175,7 @@ namespace Insight
             }
         }
 
-        void MenuBar::DrawRenderDocMenu() const
+        void MenuBar::DrawProfileMenu() const
         {
             if (Graphics::RenderDocAPI::Instance().IsInitialised()
                 && ImGui::BeginMenu("RenderDoc"))

@@ -80,7 +80,7 @@ namespace Insight
 				int32_t valueAsIntger = 0;
 				memcpy(&valueAsIntger, &v, 4);
 
-				const int32_t byteMasks[] =
+				const uint32_t byteMasks[] =
 				{
 					0b0000'0000'0000'0000'0000'0000'1111'1111,
 					0b0000'0000'0000'0000'1111'1111'0000'0000,
@@ -97,7 +97,7 @@ namespace Insight
 					const uint32_t mask = byteMasks[byteIdx];
 					const uint32_t byteValue = valueAsIntger & mask;
 
-					for (size_t bitIdx = 0; bitIdx < 8; ++bitIdx)
+					for (uint8_t bitIdx = 0; bitIdx < 8; ++bitIdx)
 					{
 						const int32_t currentBitIdx = (currentByteIdx * 8) + bitIdx;
 						const uint32_t evaluateBitIdx = 1 << currentBitIdx;

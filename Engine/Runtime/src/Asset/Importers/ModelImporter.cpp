@@ -3,7 +3,7 @@
 #include "Asset/Assets/Model.h"
 #include "Asset/Assets/TExture.h"
 
-#include "Graphics/Vertex.h"
+#include "Graphics/RenderContext.h"
 
 #include "Core/Logger.h"
 #include "Core/Profiler.h"
@@ -23,12 +23,16 @@
 
 #include <future>
 
+#define SINGLE_MESH 0
 //#define THREADED_LOADING
 
 namespace Insight
 {
-    namespace Runtime
-    {
+	namespace Runtime
+	{
+		//=============================================
+		// CustomAssimpIOStrean
+		//=============================================
 		class CustomAssimpIOStrean : public Assimp::IOStream
 		{
 		public:
@@ -107,6 +111,9 @@ namespace Insight
 			u64 m_cursor = 0;
 		};
 
+		//=============================================
+		// CustomAssimpIOSystem
+		//=============================================
 		class CustomAssimpIOSystem : public Assimp::DefaultIOSystem
 		{
 			/*
@@ -141,18 +148,123 @@ namespace Insight
 
 		};
 
-        ModelImporter::ModelImporter()
-            : IAssetImporter(
-                {
-                    ".obj",
-                    ".fbx",
-                    ".gltf",
-                })
-        {
-        }
+		//=============================================
+		// MeshData
+		//=============================================
+		void MeshData::Optimise()
+		{
+			IS_PROFILE_FUNCTION();
 
-        Ref<Asset> ModelImporter::Import(const AssetInfo* assetInfo, const std::string_view path) const
-        {
+			std::vector<Graphics::Vertex> optimisedVertices;
+			std::vector<u32> optimisedIndices;
+
+			for (size_t i = 0; i < LODs.size(); ++i)
+			{
+				const u64 vertexOffset = LODs[i].Vertex_offset;
+				const u64 indexOffset = LODs[i].First_index;
+
+				const u64 vertex_count = LODs[i].Vertex_count;
+				const u64 index_count = LODs[i].Index_count;
+
+				const u64 vertex_size = sizeof(Graphics::Vertex);
+
+				/// The optimization order is important
+				std::vector<u32> remapTable(index_count); /// allocate temporary memory for the remap table
+				size_t total_vertices_optimized = meshopt_generateVertexRemap(remapTable.data(), NULL, index_count, Vertices.data() + vertexOffset, vertex_count, sizeof(Graphics::Vertex));
+				
+				optimisedIndices.reserve(optimisedIndices.size() + index_count);
+				optimisedVertices.reserve(optimisedVertices.size() + total_vertices_optimized);
+
+				std::vector<Graphics::Vertex> remapVertices(vertex_count);
+				std::vector<u32> remapIndices(index_count);
+
+				meshopt_remapIndexBuffer(remapIndices.data(), NULL, index_count, remapTable.data());
+				meshopt_remapVertexBuffer(remapVertices.data(), Vertices.data() + vertexOffset, vertex_count, sizeof(Graphics::Vertex), remapTable.data());
+
+				/// Vertex cache optimization - reordering triangles to maximize cache locality
+				IS_LOG_INFO("Optimizing vertex cache...");
+				meshopt_optimizeVertexCache(remapIndices.data(), Indices.data() + indexOffset, index_count, vertex_count);
+
+				/// Overdraw optimizations - reorders triangles to minimize overdraw from all directions
+				IS_LOG_INFO("Optimizing overdraw...");
+				meshopt_optimizeOverdraw(optimisedIndices.data() + optimisedIndices.size(), remapIndices.data(), index_count, &Vertices.data()->Position.x, vertex_count, vertex_size, 1.05f);
+
+				/// Vertex fetch optimization - reorders triangles to maximize memory access locality
+				IS_LOG_INFO("Optimizing vertex fetch...");
+				meshopt_optimizeVertexFetch(optimisedVertices.data() + optimisedVertices.size(), Indices.data() + indexOffset, index_count, remapVertices.data(), vertex_count, vertex_size);
+			}
+		}
+
+		void MeshData::GenerateLODs()
+		{
+			for (u32 lod_index = 1; lod_index < Mesh::s_LOD_Count; ++lod_index)
+			{
+				std::vector<u32> indcies_to_lod;
+
+				const float error_rate = 1.0f;
+				const float lodSplitPercentage = 1.0f / Mesh::s_LOD_Count;
+				const float lodSplit = 1.0f - (lodSplitPercentage * lod_index);
+				const u32 target_index_count = static_cast<u32>(static_cast<float>(LODs.at(0).Index_count) * lodSplit);
+
+				const u64 indices_start = LODs.at(0).First_index;
+				const u64 indices_count = LODs.at(0).Index_count;
+				const u64 vertex_start = LODs.at(0).Vertex_offset;
+				const u64 vertex_count = LODs.at(0).Vertex_count;
+
+				std::vector<u32>::iterator indices_begin = Indices.begin() + indices_start;
+				std::vector<u32> result_lod;
+				result_lod.resize(indices_count);
+
+				// Try and simplify the mesh, try and preserve mesh topology.
+				u64 result_index_count = meshopt_simplify(
+					result_lod.data()
+					, &*indices_begin
+					, static_cast<u64>(indices_count)
+					, &(Vertices.data() + vertex_start)->Position.x
+					, vertex_count
+					, sizeof(Graphics::Vertex)
+					, target_index_count
+					, error_rate);
+
+				if (false && result_index_count > target_index_count)
+				{
+					// Try and simplify the mesh, doesn't preserve mesh topology.
+					result_index_count = meshopt_simplifySloppy(
+						  result_lod.data()
+						, &*indices_begin
+						, static_cast<u64>(indices_count)
+						, &(Vertices.data() + vertex_start)->Position.x
+						, vertex_count
+						, sizeof(Graphics::Vertex)
+						, target_index_count
+						, error_rate);
+				}
+				result_lod.resize(result_index_count);
+
+				LODs.push_back(LODs.at(0));
+				MeshData::LOD& mesh_lod = LODs.back();
+				mesh_lod.First_index = static_cast<u32>(Indices.size());
+				mesh_lod.Index_count = static_cast<u32>(result_index_count);
+
+				std::move(result_lod.begin(), result_lod.end(), std::back_inserter(Indices));
+			}
+		}
+
+		//=============================================
+		// ModelImporter
+		//=============================================
+		ModelImporter::ModelImporter()
+			: IAssetImporter(
+				{
+					".obj",
+					".fbx",
+					".gltf",
+				})
+		{
+		}
+
+		Ref<Asset> ModelImporter::Import(const AssetInfo* assetInfo, const std::string_view path) const
+		{
 			IS_PROFILE_FUNCTION();
 
 			Assimp::Importer importer;
@@ -212,8 +324,15 @@ namespace Insight
 			}
 
 			{
-
 #ifdef THREADED_LOADING
+				{
+					IS_PROFILE_SCOPE("Preallocate all vertex and index buffers for all meshes");
+					for (size_t i = 0; i < meshNodes.size(); ++i)
+					{
+						PreallocateVeretxAndIndexBuffers(meshNodes[i]);
+					}
+				}
+
 				IS_PROFILE_SCOPE("Process all mesh nodes - threaded");
 				std::vector<std::future<void>> processNodesFutures;
 				for (size_t i = 0; i < meshNodes.size(); ++i)
@@ -229,10 +348,12 @@ namespace Insight
 					}
 				}
 #else
-				IS_PROFILE_SCOPE("Process all mesh nodes");
-				for (size_t i = 0; i < meshNodes.size(); ++i)
 				{
-					ModelImporter::ProcessNode(meshNodes[i]);
+					IS_PROFILE_SCOPE("Process all mesh nodes");
+					for (size_t i = 0; i < meshNodes.size(); ++i)
+					{
+						ProcessNode(meshNodes[i]);
+					}
 				}
 #endif
 			}
@@ -240,14 +361,15 @@ namespace Insight
 			for (size_t i = 0; i < meshNodes.size(); ++i)
 			{
 				MeshNode*& meshNode = meshNodes[i];
+				Delete(meshNode->MeshData);
 				Delete(meshNode->Mesh);
 				Delete(meshNode);
 			}
 
-            return modelAsset;
-        }
+			return modelAsset;
+		}
 
-		MeshNode* ModelImporter::GetMeshHierarchy(const aiScene* aiScene, const aiNode* aiNode, const MeshNode* parentMeshNode, std::vector<MeshNode*>& meshNodes) const
+		MeshNode* ModelImporter::GetMeshHierarchy(const aiScene* aiScene, const aiNode* aiNode, const MeshNode* parentMeshNode, std::vector<MeshNode*>& meshNodes, MeshData* monolithMeshData) const
 		{
 			IS_PROFILE_FUNCTION();
 
@@ -255,6 +377,7 @@ namespace Insight
 			newMeshNode->AssimpNode = aiNode;
 			newMeshNode->AssimpScene = aiScene;
 			newMeshNode->Parent = parentMeshNode;
+			newMeshNode->MeshData = monolithMeshData != nullptr ? monolithMeshData : New<MeshData>();
 			newMeshNode->Mesh = New<Mesh>();
 			meshNodes.push_back(newMeshNode);
 
@@ -263,6 +386,35 @@ namespace Insight
 				newMeshNode->Children.push_back(GetMeshHierarchy(aiScene, aiNode->mChildren[childIdx], newMeshNode, meshNodes));
 			}
 			return newMeshNode;
+		}
+
+		void ModelImporter::PreallocateVeretxAndIndexBuffers(MeshNode* meshNode) const
+		{
+			IS_PROFILE_FUNCTION();
+			const aiNode* aiNode = meshNode->AssimpNode;
+			const aiScene* aiScene = meshNode->AssimpScene;
+
+			if (aiNode->mNumMeshes > 0)
+			{
+				for (u32 i = 0; i < aiNode->mNumMeshes; ++i)
+				{
+					IS_PROFILE_SCOPE("Mesh evaluated");
+					const aiMesh* aiMesh = aiScene->mMeshes[aiNode->mMeshes[i]];
+					meshNode->MeshData->Vertices.reserve(meshNode->MeshData->Vertices.size() + static_cast<u64>(aiMesh->mNumVertices));
+					u64 meshIndicesCount = 0;
+
+					// Do the loop as if Assimp couldn't make all faces a triangle then will catch that edge case by not assuming that all faces area triangle.
+					for (size_t faceIdx = 0; faceIdx < aiMesh->mNumFaces; ++faceIdx)
+					{
+						const aiFace& face = aiMesh->mFaces[faceIdx];
+						for (size_t indicesIdx = 0; indicesIdx < face.mNumIndices; ++indicesIdx)
+						{
+							++meshIndicesCount;
+						}
+					}
+					meshNode->MeshData->Indices.reserve(meshNode->MeshData->Indices.size() + static_cast<u64>(meshIndicesCount));
+				}
+			}
 		}
 
 		void ModelImporter::ProcessNode(MeshNode* meshNode) const
@@ -277,7 +429,7 @@ namespace Insight
 				{
 					IS_PROFILE_SCOPE("Mesh evaluated");
 					const aiMesh* aiMesh = aiScene->mMeshes[aiNode->mMeshes[i]];
-					ProcessMesh(aiScene, aiMesh, meshNode->Mesh);
+					ProcessMesh(aiScene, aiMesh, meshNode->MeshData);
 					if (aiScene->HasMaterials() && aiMesh->mMaterialIndex < aiScene->mNumMaterials)
 					{
 						meshNode->AssimpMaterial = aiScene->mMaterials[aiMesh->mMaterialIndex];
@@ -285,15 +437,65 @@ namespace Insight
 					}
 				}
 			}
+
+			MeshData* meshData = meshNode->MeshData;
+			if (meshData
+				&& !meshData->Vertices.empty()
+				&& !meshData->Indices.empty())
+			{
+				meshData->GenerateLODs();
+				meshData->Optimise();
+
+				if (!meshData->RHI_VertexBuffer)
+				{
+					meshData->RHI_VertexBuffer = Renderer::CreateVertexBuffer(meshData->Vertices.size() * sizeof(Graphics::Vertex), sizeof(Graphics::Vertex));
+				}
+				else
+				{
+					// We already have a buffer, just upload out data.
+				}
+
+				if (!meshData->RHI_IndexBuffer)
+				{
+					meshData->RHI_IndexBuffer = Renderer::CreateIndexBuffer(meshData->Indices.size() * sizeof(u32));
+				}
+				else
+				{
+					// We already have a buffer, just upload out data.
+				}
+
+				Mesh* mesh = meshNode->Mesh;
+				ASSERT(mesh);
+
+				mesh->m_lods.resize(Mesh::s_LOD_Count);
+				for (size_t lodIdx = 0; lodIdx < meshData->LODs.size(); ++lodIdx)
+				{
+					MeshData::LOD meshDataLod = meshData->LODs[lodIdx];
+					MeshLOD& meshLod = mesh->m_lods[lodIdx];
+					meshLod.LOD_index = lodIdx;
+
+					meshLod.Vertex_offset = static_cast<u32>(meshDataLod.Vertex_offset);
+					meshLod.Vertex_count = static_cast<u32>(meshDataLod.Vertex_count);
+					meshLod.First_index = static_cast<u32>(meshDataLod.First_index);
+					meshLod.Index_count = static_cast<u32>(meshDataLod.Index_count);
+
+					meshLod.Vertex_buffer = meshData->RHI_VertexBuffer;
+					meshLod.Index_buffer = meshData->RHI_IndexBuffer;
+
+					const std::string vertexBufferName = std::string(meshNode->FileName) + "_" + aiNode->mName.C_Str() + "_Veretx";
+					const std::string indexBufferName = std::string(meshNode->FileName) + "_" + aiNode->mName.C_Str() + "_Index";
+					meshLod.Vertex_buffer->SetName(vertexBufferName);
+					meshLod.Index_buffer->SetName(indexBufferName);
+				}
+
+			}
 		}
 
-		void ModelImporter::ProcessMesh(const aiScene* aiScene, const aiMesh* aiMesh, Mesh* mesh) const
+		void ModelImporter::ProcessMesh(const aiScene* aiScene, const aiMesh* aiMesh, MeshData* meshData) const
 		{
 			IS_PROFILE_FUNCTION();
 
-			std::vector<Graphics::Vertex> vertices;
-			vertices.reserve(aiMesh->mNumVertices);
-
+			meshData->Vertices.reserve(meshData->Vertices.size() + static_cast<u64>(aiMesh->mNumVertices));
 			/// walk through each of the mesh's vertices
 			for (unsigned int i = 0; i < aiMesh->mNumVertices; ++i)
 			{
@@ -356,12 +558,10 @@ namespace Insight
 				}
 
 				Graphics::VertexOptomised vertexOptomised(vertex);
-				vertices.push_back(vertex);
+				meshData->Vertices.push_back(vertex);
 			}
 
-			std::vector<u32> indices;
-			indices.reserve(aiMesh->mNumFaces * 3);
-
+			meshData->Indices.reserve(meshData->Indices.size() + (static_cast<u64>(aiMesh->mNumFaces) * 3));
 			/// Now walk through each of the mesh's faces (a face is a mesh its triangle) and retrieve the corresponding vertex indices.
 			for (unsigned int i = 0; i < aiMesh->mNumFaces; ++i)
 			{
@@ -369,9 +569,17 @@ namespace Insight
 				/// retrieve all indices of the face and store them in the indices vector
 				for (unsigned int j = 0; j < face.mNumIndices; ++j)
 				{
-					indices.push_back(face.mIndices[j]);
+					meshData->Indices.push_back(face.mIndices[j]);
 				}
 			}
+
+			meshData->LODs.push_back(
+				MeshData::LOD(
+					0, 
+					0, 
+					static_cast<u32>(meshData->Vertices.size()),
+					0,
+					static_cast<u32>(meshData->Indices.size())));
 		}
 
 		void ModelImporter::ProcessMaterial(MeshNode* meshNode) const
@@ -423,5 +631,5 @@ namespace Insight
 
 			return std::string(directory) + "/" + texturePath.C_Str();
 		}
-    }
+	}
 }
