@@ -11,6 +11,8 @@
 #include <string>
 #include <vector>
 
+#define DEBUG_BREAK __debugbreak()
+
 namespace Insight
 {
 	namespace Windows

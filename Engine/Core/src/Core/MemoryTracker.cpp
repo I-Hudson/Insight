@@ -248,9 +248,10 @@ namespace Insight
 #ifdef IS_MEMORY_TRACKING
             /// TOOD: Think of a better way to have this supported. Would be nice to have this. Maybe a call stack should only be gotten
             /// if there is a crash? Look at third party options for getting the callstack. Disabled for non debug due to performance.
-#if defined(IS_PLATFORM_WINDOWS) && defined(MEMORY_TRACK_CALLSTACK) && defined(_DEBUG)
+#if defined(IS_PLATFORM_WINDOWS) && defined(MEMORY_TRACK_CALLSTACK)
 
-            const ULONG framesToSkip = 0;
+            // Skip the two stack frames which are included because of the calls within MemoryTracker. 
+            const ULONG framesToSkip = 2;
             const ULONG framesToCapture = c_CallStackCount;
             void* backTrace[framesToCapture]{};
             ULONG backTraceHash = 0;
@@ -280,10 +281,13 @@ namespace Insight
                 symbol->MaxNameLen = 255;
                 symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
 
-                for (int i = 1; i < nFrame; ++i)
+                for (int i = 0; i < nFrame; ++i)
                 {
                     if (!SymFromAddr(process, (DWORD64)(backTrace[i]), 0, symbol))
-                        break;
+                    {
+                        Platform::MemSet(callStack[i], '\0', c_CallstackStringSize);
+                        continue;
+                    }
 
                     //std::stringstream hexAddressStream;
                     //hexAddressStream << std::hex << symbol->Address;
@@ -293,13 +297,22 @@ namespace Insight
                     //        return std::toupper(c);
                     //    });
 
-#define ADVANCE_CHAR(cPtr, lPtr) if (cPtr == lPtr) { break; } else { ++cPtr; } 
+#define ADVANCE_CHAR(cPtr, lPtr) \
+if (cPtr == lPtr) \
+{ \
+    IS_LOG_CORE_ERROR("[MemoryTracker::GetCallStack] Call stack string size is too small."); \
+    DEBUG_BREAK; \
+    break; \
+} \
+else \
+{ \
+    ++cPtr; \
+} 
+                    char* firstChar = callStack[i];
+                    char* lastChar = callStack[i] + (c_CallstackStringSize - 1ull);
+                    char* currentChar = callStack[i];
 
-                    char* firstChar = callStack[i - 1];
-                    char* lastChar = callStack[i - 1] + (c_CallstackStringSize - 1ull);
-                    char* currentChar = callStack[i - 1];
-
-                    currentChar = std::to_chars(currentChar, lastChar, nFrame - i - 1).ptr;
+                    currentChar = std::to_chars(currentChar, lastChar, nFrame - i).ptr;
                     *currentChar = ':';
                     ADVANCE_CHAR(currentChar, lastChar);
                     *currentChar = ' ';

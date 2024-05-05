@@ -16,20 +16,20 @@ namespace Insight
 	namespace Core
 	{
 #ifdef IS_MEMORY_TRACKING
-		CONSTEXPR int c_CallStackCount = 32;
+		CONSTEXPR int c_CallStackCount = 16;
 		CONSTEXPR u64 c_CallstackStringSize = 512;
 #else
 		CONSTEXPR int c_CallStackCount = 1;
 		CONSTEXPR u64 c_CallstackStringSize = 1;
 #endif
 
-		enum class IS_CORE MemoryTrackAllocationType
+		enum class IS_CORE MemoryTrackAllocationType : u8
 		{
 			Array,
 			Single
 		};
 
-		enum class MemoryAllocCategory
+		enum class MemoryAllocCategory : u8
 		{
 			General,
 			Threading,
@@ -163,11 +163,11 @@ namespace Insight
 				: Ptr(ptr), Size(size), Category(category), Type(type), CallStack(std::move(callStack))
 			{ }
 
+			std::array<char[c_CallstackStringSize], c_CallStackCount> CallStack;
 			void* Ptr;
 			u64 Size;
 			MemoryTrackAllocationType Type;
 			MemoryAllocCategory Category;
-			std::array<char[c_CallstackStringSize], c_CallStackCount> CallStack;
 		};
 
 		class IS_CORE MemoryTracker

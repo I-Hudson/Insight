@@ -65,6 +65,9 @@ namespace Insight
 
                 return data;
             }
+
+            FAIL_ASSERT_MSG("[AssetPackageZip::LoadInteral] A Zip handle is required when loading from a zip package.");
+            return { };
         }
 
         IS_SERIALISABLE_CPP(AssetPackageZip)
