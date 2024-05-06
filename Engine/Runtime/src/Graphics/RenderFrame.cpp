@@ -11,7 +11,7 @@
 
 namespace Insight
 {
-    void RenderMaterial::SetMaterial(const Runtime::Material* material)
+    void RenderMaterial::SetMaterial(const Ref<Runtime::MaterialAsset> material)
     {
         if (!material)
         {
@@ -20,7 +20,7 @@ namespace Insight
 
         for (size_t i = 0; i < static_cast<u64>(Runtime::TextureTypes::Count); ++i)
         {
-            Runtime::Texture* texture = material->GetTexture(static_cast<Runtime::TextureTypes>(i));
+            Ref<Runtime::TextureAsset> texture = material->GetTexture(static_cast<Runtime::TextureAssetTypes>(i));
             if (texture)
             {
                 Textures.at(i) = texture->GetRHITexture();
@@ -38,7 +38,7 @@ namespace Insight
         MeshLods = mesh->m_lods;
     }
 
-    void RenderMesh::SetMaterial(Runtime::Material* material)
+    void RenderMesh::SetMaterial(const Ref<Runtime::MaterialAsset> material)
     {
         Material = {};
         Material.SetMaterial(material);
@@ -55,6 +55,17 @@ namespace Insight
     void RenderWorld::AddCamrea(ECS::Camera camera, const Maths::Matrix4 transform)
     {
         Cameras.push_back(RenderCamrea{ std::move(camera), std::move(transform), true });
+    }
+
+    //=====================================================
+    // RenderFrame
+    //=====================================================
+    RenderFrame::RenderFrame()
+    {
+    }
+
+    RenderFrame::~RenderFrame()
+    {
     }
 
     void RenderFrame::CreateRenderFrameFromWorldSystem(Runtime::WorldSystem* worldSystem)
@@ -136,7 +147,8 @@ namespace Insight
                             //continue;
                         }
 
-                        Runtime::Material* material = meshComponent->GetMaterial();
+                        //Runtime::Material* material = meshComponent->GetMaterial();
+                        Ref<Runtime::MaterialAsset> material = meshComponent->GetMaterial();
                         if (!material)
                         {
                             //continue;
@@ -149,7 +161,7 @@ namespace Insight
                         renderWorld.Meshes.push_back(std::move(renderMesh));
                         bool meshIsTransparent = renderMesh.Material.Properties.at(static_cast<u64>(Runtime::MaterialProperty::Colour_A)) < 1.0f;
 
-                        if (auto materialBatchIter = renderWorld.MaterialBatchLookup.find(material);
+                        if (auto materialBatchIter = renderWorld.MaterialBatchLookup.find(material->GetGuid());
                             materialBatchIter != renderWorld.MaterialBatchLookup.end())
                         {
                             RenderMaterailBatch& batch = renderWorld.MaterialBatch.at(materialBatchIter->second);
@@ -163,7 +175,7 @@ namespace Insight
 
                             const u64 batchIndex = renderWorld.MaterialBatch.size();
                             renderWorld.MaterialBatch.push_back(batch);
-                            renderWorld.MaterialBatchLookup[material] = batchIndex;
+                            renderWorld.MaterialBatchLookup[material->GetGuid()] = batchIndex;
                         }
 
                         if (meshIsTransparent)

@@ -19,7 +19,7 @@ namespace Insight
 			m_mesh = mesh;
 		}
 
-		void MeshComponent::SetMaterial(Runtime::Material* material)
+		void MeshComponent::SetMaterial(Ref<Runtime::MaterialAsset> material)
 		{
 			m_material = material;
 		}

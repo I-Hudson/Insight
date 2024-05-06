@@ -24,8 +24,8 @@ namespace Insight
 
 			void				SetMesh(Runtime::Mesh* mesh);
 			Runtime::Mesh*		GetMesh()						const		{ return m_mesh; }
-			void				SetMaterial(Runtime::Material* material);
-			Runtime::Material*	GetMaterial()					const		{ return m_material; }
+			void				SetMaterial(Ref<Runtime::MaterialAsset> material);
+			Ref<Runtime::MaterialAsset>	GetMaterial()					const		{ return m_material; }
 
 			IS_SERIALISABLE_H(MeshComponent)
 
@@ -34,7 +34,8 @@ namespace Insight
 
 		private:
 			Runtime::ResourceLFHandle<Runtime::Mesh> m_mesh;
-			Runtime::ResourceLFHandle<Runtime::Material> m_material;
+			//Runtime::ResourceLFHandle<Runtime::Material> m_material;
+			Ref<Runtime::MaterialAsset> m_material;
 		};
 	}
 
@@ -56,7 +57,7 @@ namespace Insight
 
 	OBJECT_SERIALISER(ECS::MeshComponent, 4,
 		SERIALISE_BASE(ECS::Component, 2, 0)
-		SERIALISE_COMPLEX(Serialisation::MeshToGuid, m_mesh, 3, 0)
-		SERIALISE_COMPLEX(Serialisation::MaterialToGuid, m_material, 4, 0)
+		//SERIALISE_COMPLEX(Serialisation::MeshToGuid, m_mesh, 3, 0)
+		//SERIALISE_COMPLEX(Serialisation::MaterialToGuid, m_material, 4, 0)
 	);
 }

@@ -6,6 +6,9 @@
 #include "Resource/Mesh.h"
 #include "Resource/Material.h"
 
+#include "Asset/Assets/Texture.h"
+#include "Asset/Assets/Material.h"
+
 #include "ECS/Components/CameraComponent.h"
 
 #include <glm/vec3.hpp>
@@ -29,7 +32,7 @@ namespace Insight
 
     struct IS_RUNTIME RenderMaterial
     {
-        void SetMaterial(const Runtime::Material* material);
+        void SetMaterial(const Ref<Runtime::MaterialAsset> material);
         std::array<Graphics::RHI_Texture*, static_cast<u64>(Runtime::TextureTypes::Count)> Textures;
         std::array<float, static_cast<u32>(Runtime::MaterialProperty::Count)> Properties;
     };
@@ -43,7 +46,7 @@ namespace Insight
         RenderMaterial Material;
 
         void SetMesh(Runtime::Mesh* mesh);
-        void SetMaterial(Runtime::Material* material);
+        void SetMaterial(const Ref<Runtime::MaterialAsset> material);
     };
 
     struct IS_RUNTIME RenderMaterailBatch
@@ -92,7 +95,7 @@ namespace Insight
         std::vector<u64> TransparentMeshIndexs;
 
         std::vector<RenderMaterailBatch> MaterialBatch;
-        std::unordered_map<Runtime::Material*, u64> MaterialBatchLookup;
+        std::unordered_map<Core::GUID, u64> MaterialBatchLookup;
 
         glm::vec3 DirectionalLight = glm::vec3(0, 0, 0);
     };
@@ -100,6 +103,9 @@ namespace Insight
     /// @brief Contain a vector of worlds for rendering.
     struct IS_RUNTIME RenderFrame
     {
+        RenderFrame();
+        ~RenderFrame();
+
         std::vector<RenderWorld> RenderWorlds;
         /// @brief The main rendering camera for all render worlds.
         RenderCamrea MainCamera;

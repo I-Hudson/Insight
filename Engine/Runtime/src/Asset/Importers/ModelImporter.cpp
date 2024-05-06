@@ -328,8 +328,6 @@ namespace Insight
 					meshNodes[i]->FileName = assetInfo->FileName;
 					meshNodes[i]->MaterialCache = &materialCache;
 				}
-				Delete(*meshNodes.begin());
-				meshNodes.erase(meshNodes.begin());
 			}
 
 			{
@@ -369,9 +367,12 @@ namespace Insight
 
 			for (size_t i = 0; i < meshNodes.size(); ++i)
 			{
-				modelAsset->m_meshes.push_back(meshNodes[i]->Mesh);
-				Algorithm::VectorAddUnique(modelAsset->m_materials, meshNodes[i]->Mesh->GetMaterialAsset());
-				meshNodes[i]->Mesh = nullptr;
+				if (meshNodes[i]->Mesh)
+				{
+					modelAsset->m_meshes.push_back(meshNodes[i]->Mesh);
+					Algorithm::VectorAddUnique(modelAsset->m_materials, meshNodes[i]->Mesh->GetMaterialAsset());
+					meshNodes[i]->Mesh = nullptr;
+				}
 			}
 
 			for (size_t i = 0; i < meshNodes.size(); ++i)
@@ -391,12 +392,15 @@ namespace Insight
 		{
 			IS_PROFILE_FUNCTION();
 
-			MeshNode* newMeshNode = New<MeshNode>();
+			MeshNode* newMeshNode = newMeshNode = New<MeshNode>();
 			newMeshNode->AssimpNode = aiNode;
 			newMeshNode->AssimpScene = aiScene;
 			newMeshNode->Parent = parentMeshNode;
-			newMeshNode->MeshData = monolithMeshData != nullptr ? monolithMeshData : New<MeshData>();
-			newMeshNode->Mesh = New<Mesh>();
+			if (aiNode->mNumMeshes > 0)
+			{
+				newMeshNode->MeshData = monolithMeshData != nullptr ? monolithMeshData : New<MeshData>();
+				newMeshNode->Mesh = New<Mesh>();
+			}
 			meshNodes.push_back(newMeshNode);
 
 			for (size_t childIdx = 0; childIdx < aiNode->mNumChildren; ++childIdx)
@@ -640,6 +644,7 @@ namespace Insight
 
 			Ref<MaterialAsset> material = ::New<MaterialAsset>(nullptr);
 			material->SetName(materialname);
+
 			material->SetTexture(TextureAssetTypes::Diffuse, diffuseTexture);
 			material->SetTexture(TextureAssetTypes::Normal, normalTexture);
 

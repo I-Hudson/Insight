@@ -62,7 +62,7 @@ namespace Insight::Runtime
 				static_cast<ECS::TransformComponent*>(entity->GetComponentByName(ECS::TransformComponent::Type_Name))->SetTransform(mesh->GetTransform());
 				ECS::MeshComponent* meshComponent = static_cast<ECS::MeshComponent*>(entity->AddComponentByName(ECS::MeshComponent::Type_Name));
 				meshComponent->SetMesh(mesh);
-				meshComponent->SetMaterial(mesh->GetMaterial());
+				meshComponent->SetMaterial(mesh->GetMaterialAsset());
 			}
 			return root_entity.Get();
 		}
@@ -87,7 +87,7 @@ namespace Insight::Runtime
 
 			if (material->GetReferenceCount() > 1)
 			{
-				IS_LOG_CORE_WARN("[ModelAsset::OnUnload] Material '{}', is reference elsewhere. Will not be deleted here.", material->GetFilePath());
+				IS_LOG_CORE_WARN("[ModelAsset::OnUnload] Material '{}', is reference elsewhere. Will not be deleted here.", material->GetName());
 			}
 			//RemoveDependentResource(material);
 			//ResourceManager::Instance().RemoveDependentResource(material->GetResourceId());

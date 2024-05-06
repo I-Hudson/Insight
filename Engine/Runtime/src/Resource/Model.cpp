@@ -86,7 +86,7 @@ namespace Insight
 					static_cast<ECS::TransformComponent*>(entity->GetComponentByName(ECS::TransformComponent::Type_Name))->SetTransform(mesh->GetTransform());
 					ECS::MeshComponent* meshComponent = static_cast<ECS::MeshComponent*>(entity->AddComponentByName(ECS::MeshComponent::Type_Name));
 					meshComponent->SetMesh(mesh);
-					meshComponent->SetMaterial(mesh->GetMaterial());
+					meshComponent->SetMaterial(mesh->GetMaterialAsset());
 				}
 				return root_entity.Get();
 			}

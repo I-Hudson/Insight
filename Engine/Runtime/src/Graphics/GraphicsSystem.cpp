@@ -53,6 +53,8 @@ namespace Insight
 		{
 			IS_PROFILE_FUNCTION();
 
+			m_renderFrame = {};
+
 			if (m_context)
 			{
 				m_context->GpuWaitForIdle();

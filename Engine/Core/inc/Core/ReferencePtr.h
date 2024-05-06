@@ -138,7 +138,7 @@ namespace Insight
     template<typename T>
     bool operator!=(const ReferencePtr<T>& left, std::nullptr_t)
     {
-        return left..Ptr() != nullptr;
+        return left.Ptr() != nullptr;
     }
 
     template<typename TOther1, typename TOther2>
@@ -147,3 +147,12 @@ namespace Insight
         return left.Ptr() != right.Ptr();
     }
 }
+
+template<typename T>
+struct std::hash<Insight::Ref<T>>
+{
+    std::size_t operator()(const Insight::Ref<T>& ref) const noexcept
+    {
+        return std::hash<const T*>()(ref.Ptr());
+    }
+};

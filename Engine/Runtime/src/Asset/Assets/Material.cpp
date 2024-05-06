@@ -10,7 +10,7 @@ namespace Insight
 
         MaterialAsset::~MaterialAsset()
         {
-            OnUnload();
+
         }
 
         void MaterialAsset::SetTexture(const TextureAssetTypes textureType, Ref<TextureAsset> texture)
