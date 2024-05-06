@@ -107,7 +107,7 @@ namespace Insight
         {
             IS_PROFILE_FUNCTION();
 
-            std::vector<Byte> worldData = AssetRegistry::Instance().LoadAsset(filePath);
+            std::vector<Byte> worldData = AssetRegistry::Instance().LoadAssetData(filePath);
             if (worldData.empty())
             {
                 return nullptr;

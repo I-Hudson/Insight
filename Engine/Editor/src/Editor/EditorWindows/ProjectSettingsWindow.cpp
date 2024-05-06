@@ -56,7 +56,7 @@ namespace Insight
             ImGui::Text("%u", projectInfo.ProjectVersion);
 
             Reflect::TypeInfo worldTypeInfo = Runtime::World::GetStaticTypeInfo();
-            const Runtime::AssetInfo* initialWorld = Runtime::AssetRegistry::Instance().GetAsset(projectInfo.DefaultWorld);
+            const Runtime::AssetInfo* initialWorld = Runtime::AssetRegistry::Instance().GetAssetInfo(projectInfo.DefaultWorld);
 
             {
                 ImGui::BeginGroup();
@@ -86,7 +86,7 @@ namespace Insight
                     Core::GUID newInitialWorldGuid;
                     newInitialWorldGuid.StringToGuid(worldDropTargetData);
 
-                    const Runtime::AssetInfo* newInitialworldAssetInfo = Runtime::AssetRegistry::Instance().GetAsset(newInitialWorldGuid);
+                    const Runtime::AssetInfo* newInitialworldAssetInfo = Runtime::AssetRegistry::Instance().GetAssetInfo(newInitialWorldGuid);
                     if (newInitialworldAssetInfo)
                     {
                         RemoveConst(projectInfo.DefaultWorld) = newInitialworldAssetInfo->Guid;

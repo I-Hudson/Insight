@@ -138,7 +138,7 @@ namespace Insight
                 //    }
                 //}
 
-                Ref<Runtime::Asset> asset = Runtime::AssetRegistry::Instance().LoadAsset2(resourceGuid);
+                Ref<Runtime::Asset> asset = Runtime::AssetRegistry::Instance().LoadAsset(resourceGuid);
                 if (Ref<Runtime::ModelAsset> modelAsset = asset.As<Runtime::ModelAsset>())
                 {
                     modelAsset->CreateEntityHierarchy();

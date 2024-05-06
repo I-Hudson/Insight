@@ -78,23 +78,23 @@ namespace Insight::Editor
             });
 
         m_fileExtensionToTexture[".fbx"] = 
-            Runtime::AssetRegistry::Instance().LoadAsset2(EnginePaths::GetResourcePath() + "/Editor/Icons/FBX_File_Icon.png").As<Runtime::TextureAsset>();
+            Runtime::AssetRegistry::Instance().LoadAsset(EnginePaths::GetResourcePath() + "/Editor/Icons/FBX_File_Icon.png").As<Runtime::TextureAsset>();
 
         m_fileExtensionToTexture[".obj"] =
-            Runtime::AssetRegistry::Instance().LoadAsset2(EnginePaths::GetResourcePath() + "/Editor/Icons/OBJ_File_Icon.png").As<Runtime::TextureAsset>();
+            Runtime::AssetRegistry::Instance().LoadAsset(EnginePaths::GetResourcePath() + "/Editor/Icons/OBJ_File_Icon.png").As<Runtime::TextureAsset>();
         
         m_fileExtensionToTexture[".gltf"] =
-            Runtime::AssetRegistry::Instance().LoadAsset2(EnginePaths::GetResourcePath() + "/Editor/Icons/GLTF_File_Icon.png").As<Runtime::TextureAsset>();
+            Runtime::AssetRegistry::Instance().LoadAsset(EnginePaths::GetResourcePath() + "/Editor/Icons/GLTF_File_Icon.png").As<Runtime::TextureAsset>();
         
         m_fileExtensionToTexture[".isworld"] =
-            Runtime::AssetRegistry::Instance().LoadAsset2(EnginePaths::GetResourcePath() + "/Editor/Icons/World_File_Icon.png").As<Runtime::TextureAsset>();
+            Runtime::AssetRegistry::Instance().LoadAsset(EnginePaths::GetResourcePath() + "/Editor/Icons/World_File_Icon.png").As<Runtime::TextureAsset>();
 
 
 
         m_thumbnailToTexture[ContentWindowThumbnailType::Folder] =
-            Runtime::AssetRegistry::Instance().LoadAsset2(EnginePaths::GetResourcePath() + "/Editor/Icons/Folder.png").As<Runtime::TextureAsset>();
+            Runtime::AssetRegistry::Instance().LoadAsset(EnginePaths::GetResourcePath() + "/Editor/Icons/Folder.png").As<Runtime::TextureAsset>();
         m_thumbnailToTexture[ContentWindowThumbnailType::File] =
-            Runtime::AssetRegistry::Instance().LoadAsset2(EnginePaths::GetResourcePath() + "/Editor/Icons/File.png").As<Runtime::TextureAsset>();
+            Runtime::AssetRegistry::Instance().LoadAsset(EnginePaths::GetResourcePath() + "/Editor/Icons/File.png").As<Runtime::TextureAsset>();
 
 
         if (Runtime::ProjectSystem::Instance().IsProjectOpen())
@@ -238,7 +238,7 @@ namespace Insight::Editor
 
                         //Runtime::IResource* contentResource = nullptr;
                         Ref<Runtime::Asset> contentResource = nullptr;
-                        const Runtime::AssetInfo* assetInfo = Runtime::AssetRegistry::Instance().GetAsset(path);
+                        const Runtime::AssetInfo* assetInfo = Runtime::AssetRegistry::Instance().GetAssetInfo(path);
 
                         if (iter.is_regular_file())
                         {
@@ -250,7 +250,7 @@ namespace Insight::Editor
                             else
                             {
                                 //contentResource = Runtime::ResourceManager::Instance().LoadSync(path, false);
-                                contentResource = Runtime::AssetRegistry::Instance().LoadAsset2(path);
+                                contentResource = Runtime::AssetRegistry::Instance().LoadAsset(path);
                             }
                         }
 
@@ -320,7 +320,7 @@ namespace Insight::Editor
                                         }
                                         else
                                         {
-                                            const Runtime::AssetInfo* info = Runtime::AssetRegistry::Instance().GetAsset(path);
+                                            const Runtime::AssetInfo* info = Runtime::AssetRegistry::Instance().GetAssetInfo(path);
                                             ASSERT(info);
 
                                             AssetInspectorWindow* assetInspectorWindow = static_cast<AssetInspectorWindow*>(EditorWindowManager::Instance().GetActiveWindow(AssetInspectorWindow::WINDOW_NAME));
@@ -344,7 +344,7 @@ namespace Insight::Editor
                                     Graphics::RHI_Texture* texture = nullptr;
                                     if (Runtime::AssetRegistry::Instance().GetAssetInfo(path))
                                     {
-                                        Ref<Runtime::Asset> asset = Runtime::AssetRegistry::Instance().LoadAsset2(path);
+                                        Ref<Runtime::Asset> asset = Runtime::AssetRegistry::Instance().LoadAsset(path);
                                         if (Ref<Runtime::TextureAsset> textureAsset = asset.As<Runtime::TextureAsset>())
                                         {
                                             texture = textureAsset->GetRHITexture();

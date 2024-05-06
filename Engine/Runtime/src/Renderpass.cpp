@@ -87,27 +87,27 @@ namespace Insight
 
 			if constexpr (DefaultModelToLoad == DefaultModels::Backpack)
 			{
-				Ref<Runtime::ModelAsset> model_backpack = Runtime::AssetRegistry::Instance().LoadAsset2(EnginePaths::GetResourcePath() + "/models/Survival_BackPack_2/obj/backpack.obj").As<Runtime::ModelAsset>();
+				Ref<Runtime::ModelAsset> model_backpack = Runtime::AssetRegistry::Instance().LoadAsset(EnginePaths::GetResourcePath() + "/models/Survival_BackPack_2/obj/backpack.obj").As<Runtime::ModelAsset>();
 				modelsToAddToScene.push_back({ model_backpack, false });
 			}
 			else if constexpr (DefaultModelToLoad == DefaultModels::SponzaMain)
 			{
-				Ref<Runtime::ModelAsset> model_sponza = Runtime::AssetRegistry::Instance().LoadAsset2(EnginePaths::GetResourcePath() + "/models/Sponza/Sponza/NewSponza_Main_glTF_002.gltf").As<Runtime::ModelAsset>();
+				Ref<Runtime::ModelAsset> model_sponza = Runtime::AssetRegistry::Instance().LoadAsset(EnginePaths::GetResourcePath() + "/models/Sponza/Sponza/NewSponza_Main_glTF_002.gltf").As<Runtime::ModelAsset>();
 				modelsToAddToScene.push_back({ model_sponza, false });
 			}
 			else if constexpr (DefaultModelToLoad == DefaultModels::SponzaMain_Curtains)
 			{
-				Ref<Runtime::ModelAsset> model_sponza = Runtime::AssetRegistry::Instance().LoadAsset2(EnginePaths::GetResourcePath() + "/models/Sponza/Sponza/NewSponza_Main_glTF_002.gltf").As<Runtime::ModelAsset>();
-				Ref<Runtime::ModelAsset> model_sponza_curtains = Runtime::AssetRegistry::Instance().LoadAsset2(EnginePaths::GetResourcePath() + "/models/Sponza/Curtains/NewSponza_Curtains_glTF.gltf").As<Runtime::ModelAsset>();
+				Ref<Runtime::ModelAsset> model_sponza = Runtime::AssetRegistry::Instance().LoadAsset(EnginePaths::GetResourcePath() + "/models/Sponza/Sponza/NewSponza_Main_glTF_002.gltf").As<Runtime::ModelAsset>();
+				Ref<Runtime::ModelAsset> model_sponza_curtains = Runtime::AssetRegistry::Instance().LoadAsset(EnginePaths::GetResourcePath() + "/models/Sponza/Curtains/NewSponza_Curtains_glTF.gltf").As<Runtime::ModelAsset>();
 				modelsToAddToScene.push_back({ model_sponza, false });
 				modelsToAddToScene.push_back({ model_sponza_curtains, false });
 			}
 			else if constexpr (DefaultModelToLoad == DefaultModels::SponzaFull)
 			{
-				Ref<Runtime::ModelAsset> model_sponza = Runtime::AssetRegistry::Instance().LoadAsset2(EnginePaths::GetResourcePath() + "/models/Sponza/Sponza/NewSponza_Main_glTF_002.gltf").As<Runtime::ModelAsset>();
-				Ref<Runtime::ModelAsset> model_sponza_curtains = Runtime::AssetRegistry::Instance().LoadAsset2(EnginePaths::GetResourcePath() + "/models/Sponza/Curtains/NewSponza_Curtains_glTF.gltf").As<Runtime::ModelAsset>();
-				Ref<Runtime::ModelAsset> model_sponza_ivy = Runtime::AssetRegistry::Instance().LoadAsset2(EnginePaths::GetResourcePath() + "/models/Sponza/Ivy/NewSponza_IvyGrowth_glTF.gltf").As<Runtime::ModelAsset>();
-				Ref<Runtime::ModelAsset> model_sponza_trees = Runtime::AssetRegistry::Instance().LoadAsset2(EnginePaths::GetResourcePath() + "/models/Sponza/Trees/NewSponza_CypressTree_glTF.gltf").As<Runtime::ModelAsset>();
+				Ref<Runtime::ModelAsset> model_sponza = Runtime::AssetRegistry::Instance().LoadAsset(EnginePaths::GetResourcePath() + "/models/Sponza/Sponza/NewSponza_Main_glTF_002.gltf").As<Runtime::ModelAsset>();
+				Ref<Runtime::ModelAsset> model_sponza_curtains = Runtime::AssetRegistry::Instance().LoadAsset(EnginePaths::GetResourcePath() + "/models/Sponza/Curtains/NewSponza_Curtains_glTF.gltf").As<Runtime::ModelAsset>();
+				Ref<Runtime::ModelAsset> model_sponza_ivy = Runtime::AssetRegistry::Instance().LoadAsset(EnginePaths::GetResourcePath() + "/models/Sponza/Ivy/NewSponza_IvyGrowth_glTF.gltf").As<Runtime::ModelAsset>();
+				Ref<Runtime::ModelAsset> model_sponza_trees = Runtime::AssetRegistry::Instance().LoadAsset(EnginePaths::GetResourcePath() + "/models/Sponza/Trees/NewSponza_CypressTree_glTF.gltf").As<Runtime::ModelAsset>();
 				
 				modelsToAddToScene.push_back({ model_sponza, false });
 				modelsToAddToScene.push_back({ model_sponza_curtains, false });
@@ -1454,34 +1454,34 @@ namespace Insight
 
 		void Renderpass::CreateAllCommonShaders()
 		{
-			std::vector<Byte> shaderData = Runtime::AssetRegistry::Instance().LoadAsset(EnginePaths::GetResourcePath() + "/Shaders/hlsl/Cascade_Shadow.hlsl");
+			std::vector<Byte> shaderData = Runtime::AssetRegistry::Instance().LoadAssetData(EnginePaths::GetResourcePath() + "/Shaders/hlsl/Cascade_Shadow.hlsl");
 			ShaderDesc shaderDesc("CascadeShaderMap", shaderData, ShaderStageFlagBits::ShaderStage_Vertex);
 			shaderDesc.InputLayout = GetDefaultShaderInputLayout();
 			RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
 
-			shaderData = Runtime::AssetRegistry::Instance().LoadAsset(EnginePaths::GetResourcePath() + "/Shaders/hlsl/Depth_Prepass.hlsl");
+			shaderData = Runtime::AssetRegistry::Instance().LoadAssetData(EnginePaths::GetResourcePath() + "/Shaders/hlsl/Depth_Prepass.hlsl");
 			shaderDesc = ShaderDesc("DepthPrepass", shaderData, ShaderStageFlagBits::ShaderStage_Vertex);
 			shaderDesc.InputLayout = GetDefaultShaderInputLayout();
 			//RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
 
-			shaderData = Runtime::AssetRegistry::Instance().LoadAsset(EnginePaths::GetResourcePath() + "/Shaders/hlsl/GBuffer.hlsl");
+			shaderData = Runtime::AssetRegistry::Instance().LoadAssetData(EnginePaths::GetResourcePath() + "/Shaders/hlsl/GBuffer.hlsl");
 			shaderDesc = ShaderDesc("GBuffer", shaderData, ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
 			shaderDesc.InputLayout = GetDefaultShaderInputLayout();
 			RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
 
-			shaderData = Runtime::AssetRegistry::Instance().LoadAsset(EnginePaths::GetResourcePath() + "/Shaders/hlsl/Composite.hlsl");
+			shaderData = Runtime::AssetRegistry::Instance().LoadAssetData(EnginePaths::GetResourcePath() + "/Shaders/hlsl/Composite.hlsl");
 			shaderDesc = ShaderDesc("Composite", shaderData, ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
 			RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
 
-			shaderData = Runtime::AssetRegistry::Instance().LoadAsset(EnginePaths::GetResourcePath() + "/Shaders/hlsl/GFXHelper.hlsl");
+			shaderData = Runtime::AssetRegistry::Instance().LoadAssetData(EnginePaths::GetResourcePath() + "/Shaders/hlsl/GFXHelper.hlsl");
 			shaderDesc = ShaderDesc("GFXHelper", shaderData, ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
 			RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
 
-			shaderData = Runtime::AssetRegistry::Instance().LoadAsset(EnginePaths::GetResourcePath() + "/Shaders/hlsl/Swapchain.hlsl");
+			shaderData = Runtime::AssetRegistry::Instance().LoadAssetData(EnginePaths::GetResourcePath() + "/Shaders/hlsl/Swapchain.hlsl");
 			shaderDesc = ShaderDesc("Swapchain", shaderData, ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
 			RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
 
-			shaderData = Runtime::AssetRegistry::Instance().LoadAsset(EnginePaths::GetResourcePath() + "/Shaders/hlsl/LightPass.hlsl");
+			shaderData = Runtime::AssetRegistry::Instance().LoadAssetData(EnginePaths::GetResourcePath() + "/Shaders/hlsl/LightPass.hlsl");
 			shaderDesc = ShaderDesc("LightPass", shaderData, ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
 			RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
 		}

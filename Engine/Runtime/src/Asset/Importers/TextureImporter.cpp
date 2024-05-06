@@ -107,8 +107,11 @@ namespace Insight
 
             // In NVTT, we use nvtt::Surface to store a single uncompressed image. nvtt::Surface has a method nvtt::Surface::load(), which can be used to load an image file. A typical image loading process looks like this:
             nvtt::Surface image;
-            bool nvttLoadFromMemory = image.loadFromMemory(textureData.data(), static_cast<int>(textureData.size()));
-
+            bool nvttLoadFromMemory = false;
+            {
+                IS_PROFILE_SCOPE("nvtt - loadFromMemory");
+                nvttLoadFromMemory = image.loadFromMemory(textureData.data(), static_cast<int>(textureData.size()));
+            }
             // Then, we set up compression options using nvtt::CompressionOptions:
             nvtt::CompressionOptions compressionOptions;
             // Compress to 4-channel, 8-bit-per-pixel BC3:
@@ -125,7 +128,11 @@ namespace Insight
 
             // When the above setup is complete, we compress the image using nvtt::Context.
             //context.outputHeader(image, 1, compressionOptions, outputOptions); // output DDS header
-            bool nvttCompress = context.compress(image, 0, 0, compressionOptions, outputOptions); // output compressed image
+            bool nvttCompress = false;
+            {
+                IS_PROFILE_SCOPE("nvtt - compress");
+                nvttCompress = context.compress(image, 0, 0, compressionOptions, outputOptions); // output compressed image
+            }
 
             if (kEnableNVTT && nvttLoadFromMemory && nvttCompress)
             {

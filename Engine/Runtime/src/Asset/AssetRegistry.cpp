@@ -37,9 +37,11 @@ namespace Insight::Runtime
 
         for (IAssetPackage*& package : m_assetPackages)
         {
+            package->Destroy();
             Delete(package);
             package = nullptr;
         }
+        m_assetPackages.clear();
 
         for (auto& [path, assetInfo] : m_pathToAssetInfo)
         {
@@ -91,7 +93,7 @@ namespace Insight::Runtime
         std::string packageName = FileSystem::GetFileName(pathWithExtension, true);
         IAssetPackage* newPackage = CreateAssetPackageInternal(packageName, pathWithExtension, packageType);
 
-        const AssetInfo* info = GetAsset(pathWithExtension);
+        const AssetInfo* info = GetAssetInfo(pathWithExtension);
         if (info)
         {
             RegisterObjectToAsset(info, newPackage);
@@ -151,7 +153,7 @@ namespace Insight::Runtime
             }*/
         }
 
-        const AssetInfo* info = GetAsset(path);
+        const AssetInfo* info = GetAssetInfo(std::string(path));
         if (info)
         {
             package->AddAsset(RemoveConst(info));
@@ -170,7 +172,7 @@ namespace Insight::Runtime
 
     void AssetRegistry::RemoveAsset(std::string_view path)
     {
-        AssetInfo* info = RemoveConst(GetAsset(path));
+        AssetInfo* info = RemoveConst(GetAssetInfo(std::string(path)));
         if (!info)
         {
             return;
@@ -261,7 +263,7 @@ namespace Insight::Runtime
         //object->SetAssetInfo(assetInfo);
     }
 
-    Ref<Asset> AssetRegistry::LoadAsset2(std::string path)
+    Ref<Asset> AssetRegistry::LoadAsset(std::string path)
     {
         /*
             Order of things:
@@ -287,14 +289,14 @@ namespace Insight::Runtime
         const IAssetImporter* importer = GetImporter(extension);
         if (importer == nullptr)
         {
-            IS_LOG_CORE_ERROR("[AssetRegistry::LoadAsset2] 'Importer' is nullptr for extension '{}'.", extension);
+            IS_LOG_CORE_ERROR("[AssetRegistry::LoadAsset] 'Importer' is nullptr for extension '{}'.", extension);
             return Ref<Asset>();
         }
 
         const AssetInfo* assetInfo = GetAssetInfo(path);
         if (assetInfo == nullptr)
         {
-            IS_LOG_CORE_ERROR("[AssetRegistry::LoadAsset2] Unable to get AssetInfo from path '{}'.", path);
+            IS_LOG_CORE_ERROR("[AssetRegistry::LoadAsset] Unable to get AssetInfo from path '{}'.", path);
             return Ref<Asset>();
         }
 
@@ -319,7 +321,7 @@ namespace Insight::Runtime
         return asset;
     }
 
-    Ref<Asset> AssetRegistry::LoadAsset2(const Core::GUID guid)
+    Ref<Asset> AssetRegistry::LoadAsset(const Core::GUID guid)
     {
         if (!guid.IsValid())
         {
@@ -329,12 +331,11 @@ namespace Insight::Runtime
         const AssetInfo* assetInfo = GetAssetInfo(guid);
         if (assetInfo == nullptr)
         {
-            IS_LOG_CORE_ERROR("[AssetRegistry::LoadAsset2] Unable to get AssetInfo from guid '{}'.", guid.ToString());
+            IS_LOG_CORE_ERROR("[AssetRegistry::LoadAsset] Unable to get AssetInfo from guid '{}'.", guid.ToString());
             return Ref<Asset>();
         }
-        return LoadAsset2(assetInfo->GetFullFilePath());
+        return LoadAsset(assetInfo->GetFullFilePath());
     }
-
 
     const AssetInfo* AssetRegistry::GetAssetInfo(const std::string& path) const
     {
@@ -343,6 +344,10 @@ namespace Insight::Runtime
         Threading::ScopedLock lock(m_assetPackagesLock);
         for (size_t i = 0; i < m_assetPackages.size(); ++i)
         {
+            if (m_assetPackages[i] == nullptr)
+            {
+                continue;
+            }
             const AssetInfo* assetInfo = m_assetPackages[i]->GetAsset(path);
             if (assetInfo != nullptr)
             {
@@ -384,7 +389,7 @@ namespace Insight::Runtime
         IS_PROFILE_FUNCTION();
 
         std::string absPath = FileSystem::GetAbsolutePath(path);
-        const AssetInfo* info = GetAsset(absPath);
+        const AssetInfo* info = GetAssetInfo(absPath);
         if (info && info->AssetPackage)
         {
             return info->AssetPackage->LoadAsset(absPath);
@@ -409,53 +414,6 @@ namespace Insight::Runtime
                 return assetImporter;
                 break;
             }
-        }
-        return nullptr;
-    }
-
-
-    std::vector<Byte> AssetRegistry::LoadAsset(std::string_view path) const
-    {
-        std::string absPath = FileSystem::GetAbsolutePath(path);
-        const AssetInfo* info = GetAsset(absPath);
-        if (info && info->AssetPackage)
-        {
-            return info->AssetPackage->LoadAsset(absPath);
-        }
-        else
-        {
-            if (FileSystem::Exists(absPath))
-            {
-               return FileSystem::ReadFromFile(absPath);
-            }
-        }
-        IS_LOG_CORE_ERROR("[AssetRegistry::LoadAsset] Unable to load asset from path '{}'.", absPath.data());
-        return {};
-    }
-
-    Ref<Asset> AssetRegistry::GetAsset2(const std::string& path) const
-    {
-        return Ref<Asset>();
-    }
-
-    const AssetInfo* AssetRegistry::GetAsset(const Core::GUID& guid) const
-    {
-        for (const auto& [path, assetInfo] : m_pathToAssetInfo)
-        {
-            if (guid == assetInfo->Guid)
-            {
-                return assetInfo;
-            }
-        }
-        return nullptr;
-    }
-
-    const AssetInfo* AssetRegistry::GetAsset(std::string_view path) const
-    {
-        if (auto iter = m_pathToAssetInfo.find(std::string(path));
-            iter != m_pathToAssetInfo.end())
-        {
-            return iter->second;
         }
         return nullptr;
     }
@@ -682,12 +640,12 @@ namespace Insight::Runtime
 
     bool AssetRegistry::HasAssetFromGuid(const Core::GUID& guid) const
     {
-        return GetAsset(guid) != nullptr;
+        return GetAssetInfo(guid) != nullptr;
     }
     
     bool AssetRegistry::HasAssetFromPath(std::string_view path) const
     {
-        return GetAsset(path) != nullptr;
+        return GetAssetInfo(std::string(path)) != nullptr;
     }
 
     bool AssetRegistry::AssetInfoValidate(const AssetInfo* assetInfo) const

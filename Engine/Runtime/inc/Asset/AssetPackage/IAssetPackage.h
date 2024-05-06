@@ -61,6 +61,8 @@ namespace Insight
 
             virtual void BuildPackage(std::string_view path);
 
+            void Destroy();
+
         protected:
             virtual std::vector<Byte> LoadInteral(const AssetInfo* assetInfo) const = 0;
 

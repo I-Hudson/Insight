@@ -71,7 +71,7 @@ namespace Insight
 						{
 							Core::GUID assetGuid;
 							assetGuid.StringToGuid(assetDragGuid);
-							const Runtime::AssetInfo* dragGuid = Runtime::AssetRegistry::Instance().GetAsset(assetGuid);
+							const Runtime::AssetInfo* dragGuid = Runtime::AssetRegistry::Instance().GetAssetInfo(assetGuid);
 							if (dragGuid)
 							{
 								assetPackage->ReplaceAsset(RemoveConst(info), RemoveConst(dragGuid));
@@ -115,7 +115,7 @@ namespace Insight
 			{
 				Core::GUID assetGuid;
 				assetGuid.StringToGuid(assetDragGuid);
-				const Runtime::AssetInfo* dargAssetInfo = Runtime::AssetRegistry::Instance().GetAsset(assetGuid);
+				const Runtime::AssetInfo* dargAssetInfo = Runtime::AssetRegistry::Instance().GetAssetInfo(assetGuid);
 				if (dargAssetInfo)
 				{
 					assetPackage->AddAsset(RemoveConst(dargAssetInfo));

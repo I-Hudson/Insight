@@ -97,7 +97,7 @@ namespace Insight
                             {
                                 if (path.path().extension() == ".png")
                                 {
-                                    Runtime::AssetRegistry::Instance().LoadAsset2(path.path().string());
+                                    Runtime::AssetRegistry::Instance().LoadAsset(path.path().string());
                                 }
                             }
                         }
@@ -111,13 +111,13 @@ namespace Insight
                             {
                                 if (path.path().extension() == ".qoi")
                                 {
-                                    Runtime::AssetRegistry::Instance().LoadAsset2(path.path().string());
+                                    Runtime::AssetRegistry::Instance().LoadAsset(path.path().string());
                                 }
                             }
                         }
                     }
 
-                    Ref<Runtime::Asset> a = Runtime::AssetRegistry::Instance().LoadAsset2("Main.1_Sponza_/NewSponza_Main_glTF_002.gltf");
+                    Ref<Runtime::Asset> a = Runtime::AssetRegistry::Instance().LoadAsset("Main.1_Sponza_/NewSponza_Main_glTF_002.gltf");
                     //Runtime::ResourceManager::Instance().LoadResourcesInFolder(projectInfo.GetContentPath(), true);
 
                     Runtime::AssetRegistry::Instance().SetDebugDirectories(projectInfo.GetIntermediatePath() + "/AssetMeta", projectInfo.GetContentPath());

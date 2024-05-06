@@ -104,7 +104,7 @@ namespace Insight
         void AssetInfo::LoadMetaData() const
         {
             const std::string metaDataPath = GetFullFilePath() + AssetMetaData::c_FileExtension;
-            std::vector<u8> data = AssetRegistry::Instance().LoadAsset(metaDataPath);
+            std::vector<u8> data = AssetRegistry::Instance().LoadAssetData(metaDataPath);
             if (!data.empty())
             {    
                 Serialisation::JsonSerialiser jsonSerialiser(true);

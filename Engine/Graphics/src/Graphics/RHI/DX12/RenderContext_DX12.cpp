@@ -73,7 +73,7 @@ namespace Insight
 							ID3D12Debug1* spDebugController1;
 							if (SUCCEEDED(m_debugController->QueryInterface(IID_PPV_ARGS(&spDebugController1))))
 							{
-								spDebugController1->SetEnableGPUBasedValidation(true);
+								//spDebugController1->SetEnableGPUBasedValidation(true);
 							}
 
 							/// Enable additional debug layers.

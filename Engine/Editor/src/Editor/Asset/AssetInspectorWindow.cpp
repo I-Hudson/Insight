@@ -37,7 +37,7 @@ namespace Insight
 
 		void AssetInspectorWindow::OnDraw()
 		{
-			const Runtime::AssetInfo* assetInfo = Runtime::AssetRegistry::Instance().GetAsset(m_selectedAssetInfoGuid);
+			const Runtime::AssetInfo* assetInfo = Runtime::AssetRegistry::Instance().GetAssetInfo(m_selectedAssetInfoGuid);
 			if (!assetInfo)
 			{
 				return;

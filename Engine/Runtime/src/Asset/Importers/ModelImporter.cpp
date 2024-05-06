@@ -27,6 +27,8 @@
 #include <future>
 
 #define SINGLE_MESH 0
+
+// Can't use this as memory usage skyrockets. 
 //#define THREADED_LOADING
 
 namespace Insight
@@ -45,7 +47,7 @@ namespace Insight
 				: Path(path)
 				, m_assetInfo(assetInfo)
 			{
-				m_fileData = AssetRegistry::Instance().LoadAsset(m_assetInfo->GetFullFilePath());
+				m_fileData = AssetRegistry::Instance().LoadAssetData(m_assetInfo->GetFullFilePath());
 				ASSERT(!m_fileData.empty());
 			}
 
@@ -127,7 +129,7 @@ namespace Insight
 		public:
 			virtual bool Exists(const char* pFile) const override
 			{
-				return AssetRegistry::Instance().GetAsset(pFile) != nullptr;
+				return AssetRegistry::Instance().GetAssetInfo(pFile) != nullptr;
 			}
 
 			virtual char getOsSeparator() const override
@@ -138,7 +140,7 @@ namespace Insight
 			virtual Assimp::IOStream* Open(const char* pFile,
 				const char* pMode = "rb") override
 			{
-				const AssetInfo* assetInfo = AssetRegistry::Instance().GetAsset(pFile);
+				const AssetInfo* assetInfo = AssetRegistry::Instance().GetAssetInfo(pFile);
 				Assimp::IOStream* stream = new CustomAssimpIOStrean(pFile, assetInfo);
 				Core::MemoryTracker::Instance().NameAllocation(stream, assetInfo->GetFullFilePath().c_str());
 				return stream;
@@ -339,6 +341,7 @@ namespace Insight
 
 			{
 #ifdef THREADED_LOADING
+				FAIL_ASSERT_MSG("[ModelImporter::Import] Please undefine 'THREADED_LOADING'. With this enabled currently the memory usage is maxed out");
 				{
 					IS_PROFILE_SCOPE("Preallocate all vertex and index buffers for all meshes");
 					for (size_t i = 0; i < meshNodes.size(); ++i)
@@ -657,10 +660,10 @@ namespace Insight
 			const std::string materialname = aiMaterial->GetName().C_Str();
 
 			const std::string diffuseTexturePath = GetTexturePath(aiMaterial, meshNode->Directory, aiTextureType_BASE_COLOR, aiTextureType_DIFFUSE);
-			Ref<TextureAsset> diffuseTexture = AssetRegistry::Instance().LoadAsset2(diffuseTexturePath).As<TextureAsset>();
+			Ref<TextureAsset> diffuseTexture = AssetRegistry::Instance().LoadAsset(diffuseTexturePath).As<TextureAsset>();
 
 			const std::string normalTexturePath = GetTexturePath(aiMaterial, meshNode->Directory, aiTextureType_NORMAL_CAMERA, aiTextureType_NORMALS);
-			Ref<TextureAsset> normalTexture = AssetRegistry::Instance().LoadAsset2(normalTexturePath).As<TextureAsset>();
+			Ref<TextureAsset> normalTexture = AssetRegistry::Instance().LoadAsset(normalTexturePath).As<TextureAsset>();
 
 			aiColor4D colour(1.0f);
 			aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_DIFFUSE, &colour);

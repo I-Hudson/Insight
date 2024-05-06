@@ -23,12 +23,7 @@ namespace Insight
 
         IAssetPackage::~IAssetPackage()
         {
-            std::vector<AssetInfo*> infos = m_assetInfos;
-            for (int infoIdx = 0; infoIdx < infos.size(); ++infoIdx)
-            {
-                AssetRegistry::Instance().RemoveAsset(infos.at(infoIdx)->GetFullFilePath());
-            }
-            m_assetInfos.clear();
+            ASSERT_MSG(m_assetInfos.size() == 0, "[IAssetPackage::~IAssetPackage] 'Destroy' must be called on all AssetPackages.");
         }
 
         std::string_view IAssetPackage::GetPath() const
@@ -57,7 +52,7 @@ namespace Insight
                 return GetAsset(path);
             }
 
-            AssetInfo* assetInfo = RemoveConst(AssetRegistry::Instance().GetAsset(path));
+            AssetInfo* assetInfo = RemoveConst(AssetRegistry::Instance().GetAssetInfo(std::string(path)));
             return AddAsset(assetInfo);
         }
 
@@ -82,13 +77,13 @@ namespace Insight
 
         void IAssetPackage::RemoveAsset(std::string_view path)
         {
-            AssetInfo* assetInfo = RemoveConst(AssetRegistry::Instance().GetAsset(path));
+            AssetInfo* assetInfo = RemoveConst(AssetRegistry::Instance().GetAssetInfo(std::string(path)));
             RemoveAsset(assetInfo);
         }
 
         void IAssetPackage::RemoveAsset(const Core::GUID& guid)
         {
-            AssetInfo* assetInfo = RemoveConst(AssetRegistry::Instance().GetAsset(guid));
+            AssetInfo* assetInfo = RemoveConst(AssetRegistry::Instance().GetAssetInfo(guid));
             RemoveAsset(assetInfo);
         }
 
@@ -212,6 +207,16 @@ namespace Insight
             buildPackage.BuildPackage(path);
 
             buildPackage.m_assetInfos.clear();
+        }
+
+        void IAssetPackage::Destroy()
+        {
+            std::vector<AssetInfo*> infos = m_assetInfos;
+            for (int infoIdx = 0; infoIdx < infos.size(); ++infoIdx)
+            {
+                AssetRegistry::Instance().RemoveAsset(infos.at(infoIdx)->GetFullFilePath());
+            }
+            m_assetInfos.clear();
         }
 
         Core::GUID IAssetPackage::GetGuidFromPath(std::string_view path) const
