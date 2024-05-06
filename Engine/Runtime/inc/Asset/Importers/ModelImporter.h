@@ -36,6 +36,7 @@ namespace Insight
 
             struct LOD
             {
+                LOD() { }
                 LOD(const u32 index, const u32 vertexOffset, const u32 vertexCount, const u32 firstIndx, const u32 indexCount)
                     : LOD_index(index), Vertex_offset(vertexOffset), Vertex_count(vertexCount), First_index(firstIndx), Index_count(indexCount)
                 { }
@@ -90,7 +91,8 @@ namespace Insight
         public:
             ModelImporter();
 
-            virtual Ref<Asset> Import(const AssetInfo* assetInfo, const std::string_view path) const override;
+            virtual Ref<Asset> CreateAsset(const AssetInfo* assetInfo) const  override;
+            virtual void Import(Ref<Asset>& asset, const AssetInfo* assetInfo, const std::string_view path) const override;
 
         private:
             MeshNode* GetMeshHierarchy(const aiScene* aiScene, const aiNode* aiNode, const MeshNode* parentMeshNode, std::vector<MeshNode*>& meshNodes, MeshData* monolithMeshData = nullptr) const;

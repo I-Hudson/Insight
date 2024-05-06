@@ -25,7 +25,12 @@ namespace Insight
             : IAssetImporter({ ".png", ".jpeg", ".jpg", ".qoi" })
         { }
 
-        Ref<Asset> TextureImporter::Import(const AssetInfo* assetInfo, const std::string_view path) const
+        Ref<Asset> TextureImporter::CreateAsset(const AssetInfo* assetInfo) const
+        {
+            return Ref<TextureAsset>(::New<TextureAsset>(assetInfo));
+        }
+
+        void TextureImporter::Import(Ref<Asset>& asset, const AssetInfo* assetInfo, const std::string_view path) const
         {
             IS_PROFILE_FUNCTION();
 
@@ -33,7 +38,7 @@ namespace Insight
             if (textureData.empty())
             {
                 IS_LOG_CORE_ERROR("[TextureImporter::Import] Texture data from path '{}' was empty.", path);
-                return Ref<Asset>();
+                return;
             }
 
             enum class ImageLoader
@@ -174,10 +179,10 @@ namespace Insight
             if (textureBuffer == nullptr)
             {
                 IS_LOG_CORE_ERROR("[TextureImporter::Import] Unable to load texture '{}' using, Nvidia texture tools, stbi or QOI.", path.data());
-                return Ref<Asset>();
+                return;
             }
 
-            Ref<TextureAsset> texture = Ref<TextureAsset>(New<TextureAsset>(assetInfo));
+            Ref<TextureAsset> texture = asset.As<TextureAsset>();
             texture->m_width = width;
             texture->m_height = height;
             texture->m_depth = 1;
@@ -199,8 +204,6 @@ namespace Insight
                     break;
                 }
             }
-
-            return texture;
         }
     }
 }

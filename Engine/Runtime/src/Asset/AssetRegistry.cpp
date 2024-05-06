@@ -283,15 +283,6 @@ namespace Insight::Runtime
 
         path = ValidatePath(path);
 
-        {
-            std::lock_guard lock(m_loadedAssetLock);
-            if (auto iter = m_loadedAssets.find(path);
-                iter != m_loadedAssets.end())
-            {
-                return iter->second;
-            }
-        }
-
         std::string_view extension = FileSystem::GetExtension(path);
         const IAssetImporter* importer = GetImporter(extension);
         if (importer == nullptr)
@@ -307,9 +298,23 @@ namespace Insight::Runtime
             return Ref<Asset>();
         }
 
-        Ref<Asset> asset = importer->Import(assetInfo, path);
-        asset->SetGuid(assetInfo->Guid);
-        m_loadedAssets[assetInfo->GetFullFilePath()] = asset;
+        Ref<Asset> asset;
+        {
+            std::lock_guard lock(m_loadedAssetLock);
+            if (auto iter = m_loadedAssets.find(path);
+                iter != m_loadedAssets.end())
+            {
+                return iter->second;
+            }
+            else
+            {
+                asset = importer->CreateAsset(assetInfo);
+                asset->SetGuid(assetInfo->Guid);
+                m_loadedAssets[assetInfo->GetFullFilePath()] = asset;
+            }
+        }
+
+        importer->Import(asset, assetInfo, path);
 
         return asset;
     }

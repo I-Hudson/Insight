@@ -200,6 +200,8 @@ namespace Insight
 
 		void MeshData::GenerateLODs()
 		{
+			ASSERT(LODs.size() == 1);
+			LODs.resize(Mesh::s_LOD_Count);
 			for (u32 lod_index = 1; lod_index < Mesh::s_LOD_Count; ++lod_index)
 			{
 				std::vector<u32> indcies_to_lod;
@@ -244,10 +246,10 @@ namespace Insight
 				}
 				result_lod.resize(result_index_count);
 
-				LODs.push_back(LODs.at(0));
-				MeshData::LOD& mesh_lod = LODs.back();
-				mesh_lod.First_index = static_cast<u32>(Indices.size());
-				mesh_lod.Index_count = static_cast<u32>(result_index_count);
+				MeshData::LOD& mesh_lod = LODs[lod_index];
+				const u32 First_index = static_cast<u32>(Indices.size());
+				const u32 Index_count = static_cast<u32>(result_index_count);
+				mesh_lod = MeshData::LOD(lod_index, 0, vertex_count, First_index, Index_count);
 
 				std::move(result_lod.begin(), result_lod.end(), std::back_inserter(Indices));
 			}
@@ -266,7 +268,12 @@ namespace Insight
 		{
 		}
 
-		Ref<Asset> ModelImporter::Import(const AssetInfo* assetInfo, const std::string_view path) const
+		Ref<Asset> ModelImporter::CreateAsset(const AssetInfo* assetInfo) const
+		{
+			return Ref<ModelAsset>(::New<ModelAsset>(assetInfo));
+		}
+
+		void ModelImporter::Import(Ref<Asset>& asset, const AssetInfo* assetInfo, const std::string_view path) const
 		{
 			IS_PROFILE_FUNCTION();
 
@@ -308,11 +315,11 @@ namespace Insight
 			if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 			{
 				IS_LOG_CORE_ERROR("[ModelImporter::Import] Assimp model load: {0}", importer.GetErrorString());
-				return Ref<Asset>();
+				return;
 			}
 
 
-			Ref<ModelAsset> modelAsset = New<ModelAsset>(assetInfo);
+			Ref<ModelAsset> modelAsset = asset.As<ModelAsset>();
 			modelAsset.Ptr()->m_assetState = AssetState::Loading;
 			modelAsset->SetName(scene->mName.C_Str());
 
@@ -336,7 +343,7 @@ namespace Insight
 					IS_PROFILE_SCOPE("Preallocate all vertex and index buffers for all meshes");
 					for (size_t i = 0; i < meshNodes.size(); ++i)
 					{
-						PreallocateVeretxAndIndexBuffers(meshNodes[i]);
+						//PreallocateVeretxAndIndexBuffers(meshNodes[i]);
 					}
 				}
 
@@ -388,7 +395,6 @@ namespace Insight
 			meshNodes.clear();
 
 			modelAsset.Ptr()->m_assetState = AssetState::Loaded;
-			return modelAsset;
 		}
 
 		MeshNode* ModelImporter::GetMeshHierarchy(const aiScene* aiScene, const aiNode* aiNode, const MeshNode* parentMeshNode, std::vector<MeshNode*>& meshNodes, MeshData* monolithMeshData) const
@@ -407,6 +413,10 @@ namespace Insight
 			}
 			meshNodes.push_back(newMeshNode);
 
+			// Some nodes contain multiple meshes. As a MeshNode for us is a single mesh, we must create
+			// additional MeshNodes if an assimp node has mulitple meshes so we are aligned on the interpretation
+			// of the scene.
+			// Hierarchy wise this should be fine as the meshes being created here are on the same "level".
 			for (size_t meshIdx = 1; meshIdx < aiNode->mNumMeshes; ++meshIdx)
 			{
 				MeshNode* meshNode = New<MeshNode>();

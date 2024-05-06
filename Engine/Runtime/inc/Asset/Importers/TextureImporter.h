@@ -11,7 +11,8 @@ namespace Insight
         public:
             TextureImporter();
 
-            virtual Ref<Asset> Import(const AssetInfo* assetInfo, const std::string_view path) const override;
+            virtual Ref<Asset> CreateAsset(const AssetInfo* assetInfo) const override;
+            virtual void Import(Ref<Asset>& asset, const AssetInfo* assetInfo, const std::string_view path) const override;
 
         private:
 
