@@ -6,6 +6,10 @@
 
 #include "Graphics/Vertex.h"
 
+#include "Maths/Matrix4.h"
+
+#include <assimp/matrix4x4.h>
+
 #include <vector>
 
 struct aiNode;
@@ -64,6 +68,7 @@ namespace Insight
 
             const aiScene* AssimpScene = nullptr;
             const aiNode* AssimpNode = nullptr;
+            const aiMesh* AssimpMesh = nullptr;
             const aiMaterial* AssimpMaterial = nullptr;
 
             const MeshNode* Parent = nullptr;
@@ -100,6 +105,9 @@ namespace Insight
             /// @param textureTypelegcy 
             /// @return 
             std::string GetTexturePath(const aiMaterial* aiMaterial, const std::string_view directory, const aiTextureType textureTypePBR, const aiTextureType textureTypeLegacy) const;
+
+            glm::mat4 AssimpToGLMMat4(const aiMatrix4x4& transform) const;
+            Maths::Matrix4 AssimpToInsightMatrix4(const aiMatrix4x4& transform) const;
         };
     }
 }

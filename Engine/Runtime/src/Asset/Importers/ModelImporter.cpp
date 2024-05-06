@@ -370,7 +370,10 @@ namespace Insight
 				if (meshNodes[i]->Mesh)
 				{
 					modelAsset->m_meshes.push_back(meshNodes[i]->Mesh);
-					Algorithm::VectorAddUnique(modelAsset->m_materials, meshNodes[i]->Mesh->GetMaterialAsset());
+					if (meshNodes[i]->Mesh->GetMaterialAsset() != nullptr)
+					{
+						Algorithm::VectorAddUnique(modelAsset->m_materials, meshNodes[i]->Mesh->GetMaterialAsset());
+					}
 					meshNodes[i]->Mesh = nullptr;
 				}
 			}
@@ -398,10 +401,23 @@ namespace Insight
 			newMeshNode->Parent = parentMeshNode;
 			if (aiNode->mNumMeshes > 0)
 			{
+				newMeshNode->AssimpMesh = aiScene->mMeshes[aiNode->mMeshes[0]];
 				newMeshNode->MeshData = monolithMeshData != nullptr ? monolithMeshData : New<MeshData>();
 				newMeshNode->Mesh = New<Mesh>();
 			}
 			meshNodes.push_back(newMeshNode);
+
+			for (size_t meshIdx = 1; meshIdx < aiNode->mNumMeshes; ++meshIdx)
+			{
+				MeshNode* meshNode = New<MeshNode>();
+				meshNode->AssimpNode = aiNode;
+				meshNode->AssimpMesh = aiScene->mMeshes[aiNode->mMeshes[meshIdx]];
+				meshNode->AssimpScene = aiScene;
+				meshNode->Parent = parentMeshNode;
+				meshNode->MeshData = monolithMeshData != nullptr ? monolithMeshData : New<MeshData>();
+				meshNode->Mesh = New<Mesh>();
+				meshNodes.push_back(meshNode);
+			}
 
 			for (size_t childIdx = 0; childIdx < aiNode->mNumChildren; ++childIdx)
 			{
@@ -445,14 +461,15 @@ namespace Insight
 			const aiNode* aiNode = meshNode->AssimpNode;
 			const aiScene* aiScene = meshNode->AssimpScene;
 
-			if (aiNode->mNumMeshes > 0)
+			if (meshNode->AssimpMesh != nullptr)
 			{
-				for (u32 i = 0; i < aiNode->mNumMeshes; ++i)
+				//for (u32 i = 0; i < aiNode->mNumMeshes; ++i)
 				{
 					IS_PROFILE_SCOPE("Mesh evaluated");
-					const aiMesh* aiMesh = aiScene->mMeshes[aiNode->mMeshes[i]];
+					const aiMesh* aiMesh = meshNode->AssimpMesh;// aiScene->mMeshes[aiNode->mMeshes[i]];
 					ProcessMesh(aiScene, aiMesh, meshNode->MeshData);
 					meshNode->Mesh->m_mesh_name = aiMesh->mName.C_Str();
+					meshNode->Mesh->m_transform_offset = AssimpToGLMMat4(aiNode->mTransformation);
 
 					if (aiScene->HasMaterials() && aiMesh->mMaterialIndex < aiScene->mNumMaterials)
 					{
@@ -468,7 +485,7 @@ namespace Insight
 				&& !meshData->Vertices.empty()
 				&& !meshData->Indices.empty())
 			{
-				meshData->GenerateLODs();
+				//meshData->GenerateLODs();
 				//meshData->Optimise();
 
 				Mesh* mesh = meshNode->Mesh;
@@ -496,7 +513,7 @@ namespace Insight
 					FAIL_ASSERT();
 				}
 
-				mesh->m_lods.resize(Mesh::s_LOD_Count);
+				ASSERT(meshData->LODs.size() == 1);
 				for (size_t lodIdx = 0; lodIdx < meshData->LODs.size(); ++lodIdx)
 				{
 					MeshData::LOD meshDataLod = meshData->LODs[lodIdx];
@@ -684,6 +701,28 @@ namespace Insight
 			}
 
 			return std::string(directory) + "/" + texturePath.C_Str();
+		}
+
+		glm::mat4 ModelImporter::AssimpToGLMMat4(const aiMatrix4x4& transform) const
+		{
+			return glm::mat4
+			(
+				transform.a1, transform.b1, transform.c1, transform.d1,
+				transform.a2, transform.b2, transform.c2, transform.d2,
+				transform.a3, transform.b3, transform.c3, transform.d3,
+				transform.a4, transform.b4, transform.c4, transform.d4
+			);
+		}
+
+		Maths::Matrix4 ModelImporter::AssimpToInsightMatrix4(const aiMatrix4x4& transform) const
+		{
+			return Maths::Matrix4
+			(
+				transform.a1, transform.b1, transform.c1, transform.d1,
+				transform.a2, transform.b2, transform.c2, transform.d2,
+				transform.a3, transform.b3, transform.c3, transform.d3,
+				transform.a4, transform.b4, transform.c4, transform.d4
+			);
 		}
 	}
 }

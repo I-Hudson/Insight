@@ -219,7 +219,8 @@ namespace Insight
             std::lock_guard lock(m_packageLock);
             if (auto iter = Algorithm::VectorFindIf(m_assetInfos, [&path](const AssetInfo* assetInfo)
                 {
-                    return path == assetInfo->GetFullFilePath();
+                    const std::string assetFullPath = assetInfo->GetFullFilePath();
+                    return path == assetFullPath;
                 });
                 iter != m_assetInfos.end())
             {
