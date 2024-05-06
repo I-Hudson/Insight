@@ -283,15 +283,6 @@ namespace Insight::Runtime
 
         path = ValidatePath(path);
 
-        {
-            std::lock_guard lock(m_loadedAssetLock);
-            if (auto iter = m_loadedAssets.find(path);
-                iter != m_loadedAssets.end())
-            {
-                return iter->second;
-            }
-        }
-
         std::string_view extension = FileSystem::GetExtension(path);
         const IAssetImporter* importer = GetImporter(extension);
         if (importer == nullptr)
@@ -307,13 +298,23 @@ namespace Insight::Runtime
             return Ref<Asset>();
         }
 
-        Ref<Asset> asset = importer->Import(assetInfo, path);
-        asset->SetGuid(assetInfo->Guid);
-
+        Ref<Asset> asset;
         {
-            Threading::ScopedLock lock(m_loadedAssetLock);
-            m_loadedAssets[path] = asset;
+            std::lock_guard lock(m_loadedAssetLock);
+            if (auto iter = m_loadedAssets.find(assetInfo->GetFullFilePath());
+                iter != m_loadedAssets.end())
+            {
+                return iter->second;
+            }
+            else
+            {
+                asset = importer->CreateAsset(assetInfo);
+                asset->SetGuid(assetInfo->Guid);
+                m_loadedAssets[assetInfo->GetFullFilePath()] = asset;
+            }
         }
+        importer->Import(asset, assetInfo, assetInfo->GetFullFilePath());
+
         return asset;
     }
 
@@ -330,35 +331,7 @@ namespace Insight::Runtime
             IS_LOG_CORE_ERROR("[AssetRegistry::LoadAsset2] Unable to get AssetInfo from guid '{}'.", guid.ToString());
             return Ref<Asset>();
         }
-
-        {
-            std::lock_guard lock(m_loadedAssetLock);
-            if (auto iter = m_loadedAssets.find(assetInfo->GetFullFilePath());
-                iter != m_loadedAssets.end())
-            {
-                return iter->second;
-            }
-        }
-
-        std::string_view extension = FileSystem::GetExtension(assetInfo->GetFullFilePath());
-        const IAssetImporter* importer = GetImporter(extension);
-        if (importer == nullptr)
-        {
-            IS_LOG_CORE_ERROR("[AssetRegistry::LoadAsset2] 'Importer' is nullptr for extension '{}'.", extension);
-            return Ref<Asset>();
-        }
-        if (importer == nullptr)
-        {
-            IS_LOG_CORE_ERROR("[AssetRegistry::LoadAsset2] 'Importer' is nullptr for extension '{}'.", extension);
-            return Ref<Asset>();
-        }
-
-        Ref<Asset> asset = importer->Import(assetInfo, assetInfo->GetFullFilePath());
-        {
-            Threading::ScopedLock lock(m_loadedAssetLock);
-            m_loadedAssets[assetInfo->GetFullFilePath()] = asset;
-        }
-        return asset;
+        return LoadAsset2(assetInfo->GetFullFilePath());
     }
 
 
