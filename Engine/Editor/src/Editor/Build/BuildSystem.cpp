@@ -1,7 +1,5 @@
 #include "Editor/Build/BuildSystem.h"
 
-#include "Resource/ResourceManager.h"
-
 namespace Insight::Editor
 {
     BuildSystem::BuildSystem()

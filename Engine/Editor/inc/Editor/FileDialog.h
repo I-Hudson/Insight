@@ -6,8 +6,9 @@
 #include "Core/TypeAlias.h"
 #include "Core/Timer.h"
 #include "Core/Memory.h"
+#include "Core/ReferencePtr.h"
 
-#include "Resource/Texture2D.h"
+#include "Asset/Assets/Texture.h"
 
 #include <imgui.h>
 
@@ -40,14 +41,14 @@ namespace Insight
 
             const std::string& GetPath() const;
             const std::string& GetPathName() const;
-            Runtime::Texture2D* GetIcon() const;
+            Ref<Runtime::TextureAsset> GetIcon() const;
             bool IsDirectory() const;
 
         private:
             std::string m_path;
             std::string m_pathName;
             bool m_isDirectory;
-            TObjectPtr<Runtime::Texture2D> m_icon;
+            Ref<Runtime::TextureAsset> m_icon;
 
             Core::Timer m_clickedTimer;
             std::chrono::milliseconds m_timeSinceLastClick;

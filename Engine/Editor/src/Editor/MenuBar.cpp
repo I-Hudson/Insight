@@ -10,7 +10,6 @@
 #include "Serialisation/Serialisers/JsonSerialiser.h"
 #include "World/WorldSystem.h"
 
-#include "Resource/ResourceManager.h"
 #include "Runtime/ProjectSystem.h"
 
 #include "Asset/AssetRegistry.h"
@@ -72,18 +71,6 @@ namespace Insight
 
                     WorldItems();
                     
-                    if (ImGui::MenuItem("Save Resource Database"))
-                    {
-                        Runtime::ResourceManager::Instance().SaveDatabase();
-                    }
-                    if (ImGui::MenuItem("Load Resource Database"))
-                    {
-                        Runtime::ResourceManager::Instance().LoadDatabase();
-                    }
-                    if (ImGui::MenuItem("Clear Resource Database"))
-                    {
-                        Runtime::ResourceManager::Instance().ClearDatabase();
-                    }
                     DrawAllRegisteredWindow(EditorWindowCategories::File);
                     ImGui::EndMenu();
                 }
@@ -144,11 +131,11 @@ namespace Insight
                     TObjectPtr<Runtime::World> activeWorld = Runtime::WorldSystem::Instance().GetActiveWorld();
                     if (activeWorld)
                     {
-                        activeWorld->SaveWorld(item);
+                        //activeWorld->SaveWorld(item);
 
                         const Runtime::ProjectInfo& projectInfo = Runtime::ProjectSystem::Instance().GetProjectInfo();
                         std::string relative = FileSystem::GetRelativePath(item, projectInfo.GetContentPath());
-                        activeWorld->SaveDebugWorld(projectInfo.GetIntermediatePath() + "/World/" + relative);
+                        //activeWorld->SaveDebugWorld(projectInfo.GetIntermediatePath() + "/World/" + relative);
                     }
                 }
             }

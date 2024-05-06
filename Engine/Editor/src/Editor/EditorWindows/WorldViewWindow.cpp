@@ -123,7 +123,7 @@ namespace Insight
             IS_PROFILE_FUNCTION();
 
             std::string resourceGuidString;
-            if (EditorGUI::ObjectFieldTarget(ContentWindow::c_ContentWindowResourceDragSource, resourceGuidString, Runtime::IResource::GetStaticTypeInfo().GetType()))
+            if (EditorGUI::ObjectFieldTarget(ContentWindow::c_ContentWindowResourceDragSource, resourceGuidString, Runtime::Asset::GetStaticTypeInfo().GetType()))
             {
                 Core::GUID resourceGuid;
                 resourceGuid.StringToGuid(resourceGuidString);
@@ -270,7 +270,7 @@ namespace Insight
 
                             const RenderMaterial& renderMaterial = mesh.Material;
                             // Theses sets and bindings shouldn't chagne.
-                            Graphics::RHI_Texture* diffuseTexture = renderMaterial.Textures[(u64)Runtime::TextureTypes::Diffuse];
+                            Graphics::RHI_Texture* diffuseTexture = renderMaterial.Textures[(u64)Runtime::TextureAssetTypes::Diffuse];
                             if (diffuseTexture)
                             {
                                 cmdList->SetTexture(3, 0, diffuseTexture);
@@ -403,7 +403,7 @@ namespace Insight
 
                                 const RenderMaterial& renderMaterial = mesh.Material;
                                 // Theses sets and bindings shouldn't chagne.
-                                Graphics::RHI_Texture* diffuseTexture = renderMaterial.Textures[(u64)Runtime::TextureTypes::Diffuse];
+                                Graphics::RHI_Texture* diffuseTexture = renderMaterial.Textures[(u64)Runtime::TextureAssetTypes::Diffuse];
                                 if (diffuseTexture)
                                 {
                                     cmdList->SetTexture(3, 0, diffuseTexture);
@@ -524,7 +524,7 @@ namespace Insight
 
                                 const RenderMaterial& renderMaterial = mesh.Material;
                                 // Theses sets and bindings shouldn't change.
-                                Graphics::RHI_Texture* diffuseTexture = renderMaterial.Textures[(u64)Runtime::TextureTypes::Diffuse];
+                                Graphics::RHI_Texture* diffuseTexture = renderMaterial.Textures[(u64)Runtime::TextureAssetTypes::Diffuse];
                                 if (diffuseTexture)
                                 {
                                     cmdList->SetTexture(3, 0, diffuseTexture);

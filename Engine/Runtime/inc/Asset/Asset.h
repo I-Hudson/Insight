@@ -5,6 +5,8 @@
 #include "Core/IObject.h"
 #include "Core/RefCount.h"
 
+#include "Generated/Asset_reflect_generated.h"
+
 namespace Insight::Runtime
 {
     class AssetRegistry;
@@ -21,8 +23,10 @@ namespace Insight::Runtime
 
     /// @brief Base class for asset classes. An Asset object is something which can comes from 
     /// a file on disk.
+    REFLECT_CLASS();
     class IS_RUNTIME Asset : public Core::RefCount
     {
+        REFLECT_GENERATED_BODY();
     public:
         Asset(const AssetInfo* assetInfo);
         virtual ~Asset() override;

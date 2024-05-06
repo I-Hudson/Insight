@@ -1,5 +1,4 @@
 #include "Editor/ContentFolderListener.h"
-#include "Resource/ResourceManager.h"
 #include "Asset/AssetRegistry.h"
 
 #include "FileSystem/FileSystem.h"
@@ -30,7 +29,6 @@ namespace Insight::Editor
             m_queuedActions.push_back([this, fullPath]()
                 {
                     Runtime::AssetRegistry::Instance().AddAssetFromDisk(fullPath, m_assetPackage);
-                    TObjectPtr<Runtime::IResource> resource = Runtime::ResourceManager::Instance().LoadSync(fullPath, false);
                 });
         }
             break;
@@ -42,7 +40,7 @@ namespace Insight::Editor
 
             m_queuedActions.push_back([this, fullPath]()
                 {
-                    Runtime::ResourceManager::Instance().Unload(fullPath);
+                    //Runtime::AssetRegistry::Instance().UnloadAsset(fullPath);
                     Runtime::AssetRegistry::Instance().RemoveAsset(fullPath);
                 });
         }

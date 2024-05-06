@@ -5,8 +5,6 @@
 
 #include "FileSystem/FileSystem.h"
 
-#include "Resource/Loaders/ResourceLoaderRegister.h"
-
 #include "Serialisation/Serialisers/BinarySerialiser.h"
 
 #include "Core/Profiler.h"
@@ -99,13 +97,13 @@ namespace Insight
                             ImGui::TableNextColumn();
 
                             std::string_view fileExtension = FileSystem::GetExtension(info->FileName);
-                            const Runtime::IResourceLoader* loader = Runtime::ResourceLoaderRegister::GetLoaderFromExtension(fileExtension);
-                            if (loader != nullptr)
-                            {
-                                Runtime::ResourceTypeId typeId = loader->GetResourceTypeId();
-                                ImGui::Text("%s", typeId.GetTypeName().c_str());
-                            }
-                            else
+                            const Runtime::IAssetImporter* importer = Runtime::AssetRegistry::Instance().GetImporter(fileExtension);
+                            //if (importer != nullptr)
+                            //{
+                                //Runtime::ResourceTypeId typeId = loader->GetResourceTypeId();
+                                //ImGui::Text("%s", typeId.GetTypeName().c_str());
+                            //}
+                            //else
                             {
                                 ImGui::Text("Unknown");
                             }

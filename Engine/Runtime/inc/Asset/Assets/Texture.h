@@ -5,6 +5,8 @@
 
 #include "Graphics/PixelFormat.h"
 
+#include "Generated/Texture_reflect_generated.h"
+
 namespace Insight
 {
     namespace Graphics
@@ -25,8 +27,10 @@ namespace Insight
             Count
         };
 
-        class TextureAsset : public Asset
+        REFLECT_CLASS();
+        class IS_RUNTIME TextureAsset : public Asset
         {
+            REFLECT_GENERATED_BODY();
         public:
             TextureAsset(const AssetInfo* assetInfo);
             virtual ~TextureAsset() override;

@@ -63,14 +63,15 @@ namespace Insight
             const AssetInfo* GetAssetInfo(const Core::GUID guid) const;
             std::vector<Byte> LoadAssetData(std::string_view path) const;
 
+            const IAssetImporter* GetImporter(const std::string_view extension) const;
 
             DEPRECATED_MSG("Use 'Ref<Asset> LoadAsset'.")
             std::vector<Byte> LoadAsset(std::string_view path) const;
 
             Ref<Asset> GetAsset2(const std::string& path) const;
-            DEPRECATED_MSG("Use 'Ref<Asset> GetAsset'.")
+            DEPRECATED_MSG("Use 'Ref<Asset> GetAssetInfo'.")
             const AssetInfo* GetAsset(const Core::GUID& guid) const;
-            DEPRECATED_MSG("Use 'Ref<Asset> GetAsset'.")
+            DEPRECATED_MSG("Use 'Ref<Asset> GetAssetInfo'.")
             const AssetInfo* GetAsset(std::string_view path) const;
 
             std::vector<const AssetInfo*> GetAllAssetInfos() const;

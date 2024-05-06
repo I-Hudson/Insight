@@ -51,6 +51,7 @@ namespace Insight
             m_rhiTexture->m_pixelFormat = m_pixelFormat;
             m_rhiTexture->SetName(m_assetInfo->FileName);
             m_rhiTexture->LoadFromData((Byte*)data, GetWidth(), GetHeight(), GetDepth(), m_channels);
+            m_rhiTexture->m_hasAlpha = true;
         }
 
         Graphics::RHI_Texture* TextureAsset::GetRHITexture() const

@@ -19,10 +19,10 @@ namespace Insight
         class ModelImporter;
         class Mesh;
 
-        REFLECT_CLASS()
-            class ModelAsset : public Asset, public ECS::ICreateEntityHierarchy
+        REFLECT_CLASS();
+        class IS_RUNTIME ModelAsset : public Asset, public ECS::ICreateEntityHierarchy
         {
-            REFLECT_GENERATED_BODY()
+            REFLECT_GENERATED_BODY();
         public:
             ModelAsset(const AssetInfo* assetInfo);
             virtual ~ModelAsset() override;

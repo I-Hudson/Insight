@@ -6,12 +6,13 @@
 
 #include "Editor/EditorWindows/EditorWindowManager.h"
 #include "Editor/MenuBar.h"
-#include "Editor/EditorResourceManager.h"
 #include "Editor/TypeDrawers/TypeDrawerRegister.h"
 #include "Editor/HotReload/HotReloadSystem.h"
 #include "Editor/Build/BuildSystem.h"
 
 #include "Editor/ContentFolderListener.h"
+
+#include "Serialisation/Serialisers/JsonSerialiser.h"
 
 #include "Renderpass.h"
 
@@ -50,8 +51,6 @@ namespace Insight
 
 			HotReloadSystem m_hotReloadSystem;
 			BuildSystem m_buildSystem;
-
-			EditorResourceManager m_editorResourceManager;
 
 			efsw::FileWatcher m_fileWatcher;
 			ContentFolderListener m_contentListener;

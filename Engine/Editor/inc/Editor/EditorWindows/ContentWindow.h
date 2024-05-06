@@ -3,7 +3,8 @@
 #include "Editor/EditorWindows/IEditorWindow.h"
 
 #include "Graphics/RHI/RHI_Texture.h"
-#include "Resource/ResourceTypeId.h"
+#include "Core/ReferencePtr.h"
+//#include "Asset/Assets/Texture.h"
 
 #include "Core/Timer.h"
 
@@ -16,7 +17,7 @@ namespace Insight
 {
     namespace Runtime
     {
-        class Texture2D;
+        class TextureAsset;
     }
 
     namespace Editor
@@ -61,13 +62,13 @@ namespace Insight
             void SplitDirectory();
             void SetDirectoryFromParent(u32 parentIndex);
 
-            Runtime::Texture2D* PathToThumbnail(std::string const& path);
+            Ref<Runtime::TextureAsset> PathToThumbnail(std::string const& path);
 
             void DrawGeneralMenu();
 
         private:
-            std::unordered_map<ContentWindowThumbnailType, Runtime::Texture2D*> m_thumbnailToTexture;
-            std::unordered_map<std::string, Runtime::Texture2D*> m_fileExtensionToTexture;
+            std::unordered_map<ContentWindowThumbnailType, Ref<Runtime::TextureAsset>> m_thumbnailToTexture;
+            std::unordered_map<std::string, Ref<Runtime::TextureAsset>> m_fileExtensionToTexture;
 
             Core::Timer m_lastClickTimer;
             std::string itemClickedId;
@@ -81,7 +82,6 @@ namespace Insight
             bool m_showImportWindow = false;
             bool m_convertResourceToEngineFormat = false;
 
-            Runtime::ResourceTypeId m_createResourceSelectedTypeId;
             bool m_showCreateResourceWindow = false;
 
             bool m_showGeneralMenu = false;

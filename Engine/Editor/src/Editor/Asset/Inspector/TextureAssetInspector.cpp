@@ -1,13 +1,11 @@
 #include "Editor/Asset/Inspector/TextureAssetInspector.h"
 
-#include "Resource/Loaders/TextureLoader.h"
-
 namespace Insight
 {
 	namespace Editor
 	{
 		TextureAssetInspector::TextureAssetInspector()
-			: IAssetInspector({ std::begin(Runtime::c_TextureLoaderFileExtensions), std::end(Runtime::c_TextureLoaderFileExtensions) })
+			: IAssetInspector({ })
 		{ }
 
 		TextureAssetInspector::~TextureAssetInspector()

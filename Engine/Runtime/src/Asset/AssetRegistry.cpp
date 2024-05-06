@@ -292,16 +292,8 @@ namespace Insight::Runtime
             }
         }
 
-        const IAssetImporter* importer = nullptr;
         std::string_view extension = FileSystem::GetExtension(path);
-        for (const IAssetImporter* assetImporter : m_importers)
-        {
-            if (assetImporter && assetImporter->IsValidImporterForFileExtension(extension.data()))
-            {
-                importer = assetImporter;
-                break;
-            }
-        }
+        const IAssetImporter* importer = GetImporter(extension);
         if (importer == nullptr)
         {
             IS_LOG_CORE_ERROR("[AssetRegistry::LoadAsset2] 'Importer' is nullptr for extension '{}'.", extension);
@@ -348,15 +340,12 @@ namespace Insight::Runtime
             }
         }
 
-        const IAssetImporter* importer = nullptr;
         std::string_view extension = FileSystem::GetExtension(assetInfo->GetFullFilePath());
-        for (const IAssetImporter* assetImporter : m_importers)
+        const IAssetImporter* importer = GetImporter(extension);
+        if (importer == nullptr)
         {
-            if (assetImporter && assetImporter->IsValidImporterForFileExtension(extension.data()))
-            {
-                importer = assetImporter;
-                break;
-            }
+            IS_LOG_CORE_ERROR("[AssetRegistry::LoadAsset2] 'Importer' is nullptr for extension '{}'.", extension);
+            return Ref<Asset>();
         }
         if (importer == nullptr)
         {
@@ -436,6 +425,20 @@ namespace Insight::Runtime
         IS_LOG_CORE_ERROR("[AssetRegistry::LoadAsset] Unable to load asset from path '{}'.", absPath.data());
         return {};
     }
+
+    const IAssetImporter* AssetRegistry::GetImporter(const std::string_view extension) const
+    {
+        for (const IAssetImporter* assetImporter : m_importers)
+        {
+            if (assetImporter && assetImporter->IsValidImporterForFileExtension(extension.data()))
+            {
+                return assetImporter;
+                break;
+            }
+        }
+        return nullptr;
+    }
+
 
     std::vector<Byte> AssetRegistry::LoadAsset(std::string_view path) const
     {

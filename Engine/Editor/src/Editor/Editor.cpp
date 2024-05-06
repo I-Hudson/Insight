@@ -9,7 +9,6 @@
 #include "Asset/AssetPackage/IAssetPackage.h"
 
 #include "Runtime/EntryPoint.h"
-#include "Resource/ResourceManager.h"
 
 #include "Runtime/RuntimeEvents.h"
 #include "Runtime/ProjectSystem.h"
@@ -122,7 +121,6 @@ namespace Insight
                     //Runtime::ResourceManager::Instance().LoadResourcesInFolder(projectInfo.GetContentPath(), true);
 
                     Runtime::AssetRegistry::Instance().SetDebugDirectories(projectInfo.GetIntermediatePath() + "/AssetMeta", projectInfo.GetContentPath());
-                    Runtime::ResourceManager::Instance().SetDebugDirectories(projectInfo.GetIntermediatePath() + "/Meta", projectInfo.GetContentPath());
 
                     std::vector<const Runtime::AssetInfo*> allAssetPackages = Runtime::AssetRegistry::Instance().GetAllAssetsWithExtension(Runtime::IAssetPackage::c_FileExtension);
                     for (const Runtime::AssetInfo* info : allAssetPackages)
@@ -136,8 +134,6 @@ namespace Insight
                     m_contentListener.WatchId = m_fileWatcher.addWatch(projectInfo.GetContentPath(), &m_contentListener, true);
                     m_fileWatcher.watch();
                 });
-
-            m_editorResourceManager.Initialise();
 
             EditorModule::Initialise(GetSystemRegistry().GetSystem<Core::ImGuiSystem>());
 
@@ -187,15 +183,6 @@ namespace Insight
 
             m_gameRenderpass = New<Graphics::Renderpass>();
             m_gameRenderpass->Create();
-
-            if (Runtime::ProjectSystem::Instance().IsProjectOpen())
-            {
-                const Runtime::ProjectInfo& projectInfo = Runtime::ProjectSystem::Instance().GetProjectInfo();
-
-                Runtime::IResource* resource = Runtime::ResourceManager::Instance().LoadSync(
-                    Runtime::ResourceId(Runtime::ProjectSystem::Instance().GetProjectInfo().GetContentPath() + "/Textures/Background.png"
-                        , Runtime::Texture2D::GetStaticResourceTypeId())).Get();
-            }
 
             if (!Runtime::ProjectSystem::Instance().IsProjectOpen())
             {
@@ -255,8 +242,6 @@ namespace Insight
 
             App::Engine::Instance().GetSystemRegistry().UnregisterSystem(&m_hotReloadSystem);
             App::Engine::Instance().GetSystemRegistry().UnregisterSystem(&m_buildSystem);
-
-            m_editorResourceManager.Shutdown();
 
             Runtime::AssetRegistry::Instance().Shutdown();
         }

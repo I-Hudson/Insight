@@ -4,16 +4,12 @@
 #include "Editor/Asset/AssetInspectorWindow.h"
 
 #include "Editor/EditorGUI.h"
-#include "Editor/EditorResourceManager.h"
+#include "Editor/EditorAssetRegistry.h"
 
 #include "Asset/AssetRegistry.h"
+#include "Asset/Assets/Texture.h"
 
 #include "Runtime/ProjectSystem.h"
-#include "Resource/ResourceManager.h"
-#include "Resource/Loaders/IResourceLoader.h"
-#include "Resource/Loaders/ResourceLoaderRegister.h"
-
-#include "Resource/Texture2D.h"
 
 #include "FileSystem/FileSystem.h"
 
@@ -21,6 +17,8 @@
 
 #include "Core/EnginePaths.h"
 #include "Core/Profiler.h"
+#include "Core/Logger.h"
+
 #include "Event/EventSystem.h"
 
 #include <filesystem>
@@ -80,27 +78,23 @@ namespace Insight::Editor
             });
 
         m_fileExtensionToTexture[".fbx"] = 
-            EditorResourceManager::Instance().LoadSync(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/Editor/Icons/FBX_File_Icon.png", Runtime::Texture2D::GetStaticResourceTypeId())).CastTo<Runtime::Texture2D>().Get();
-        m_fileExtensionToTexture[".fbx"]->SetAlpha(true);
+            Runtime::AssetRegistry::Instance().LoadAsset2(EnginePaths::GetResourcePath() + "/Editor/Icons/FBX_File_Icon.png").As<Runtime::TextureAsset>();
 
         m_fileExtensionToTexture[".obj"] =
-            EditorResourceManager::Instance().LoadSync(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/Editor/Icons/OBJ_File_Icon.png", Runtime::Texture2D::GetStaticResourceTypeId())).CastTo<Runtime::Texture2D>().Get();
-        m_fileExtensionToTexture[".obj"]->SetAlpha(true);
+            Runtime::AssetRegistry::Instance().LoadAsset2(EnginePaths::GetResourcePath() + "/Editor/Icons/OBJ_File_Icon.png").As<Runtime::TextureAsset>();
         
         m_fileExtensionToTexture[".gltf"] =
-            EditorResourceManager::Instance().LoadSync(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/Editor/Icons/GLTF_File_Icon.png", Runtime::Texture2D::GetStaticResourceTypeId())).CastTo<Runtime::Texture2D>().Get();
-        m_fileExtensionToTexture[".gltf"]->SetAlpha(true);
+            Runtime::AssetRegistry::Instance().LoadAsset2(EnginePaths::GetResourcePath() + "/Editor/Icons/GLTF_File_Icon.png").As<Runtime::TextureAsset>();
         
         m_fileExtensionToTexture[".isworld"] =
-            EditorResourceManager::Instance().LoadSync(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/Editor/Icons/World_File_Icon.png", Runtime::Texture2D::GetStaticResourceTypeId())).CastTo<Runtime::Texture2D>().Get();
-        m_fileExtensionToTexture[".isworld"]->SetAlpha(true);
+            Runtime::AssetRegistry::Instance().LoadAsset2(EnginePaths::GetResourcePath() + "/Editor/Icons/World_File_Icon.png").As<Runtime::TextureAsset>();
 
 
 
         m_thumbnailToTexture[ContentWindowThumbnailType::Folder] =
-            EditorResourceManager::Instance().LoadSync(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/Editor/Icons/Folder.png", Runtime::Texture2D::GetStaticResourceTypeId())).CastTo<Runtime::Texture2D>().Get();
+            Runtime::AssetRegistry::Instance().LoadAsset2(EnginePaths::GetResourcePath() + "/Editor/Icons/Folder.png").As<Runtime::TextureAsset>();
         m_thumbnailToTexture[ContentWindowThumbnailType::File] =
-            EditorResourceManager::Instance().LoadSync(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/Editor/Icons/File.png", Runtime::Texture2D::GetStaticResourceTypeId())).CastTo<Runtime::Texture2D>().Get();
+            Runtime::AssetRegistry::Instance().LoadAsset2(EnginePaths::GetResourcePath() + "/Editor/Icons/File.png").As<Runtime::TextureAsset>();
 
 
         if (Runtime::ProjectSystem::Instance().IsProjectOpen())
@@ -133,7 +127,6 @@ namespace Insight::Editor
 
         if (ImGui::Button("Create Resource"))
         {
-            m_createResourceSelectedTypeId = {};
             m_showCreateResourceWindow = true;
         }
 
@@ -349,19 +342,18 @@ namespace Insight::Editor
                                 {
                                     // Compute thumbnail size
                                     Graphics::RHI_Texture* texture = nullptr;
-                                    Runtime::ResourceId textureResourceId(path, Runtime::Texture2D::GetStaticResourceTypeId());
-                                    if (Runtime::ResourceManager::Instance().HasResource(textureResourceId))
+                                    if (Runtime::AssetRegistry::Instance().GetAssetInfo(path))
                                     {
-                                        TObjectPtr<Runtime::IResource> loadedResource = Runtime::ResourceManager::Instance().LoadSync(textureResourceId);
-                                        if (loadedResource)
+                                        Ref<Runtime::Asset> asset = Runtime::AssetRegistry::Instance().LoadAsset2(path);
+                                        if (Ref<Runtime::TextureAsset> textureAsset = asset.As<Runtime::TextureAsset>())
                                         {
-                                            texture = loadedResource.CastTo<Runtime::Texture2D>()->GetRHITexture();
+                                            texture = textureAsset->GetRHITexture();
                                         }
                                     }
 
                                     if (texture == nullptr)
                                     {
-                                        Runtime::Texture2D* thumbnailTexture = PathToThumbnail(path);
+                                        Ref<Runtime::Asset> thumbnailTexture = PathToThumbnail(path);
                                         if (thumbnailTexture)
                                         {
                                             texture = PathToThumbnail(path)->GetRHITexture();
@@ -430,7 +422,7 @@ namespace Insight::Editor
                         {
                             EditorGUI::ObjectFieldSource(c_ContentWindowResourceDragSource
                                 , contentResource->GetGuid().ToString().data()
-                                , Runtime::IResource::GetStaticTypeInfo().GetType());
+                                , Runtime::Asset::GetStaticTypeInfo().GetType());
                         }
                         else if (assetInfo)
                         {
@@ -514,6 +506,7 @@ namespace Insight::Editor
 
     void ContentWindow::ImportResource()
     {
+        /*
         constexpr ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoCollapse
             | ImGuiWindowFlags_NoDocking
             //| ImGuiWindowFlags_NoResize
@@ -573,10 +566,12 @@ namespace Insight::Editor
             }
         }
         ImGui::End();
+        */
     }
 
     void ContentWindow::CreateNewResourceWindow()
     {
+        /*
         constexpr ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoCollapse
             | ImGuiWindowFlags_NoDocking
             | ImGuiWindowFlags_NoResize
@@ -752,6 +747,7 @@ namespace Insight::Editor
         {
             m_showCreateResourceWindow = false;
         }
+        */
     }
 
     void ContentWindow::SplitDirectory()
@@ -785,7 +781,7 @@ namespace Insight::Editor
         SplitDirectory();
     }
 
-    Runtime::Texture2D* ContentWindow::PathToThumbnail(std::string const& path)
+    Ref<Runtime::TextureAsset> ContentWindow::PathToThumbnail(std::string const& path)
     {
         std::string_view pathExtension = FileSystem::GetExtension(path);
         if (auto iter = m_fileExtensionToTexture.find(std::string(pathExtension)); iter != m_fileExtensionToTexture.end())
@@ -815,7 +811,7 @@ namespace Insight::Editor
                 m_showGeneralMenu = false;
 
                 TObjectPtr<Runtime::World> world = Runtime::WorldSystem::Instance().CreateWorld("New World");
-                world->SaveWorld(m_currentDirectory + "/" + world->GetFileName() + Runtime::World::c_FileExtension);
+                //world->SaveWorld(m_currentDirectory + "/" + world->GetFileName() + Runtime::World::c_FileExtension);
                 Runtime::WorldSystem::Instance().RemoveWorld(world);
             }
             ImGui::EndPopup();
