@@ -18,7 +18,7 @@ namespace Insight
             return;
         }
 
-        for (size_t i = 0; i < static_cast<u64>(Runtime::TextureTypes::Count); ++i)
+        for (size_t i = 0; i < static_cast<u64>(Runtime::TextureAssetTypes::Count); ++i)
         {
             Ref<Runtime::TextureAsset> texture = material->GetTexture(static_cast<Runtime::TextureAssetTypes>(i));
             if (texture)
@@ -159,7 +159,7 @@ namespace Insight
 
                         u64 meshIndex = renderWorld.Meshes.size();
                         renderWorld.Meshes.push_back(std::move(renderMesh));
-                        bool meshIsTransparent = renderMesh.Material.Properties.at(static_cast<u64>(Runtime::MaterialProperty::Colour_A)) < 1.0f;
+                        bool meshIsTransparent = renderMesh.Material.Properties.at(static_cast<u64>(Runtime::MaterialAssetProperty::Colour_A)) < 1.0f;
 
                         if (auto materialBatchIter = renderWorld.MaterialBatchLookup.find(material->GetGuid());
                             materialBatchIter != renderWorld.MaterialBatchLookup.end())

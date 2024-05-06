@@ -13,18 +13,22 @@ namespace Insight
 	namespace Runtime
 	{
 		World::World()
-			: IResource("Default")
+			: Asset(nullptr)
 			, m_worldName("Default")
 		{
 			m_entityManager.SetWorld(this);
 		}
 
-		World::World(std::string_view filePath, std::string worldName)
-			: IResource(filePath)
+		World::World(std::string worldName)
+			: Asset(nullptr)
 			, m_worldName(std::move(worldName))
 		{
 			m_entityManager.SetWorld(this);
 		}
+
+		World::World(const AssetInfo* assetInfo)
+			: Asset(assetInfo)
+		{ }
 
 		World::~World()
 		{ }
@@ -160,6 +164,12 @@ namespace Insight
 			return m_entityManager.GetEntityByGUID(guid);
 		}
 
+		void World::OnUnload()
+		{
+
+		}
+
+		/*
 		void World::SaveWorld(std::string_view filePath) const
 		{
 			Runtime::World::ResourceSerialiserType serialiser(false);
@@ -195,7 +205,7 @@ namespace Insight
 			serialiserObject.Deserialise(serialiser, *this);
 			m_entityManager.SetWorld(this);
 		}
-
+		*/
 		void World::AddEntityAndChildrenToVector(Ptr<ECS::Entity> const& entity, std::vector<Ptr<ECS::Entity>>& vector) const
 		{
 			vector.push_back(entity);

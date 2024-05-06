@@ -14,7 +14,6 @@
 #include "Core/SystemRegistry.h"
 #include "Threading/TaskSystem.h"
 #include "Event/EventSystem.h"
-#include "Resource/ResourceSystem.h"
 #include "Graphics/GraphicsSystem.h"
 #include "Input/InputSystem.h"
 #include "Core/ImGuiSystem.h"
@@ -84,7 +83,6 @@ namespace Insight
 			Runtime::AssetRegistry m_assetRegistry;
 			Threading::TaskSystem m_taskSystem;
 			Core::EventSystem m_eventSystem;
-			Runtime::ResourceSystem m_resourceSystem;
 			Runtime::GraphicsSystem m_graphicsSystem;
 			Core::ImGuiSystem m_imguiSystem;
 			Input::InputSystem m_inputSystem;

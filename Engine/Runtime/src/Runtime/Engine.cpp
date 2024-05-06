@@ -21,8 +21,6 @@
 #include "ECS/ECSWorld.h"
 #include "ECS/Components/TagComponent.h"
 
-#include "Resource/ResourceManager.h"
-
 #include "Serialisation/Archive.h"
 
 #include "imgui.h"
@@ -74,7 +72,6 @@ namespace Insight
 
 			m_systemRegistry.RegisterSystem(&m_taskSystem);
 			m_systemRegistry.RegisterSystem(&m_eventSystem);
-			m_systemRegistry.RegisterSystem(&m_resourceSystem);
 			m_systemRegistry.RegisterSystem(&m_inputSystem);
 			m_systemRegistry.RegisterSystem(&m_graphicsSystem);
 			m_systemRegistry.RegisterSystem(&m_imguiSystem);
@@ -84,7 +81,6 @@ namespace Insight
 			m_taskSystem.Initialise();
 			m_eventSystem.Initialise();
 
-			m_resourceSystem.Initialise();
 			m_imguiSystem.Initialise();
 			ImGui::SetCurrentContext(m_imguiSystem.GetCurrentContext());
 
@@ -98,7 +94,6 @@ namespace Insight
 			m_graphicsSystem.Initialise(&m_inputSystem);
 			m_worldSystem.Initialise();
 
-			m_projectSystem.SetResourceSystem(&m_resourceSystem);
 			m_projectSystem.Initialise();
 
 			OnInit();
@@ -155,11 +150,6 @@ namespace Insight
 						m_inputSystem.Update(delta_time);
 					}
 
-					{
-						IS_PROFILE_SCOPE("InputSystem Update");
-						m_resourceSystem.Update(delta_time);
-					}
-
 					OnUpdate();
 
 					{
@@ -201,9 +191,9 @@ namespace Insight
 
 			OnDestroy();
 			
-			m_worldSystem.Shutdown();
+			m_assetRegistry.Shutdown();
 
-			m_resourceSystem.Shutdown();
+			m_worldSystem.Shutdown();
 
 			m_graphicsSystem.Shutdown();
 
@@ -216,7 +206,6 @@ namespace Insight
 
 			m_taskSystem.Shutdown();
 
-			m_assetRegistry.Shutdown();
 
 			m_systemRegistry.VerifyAllSystemsStates(Core::SystemStates::Not_Initialised);
 
@@ -224,7 +213,6 @@ namespace Insight
 			m_systemRegistry.UnregisterSystem(&m_inputSystem);
 			m_systemRegistry.UnregisterSystem(&m_imguiSystem);
 			m_systemRegistry.UnregisterSystem(&m_graphicsSystem);
-			m_systemRegistry.UnregisterSystem(&m_resourceSystem);
 			m_systemRegistry.UnregisterSystem(&m_projectSystem);
 			m_systemRegistry.UnregisterSystem(&m_eventSystem);
 			m_systemRegistry.UnregisterSystem(&m_taskSystem);

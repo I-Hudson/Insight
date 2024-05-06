@@ -1,6 +1,6 @@
 #include "Editor/EditorWindows/ResourceWindow.h"
 #include "Resource/ResourceManager.h"
-#include "Resource/Resource.h"
+
 
 #include "FileSystem/FileSystem.h"
 

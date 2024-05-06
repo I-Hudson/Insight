@@ -2,7 +2,6 @@
 #include "ECS/Components/MeshComponent.inl"
 
 #include "Resource/Mesh.h"
-#include "Resource/Material.h"
 
 namespace Insight
 {

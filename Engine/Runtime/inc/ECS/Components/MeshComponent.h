@@ -3,8 +3,6 @@
 #include "ECS/Entity.h"
 
 #include "Resource/Mesh.h"
-#include "Resource/Material.h"
-#include "Resource/ResourceLifeTimeHandle.h"
 
 #include "Generated/MeshComponent_reflect_generated.h"
 
@@ -22,25 +20,23 @@ namespace Insight
 			MeshComponent();
 			virtual ~MeshComponent() override;
 
-			void				SetMesh(Runtime::Mesh* mesh);
-			Runtime::Mesh*		GetMesh()						const		{ return m_mesh; }
-			void				SetMaterial(Ref<Runtime::MaterialAsset> material);
+			void						SetMesh(Runtime::Mesh* mesh);
+			Runtime::Mesh*				GetMesh()						const		{ return m_mesh; }
+			void						SetMaterial(Ref<Runtime::MaterialAsset> material);
 			Ref<Runtime::MaterialAsset>	GetMaterial()					const		{ return m_material; }
 
 			IS_SERIALISABLE_H(MeshComponent)
 
 		private:
-			void OnMaterialUnload(Runtime::IResource* resource);
+			Runtime::Mesh* m_mesh;
 
-		private:
-			Runtime::ResourceLFHandle<Runtime::Mesh> m_mesh;
-			//Runtime::ResourceLFHandle<Runtime::Material> m_material;
 			Ref<Runtime::MaterialAsset> m_material;
 		};
 	}
 
 	namespace Serialisation
 	{
+		/*
 		struct MeshToGuid {};
 		template<>
 		struct ComplexSerialiser<MeshToGuid, Runtime::ResourceLFHandle<Runtime::Mesh>, ECS::MeshComponent>
@@ -53,6 +49,7 @@ namespace Insight
 		{
 			void operator()(ISerialiser* serialiser, Runtime::ResourceLFHandle<Runtime::Material>& material, ECS::MeshComponent* meshComponent) const;
 		};
+		*/
 	}
 
 	OBJECT_SERIALISER(ECS::MeshComponent, 4,

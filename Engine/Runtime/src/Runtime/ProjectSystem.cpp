@@ -1,7 +1,6 @@
 ﻿#include "Runtime/ProjectSystem.h"
 
-#include "Resource/ResourceSystem.h"
-#include "Resource/ResourceManager.h"
+#include "Asset/AssetRegistry.h"
 
 #include "Core/Logger.h"
 #include "Core/Profiler.h"
@@ -31,7 +30,7 @@ namespace Insight
 
         void ProjectSystem::Initialise()
         {
-            ASSERT_MSG(m_resourceSystem, "[ProjectSystem::Initialise] There must be a valid resource system pointer in the project system.");
+            ASSERT_MSG(AssetRegistry::IsValidInstance(), "[ProjectSystem::Initialise] There must be a valid AssetRegistry.");
             m_state = Core::SystemStates::Initialised;
         }
 
@@ -42,12 +41,6 @@ namespace Insight
             Core::EventSystem::Instance().DispatchEventNow(MakeRPtr<Core::ProjectCloseEvent>(m_projectInfo.ProjectPath));
             m_projectInfo = {};
             m_state = Core::SystemStates::Not_Initialised;
-        }
-
-        void ProjectSystem::SetResourceSystem(ResourceSystem* resourceSystem)
-        {
-            ASSERT(!m_resourceSystem);
-            m_resourceSystem = resourceSystem;
         }
 
         bool ProjectSystem::IsProjectOpen() const

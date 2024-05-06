@@ -74,10 +74,7 @@ namespace Insight::Runtime
 		// Unload all our memory meshes.
 		for (Mesh* mesh : m_meshes)
 		{
-			mesh->OnUnloaded(mesh);
 			::Delete(mesh);
-			//RemoveDependentResource(mesh);
-			//ResourceManager::Instance().RemoveDependentResource(mesh->GetResourceId());
 		}
 		m_meshes.clear();
 
@@ -89,8 +86,6 @@ namespace Insight::Runtime
 			{
 				IS_LOG_CORE_WARN("[ModelAsset::OnUnload] Material '{}', is reference elsewhere. Will not be deleted here.", material->GetName());
 			}
-			//RemoveDependentResource(material);
-			//ResourceManager::Instance().RemoveDependentResource(material->GetResourceId());
 		}
 		m_materials.clear();
 

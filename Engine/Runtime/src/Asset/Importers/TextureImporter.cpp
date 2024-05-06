@@ -7,9 +7,10 @@
 #include "Core/Logger.h"
 #include "Core/Profiler.h"
 
+#define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
-//#define QOI_IMPLEMENTATION
+#define QOI_IMPLEMENTATION
 #include <qoi.h>
 
 namespace Insight

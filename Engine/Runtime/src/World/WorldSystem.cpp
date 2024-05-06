@@ -113,15 +113,17 @@ namespace Insight
                 return nullptr;
             }
 
+            /*
             Runtime::World::ResourceSerialiserType serialiser(true);
             if (!serialiser.Deserialise(worldData))
             {
                 return nullptr;
             }
+            */
 
             TObjectPtr<World> world = CreateWorld();
             SetActiveWorld(world);
-            world->Deserialise(&serialiser);
+            //world->Deserialise(&serialiser);
             world->SetWorldState(WorldStates::Running);
             return world.Get();
         }

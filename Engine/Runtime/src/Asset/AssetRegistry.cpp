@@ -9,9 +9,6 @@
 
 #include "Runtime/ProjectSystem.h"
 
-#include "Resource/Loaders/ResourceLoaderRegister.h"
-#include "Resource/ResourceDatabase.h"
-
 #include "Serialisation/Serialisers/BinarySerialiser.h"
 #include "Serialisation/Serialisers/JsonSerialiser.h"
 
@@ -143,8 +140,7 @@ namespace Insight::Runtime
             {
                 return nullptr;
             }
-            else if (FileSystem::GetFileExtension(path) == ResourceDatabase::c_MetaFileExtension
-                || FileSystem::GetFileExtension(path) == ".meta")
+            else if (FileSystem::GetFileExtension(path) == ".meta")
             {
                 return nullptr;
             }

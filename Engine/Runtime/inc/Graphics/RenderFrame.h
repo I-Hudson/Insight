@@ -2,10 +2,7 @@
 
 #include "Core/TypeAlias.h"
 
-#include "Resource/Texture.h"
 #include "Resource/Mesh.h"
-#include "Resource/Material.h"
-
 #include "Asset/Assets/Texture.h"
 #include "Asset/Assets/Material.h"
 
@@ -33,8 +30,8 @@ namespace Insight
     struct IS_RUNTIME RenderMaterial
     {
         void SetMaterial(const Ref<Runtime::MaterialAsset> material);
-        std::array<Graphics::RHI_Texture*, static_cast<u64>(Runtime::TextureTypes::Count)> Textures;
-        std::array<float, static_cast<u32>(Runtime::MaterialProperty::Count)> Properties;
+        std::array<Graphics::RHI_Texture*, static_cast<u64>(Runtime::TextureAssetTypes::Count)> Textures;
+        std::array<float, static_cast<u32>(Runtime::MaterialAssetProperty::Count)> Properties;
     };
 
     struct IS_RUNTIME RenderMesh

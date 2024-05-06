@@ -13,8 +13,6 @@ namespace Insight
 {
     namespace Runtime
     {
-        class ResourceSystem;
-
         constexpr const char* c_ProjectExtension = ".isproject";
 
         //TODO High: Move this into the editor project and out of the Runtime one.
@@ -44,8 +42,6 @@ namespace Insight
 
             IS_SYSTEM(ProjectSystem);
 
-            void SetResourceSystem(ResourceSystem* resourceSystem);
-
             bool IsProjectOpen() const;
 
             bool CreateProject(std::string_view projectPath, std::string_view projectName);
@@ -57,7 +53,6 @@ namespace Insight
 
         private:
             ProjectInfo m_projectInfo;
-            ResourceSystem* m_resourceSystem = nullptr;
         };
     }
 

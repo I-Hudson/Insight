@@ -18,12 +18,8 @@
 #include "ECS/Components/MeshComponent.h"
 #include "ECS/Components/FreeCameraControllerComponent.h"
 
-#include "Resource/Model.h"
+#include "Asset/Assets/Model.h"
 #include "Resource/Mesh.h"
-#include "Resource/Texture2D.h"
-#include "Resource/Material.h"
-
-#include "Resource/ResourceManager.h"
 
 #include <glm/gtx/matrix_interpolation.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
@@ -54,7 +50,7 @@ namespace Insight
 	Graphics::Frustum MainCameraFrustum = {};
 	bool UseCustomFrustum = false;
 
-	std::vector<std::pair<Runtime::Model*, bool>> modelsToAddToScene;
+	std::vector<std::pair<Ref<Runtime::ModelAsset>, bool>> modelsToAddToScene;
 
 	static bool enableFSR = false;
 	static float fsrSharpness = 1.0f;
@@ -91,28 +87,28 @@ namespace Insight
 
 			if constexpr (DefaultModelToLoad == DefaultModels::Backpack)
 			{
-				TObjectPtr<Runtime::Model> model_backpack = Runtime::ResourceManager::Instance().LoadSync(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Survival_BackPack_2/obj/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
+				Ref<Runtime::ModelAsset> model_backpack = Runtime::AssetRegistry::Instance().LoadAsset2(EnginePaths::GetResourcePath() + "/models/Survival_BackPack_2/obj/backpack.obj").As<Runtime::ModelAsset>();
 				modelsToAddToScene.push_back({ model_backpack, false });
 			}
 			else if constexpr (DefaultModelToLoad == DefaultModels::SponzaMain)
 			{
-				TObjectPtr<Runtime::Model> model_sponza = Runtime::ResourceManager::Instance().LoadSync(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Sponza/Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
+				Ref<Runtime::ModelAsset> model_sponza = Runtime::AssetRegistry::Instance().LoadAsset2(EnginePaths::GetResourcePath() + "/models/Sponza/Sponza/NewSponza_Main_glTF_002.gltf").As<Runtime::ModelAsset>();
 				modelsToAddToScene.push_back({ model_sponza, false });
 			}
 			else if constexpr (DefaultModelToLoad == DefaultModels::SponzaMain_Curtains)
 			{
-				TObjectPtr<Runtime::Model> model_sponza = Runtime::ResourceManager::Instance().Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Sponza/Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
-				TObjectPtr<Runtime::Model> model_sponza_curtains = Runtime::ResourceManager::Instance().Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Sponza/Curtains/NewSponza_Curtains_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
+				Ref<Runtime::ModelAsset> model_sponza = Runtime::AssetRegistry::Instance().LoadAsset2(EnginePaths::GetResourcePath() + "/models/Sponza/Sponza/NewSponza_Main_glTF_002.gltf").As<Runtime::ModelAsset>();
+				Ref<Runtime::ModelAsset> model_sponza_curtains = Runtime::AssetRegistry::Instance().LoadAsset2(EnginePaths::GetResourcePath() + "/models/Sponza/Curtains/NewSponza_Curtains_glTF.gltf").As<Runtime::ModelAsset>();
 				modelsToAddToScene.push_back({ model_sponza, false });
 				modelsToAddToScene.push_back({ model_sponza_curtains, false });
 			}
 			else if constexpr (DefaultModelToLoad == DefaultModels::SponzaFull)
 			{
-				TObjectPtr<Runtime::Model> model_sponza = Runtime::ResourceManager::Instance().Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Sponza/Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
-				TObjectPtr<Runtime::Model> model_sponza_curtains = Runtime::ResourceManager::Instance().Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Sponza/Curtains/NewSponza_Curtains_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
-				TObjectPtr<Runtime::Model> model_sponza_ivy = Runtime::ResourceManager::Instance().Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Sponza/Ivy/NewSponza_IvyGrowth_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
-				TObjectPtr<Runtime::Model> model_sponza_trees = Runtime::ResourceManager::Instance().Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Sponza/Trees/NewSponza_CypressTree_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
-
+				Ref<Runtime::ModelAsset> model_sponza = Runtime::AssetRegistry::Instance().LoadAsset2(EnginePaths::GetResourcePath() + "/models/Sponza/Sponza/NewSponza_Main_glTF_002.gltf").As<Runtime::ModelAsset>();
+				Ref<Runtime::ModelAsset> model_sponza_curtains = Runtime::AssetRegistry::Instance().LoadAsset2(EnginePaths::GetResourcePath() + "/models/Sponza/Curtains/NewSponza_Curtains_glTF.gltf").As<Runtime::ModelAsset>();
+				Ref<Runtime::ModelAsset> model_sponza_ivy = Runtime::AssetRegistry::Instance().LoadAsset2(EnginePaths::GetResourcePath() + "/models/Sponza/Ivy/NewSponza_IvyGrowth_glTF.gltf").As<Runtime::ModelAsset>();
+				Ref<Runtime::ModelAsset> model_sponza_trees = Runtime::AssetRegistry::Instance().LoadAsset2(EnginePaths::GetResourcePath() + "/models/Sponza/Trees/NewSponza_CypressTree_glTF.gltf").As<Runtime::ModelAsset>();
+				
 				modelsToAddToScene.push_back({ model_sponza, false });
 				modelsToAddToScene.push_back({ model_sponza_curtains, false });
 				modelsToAddToScene.push_back({ model_sponza_ivy, false });
@@ -180,7 +176,7 @@ namespace Insight
 				{
 					if (modelsToAddToScene.at(i).first
 						&& !modelsToAddToScene.at(i).second
-						&& modelsToAddToScene.at(i).first->GetResourceState() == Runtime::EResoruceStates::Loaded)
+						&& modelsToAddToScene.at(i).first->GetAssetState() == Runtime::AssetState::Loaded)
 					{
 						modelsToAddToScene.at(i).second = true;
 						for (size_t modelCreateIdx = 0; modelCreateIdx < 1; ++modelCreateIdx)
@@ -313,7 +309,7 @@ namespace Insight
 				{
 					if (modelsToAddToScene.at(i).first
 						&& !modelsToAddToScene.at(i).second
-						&& modelsToAddToScene.at(i).first->GetResourceState() == Runtime::EResoruceStates::Loaded)
+						&& modelsToAddToScene.at(i).first->GetAssetState() == Runtime::AssetState::Loaded)
 					{
 						modelsToAddToScene.at(i).second = true;
 						for (size_t modelCreateIdx = 0; modelCreateIdx < 1; ++modelCreateIdx)
@@ -814,7 +810,7 @@ namespace Insight
 
 									const RenderMaterial& renderMaterial = materialBatch.Material;
 									// Theses sets and bindings shouldn't chagne.
-									RHI_Texture* diffuseTexture = renderMaterial.Textures[(u64)Runtime::TextureTypes::Diffuse];
+									RHI_Texture* diffuseTexture = renderMaterial.Textures[(u64)Runtime::TextureAssetTypes::Diffuse];
 									if (diffuseTexture)
 									{
 										cmdList->SetTexture(3, 0, diffuseTexture);
@@ -855,7 +851,7 @@ namespace Insight
 
 									const RenderMaterial& renderMaterial = mesh.Material;
 									// Theses sets and bindings shouldn't chagne.
-									RHI_Texture* diffuseTexture = renderMaterial.Textures[(u64)Runtime::TextureTypes::Diffuse];
+									RHI_Texture* diffuseTexture = renderMaterial.Textures[(u64)Runtime::TextureAssetTypes::Diffuse];
 									if (diffuseTexture)
 									{
 										cmdList->SetTexture(3, 0, diffuseTexture);
@@ -994,7 +990,7 @@ namespace Insight
 
 									const RenderMaterial& renderMaterial = materialBatch.Material;
 									// Theses sets and bindings shouldn't chagne.
-									RHI_Texture* diffuseTexture = renderMaterial.Textures[(u64)Runtime::TextureTypes::Diffuse];
+									RHI_Texture* diffuseTexture = renderMaterial.Textures[(u64)Runtime::TextureAssetTypes::Diffuse];
 									if (diffuseTexture)
 									{
 										cmdList->SetTexture(3, 0, diffuseTexture);
@@ -1032,7 +1028,7 @@ namespace Insight
 
 								const RenderMaterial& renderMaterial = mesh.Material;
 								// Theses sets and bindings shouldn't chagne.
-								RHI_Texture* diffuseTexture = renderMaterial.Textures[(u64)Runtime::TextureTypes::Diffuse];
+								RHI_Texture* diffuseTexture = renderMaterial.Textures[(u64)Runtime::TextureAssetTypes::Diffuse];
 								if (diffuseTexture)
 								{
 									cmdList->SetTexture(3, 0, diffuseTexture);

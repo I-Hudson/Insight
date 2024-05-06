@@ -453,7 +453,6 @@ namespace Insight
 					const aiMesh* aiMesh = aiScene->mMeshes[aiNode->mMeshes[i]];
 					ProcessMesh(aiScene, aiMesh, meshNode->MeshData);
 					meshNode->Mesh->m_mesh_name = aiMesh->mName.C_Str();
-					meshNode->Mesh->m_file_path = aiMesh->mName.C_Str();
 
 					if (aiScene->HasMaterials() && aiMesh->mMaterialIndex < aiScene->mNumMaterials)
 					{
