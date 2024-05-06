@@ -265,6 +265,7 @@ namespace Insight::Runtime
 
     Ref<Asset> AssetRegistry::LoadAsset(std::string path)
     {
+        IS_PROFILE_FUNCTION();
         /*
             Order of things:
             First get the correct asset importer for the data being loaded. Do this before loading the data
@@ -289,7 +290,7 @@ namespace Insight::Runtime
         const IAssetImporter* importer = GetImporter(extension);
         if (importer == nullptr)
         {
-            IS_LOG_CORE_ERROR("[AssetRegistry::LoadAsset] 'Importer' is nullptr for extension '{}'.", extension);
+            //IS_LOG_CORE_ERROR("[AssetRegistry::LoadAsset] 'Importer' is nullptr for extension '{}'.", extension);
             return Ref<Asset>();
         }
 

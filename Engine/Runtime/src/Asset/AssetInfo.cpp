@@ -1,6 +1,8 @@
 #include "Asset/AssetInfo.h"
 #include "Asset/AssetRegistry.h"
 
+#include "Core/Profiler.h"
+
 #include "FileSystem/FileSystem.h"
 #include "Serialisation/Serialisers/JsonSerialiser.h"
 
@@ -93,6 +95,7 @@ namespace Insight
 
         std::string AssetInfo::GetFullFilePath() const
         {
+            IS_PROFILE_FUNCTION();
             return FilePath + "/" + FileName;
         }
 

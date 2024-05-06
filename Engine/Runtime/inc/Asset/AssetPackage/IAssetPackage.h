@@ -79,6 +79,8 @@ namespace Insight
             mutable std::mutex m_packageLock;
 
             std::vector<AssetInfo*> m_assetInfos;
+            std::unordered_map<std::string, AssetInfo*> m_assetInfosFromPath;
+            std::unordered_map<Core::GUID, AssetInfo*> m_assetInfosFromGuid;
         };
     }
 }

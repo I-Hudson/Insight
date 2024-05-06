@@ -6,6 +6,7 @@
 #include "Serialisation/Serialisers/BinarySerialiser.h"
 
 #include "Core/Logger.h"
+#include "Core/Profiler.h"
 #include "FileSystem/FileSystem.h"
 
 #include "Algorithm/Vector.h"
@@ -67,6 +68,8 @@ namespace Insight
 
                 std::lock_guard lock(m_packageLock);
                 m_assetInfos.push_back(assetInfo);
+                m_assetInfosFromPath[assetInfo->GetFullFilePath()] = assetInfo;
+                m_assetInfosFromGuid[assetInfo->Guid] = assetInfo;
                 return assetInfo;
             }
             else
@@ -98,6 +101,8 @@ namespace Insight
             assetInfo->PackageName.clear();
             assetInfo->PackagePath.clear();
             ASSERT(Algorithm::VectorRemove(m_assetInfos, assetInfo));
+            ASSERT(m_assetInfosFromPath.erase(assetInfo->GetFullFilePath()) == 1);
+            ASSERT(m_assetInfosFromGuid.erase(assetInfo->Guid) == 1);
         }
 
         bool IAssetPackage::HasAsset(std::string_view path) const
@@ -108,14 +113,7 @@ namespace Insight
         bool IAssetPackage::HasAsset(const Core::GUID& guid) const
         {
             std::lock_guard lock(m_packageLock);
-            return Algorithm::VectorContainsIf(m_assetInfos, [&guid](const AssetInfo* assetInfo)
-                {
-                    if (!assetInfo)
-                    {
-                        return false;
-                    }
-                    return guid == assetInfo->Guid;
-                });
+            return m_assetInfosFromGuid.find(guid) != m_assetInfosFromGuid.end();
         }
 
         bool IAssetPackage::HasAsset(const AssetInfo* assetInfo) const
@@ -129,29 +127,34 @@ namespace Insight
 
         const AssetInfo* IAssetPackage::GetAsset(std::string_view path) const
         {
+            IS_PROFILE_SCOPE("IAssetPackage::GetAsset::Path");
             std::string formattedPath = std::string(path);
             FileSystem::PathToUnix(formattedPath);
 
-            Core::GUID assetGuid = GetGuidFromPath(formattedPath);
-            return GetAsset(assetGuid);
+            std::lock_guard lock(m_packageLock);
+            if (auto iter = m_assetInfosFromPath.find(std::string(path));
+                iter != m_assetInfosFromPath.end())
+            {
+                return iter->second;
+            }
+            return nullptr;
         }
 
         const AssetInfo* IAssetPackage::GetAsset(const Core::GUID& guid) const
         {
+            IS_PROFILE_SCOPE("IAssetPackage::GetAsset::Guid");
             std::lock_guard lock(m_packageLock);
-            if (auto iter = Algorithm::VectorFindIf(m_assetInfos, [&guid](const AssetInfo* assetInfo)
-                {
-                    return guid == assetInfo->Guid;
-                });
-                iter != m_assetInfos.end())
+            if (auto iter = m_assetInfosFromGuid.find(guid);
+                iter != m_assetInfosFromGuid.end())
             {
-                return *iter;
+                return iter->second;
             }
             return nullptr;
         }
 
         const AssetInfo* IAssetPackage::GetAsset(const AssetInfo* assetInfo) const
         {
+            IS_PROFILE_SCOPE("IAssetPackage::GetAsset::AssetInfo*");
             if (!assetInfo)
             {
                 return nullptr;
@@ -207,6 +210,8 @@ namespace Insight
             buildPackage.BuildPackage(path);
 
             buildPackage.m_assetInfos.clear();
+            buildPackage.m_assetInfosFromPath.clear();
+            buildPackage.m_assetInfosFromGuid.clear();
         }
 
         void IAssetPackage::Destroy()
@@ -217,19 +222,18 @@ namespace Insight
                 AssetRegistry::Instance().RemoveAsset(infos.at(infoIdx)->GetFullFilePath());
             }
             m_assetInfos.clear();
+            m_assetInfosFromPath.clear();
+            m_assetInfosFromGuid.clear();
         }
 
         Core::GUID IAssetPackage::GetGuidFromPath(std::string_view path) const
         {
+            IS_PROFILE_FUNCTION();
             std::lock_guard lock(m_packageLock);
-            if (auto iter = Algorithm::VectorFindIf(m_assetInfos, [&path](const AssetInfo* assetInfo)
-                {
-                    const std::string assetFullPath = assetInfo->GetFullFilePath();
-                    return path == assetFullPath;
-                });
-                iter != m_assetInfos.end())
+            if (auto iter = m_assetInfosFromPath.find(std::string(path));
+                iter != m_assetInfosFromPath.end())
             {
-                return (*iter)->Guid;
+                return iter->second->Guid;
             }
             return { };
         }

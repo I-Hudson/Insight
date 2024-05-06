@@ -238,7 +238,11 @@ namespace Insight::Editor
 
                         //Runtime::IResource* contentResource = nullptr;
                         Ref<Runtime::Asset> contentResource = nullptr;
-                        const Runtime::AssetInfo* assetInfo = Runtime::AssetRegistry::Instance().GetAssetInfo(path);
+                        const Runtime::AssetInfo* assetInfo;      
+                        {
+                            IS_PROFILE_SCOPE("GetAssetInfo");
+                            assetInfo = Runtime::AssetRegistry::Instance().GetAssetInfo(path);
+                        }
 
                         if (iter.is_regular_file())
                         {
@@ -267,6 +271,7 @@ namespace Insight::Editor
 
                             // Compute rectangles for elements that make up an item
                             {
+                                IS_PROFILE_SCOPE("Button");
                                 rect_button = ImRect
                                 (
                                     ImGui::GetCursorScreenPos().x,
@@ -294,6 +299,7 @@ namespace Insight::Editor
 
                             // THUMBNAIL
                             {
+                                IS_PROFILE_SCOPE("THUMBNAIL");
                                 ImGui::PushID(fileName.c_str());
                                 ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0, 0, 0, 0));
                                 ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 1.0f, 0.25f));
@@ -320,16 +326,14 @@ namespace Insight::Editor
                                         }
                                         else
                                         {
-                                            const Runtime::AssetInfo* info = Runtime::AssetRegistry::Instance().GetAssetInfo(path);
-                                            ASSERT(info);
 
                                             AssetInspectorWindow* assetInspectorWindow = static_cast<AssetInspectorWindow*>(EditorWindowManager::Instance().GetActiveWindow(AssetInspectorWindow::WINDOW_NAME));
                                             if (assetInspectorWindow)
                                             {
-                                                assetInspectorWindow->SetSelectedAssetInfo(info);
+                                                assetInspectorWindow->SetSelectedAssetInfo(assetInfo);
                                             }
 
-                                            std::vector<IObject*> objects = Runtime::AssetRegistry::Instance().GetObjectsFromAsset(info->Guid);
+                                            std::vector<IObject*> objects = Runtime::AssetRegistry::Instance().GetObjectsFromAsset(assetInfo->Guid);
                                             if (!objects.empty())
                                             {
 
@@ -340,9 +344,10 @@ namespace Insight::Editor
 
                                 // Image
                                 {
+                                    IS_PROFILE_SCOPE("Image");
                                     // Compute thumbnail size
                                     Graphics::RHI_Texture* texture = nullptr;
-                                    if (Runtime::AssetRegistry::Instance().GetAssetInfo(path))
+                                    if (assetInfo != nullptr)
                                     {
                                         Ref<Runtime::Asset> asset = Runtime::AssetRegistry::Instance().LoadAsset(path);
                                         if (Ref<Runtime::TextureAsset> textureAsset = asset.As<Runtime::TextureAsset>())
@@ -752,6 +757,8 @@ namespace Insight::Editor
 
     void ContentWindow::SplitDirectory()
     {
+        IS_PROFILE_FUNCTION();
+
         m_currentDirectoryParents.clear();
         std::string directory = m_currentDirectory;
         u64 splitIndex = directory.find('/');

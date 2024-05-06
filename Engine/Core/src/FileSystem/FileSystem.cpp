@@ -377,6 +377,7 @@ namespace Insight
 
     bool FileSystem::PathIsSubPathOf(std::string_view path, std::string_view basePath)
     {
+        IS_PROFILE_FUNCTION();
         std::filesystem::path fsPath(path);
         std::filesystem::path fsBasePath(basePath);
 
@@ -386,6 +387,7 @@ namespace Insight
 
     void FileSystem::PathToUnix(std::string& path)
     {
+        IS_PROFILE_FUNCTION();
         std::replace(path.begin(), path.end(), '\\', '/');
         if (!path.empty() && path.back() == '/')
         {
@@ -395,6 +397,7 @@ namespace Insight
 
     void FileSystem::PathToWindows(std::string& path)
     {
+        IS_PROFILE_FUNCTION();
         std::replace(path.begin(), path.end(), '/', '\\');
         if (!path.empty() && path.back() == '\\')
         {
