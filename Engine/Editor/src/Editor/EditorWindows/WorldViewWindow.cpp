@@ -69,8 +69,8 @@ namespace Insight
 
             const char* editorOutputItems[] =
             {
+                "EditorWorldLightRT",
                 "EditorWorldColourRT",
-                "EditorWorldLightRT"
             };
             static int editorOutput = 0;
             ImGui::Combo("Editor Output", &editorOutput, editorOutputItems, ARRAY_COUNT(editorOutputItems));
