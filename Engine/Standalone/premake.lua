@@ -194,17 +194,15 @@ project "InsightStandalone"
             "dxcompiler.lib",
             "GFSDK_Aftermath_Lib.x64.lib",
 
-            "GenericCodeGend.lib",
-            "glslangd.lib",
-            "glslang-default-resource-limitsd.lib",
-            "HLSLd.lib",
-            "MachineIndependentd.lib",
-            "OGLCompilerd.lib",
-            "OSDependentd.lib",
-            "SPIRVd.lib",
-            "SPIRV-Toolsd.lib",
-            "SPIRV-Tools-optd.lib",
-            "SPVRemapperd.lib",
+            "GenericCodeGen.lib",
+            "glslang.lib",
+            "glslang-default-resource-limits.lib",
+            "MachineIndependent.lib",
+            "OSDependent.lib",
+            "SPIRV.lib",
+            "SPIRV-Tools.lib",
+            "SPIRV-Tools-opt.lib",
+            "SPVRemapper.lib",
             "assimpd.lib",
 
             "ffx_fsr2_api_x64d.lib",
@@ -271,6 +269,7 @@ project "InsightStandalone"
             "IS_PLATFORM_WINDOWS",
             "IS_PLATFORM_WIN32",
             "IS_MATHS_DIRECTX_MATHS",
+            "IS_MATHS_CONSTRUCTOR_GLM",
             "IS_DX12_ENABLED",
             "IS_VULKAN_ENABLED",
             "IS_CPP_WINRT",
@@ -281,6 +280,13 @@ project "InsightStandalone"
             
             "VK_USE_PLATFORM_WIN32_KHR",
         }
+        if VULKAN_SDK == nil then
+        else
+            defines
+            {
+                "IS_VULKAN_ENABLED",
+            }
+        end
         includedirs
          { 
             "%{IncludeDirs.pix}",

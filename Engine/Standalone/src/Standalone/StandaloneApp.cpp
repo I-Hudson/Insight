@@ -11,6 +11,7 @@
 #include "Renderpass.h"
 
 #include "Asset/AssetRegistry.h"
+#include "Serialisation/Serialisers/JsonSerialiser.h"
 
 #include "Runtime/EntryPoint.h"
 
@@ -50,7 +51,7 @@ namespace Insight
 			m_gameRenderpass = New<Graphics::Renderpass>();
 			m_gameRenderpass->Create();
 
-			std::vector<u8> runtimeSettingsData = Runtime::AssetRegistry::Instance().LoadAsset("RuntimeSettings.json");
+			std::vector<u8> runtimeSettingsData = Runtime::AssetRegistry::Instance().LoadAssetData("RuntimeSettings.json");
 			Serialisation::JsonSerialiser runtimeSettingsSerialsier(true);
 			if (runtimeSettingsSerialsier.Deserialise(runtimeSettingsData))
 			{

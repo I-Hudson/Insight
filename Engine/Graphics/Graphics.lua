@@ -189,7 +189,6 @@ project "Insight_Graphics"
             "SPIRV-Tools.lib",
             "SPIRV-Tools-opt.lib",
             "SPVRemapper.lib",
-            "assimpd.lib",
 
             "ffx_fsr2_api_x64d.lib",
             "ffx_fsr2_api_dx12_x64d.lib",
