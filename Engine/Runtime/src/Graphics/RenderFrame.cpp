@@ -139,7 +139,7 @@ namespace Insight
                         Runtime::Material* material = meshComponent->GetMaterial();
                         if (!material)
                         {
-                            continue;
+                            //continue;
                         }
 
                         renderMesh.SetMesh(mesh);

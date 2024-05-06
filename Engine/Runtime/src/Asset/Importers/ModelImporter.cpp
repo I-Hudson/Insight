@@ -1,12 +1,15 @@
 #include "Asset/Importers/ModelImporter.h"
 #include "Asset/AssetRegistry.h"
 #include "Asset/Assets/Model.h"
-#include "Asset/Assets/TExture.h"
+#include "Asset/Assets/Texture.h"
+
+#include "Resource/Mesh.h"
 
 #include "Graphics/RenderContext.h"
 
 #include "Core/Logger.h"
 #include "Core/Profiler.h"
+#include "Algorithm/Vector.h"
 
 #include "FileSystem/FileSystem.h"
 
@@ -310,7 +313,10 @@ namespace Insight
 
 
 			Ref<ModelAsset> modelAsset = New<ModelAsset>(assetInfo);
-			modelAsset.Ptr()->m_assetState = AssetState::Loaded;
+			modelAsset.Ptr()->m_assetState = AssetState::Loading;
+			modelAsset->SetName(scene->mName.C_Str());
+
+			std::unordered_map<const aiMaterial*, Ref<MaterialAsset>> materialCache;
 
 			std::vector<MeshNode*> meshNodes;
 			{
@@ -320,7 +326,10 @@ namespace Insight
 				{
 					meshNodes[i]->Directory = assetInfo->FilePath;
 					meshNodes[i]->FileName = assetInfo->FileName;
+					meshNodes[i]->MaterialCache = &materialCache;
 				}
+				Delete(*meshNodes.begin());
+				meshNodes.erase(meshNodes.begin());
 			}
 
 			{
@@ -360,12 +369,21 @@ namespace Insight
 
 			for (size_t i = 0; i < meshNodes.size(); ++i)
 			{
-				MeshNode*& meshNode = meshNodes[i];
-				Delete(meshNode->MeshData);
-				Delete(meshNode->Mesh);
-				Delete(meshNode);
+				modelAsset->m_meshes.push_back(meshNodes[i]->Mesh);
+				Algorithm::VectorAddUnique(modelAsset->m_materials, meshNodes[i]->Mesh->GetMaterialAsset());
+				meshNodes[i]->Mesh = nullptr;
 			}
 
+			for (size_t i = 0; i < meshNodes.size(); ++i)
+			{
+				MeshNode*& meshNode = meshNodes[i];
+				Delete(meshNode->MeshData);
+				//Delete(meshNode->Mesh);
+				Delete(meshNode);
+			}
+			meshNodes.clear();
+
+			modelAsset.Ptr()->m_assetState = AssetState::Loaded;
 			return modelAsset;
 		}
 
@@ -430,10 +448,14 @@ namespace Insight
 					IS_PROFILE_SCOPE("Mesh evaluated");
 					const aiMesh* aiMesh = aiScene->mMeshes[aiNode->mMeshes[i]];
 					ProcessMesh(aiScene, aiMesh, meshNode->MeshData);
+					meshNode->Mesh->m_mesh_name = aiMesh->mName.C_Str();
+					meshNode->Mesh->m_file_path = aiMesh->mName.C_Str();
+
 					if (aiScene->HasMaterials() && aiMesh->mMaterialIndex < aiScene->mNumMaterials)
 					{
 						meshNode->AssimpMaterial = aiScene->mMaterials[aiMesh->mMaterialIndex];
-						ProcessMaterial(meshNode);
+						Ref<MaterialAsset> material = ProcessMaterial(meshNode);
+						meshNode->Mesh->SetMaterial(material);
 					}
 				}
 			}
@@ -444,35 +466,39 @@ namespace Insight
 				&& !meshData->Indices.empty())
 			{
 				meshData->GenerateLODs();
-				meshData->Optimise();
+				//meshData->Optimise();
+
+				Mesh* mesh = meshNode->Mesh;
+				ASSERT(mesh);
 
 				if (!meshData->RHI_VertexBuffer)
 				{
 					meshData->RHI_VertexBuffer = Renderer::CreateVertexBuffer(meshData->Vertices.size() * sizeof(Graphics::Vertex), sizeof(Graphics::Vertex));
+					meshData->RHI_VertexBuffer->Upload(meshData->Vertices.data(), meshData->RHI_VertexBuffer->GetSize());
 				}
 				else
 				{
 					// We already have a buffer, just upload out data.
+					FAIL_ASSERT();
 				}
 
 				if (!meshData->RHI_IndexBuffer)
 				{
 					meshData->RHI_IndexBuffer = Renderer::CreateIndexBuffer(meshData->Indices.size() * sizeof(u32));
+					meshData->RHI_IndexBuffer->Upload(meshData->Indices.data(), meshData->RHI_IndexBuffer->GetSize());
 				}
 				else
 				{
 					// We already have a buffer, just upload out data.
+					FAIL_ASSERT();
 				}
-
-				Mesh* mesh = meshNode->Mesh;
-				ASSERT(mesh);
 
 				mesh->m_lods.resize(Mesh::s_LOD_Count);
 				for (size_t lodIdx = 0; lodIdx < meshData->LODs.size(); ++lodIdx)
 				{
 					MeshData::LOD meshDataLod = meshData->LODs[lodIdx];
 					MeshLOD& meshLod = mesh->m_lods[lodIdx];
-					meshLod.LOD_index = lodIdx;
+					meshLod.LOD_index = static_cast<u32>(lodIdx);
 
 					meshLod.Vertex_offset = static_cast<u32>(meshDataLod.Vertex_offset);
 					meshLod.Vertex_count = static_cast<u32>(meshDataLod.Vertex_count);
@@ -582,11 +608,21 @@ namespace Insight
 					static_cast<u32>(meshData->Indices.size())));
 		}
 
-		void ModelImporter::ProcessMaterial(MeshNode* meshNode) const
+		Ref<MaterialAsset> ModelImporter::ProcessMaterial(MeshNode* meshNode) const
 		{
 			IS_PROFILE_FUNCTION();
 
 			const aiMaterial* aiMaterial = meshNode->AssimpMaterial;
+
+			{
+				std::lock_guard lock(meshNode->MaterialCacheLock);
+				if (auto iter = (*meshNode->MaterialCache).find(aiMaterial);
+					iter != (*meshNode->MaterialCache).end())
+				{
+					return iter->second;
+				}
+			}
+
 			ASSERT_MSG(aiMaterial, "[ModelImporter::ProcessMaterial] AssimpMaterial from MeshNode was nullptr. This shouldn't happen.");
 			const std::string materialname = aiMaterial->GetName().C_Str();
 
@@ -601,6 +637,20 @@ namespace Insight
 
 			aiColor4D opacity(1.0f);
 			aiGetMaterialColor(aiMaterial, AI_MATKEY_OPACITY, &opacity);
+
+			Ref<MaterialAsset> material = ::New<MaterialAsset>(nullptr);
+			material->SetName(materialname);
+			material->SetTexture(TextureAssetTypes::Diffuse, diffuseTexture);
+			material->SetTexture(TextureAssetTypes::Normal, normalTexture);
+
+			material->SetProperty(MaterialAssetProperty::Colour_R, colour.r);
+			material->SetProperty(MaterialAssetProperty::Colour_G, colour.g);
+			material->SetProperty(MaterialAssetProperty::Colour_B, colour.b);
+			material->SetProperty(MaterialAssetProperty::Colour_A, colour.a);
+
+			std::lock_guard lock(meshNode->MaterialCacheLock);
+			(*meshNode->MaterialCache)[aiMaterial] = material;
+			return material;
 		}
 
 		std::string ModelImporter::GetTexturePath(const aiMaterial* aiMaterial, const std::string_view directory, const aiTextureType textureTypePBR, const aiTextureType textureTypeLegacy) const

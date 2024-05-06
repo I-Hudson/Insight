@@ -1,5 +1,7 @@
 #include "Asset/Assets/Model.h"
 
+#include "Core/Logger.h"
+
 #include "Graphics/RenderContext.h"
 
 #include "World/WorldSystem.h"
@@ -33,14 +35,14 @@ namespace Insight::Runtime
 		return static_cast<u32>(m_meshes.size());
 	}
 
-	Material* ModelAsset::GetMaterial() const
+	Ref<MaterialAsset> ModelAsset::GetMaterial() const
 	{
-		return m_materials.empty() ? nullptr : m_materials.at(0);
+		return m_materials.empty() ? nullptr : m_materials[0];
 	}
 
-	Material* ModelAsset::GetMaterialByIndex(u32 index) const
+	Ref<MaterialAsset> ModelAsset::GetMaterialByIndex(u32 index) const
 	{
-		return m_materials.at(index);
+		return m_materials[index];
 	}
 
 	u32 ModelAsset::GetMaterialCount() const
@@ -53,10 +55,10 @@ namespace Insight::Runtime
 		TObjectPtr<World> world = Runtime::WorldSystem::Instance().GetActiveWorld();
 		if (world)
 		{
-			Ptr<ECS::Entity> root_entity = world->AddEntity(GetFileName());
+			Ptr<ECS::Entity> root_entity = world->AddEntity(GetName());
 			for (Mesh* mesh : m_meshes)
 			{
-				Ptr<ECS::Entity> entity = root_entity->AddChild(mesh->GetFileName());
+				Ptr<ECS::Entity> entity = root_entity->AddChild(std::string(mesh->GetName()));
 				static_cast<ECS::TransformComponent*>(entity->GetComponentByName(ECS::TransformComponent::Type_Name))->SetTransform(mesh->GetTransform());
 				ECS::MeshComponent* meshComponent = static_cast<ECS::MeshComponent*>(entity->AddComponentByName(ECS::MeshComponent::Type_Name));
 				meshComponent->SetMesh(mesh);
@@ -73,18 +75,22 @@ namespace Insight::Runtime
 		for (Mesh* mesh : m_meshes)
 		{
 			mesh->OnUnloaded(mesh);
+			::Delete(mesh);
 			//RemoveDependentResource(mesh);
 			//ResourceManager::Instance().RemoveDependentResource(mesh->GetResourceId());
 		}
 		m_meshes.clear();
 
-		int materialIdx = 0;
-		for (Material* material : m_materials)
+		for (Ref<MaterialAsset>& material : m_materials)
 		{
-			material->OnUnloaded(material);
+			material->OnUnload();
+
+			if (material->GetReferenceCount() > 1)
+			{
+				IS_LOG_CORE_WARN("[ModelAsset::OnUnload] Material '{}', is reference elsewhere. Will not be deleted here.", material->GetFilePath());
+			}
 			//RemoveDependentResource(material);
 			//ResourceManager::Instance().RemoveDependentResource(material->GetResourceId());
-			++materialIdx;
 		}
 		m_materials.clear();
 

@@ -5,6 +5,8 @@
 #include "Graphics/RHI/RHI_Buffer.h"
 #include "Graphics/BoundingBox.h"
 
+#include "Asset/Assets/Material.h"
+
 #include "Generated/Mesh_reflect_generated.h"
 
 namespace Insight
@@ -66,6 +68,10 @@ namespace Insight
 			
 			void SetMaterial(Material* material);
 			Material* GetMaterial() const;
+
+			void SetMaterial(Ref<MaterialAsset> material);
+			Ref<MaterialAsset> GetMaterialAsset() const;
+
 			Graphics::BoundingBox GetBoundingBox() const;
 
 			static const u32 s_LOD_Count = 4;
@@ -77,6 +83,7 @@ namespace Insight
 		private:
 			std::vector<MeshLOD> m_lods;
 			Material* m_material = nullptr;
+			Ref<MaterialAsset> m_materialAsset = nullptr;
 			Graphics::BoundingBox m_boundingBox;
 
 			std::string m_mesh_name;

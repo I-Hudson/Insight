@@ -24,7 +24,7 @@ namespace Insight
 
 		Mesh::~Mesh()
 		{
-
+			UnLoad();
 		}
 
 		IS_SERIALISABLE_CPP(Mesh)
@@ -51,10 +51,19 @@ namespace Insight
 		{
 			m_material = material;
 		}
-
 		Material* Mesh::GetMaterial() const
 		{
 			return m_material;
+		}
+
+		void Mesh::SetMaterial(Ref<MaterialAsset> material)
+		{
+			m_materialAsset = material;
+		}
+
+		Ref<MaterialAsset> Mesh::GetMaterialAsset() const
+		{
+			return m_materialAsset;
 		}
 
 		Graphics::BoundingBox Mesh::GetBoundingBox() const

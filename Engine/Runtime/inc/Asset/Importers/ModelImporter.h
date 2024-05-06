@@ -2,6 +2,8 @@
 
 #include "Asset/Importers/IAssetImporter.h"
 
+#include "Asset/Assets/Material.h"
+
 #include "Graphics/Vertex.h"
 
 #include <vector>
@@ -54,12 +56,22 @@ namespace Insight
 
         struct MeshNode
         {
+            ~MeshNode()
+            {
+                Delete(MeshData);
+                Delete(Mesh);
+            }
+
             const aiScene* AssimpScene = nullptr;
             const aiNode* AssimpNode = nullptr;
             const aiMaterial* AssimpMaterial = nullptr;
 
             const MeshNode* Parent = nullptr;
             MeshData* MeshData = nullptr;
+
+            // Store all the materials found when loading the model in a cache to be reused if needed by multiple meshes.
+            std::unordered_map<const aiMaterial*, Ref<MaterialAsset>>* MaterialCache;
+            mutable std::mutex MaterialCacheLock;
 
             std::vector<MeshNode*> Children;
             Mesh* Mesh;
@@ -80,7 +92,7 @@ namespace Insight
             void PreallocateVeretxAndIndexBuffers(MeshNode* meshNode) const;
             void ProcessNode(MeshNode* meshNode) const;
             void ProcessMesh(const aiScene* aiScene, const aiMesh* aiMesh, MeshData* meshData) const;
-            void ProcessMaterial(MeshNode* meshNode) const;
+            Ref<MaterialAsset> ProcessMaterial(MeshNode* meshNode) const;
 
             /// @brief Returns the texture path from the model directory.
             /// @param aiMaterial 

@@ -101,6 +101,15 @@ namespace Insight
 			return result;
 		}
 
+		template<typename T, typename V>
+		INLINE void VectorAddUnique(std::vector<T>& vector, V const& value)
+		{
+			if (VectorFind(vector, value) == vector.end())
+			{
+				vector.push_back(value);
+			}
+		}
+
 		template<typename T, typename Predicate>
 		INLINE typename std::vector<T>::iterator VectorRemoveIf(std::vector<T>& vector, Predicate predicate)
 		{

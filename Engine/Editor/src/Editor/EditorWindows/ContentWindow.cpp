@@ -243,7 +243,8 @@ namespace Insight::Editor
                         std::string fileName = iter.path().filename().string();
                         std::string fileExtension = iter.path().extension().string();
 
-                        Runtime::IResource* contentResource = nullptr;
+                        //Runtime::IResource* contentResource = nullptr;
+                        Ref<Runtime::Asset> contentResource = nullptr;
                         const Runtime::AssetInfo* assetInfo = Runtime::AssetRegistry::Instance().GetAsset(path);
 
                         if (iter.is_regular_file())
@@ -255,7 +256,8 @@ namespace Insight::Editor
                             }
                             else
                             {
-                                contentResource = Runtime::ResourceManager::Instance().LoadSync(path, false);
+                                //contentResource = Runtime::ResourceManager::Instance().LoadSync(path, false);
+                                contentResource = Runtime::AssetRegistry::Instance().LoadAsset2(path);
                             }
                         }
 

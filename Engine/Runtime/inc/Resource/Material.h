@@ -4,7 +4,7 @@
 #include "Resource/Texture2D.h"
 #include "Resource/ResourceLifeTimeHandle.h"
 
-#include "Generated/Material_reflect_generated.h"
+//#include "Generated/Material_reflect_generated.h"
 
 #include <array>
 
@@ -28,11 +28,8 @@ namespace Insight
 			Count
 		};
 
-		REFLECT_CLASS()
 		class IS_RUNTIME Material : public IResource
 		{
-			REFLECT_GENERATED_BODY()
-		
 		public:
 			Material();
 			Material(std::string_view filePath);

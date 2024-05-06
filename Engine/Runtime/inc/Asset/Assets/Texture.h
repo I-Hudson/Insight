@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Asset/Asset.h"
+#include "Runtime/Defines.h"
 
 #include "Graphics/PixelFormat.h"
 
@@ -15,6 +16,15 @@ namespace Insight
 
     namespace Runtime
     {
+        enum class TextureAssetTypes
+        {
+            Diffuse,
+            Normal,
+            Specular,
+
+            Count
+        };
+
         class TextureAsset : public Asset
         {
         public:

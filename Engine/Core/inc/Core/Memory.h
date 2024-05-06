@@ -68,6 +68,15 @@ FORCE_INLINE void Delete(T*& pointer)
 	}
 	pointer = nullptr;
 }
+template<typename T>
+FORCE_INLINE void Delete(const T* pointer)
+{
+	if (pointer != nullptr)
+	{
+		Insight::Core::MemoryTracker::Instance().UnTrack(pointer);
+		delete pointer;
+	}
+}
 
 template<typename T>
 FORCE_INLINE void DeleteBytes(T*& pointer)

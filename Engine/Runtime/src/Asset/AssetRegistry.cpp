@@ -320,12 +320,62 @@ namespace Insight::Runtime
         }
 
         Ref<Asset> asset = importer->Import(assetInfo, path);
+        asset->SetGuid(assetInfo->Guid);
+
         {
             Threading::ScopedLock lock(m_loadedAssetLock);
             m_loadedAssets[path] = asset;
         }
         return asset;
     }
+
+    Ref<Asset> AssetRegistry::LoadAsset2(const Core::GUID guid)
+    {
+        if (!guid.IsValid())
+        {
+            return Ref<Asset>();
+        }
+
+        const AssetInfo* assetInfo = GetAssetInfo(guid);
+        if (assetInfo == nullptr)
+        {
+            IS_LOG_CORE_ERROR("[AssetRegistry::LoadAsset2] Unable to get AssetInfo from guid '{}'.", guid.ToString());
+            return Ref<Asset>();
+        }
+
+        {
+            std::lock_guard lock(m_loadedAssetLock);
+            if (auto iter = m_loadedAssets.find(assetInfo->GetFullFilePath());
+                iter != m_loadedAssets.end())
+            {
+                return iter->second;
+            }
+        }
+
+        const IAssetImporter* importer = nullptr;
+        std::string_view extension = FileSystem::GetExtension(assetInfo->GetFullFilePath());
+        for (const IAssetImporter* assetImporter : m_importers)
+        {
+            if (assetImporter && assetImporter->IsValidImporterForFileExtension(extension.data()))
+            {
+                importer = assetImporter;
+                break;
+            }
+        }
+        if (importer == nullptr)
+        {
+            IS_LOG_CORE_ERROR("[AssetRegistry::LoadAsset2] 'Importer' is nullptr for extension '{}'.", extension);
+            return Ref<Asset>();
+        }
+
+        Ref<Asset> asset = importer->Import(assetInfo, assetInfo->GetFullFilePath());
+        {
+            Threading::ScopedLock lock(m_loadedAssetLock);
+            m_loadedAssets[assetInfo->GetFullFilePath()] = asset;
+        }
+        return asset;
+    }
+
 
     const AssetInfo* AssetRegistry::GetAssetInfo(const std::string& path) const
     {
@@ -346,6 +396,25 @@ namespace Insight::Runtime
         {
             return iter->second;
         }
+#endif
+#undef GET_ASSET_INFO_DIRECT_FROM_ASSET_PACKAGE
+        return nullptr;
+    }
+    const AssetInfo* AssetRegistry::GetAssetInfo(const Core::GUID guid) const
+    {
+#define GET_ASSET_INFO_DIRECT_FROM_ASSET_PACKAGE
+#ifdef GET_ASSET_INFO_DIRECT_FROM_ASSET_PACKAGE
+        Threading::ScopedLock lock(m_assetPackagesLock);
+        for (size_t i = 0; i < m_assetPackages.size(); ++i)
+        {
+            const AssetInfo* assetInfo = m_assetPackages[i]->GetAsset(guid);
+            if (assetInfo != nullptr)
+            {
+                return assetInfo;
+            }
+        }
+#else
+        FAIL_ASSERT();
 #endif
 #undef GET_ASSET_INFO_DIRECT_FROM_ASSET_PACKAGE
         return nullptr;

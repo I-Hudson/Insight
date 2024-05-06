@@ -5,7 +5,8 @@
 #include "Editor/EditorGUI.h"
 
 #include "Runtime/Engine.h"
-#include "Resource/Model.h"
+//#include "Resource/Model.h"
+#include "Asset/Assets/Model.h"
 
 #include "Graphics/GraphicsSystem.h"
 #include "Graphics/RenderGraph/RenderGraph.h"
@@ -127,14 +128,20 @@ namespace Insight
                 Core::GUID resourceGuid;
                 resourceGuid.StringToGuid(resourceGuidString);
 
-                Runtime::IResource* resource = Runtime::ResourceManager::Instance().GetResourceFromGuid(resourceGuid);
-                if (resource)
+                //Runtime::IResource* resource = Runtime::ResourceManager::Instance().GetResourceFromGuid(resourceGuid);
+                //if (resource)
+                //{
+                //    if (resource->GetTypeInfo().GetType() == Runtime::Model::GetStaticTypeInfo().GetType())
+                //    {
+                //        Runtime::Model* model = static_cast<Runtime::Model*>(resource);
+                //        model->CreateEntityHierarchy();
+                //    }
+                //}
+
+                Ref<Runtime::Asset> asset = Runtime::AssetRegistry::Instance().LoadAsset2(resourceGuid);
+                if (Ref<Runtime::ModelAsset> modelAsset = asset.As<Runtime::ModelAsset>())
                 {
-                    if (resource->GetTypeInfo().GetType() == Runtime::Model::GetStaticTypeInfo().GetType())
-                    {
-                        Runtime::Model* model = static_cast<Runtime::Model*>(resource);
-                        model->CreateEntityHierarchy();
-                    }
+                    modelAsset->CreateEntityHierarchy();
                 }
             }
         }

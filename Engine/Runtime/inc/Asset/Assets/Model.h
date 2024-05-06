@@ -1,49 +1,57 @@
 #pragma once
 
 #include "Asset/Asset.h"
-#include "Resource/Material.h"
-#include "Resource/Mesh.h"
+#include "Asset/Assets/Material.h"
 
 #include "ECS/ICreateEntityHierarchy.h"
 
 #include "Generated/Model_reflect_generated.h"
 
-namespace Insight::Runtime
+namespace Insight
 {
-    class ModelImporter;
-
-    REFLECT_CLASS()
-    class ModelAsset : public Asset, public ECS::ICreateEntityHierarchy
+    namespace Graphics
     {
-        REFLECT_GENERATED_BODY()
-    public:
-        ModelAsset(const AssetInfo* assetInfo);
-        virtual ~ModelAsset() override;
+        class RHI_Buffer;
+    }
 
-        Mesh* GetMesh() const;
-        Mesh* GetMeshByIndex(u32 index) const;
-        u32 GetMeshCount() const;
+    namespace Runtime
+    {
+        class ModelImporter;
+        class Mesh;
 
-        Material* GetMaterial() const;
-        Material* GetMaterialByIndex(u32 index) const;
-        u32 GetMaterialCount() const;
+        REFLECT_CLASS()
+            class ModelAsset : public Asset, public ECS::ICreateEntityHierarchy
+        {
+            REFLECT_GENERATED_BODY()
+        public:
+            ModelAsset(const AssetInfo* assetInfo);
+            virtual ~ModelAsset() override;
 
-        //--ECS::ICreateEntityHierarchy
-        virtual ECS::Entity* CreateEntityHierarchy() override;
-        //--ECS::ICreateEntityHierarchy
+            Mesh* GetMesh() const;
+            Mesh* GetMeshByIndex(u32 index) const;
+            u32 GetMeshCount() const;
 
-        // BEGIN Asset
-    protected:
-        virtual void OnUnload() override;
-        // END Asset
+            Ref<MaterialAsset> GetMaterial() const;
+            Ref<MaterialAsset> GetMaterialByIndex(u32 index) const;
+            u32 GetMaterialCount() const;
 
-    private:
-        std::vector<Mesh*> m_meshes;
-        std::vector<Material*> m_materials;
+            //--ECS::ICreateEntityHierarchy
+            virtual ECS::Entity* CreateEntityHierarchy() override;
+            //--ECS::ICreateEntityHierarchy
 
-        Graphics::RHI_Buffer* m_vertex_buffer = nullptr;
-        Graphics::RHI_Buffer* m_index_buffer = nullptr;
+            // BEGIN Asset
+        protected:
+            virtual void OnUnload() override;
+            // END Asset
 
-        friend class ModelImporter;
-    };
+        private:
+            std::vector<Mesh*> m_meshes;
+            std::vector<Ref<MaterialAsset>> m_materials;
+
+            Graphics::RHI_Buffer* m_vertex_buffer = nullptr;
+            Graphics::RHI_Buffer* m_index_buffer = nullptr;
+
+            friend class ModelImporter;
+        };
+    }
 }

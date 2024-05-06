@@ -30,6 +30,16 @@ namespace Insight::Runtime
         return m_isMemoryAsset;
     }
 
+    void Asset::SetName(const std::string& name)
+    {
+        m_name = name;
+    }
+
+    std::string Asset::GetName() const
+    {
+        return m_name;
+    }
+
     std::string Asset::GetFileName() const
     {
         ASSERT(!IsMemoryAsset());

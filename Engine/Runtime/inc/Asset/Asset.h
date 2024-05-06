@@ -9,7 +9,7 @@ namespace Insight::Runtime
 {
     class AssetRegistry;
 
-    enum class AssetState
+    enum class AssetState : u8
     {
         NotLoaded,
         Loading,
@@ -31,6 +31,9 @@ namespace Insight::Runtime
         AssetState GetAssetState() const;
         bool IsMemoryAsset() const;
 
+        void SetName(const std::string& name);
+
+        std::string GetName() const;
         std::string GetFileName() const;
         std::string GetFilePath() const;
         std::string GetPackageName() const;
@@ -40,6 +43,7 @@ namespace Insight::Runtime
         virtual void OnUnload() = 0;
 
     protected:
+        std::string m_name;
         const AssetInfo* m_assetInfo = nullptr;
         std::atomic<AssetState> m_assetState = AssetState::NotLoaded;
         bool m_isMemoryAsset = false;
