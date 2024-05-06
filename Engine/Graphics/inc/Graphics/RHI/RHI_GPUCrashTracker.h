@@ -1,13 +1,6 @@
 #pragma once
 
-#include <iomanip>
-#include <string>
-#include <sstream>
-#include <mutex>
-
-#ifdef IS_PLATFORM_WINDOWS
-#include <Windows.h>
-#endif
+#include "Core/Singleton.h"
 
 #ifdef IS_NVIDIA_AFTERMATH_ENABLED
 #ifdef IS_DX12_ENABLED
@@ -18,11 +11,20 @@
 #include "GFSDK_Aftermath_GpuCrashDumpDecoding.h"
 #endif
 
+#include <iomanip>
+#include <string>
+#include <sstream>
+#include <mutex>
+
+#ifdef IS_PLATFORM_WINDOWS
+#include <Windows.h>
+#endif
+
 namespace Insight
 {
 	namespace Graphics
 	{
-		class RHI_GPUCrashTracker
+		class RHI_GPUCrashTracker : public Core::Singleton<RHI_GPUCrashTracker>
 		{
 		public:
 			static RHI_GPUCrashTracker* Create();

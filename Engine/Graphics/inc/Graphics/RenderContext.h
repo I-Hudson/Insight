@@ -344,12 +344,14 @@ namespace Insight
 		static Graphics::RHI_Buffer* CreateIndexBuffer(u64 sizeBytes, Graphics::RHI_Buffer_Overrides buffer_overrides = { });
 		static Graphics::RHI_Buffer* CreateUniformBuffer(u64 sizeBytes, Graphics::RHI_Buffer_Overrides buffer_overrides = { });
 		static Graphics::RHI_Buffer* CreateReadbackBuffer(u64 sizeBytes, Graphics::RHI_Buffer_Overrides buffer_overrides = { });
+		static Graphics::RHI_Buffer* CreateStagingBuffer(u64 sizeBytes, Graphics::RHI_Buffer_Overrides buffer_overrides = { });
 		static Graphics::RHI_Buffer* CreateRawBuffer(u64 sizeBytes, Graphics::RHI_Buffer_Overrides buffer_overrides = { });
 
 		static void FreeVertexBuffer(Graphics::RHI_Buffer* buffer);
 		static void FreeIndexBuffer(Graphics::RHI_Buffer* buffer);
 		static void FreeUniformBuffer(Graphics::RHI_Buffer* buffer);
 		static void FreeReadbackBuffer(Graphics::RHI_Buffer* buffer);
+		static void FreeStagingBuffer(Graphics::RHI_Buffer* buffer);
 		static void FreeRawBuffer(Graphics::RHI_Buffer* buffer);
 
 		static int GetVertexBufferCount();

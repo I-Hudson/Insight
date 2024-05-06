@@ -76,7 +76,8 @@ namespace Insight
 				});
 #else
 			Create(&RenderContext::Instance(), createInfo);
-			Upload(data, static_cast<int>(size_in_bytes));
+			//Upload(data, static_cast<int>(size_in_bytes));
+			RenderContext::Instance().GetUploadQueue().UploadTexture(data, size_in_bytes, this);
 #endif
 		}
 

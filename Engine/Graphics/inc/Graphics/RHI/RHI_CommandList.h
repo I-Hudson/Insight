@@ -50,6 +50,7 @@ namespace Insight
 
 			static RHI_CommandList* New();
 
+			RHI_CommandListStates GetState() const;
 			virtual void Reset();
 
 			virtual void Close() = 0;

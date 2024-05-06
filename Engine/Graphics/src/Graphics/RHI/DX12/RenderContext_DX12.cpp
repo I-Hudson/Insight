@@ -70,6 +70,12 @@ namespace Insight
 						if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&m_debugController))))
 						{
 							m_debugController->EnableDebugLayer();
+							ID3D12Debug1* spDebugController1;
+							if (SUCCEEDED(m_debugController->QueryInterface(IID_PPV_ARGS(&spDebugController1))))
+							{
+								spDebugController1->SetEnableGPUBasedValidation(true);
+							}
+
 							/// Enable additional debug layers.
 							dxgiFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
 
@@ -93,7 +99,8 @@ namespace Insight
 				));
 
 				m_gpuCrashTracker = RHI_GPUCrashTracker::Create();
-				if (m_gpuCrashTracker)
+				if (!m_desc.GPUValidation
+					&& m_gpuCrashTracker)
 				{
 					m_gpuCrashTracker->Init();
 				}
@@ -415,6 +422,7 @@ namespace Insight
 							{
 								if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET)
 								{
+									HRESULT removeReason = m_device->GetDeviceRemovedReason();
 									if (m_gpuCrashTracker)
 									{
 										m_gpuCrashTracker->DeviceLost();

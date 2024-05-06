@@ -79,7 +79,7 @@ namespace Insight
 			context->m_frameDescriptorAllocator.Setup();
 
 			context->m_rhiMemoryInfo.Setup();
-			context->m_renderDocAPI.Initialise();
+			//context->m_renderDocAPI.Initialise();
 
 #ifdef RENDERGRAPH_V2_ENABLED
 			context->m_renderGraphV2 = ::New<RenderGraphV2>();
@@ -462,6 +462,12 @@ namespace Insight
 		return s_context->CreateBuffer(Graphics::BufferType::Readback, sizeBytes, 0, buffer_overrides);
 	}
 
+	Graphics::RHI_Buffer* Renderer::CreateStagingBuffer(u64 sizeBytes, Graphics::RHI_Buffer_Overrides buffer_overrides)
+	{
+		ASSERT(s_context);
+		return s_context->CreateBuffer(Graphics::BufferType::Staging, sizeBytes, 0, buffer_overrides);
+	}
+
 	Graphics::RHI_Buffer* Renderer::CreateRawBuffer(u64 sizeBytes, Graphics::RHI_Buffer_Overrides buffer_overrides)
 	{
 		return s_context->CreateBuffer(Graphics::BufferType::Raw, sizeBytes, 0, buffer_overrides);
@@ -507,6 +513,17 @@ namespace Insight
 		}
 		ASSERT(s_context);
 		ASSERT(buffer->GetType() == Graphics::BufferType::Readback);
+		s_context->FreeBuffer(buffer);
+	}
+
+	void Renderer::FreeStagingBuffer(Graphics::RHI_Buffer* buffer)
+	{
+		if (!buffer)
+		{
+			return;
+		}
+		ASSERT(s_context);
+		ASSERT(buffer->GetType() == Graphics::BufferType::Staging);
 		s_context->FreeBuffer(buffer);
 	}
 

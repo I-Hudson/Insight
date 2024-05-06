@@ -93,7 +93,7 @@ namespace Insight
 			void RemoveRequest(RHI_UploadQueueRequest* request);
 
 		private:
-			void UploadDataToStagingBuffer(const void* data, u64 sizeInBytes, RHI_UploadTypes uploadType);
+			void UploadDataToStagingBuffer(const void* data, u64 sizeInBytes, RHI_UploadTypes uploadType, RPtr<RHI_UploadQueueRequestInternal>& uploadRequest);
 
 		private:
 			/// <summary>
@@ -111,6 +111,8 @@ namespace Insight
 			/// The current offset this frame when uploading all the resources.
 			/// </summary>
 			u64 m_frameUploadOffset = 0;
+
+			const u64 c_UploadBufferMaxSize = 4_MB;
 
 			std::mutex m_mutex;
 		};

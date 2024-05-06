@@ -30,6 +30,11 @@ namespace Insight
 			return nullptr;
 		}
 
+		RHI_CommandListStates RHI_CommandList::GetState() const
+		{
+			return m_state;
+		}
+
 		void RHI_CommandList::Reset()
 		{
 			m_pso = {};

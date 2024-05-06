@@ -122,8 +122,9 @@ namespace Insight
             void RHI_Queue_DX12::Submit(const RHI_CommandList_DX12* cmdlist)
             {
                 //nvtx3::scoped_range range{ "RHI_Queue_DX12::Submit" };          
-                ID3D12CommandList* ppCommandLists[] = { cmdlist->GetCommandList() };
-                m_dxQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
+                ASSERT(cmdlist->GetState() == RHI_CommandListStates::Ended);
+                ID3D12CommandList* ppCommandLists = cmdlist->GetCommandList();
+                m_dxQueue->ExecuteCommandLists(1, &ppCommandLists);
             }
 
             const u64 RHI_Queue_DX12::Signal()

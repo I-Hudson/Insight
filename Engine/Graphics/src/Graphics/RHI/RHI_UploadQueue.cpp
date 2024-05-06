@@ -43,7 +43,7 @@ namespace Insight
 			std::lock_guard lock(m_mutex);
 			if (!m_uploadStagingBuffer)
 			{
-				m_uploadStagingBuffer = Renderer::CreateRawBuffer(1_MB,
+				m_uploadStagingBuffer = Renderer::CreateRawBuffer(c_UploadBufferMaxSize,
 					RHI_Buffer_Overrides
 					{
 						/*Force_Host_Writeable=*/true
@@ -65,10 +65,7 @@ namespace Insight
 		{
 			IS_PROFILE_FUNCTION();
 
-			UploadDataToStagingBuffer(data, sizeInBytes, RHI_UploadTypes::Buffer);
-
-			std::lock_guard lock(m_mutex);
-			m_queuedUploads.push_back(MakeRPtr<
+			RPtr<RHI_UploadQueueRequestInternal> uploadRequest = MakeRPtr<
 				RHI_UploadQueueRequestInternal>(
 					[=](const RHI_UploadQueueRequestInternal* request, RHI_CommandList* cmdList)
 					{
@@ -80,7 +77,15 @@ namespace Insight
 						request->Request->Status = DeviceUploadStatus::Uploading;
 						cmdList->CopyBufferToBuffer(buffer, 0, m_uploadStagingBuffer, m_frameUploadOffset, request->SizeInBytes);
 						m_frameUploadOffset += request->SizeInBytes;
-					}, buffer, sizeInBytes));
+					}, buffer, sizeInBytes);
+
+			UploadDataToStagingBuffer(data, sizeInBytes, RHI_UploadTypes::Buffer, uploadRequest);
+
+			if (uploadRequest)
+			{
+				std::lock_guard lock(m_mutex);
+				m_queuedUploads.push_back(std::move(uploadRequest));
+			}
 
 			return m_queuedUploads.back()->Request;
 		}
@@ -89,10 +94,7 @@ namespace Insight
 		{
 			IS_PROFILE_FUNCTION();
 
-			UploadDataToStagingBuffer(data, sizeInBytes, RHI_UploadTypes::Texture);
-
-			std::lock_guard lock(m_mutex);
-			m_queuedUploads.push_back(MakeRPtr<
+			RPtr<RHI_UploadQueueRequestInternal> uploadRequest = MakeRPtr<
 				RHI_UploadQueueRequestInternal>(
 					[=](const RHI_UploadQueueRequestInternal* request, RHI_CommandList* cmdList)
 					{
@@ -134,9 +136,18 @@ namespace Insight
 						barreir.ImageBarriers.push_back(imageBarrier);
 						cmdList->PipelineBarrier(barreir);
 
-				}, texture, sizeInBytes));
+				}, texture, sizeInBytes);
 
-			return m_queuedUploads.back()->Request;
+			UploadDataToStagingBuffer(data, sizeInBytes, RHI_UploadTypes::Texture, uploadRequest);
+
+			if (uploadRequest)
+			{
+				std::lock_guard lock(m_mutex);
+				m_queuedUploads.push_back(std::move(uploadRequest));
+				return m_queuedUploads.back()->Request;
+			}
+			return { };
+
 		}
 
 #ifdef IS_RESOURCE_HANDLES_ENABLED
@@ -198,7 +209,7 @@ namespace Insight
 		void RHI_UploadQueue::UploadToDevice(RHI_CommandList* cmdList)
 		{
 			IS_PROFILE_FUNCTION();
-			ASSERT(RenderContext::Instance().IsRenderThread());
+			//ASSERT(RenderContext::Instance().IsRenderThread());
 			cmdList->BeginTimeBlock("UploadToDevice");
 
 			std::lock_guard lock(m_mutex);
@@ -258,24 +269,61 @@ namespace Insight
 			}
 		}
 
-		void RHI_UploadQueue::UploadDataToStagingBuffer(const void* data, u64 sizeInBytes, RHI_UploadTypes uploadType)
+		void RHI_UploadQueue::UploadDataToStagingBuffer(const void* data, u64 sizeInBytes, RHI_UploadTypes uploadType, RPtr<RHI_UploadQueueRequestInternal>& uploadRequest)
 		{
 			IS_PROFILE_FUNCTION();
 
-			std::lock_guard lock(m_mutex);
-			// Check we have enough space.
-			if (m_stagingBufferOffset + sizeInBytes > m_uploadStagingBuffer->GetSize())
+			if (sizeInBytes > c_UploadBufferMaxSize)
 			{
-				u64 newSizeBytes = m_uploadStagingBuffer->GetSize();
-				while (newSizeBytes < m_stagingBufferOffset + sizeInBytes)
+				// We must allocate a temp buffer to update this data.
+				/// We need a staging buffer to upload data from CPU to GPU.
+				RHI_Buffer* stagingBuffer = Renderer::CreateStagingBuffer(sizeInBytes);
+				stagingBuffer->Upload(data, sizeInBytes, 0, 0);
+
+				RHI_CommandList* cmdList = RenderContext::Instance().GetCommandListManager().GetCommandList();
+				switch (uploadType)
 				{
-					newSizeBytes *= 2;
+					case Insight::Graphics::RHI_UploadTypes::Buffer:
+					{
+						cmdList->CopyBufferToBuffer(static_cast<RHI_Buffer*>(uploadRequest->Request->Resource), stagingBuffer);
+
+						break;
+					}
+					case Insight::Graphics::RHI_UploadTypes::Texture:
+					{
+						cmdList->CopyBufferToImage(static_cast<RHI_Texture*>(uploadRequest->Request->Resource), stagingBuffer);
+						break;
+					}
+					default:
+					{
+						FAIL_ASSERT();
+						break;
+					}
 				}
-				m_uploadStagingBuffer->Resize(newSizeBytes);
+				cmdList->Close();
+				RenderContext::Instance().SubmitCommandListAndWait(cmdList);
+				RenderContext::Instance().GetCommandListManager().ReturnCommandList(cmdList);
+				Renderer::FreeStagingBuffer(stagingBuffer);
+				uploadRequest = {};
 			}
-			// Upload the data.
-			m_uploadStagingBuffer->Upload(data, sizeInBytes, m_stagingBufferOffset, 0);
-			m_stagingBufferOffset += sizeInBytes;
+			else
+			{
+				if (m_stagingBufferOffset + sizeInBytes > m_uploadStagingBuffer->GetSize())
+				{
+					IS_PROFILE_SCOPE("Flush upload queue");
+					// First flush the current data waiting to be uploaded.
+					RHI_CommandList* cmdList = RenderContext::Instance().GetCommandListManager().GetCommandList();
+					UploadToDevice(cmdList);
+					cmdList->Close();
+					RenderContext::Instance().SubmitCommandListAndWait(cmdList);
+					RenderContext::Instance().GetCommandListManager().ReturnCommandList(cmdList);
+				}
+
+				std::lock_guard lock(m_mutex);
+				// Upload the data.
+				m_uploadStagingBuffer->Upload(data, sizeInBytes, m_stagingBufferOffset, 0);
+				m_stagingBufferOffset += sizeInBytes;
+			}
 		}
 	}
 }

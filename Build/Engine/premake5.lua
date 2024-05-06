@@ -106,7 +106,7 @@ workspace "Insight"
         "TOBJECTPTR_REF_COUNTING",
 
         --"RENDERGRAPH_V2_ENABLED",
-        "IS_RESOURCE_HANDLES_ENABLED",
+        --"IS_RESOURCE_HANDLES_ENABLED",
 
         --"SPDLOG_COMPILED_LIB",
         --"SPDLOG_SHARED_LIB",
