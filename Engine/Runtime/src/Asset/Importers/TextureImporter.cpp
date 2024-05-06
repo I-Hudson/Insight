@@ -8,6 +8,7 @@
 #include "Core/Profiler.h"
 
 #define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_STATIC
 #include <stb_image.h>
 
 #define QOI_IMPLEMENTATION
