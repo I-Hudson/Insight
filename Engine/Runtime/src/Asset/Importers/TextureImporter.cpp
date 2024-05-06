@@ -47,6 +47,7 @@ namespace Insight
             void* textureBuffer = nullptr;
             u64 textureSize = 0;
             int width, height, channels;
+            PixelFormat pixelFormat = PixelFormat::R8G8B8A8_UNorm;
 
 #ifdef NVIDIA_Texture_Tools
             const bool kEnableNVTT = true;
@@ -129,6 +130,7 @@ namespace Insight
                 textureSize = outputHandler.Size;
                 textureBuffer = outputHandler.BufferData.data();
                 imageLoader = ImageLoader::NvidiaTextureTools;
+                pixelFormat = PixelFormat::BC3_UNorm;
             }
 #endif
 
@@ -175,16 +177,14 @@ namespace Insight
                 return Ref<Asset>();
             }
 
-            const u64 textureDataSize = width * height * 4;
-            ASSERT(textureSize == textureDataSize);
             Ref<TextureAsset> texture = Ref<TextureAsset>(New<TextureAsset>(assetInfo));
             texture->m_width = width;
             texture->m_height = height;
             texture->m_depth = 1;
             texture->m_channels = 4;
-            texture->m_pixelFormat = PixelFormat::R8G8B8A8_UNorm;
+            texture->m_pixelFormat = pixelFormat;
             texture->m_assetState = AssetState::Loaded;
-            texture->SetTextureData(textureBuffer, textureDataSize);
+            texture->SetTextureData(textureBuffer, textureSize);
 
             switch (imageLoader)
             {
