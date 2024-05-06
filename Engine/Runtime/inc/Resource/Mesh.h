@@ -64,6 +64,8 @@ namespace Insight
 
 			Graphics::BoundingBox GetBoundingBox() const;
 
+			const AssetInfo* GetAssetInfo() const;
+
 			static const u32 s_LOD_Count = 4;
 
 		private:
@@ -74,6 +76,9 @@ namespace Insight
 			std::string m_mesh_name;
 			/// @brief Transform offset from the imported model.
 			glm::mat4 m_transform_offset = glm::mat4(1.0f);
+
+			// If this mesh was loaded from an asset on disk then this will be valid.
+			const AssetInfo* m_assetInfo = nullptr;
 
 			friend class ModelImporter;
 			friend struct RenderMesh;

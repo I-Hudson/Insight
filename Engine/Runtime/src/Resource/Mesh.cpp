@@ -56,5 +56,10 @@ namespace Insight
 		{
 			return m_boundingBox;
 		}
+
+		const AssetInfo* Mesh::GetAssetInfo() const
+		{
+			return m_assetInfo;
+		}
 	}
 }

@@ -131,11 +131,11 @@ namespace Insight
                     TObjectPtr<Runtime::World> activeWorld = Runtime::WorldSystem::Instance().GetActiveWorld();
                     if (activeWorld)
                     {
-                        //activeWorld->SaveWorld(item);
+                        activeWorld->SaveWorld(item);
 
                         const Runtime::ProjectInfo& projectInfo = Runtime::ProjectSystem::Instance().GetProjectInfo();
                         std::string relative = FileSystem::GetRelativePath(item, projectInfo.GetContentPath());
-                        //activeWorld->SaveDebugWorld(projectInfo.GetIntermediatePath() + "/World/" + relative);
+                        activeWorld->SaveDebugWorld(projectInfo.GetIntermediatePath() + "/World/" + relative);
                     }
                 }
             }

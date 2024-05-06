@@ -336,6 +336,7 @@ namespace Insight
 					meshNodes[i]->Directory = assetInfo->FilePath;
 					meshNodes[i]->FileName = assetInfo->FileName;
 					meshNodes[i]->MaterialCache = &materialCache;
+					meshNodes[i]->AssetInfo = assetInfo;
 				}
 			}
 
@@ -384,6 +385,7 @@ namespace Insight
 					{
 						Algorithm::VectorAddUnique(modelAsset->m_materials, meshNodes[i]->Mesh->GetMaterialAsset());
 					}
+					meshNodes[i]->Mesh->m_assetInfo = modelAsset->GetAssetInfo();
 					meshNodes[i]->Mesh = nullptr;
 				}
 			}
@@ -671,7 +673,7 @@ namespace Insight
 			aiColor4D opacity(1.0f);
 			aiGetMaterialColor(aiMaterial, AI_MATKEY_OPACITY, &opacity);
 
-			Ref<MaterialAsset> material = ::New<MaterialAsset>(nullptr);
+			Ref<MaterialAsset> material = ::New<MaterialAsset>(meshNode->AssetInfo);
 			material->SetName(materialname);
 
 			material->SetTexture(TextureAssetTypes::Diffuse, diffuseTexture);

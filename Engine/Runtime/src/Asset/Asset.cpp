@@ -5,7 +5,7 @@ namespace Insight::Runtime
 {
     Asset::Asset(const AssetInfo* assetInfo)
         : m_assetInfo(assetInfo)
-        , m_isMemoryAsset(m_assetInfo != nullptr)
+        , m_isMemoryAsset(assetInfo == nullptr)
     {
     }
 
@@ -13,6 +13,8 @@ namespace Insight::Runtime
     {
         m_assetInfo = nullptr;
     }
+
+    IS_SERIALISABLE_CPP(Asset);
 
     const AssetInfo* Asset::GetAssetInfo() const
     {

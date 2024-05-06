@@ -6,6 +6,7 @@
 #include "ECS/Components/FreeCameraControllerComponent.h"
 
 #include "Serialisation/Archive.h"
+#include "Serialisation/Serialisers/BinarySerialiser.h"
 #include "Serialisation/Serialisers/JsonSerialiser.h"
 
 #include "Algorithm/Vector.h"
@@ -113,17 +114,17 @@ namespace Insight
                 return nullptr;
             }
 
-            /*
-            Runtime::World::ResourceSerialiserType serialiser(true);
+            
+            Serialisation::BinarySerialiser serialiser(true);
             if (!serialiser.Deserialise(worldData))
             {
                 return nullptr;
             }
-            */
+            
 
             TObjectPtr<World> world = CreateWorld();
             SetActiveWorld(world);
-            //world->Deserialise(&serialiser);
+            world->Deserialise(&serialiser);
             world->SetWorldState(WorldStates::Running);
             return world.Get();
         }

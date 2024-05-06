@@ -83,6 +83,7 @@ namespace Insight
             Mesh* Mesh;
             std::string_view Directory;
             std::string_view FileName;
+            const AssetInfo* AssetInfo = nullptr;
         };
 
 

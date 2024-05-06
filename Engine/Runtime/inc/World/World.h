@@ -46,7 +46,7 @@ namespace Insight
 			World(const AssetInfo* assetInfo);
 			~World();
 
-			//IS_SERIALISABLE_H(World);
+			IS_SERIALISABLE_H(World);
 
 			constexpr static const char* c_FileExtension = ".isworld";
 			//REGISTER_RESOURCE(World);
@@ -85,12 +85,12 @@ namespace Insight
 			std::vector<Ptr<ECS::Entity>> GetAllEntitiesFlatten() const;
 
 			ECS::Entity* GetEntityByGUID(const Core::GUID& guid) const;
-			/*
+			
 			void SaveWorld(std::string_view filePath) const;
 			/// @brief Save the world to a file in a debug format (json) for readability.
 			/// @param filePath 
 			void SaveDebugWorld(std::string_view filePath) const;
-			*/
+			
 
 			// Asset - Begin
 		protected:
@@ -118,18 +118,18 @@ namespace Insight
 		};
 	}
 
-	//OBJECT_SERIALISER(Runtime::World, 4, 
-	//	SERIALISE_PROPERTY(std::string, m_worldName, 1, 0)
-	//	SERIALISE_PROPERTY(Runtime::WorldStates, m_worldState, 2, 0)
-	//	SERIALISE_PROPERTY(Runtime::WorldTypes, m_worldType, 2, 0)
-	//
-	//	SERIALISE_VECTOR_PROPERTY(Core::GUID, m_root_entities_guids, 1, 0)
-	//	SERIALISE_OBJECT(ECS::EntityManager, m_entityManager, 1, 0)
-	//	SERIALISE_PROPERTY_REMOVED(Core::GUID, m_cameraEntity, 1, 2)
-	//
-	//	SERIALISE_PROPERTY(bool, m_persistentScene, 1, 0)
-	//	SERIALISE_PROPERTY(bool, m_onlySearchable, 1, 0)
-	//
-	//	SERIALISE_BASE(Runtime::IResource, 4, 0)
-	//);
+	OBJECT_SERIALISER(Runtime::World, 4, 
+		SERIALISE_PROPERTY(std::string, m_worldName, 1, 0)
+		SERIALISE_PROPERTY(Runtime::WorldStates, m_worldState, 2, 0)
+		SERIALISE_PROPERTY(Runtime::WorldTypes, m_worldType, 2, 0)
+	
+		SERIALISE_VECTOR_PROPERTY(Core::GUID, m_root_entities_guids, 1, 0)
+		SERIALISE_OBJECT(ECS::EntityManager, m_entityManager, 1, 0)
+		SERIALISE_PROPERTY_REMOVED(Core::GUID, m_cameraEntity, 1, 2)
+	
+		SERIALISE_PROPERTY(bool, m_persistentScene, 1, 0)
+		SERIALISE_PROPERTY(bool, m_onlySearchable, 1, 0)
+	
+		SERIALISE_BASE(Runtime::Asset, 4, 0)
+	);
 }
