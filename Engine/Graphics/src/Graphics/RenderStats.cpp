@@ -87,12 +87,26 @@ namespace Insight
                 {
                     RHI_MemoryInfo rhiMemoryInfo = RenderContext::Instance().GetVRamInfo();
                     ImGui::Text("   Block Count: %u",          rhiMemoryInfo.BlockCount);
+                    ImGui::SetItemTooltip("Number of D3D12 memory blocks allocated - `ID3D12Heap` objects and committed resources.");
+
                     ImGui::Text("   Allocation Count: %u",     rhiMemoryInfo.AllocationCount);
+                    ImGui::SetItemTooltip("Number of D3D12MA::Allocation objects allocated.");
+
                     ImGui::Text("   Block Bytes: %u MB",       rhiMemoryInfo.BlockBytes / 1024 / 1024);
+                    ImGui::SetItemTooltip("Number of bytes allocated in memory blocks.");
+
                     ImGui::Text("   Allocation Bytes: %u MB",  rhiMemoryInfo.AllocationBytes / 1024 / 1024);
+                    ImGui::SetItemTooltip("Total number of bytes occupied by all D3D12MA::Allocation objects.");
+
                     ImGui::Text("   Free Bytes: %u MB",        (rhiMemoryInfo.BlockBytes - rhiMemoryInfo.AllocationBytes) / 1024 / 1024);
+                    ImGui::SetItemTooltip("Number of bytes currently not in use. BlockBytes - AllocationBytes.");
+
                     ImGui::Text("   Est Usage Bytes: %u MB",       rhiMemoryInfo.UsageBytes / 1024 / 1024);
+                    ImGui::SetItemTooltip("Estimated current memory usage of the program.");
+
                     ImGui::Text("   Est Budget Bytes: %u MB",      rhiMemoryInfo.BudgetBytes / 1024 / 1024);
+                    ImGui::SetItemTooltip("Estimated amount of memory available to the program.");
+
                 }
 
                 ImGui::Text("Render Timer: %f", renderTime);

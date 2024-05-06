@@ -21,7 +21,7 @@ namespace Insight
 			LightComponent();
 			virtual ~LightComponent() override;
 
-			IS_SERIALISABLE_H(TagComponent);
+			IS_SERIALISABLE_H(LightComponent);
 
 			Maths::Vector3 GetLightColour() const;
 			float GetIntensity() const;
