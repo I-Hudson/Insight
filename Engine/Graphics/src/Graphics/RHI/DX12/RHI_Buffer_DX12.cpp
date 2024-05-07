@@ -76,6 +76,8 @@ namespace Insight
 
 			RHI_BufferView RHI_Buffer_DX12::Upload(const void* data, u64 sizeInBytes, u64 offset, u64 alignment)
 			{
+				IS_PROFILE_FUNCTION();
+
 				if (data == nullptr)
 				{
 					return {};

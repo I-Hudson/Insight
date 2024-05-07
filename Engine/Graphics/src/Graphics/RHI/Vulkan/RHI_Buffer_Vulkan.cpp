@@ -63,6 +63,7 @@ namespace Insight
 			RHI_BufferView RHI_Buffer_Vulkan::Upload(const void* data, u64 sizeInBytes, u64 offset, u64 alignment)
 			{
 				IS_PROFILE_FUNCTION();
+
 				ASSERT(Platform::IsMainThread());
 				std::lock_guard lock(m_mutex);
 

@@ -84,6 +84,8 @@ namespace Insight
 					//#endif
 				}
 
+				//EnabledRenderOption(RenderOptions::ReverseZ);
+
 				ThrowIfFailed(CreateDXGIFactory2(dxgiFactoryFlags, IID_PPV_ARGS(&m_factory)));
 				if (!m_factory)
 				{
@@ -615,6 +617,7 @@ namespace Insight
 				//m_queues[GPUQueue_Graphics]->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
 				//GpuWaitForIdle();
 				m_graphicsQueue.SubmitAndWait(cmdListDX12);
+				cmdList->OnWorkCompleted();
 			}
 
 			void RenderContext_DX12::MarkTimeStamp(RHI_CommandList* cmdList)

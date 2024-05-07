@@ -20,6 +20,7 @@ namespace Insight
 	namespace Graphics
 	{
 		struct RHI_UploadQueueRequestInternal;
+		class RHI_UploadQueue;
 
 		class IS_GRAPHICS RHI_Resource
 		{
@@ -40,6 +41,7 @@ namespace Insight
 			mutable std::mutex m_mutex;
 
 			friend struct RHI_UploadQueueRequestInternal;
+			friend class RHI_UploadQueue;
 		};
 
 		//void FreeResourceFromResourceManager(RHI_Resource* resource);
