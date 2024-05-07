@@ -24,12 +24,14 @@ namespace Insight
 
 		//IS_SERIALISABLE_CPP(Mesh)
 
-		void Mesh::Draw(Graphics::RHI_CommandList* cmd_list, u32 lod_index)
+		void Mesh::Draw(Graphics::RHI_CommandList* cmd_list, const u32 lod_index) const
 		{
-			lod_index = std::min(lod_index, static_cast<u32>(m_lods.size()));
-			cmd_list->SetVertexBuffer(m_lods.at(lod_index).Vertex_buffer);
-			cmd_list->SetIndexBuffer(m_lods.at(lod_index).Index_buffer, Graphics::IndexType::Uint32);
-			cmd_list->DrawIndexed(m_lods.at(lod_index).Index_count, 1, m_lods.at(lod_index).First_index, m_lods.at(lod_index).Vertex_offset, 0);
+			const u32 lodIndex = std::min(lod_index, static_cast<u32>(m_lods.size()));
+			const MeshLOD& meshLOD = m_lods[lodIndex];
+
+			cmd_list->SetVertexBuffer(meshLOD.Vertex_buffer);
+			cmd_list->SetIndexBuffer(meshLOD.Index_buffer, Graphics::IndexType::Uint32);
+			cmd_list->DrawIndexed(meshLOD.Index_count, 1, meshLOD.First_index, meshLOD.Vertex_offset, 0);
 		}
 
 		const std::string_view Mesh::GetName() const
@@ -60,6 +62,11 @@ namespace Insight
 		const AssetInfo* Mesh::GetAssetInfo() const
 		{
 			return m_assetInfo;
+		}
+
+		u32 Mesh::GetLODCount() const
+		{
+			return static_cast<u32>(m_lods.size());
 		}
 	}
 }

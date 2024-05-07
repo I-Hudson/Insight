@@ -18,7 +18,7 @@ namespace Insight
 
     namespace Runtime
     {
-        enum class TextureAssetTypes
+        enum class TextureAssetTypes : u8
         {
             Diffuse,
             Normal,

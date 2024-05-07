@@ -166,7 +166,7 @@ namespace Insight
 			IS_PROFILE_FUNCTION();
 
 			ImGui::Begin("Renderpass options:");
-			ImGui::SliderInt("Mesh Lods", &MeshLod, 0, Runtime::Mesh::s_LOD_Count - 1);
+			ImGui::SliderInt("Mesh Lods", &MeshLod, 0, Runtime::Mesh::s_MAX_LOD_COUNT - 1);
 			ImGui::Checkbox("Use Material Batching", &RenderMaterialBatching);
 			ImGui::End();
 
@@ -299,7 +299,7 @@ namespace Insight
 			IS_PROFILE_FUNCTION();
 
 			ImGui::Begin("Renderpass options:");
-			ImGui::SliderInt("Mesh Lods", &MeshLod, 0, Runtime::Mesh::s_LOD_Count - 1);
+			ImGui::SliderInt("Mesh Lods", &MeshLod, 0, Runtime::Mesh::s_MAX_LOD_COUNT - 1);
 			ImGui::Checkbox("Use Material Batching", &RenderMaterialBatching);
 			ImGui::End();
 
@@ -584,7 +584,7 @@ namespace Insight
 								};
 								cmdList->SetUniform(2, 1, object);
 
-								const Runtime::MeshLOD& renderMeshLod = mesh.MeshLods.at(MeshLod);
+								const Runtime::MeshLOD& renderMeshLod = mesh.GetLOD(MeshLod);
 								cmdList->SetVertexBuffer(renderMeshLod.Vertex_buffer);
 								cmdList->SetIndexBuffer(renderMeshLod.Index_buffer, Graphics::IndexType::Uint32);
 								cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
@@ -827,7 +827,7 @@ namespace Insight
 									object.Previous_Transform = mesh.Transform;
 									cmdList->SetUniform(2, 0, object);
 
-									const Runtime::MeshLOD& renderMeshLod = mesh.MeshLods.at(MeshLod);
+									const Runtime::MeshLOD& renderMeshLod = mesh.GetLOD(MeshLod);
 									cmdList->SetVertexBuffer(renderMeshLod.Vertex_buffer);
 									cmdList->SetIndexBuffer(renderMeshLod.Index_buffer, Graphics::IndexType::Uint32);
 									cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
@@ -861,7 +861,7 @@ namespace Insight
 
 								cmdList->SetUniform(2, 0, object);
 
-								const Runtime::MeshLOD& renderMeshLod = mesh.MeshLods.at(MeshLod);
+								const Runtime::MeshLOD& renderMeshLod = mesh.GetLOD(MeshLod);
 								cmdList->SetVertexBuffer(renderMeshLod.Vertex_buffer);
 								cmdList->SetIndexBuffer(renderMeshLod.Index_buffer, Graphics::IndexType::Uint32);
 								cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
@@ -1007,7 +1007,7 @@ namespace Insight
 									object.Previous_Transform = mesh.Transform;
 									cmdList->SetUniform(2, 0, object);
 
-									const Runtime::MeshLOD& renderMeshLod = mesh.MeshLods.at(MeshLod);
+									const Runtime::MeshLOD& renderMeshLod = mesh.GetLOD(MeshLod);
 									cmdList->SetVertexBuffer(renderMeshLod.Vertex_buffer);
 									cmdList->SetIndexBuffer(renderMeshLod.Index_buffer, Graphics::IndexType::Uint32);
 									cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
@@ -1037,7 +1037,7 @@ namespace Insight
 
 								cmdList->SetUniform(2, 0, object);
 
-								const Runtime::MeshLOD& renderMeshLod = mesh.MeshLods.at(MeshLod);
+								const Runtime::MeshLOD& renderMeshLod = mesh.GetLOD(MeshLod);
 								cmdList->SetVertexBuffer(renderMeshLod.Vertex_buffer);
 								cmdList->SetIndexBuffer(renderMeshLod.Index_buffer, Graphics::IndexType::Uint32);
 								cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);

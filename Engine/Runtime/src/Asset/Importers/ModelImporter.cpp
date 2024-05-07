@@ -203,55 +203,80 @@ namespace Insight
 		void MeshData::GenerateLODs()
 		{
 			ASSERT(LODs.size() == 1);
-			LODs.resize(Mesh::s_LOD_Count);
-			for (u32 lod_index = 1; lod_index < Mesh::s_LOD_Count; ++lod_index)
+			// Set the minimum amount of indices for any lod.
+			const u32 lowestIndexCount = 1024;
+			bool foundLowestIndexCountMesh = false;
+
+			if (LODs[0].Index_count <= lowestIndexCount)
 			{
+				// LOD 0 is already at the minimum indices count so don't generate any more LODs.
+				return;
+			}
+
+			const u64 LOD0_IndicesStart = LODs[0].First_index;
+			const u64 LOD0_IndicesCount = LODs[0].Index_count;
+			const u64 LOD0_VertexStart = LODs[0].Vertex_offset;
+			const u64 LOD0_VertexCount = LODs[0].Vertex_count;
+
+			for (u32 lodIdx = 1; lodIdx < Mesh::s_MAX_LOD_COUNT; ++lodIdx)
+			{
+				if (foundLowestIndexCountMesh)
+				{
+					break;
+				}
+
 				std::vector<u32> indcies_to_lod;
 
 				const float error_rate = 1.0f;
-				const float lodSplitPercentage = 1.0f / Mesh::s_LOD_Count;
-				const float lodSplit = 1.0f - (lodSplitPercentage * lod_index);
+				const float lodSplitPercentage = 1.0f / Mesh::s_MAX_LOD_COUNT;
+				const float lodSplit = 1.0f - (lodSplitPercentage * lodIdx);
 				const u32 target_index_count = static_cast<u32>(static_cast<float>(LODs.at(0).Index_count) * lodSplit);
 
-				const u64 indices_start = LODs.at(0).First_index;
-				const u64 indices_count = LODs.at(0).Index_count;
-				const u64 vertex_start = LODs.at(0).Vertex_offset;
-				const u64 vertex_count = LODs.at(0).Vertex_count;
-
-				std::vector<u32>::iterator indices_begin = Indices.begin() + indices_start;
+				std::vector<u32>::iterator indices_begin = Indices.begin() + LOD0_IndicesStart;
 				std::vector<u32> result_lod;
-				result_lod.resize(indices_count);
+				result_lod.resize(LOD0_IndicesCount);
 
 				// Try and simplify the mesh, try and preserve mesh topology.
-				u64 result_index_count = meshopt_simplify(
+				u64 resultIndexCount = meshopt_simplify(
 					result_lod.data()
 					, &*indices_begin
-					, static_cast<u64>(indices_count)
-					, &(Vertices.data() + vertex_start)->Position.x
-					, vertex_count
+					, static_cast<u64>(LOD0_IndicesCount)
+					, &(Vertices.data() + LOD0_VertexStart)->Position.x
+					, LOD0_VertexCount
 					, sizeof(Graphics::Vertex)
 					, target_index_count
 					, error_rate);
 
-				if (false && result_index_count > target_index_count)
+				const u64 PreviousLOD_IndicesCount = LODs[lodIdx - 1].Index_count;
+				if (resultIndexCount == PreviousLOD_IndicesCount)
+				{
+					// Our simplified mesh has the same number of indices as our previous lod. 
+					// So just break as we haven't made a simpler mesh.
+					break;
+				}
+				else if (resultIndexCount <= lowestIndexCount)
+				{
+					foundLowestIndexCountMesh = true;
+				}
+
+				if (false && resultIndexCount > target_index_count)
 				{
 					// Try and simplify the mesh, doesn't preserve mesh topology.
-					result_index_count = meshopt_simplifySloppy(
+					resultIndexCount = meshopt_simplifySloppy(
 						  result_lod.data()
 						, &*indices_begin
-						, static_cast<u64>(indices_count)
-						, &(Vertices.data() + vertex_start)->Position.x
-						, vertex_count
+						, static_cast<u64>(LOD0_IndicesCount)
+						, &(Vertices.data() + LOD0_VertexStart)->Position.x
+						, LOD0_VertexCount
 						, sizeof(Graphics::Vertex)
 						, target_index_count
 						, error_rate);
 				}
-				result_lod.resize(result_index_count);
+				result_lod.resize(resultIndexCount);
 
-				MeshData::LOD& mesh_lod = LODs[lod_index];
 				const u32 First_index = static_cast<u32>(Indices.size());
-				const u32 Index_count = static_cast<u32>(result_index_count);
-				mesh_lod = MeshData::LOD(lod_index, 0, vertex_count, First_index, Index_count);
+				const u32 Index_count = static_cast<u32>(resultIndexCount);
+				LODs.push_back(MeshData::LOD(lodIdx, 0, LOD0_VertexCount, First_index, Index_count));
 
 				std::move(result_lod.begin(), result_lod.end(), std::back_inserter(Indices));
 			}
@@ -302,7 +327,7 @@ namespace Insight
 				| aiProcess_CalcTangentSpace			/// Calculates the tangents and bitangents for the imported meshes.
 				| aiProcess_GenSmoothNormals			/// Ignored if the mesh already has normal.
 				| aiProcess_GenUVCoords					/// Converts non-UV mappings (such as spherical or cylindrical mapping) to proper texture coordinate channels.
-
+				
 
 				//| aiProcess_RemoveRedundantMaterials	/// Searches for redundant/unreferenced materials and removes them
 				//| aiProcess_JoinIdenticalVertices		/// Triangulates all faces of all meshes
@@ -482,6 +507,7 @@ namespace Insight
 				{
 					IS_PROFILE_SCOPE("Mesh evaluated");
 					const aiMesh* aiMesh = meshNode->AssimpMesh;// aiScene->mMeshes[aiNode->mMeshes[i]];
+					meshNode->MeshData->TransformOffset = AssimpToGLMMat4(aiNode->mTransformation);
 					ProcessMesh(aiScene, aiMesh, meshNode->MeshData);
 					meshNode->Mesh->m_mesh_name = aiMesh->mName.C_Str();
 					meshNode->Mesh->m_transform_offset = AssimpToGLMMat4(aiNode->mTransformation);
@@ -500,7 +526,7 @@ namespace Insight
 				&& !meshData->Vertices.empty()
 				&& !meshData->Indices.empty())
 			{
-				//meshData->GenerateLODs();
+				meshData->GenerateLODs();
 				//meshData->Optimise();
 
 				Mesh* mesh = meshNode->Mesh;
@@ -528,7 +554,7 @@ namespace Insight
 					FAIL_ASSERT();
 				}
 
-				ASSERT(meshData->LODs.size() == 1);
+				mesh->m_lods.resize(meshData->LODs.size());
 				for (size_t lodIdx = 0; lodIdx < meshData->LODs.size(); ++lodIdx)
 				{
 					MeshData::LOD meshDataLod = meshData->LODs[lodIdx];
@@ -571,6 +597,7 @@ namespace Insight
 				vector.z = aiMesh->mVertices[i].z;
 				vector.w = 1.0f;
 				vertex.Position = vector;
+				//vertex.Position += glm::vec3(meshData->TransformOffset[3].xyz);
 
 				vector = { };
 				/// Normals
@@ -670,8 +697,8 @@ namespace Insight
 			aiColor4D colour(1.0f);
 			aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_DIFFUSE, &colour);
 
-			aiColor4D opacity(1.0f);
-			aiGetMaterialColor(aiMaterial, AI_MATKEY_OPACITY, &opacity);
+			float opacity(1.0f);
+			aiGetMaterialFloat(aiMaterial, AI_MATKEY_OPACITY, &opacity);
 
 			Ref<MaterialAsset> material = ::New<MaterialAsset>(meshNode->AssetInfo);
 			material->SetName(materialname);
@@ -683,6 +710,8 @@ namespace Insight
 			material->SetProperty(MaterialAssetProperty::Colour_G, colour.g);
 			material->SetProperty(MaterialAssetProperty::Colour_B, colour.b);
 			material->SetProperty(MaterialAssetProperty::Colour_A, colour.a);
+
+			material->SetProperty(MaterialAssetProperty::Opacity, opacity);
 
 			std::lock_guard lock(meshNode->MaterialCacheLock);
 			(*meshNode->MaterialCache)[aiMaterial] = material;

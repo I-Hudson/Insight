@@ -57,6 +57,8 @@ namespace Insight
 
             Graphics::RHI_Buffer* RHI_MonolithVertexBuffer = nullptr;
             Graphics::RHI_Buffer* RHI_MonolithIndexBuffer = nullptr;
+
+            glm::mat4 TransformOffset;
         };
 
         struct MeshNode

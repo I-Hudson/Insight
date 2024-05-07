@@ -9,33 +9,36 @@ namespace Insight
         { }
 
         MaterialAsset::~MaterialAsset()
-        {
-
-        }
+        { }
 
         void MaterialAsset::SetTexture(const TextureAssetTypes textureType, Ref<TextureAsset> texture)
         {
-            m_textures.at(static_cast<u32>(textureType)) = texture;
+            m_textures[static_cast<u32>(textureType)] = texture;
         }
 
         Ref<TextureAsset> MaterialAsset::GetTexture(const TextureAssetTypes textureType) const
         {
-            return m_textures.at(static_cast<u32>(textureType));
+            return m_textures[static_cast<u32>(textureType)];
         }
 
         void MaterialAsset::SetProperty(MaterialAssetProperty property, float value)
         {
-            m_properties.at(static_cast<u32>(property)) = value;
+            m_properties[static_cast<u32>(property)] = value;
         }
 
         float MaterialAsset::GetProperty(MaterialAssetProperty property) const
         {
-            return m_properties.at(static_cast<u32>(property));
+            return m_properties[static_cast<u32>(property)];
         }
 
-        std::array<float, static_cast<u32>(MaterialAssetProperty::Count)> MaterialAsset::GetProperties() const
+        const std::array<float, static_cast<u32>(MaterialAssetProperty::Count)>& MaterialAsset::GetProperties() const
         {
             return m_properties;
+        }
+
+        bool MaterialAsset::IsTransparent() const
+        {
+            return m_properties[static_cast<u32>(MaterialAssetProperty::Opacity)] < 1.0f;
         }
 
         void MaterialAsset::OnUnload()

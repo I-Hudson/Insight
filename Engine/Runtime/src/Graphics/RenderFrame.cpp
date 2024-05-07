@@ -23,10 +23,17 @@ namespace Insight
             Ref<Runtime::TextureAsset> texture = material->GetTexture(static_cast<Runtime::TextureAssetTypes>(i));
             if (texture)
             {
-                Textures.at(i) = texture->GetRHITexture();
+                Textures[i] = texture->GetRHITexture();
             }
         }
         Properties = material->GetProperties();
+    }
+
+    const Runtime::MeshLOD& RenderMesh::GetLOD(u32 lodIndex) const
+    {
+        ASSERT(MeshLods.size() > 0);
+        lodIndex = std::min(lodIndex, static_cast<u32>(MeshLods.size() - 1));
+        return MeshLods[lodIndex];
     }
 
     //=====================================================
@@ -159,12 +166,12 @@ namespace Insight
 
                         u64 meshIndex = renderWorld.Meshes.size();
                         renderWorld.Meshes.push_back(std::move(renderMesh));
-                        bool meshIsTransparent = renderMesh.Material.Properties.at(static_cast<u64>(Runtime::MaterialAssetProperty::Colour_A)) < 1.0f;
+                        const bool meshIsTransparent = renderMesh.Material.Properties[static_cast<u64>(Runtime::MaterialAssetProperty::Opacity)] < 1.0f;
 
                         if (auto materialBatchIter = renderWorld.MaterialBatchLookup.find(material->GetGuid());
                             materialBatchIter != renderWorld.MaterialBatchLookup.end())
                         {
-                            RenderMaterailBatch& batch = renderWorld.MaterialBatch.at(materialBatchIter->second);
+                            RenderMaterailBatch& batch = renderWorld.MaterialBatch[materialBatchIter->second];
                             meshIsTransparent ? batch.TransparentMeshIndex.push_back(meshIndex) : batch.OpaqueMeshIndex.push_back(meshIndex);
                         }
                         else
@@ -231,8 +238,8 @@ namespace Insight
             {
                 std::sort(world.OpaqueMeshIndexs.begin(), world.OpaqueMeshIndexs.end(), [&world](u64 a, u64 b)
                     {
-                        const RenderMesh& meshA = world.Meshes.at(a);
-                        const RenderMesh& meshB = world.Meshes.at(b);
+                        const RenderMesh& meshA = world.Meshes[a];
+                        const RenderMesh& meshB = world.Meshes[b];
 
                         glm::vec3 const& positionA = meshA.Transform[3].xyz;
                         glm::vec3 const& positionB = meshB.Transform[3].xyz;
@@ -253,8 +260,8 @@ namespace Insight
                 IS_PROFILE_SCOPE("Sort transparent meshes");
                 std::sort(world.TransparentMeshIndexs.begin(), world.TransparentMeshIndexs.end(), [&world](u64 a, u64 b)
                     {
-                        const RenderMesh& meshA = world.Meshes.at(a);
-                        const RenderMesh& meshB = world.Meshes.at(b);
+                        const RenderMesh& meshA = world.Meshes[a];
+                        const RenderMesh& meshB = world.Meshes[b];
 
                         glm::vec3 const& positionA = meshA.Transform[3].xyz;
                         glm::vec3 const& positionB = meshB.Transform[3].xyz;

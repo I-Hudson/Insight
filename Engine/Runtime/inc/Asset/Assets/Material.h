@@ -13,12 +13,14 @@ namespace Insight
     {
         class ModelAsset;
 
-        enum class MaterialAssetProperty
+        enum class MaterialAssetProperty : u8
         {
             Colour_R,
             Colour_G,
             Colour_B,
             Colour_A,
+
+            Opacity,
 
             UV_Tilling_X,
             UV_Tilling_Y,
@@ -39,7 +41,9 @@ namespace Insight
 
             void SetProperty(MaterialAssetProperty property, float value);
             float GetProperty(MaterialAssetProperty property) const;
-            std::array<float, static_cast<u32>(MaterialAssetProperty::Count)> GetProperties() const;
+            const std::array<float, static_cast<u32>(MaterialAssetProperty::Count)>& GetProperties() const;
+
+            bool IsTransparent() const;
 
             // Asset - Begin
         protected:

@@ -42,6 +42,8 @@ namespace Insight
         std::vector<Runtime::MeshLOD> MeshLods;
         RenderMaterial Material;
 
+        const Runtime::MeshLOD& GetLOD(u32 lodIndex) const;
+
         void SetMesh(Runtime::Mesh* mesh);
         void SetMaterial(const Ref<Runtime::MaterialAsset> material);
     };

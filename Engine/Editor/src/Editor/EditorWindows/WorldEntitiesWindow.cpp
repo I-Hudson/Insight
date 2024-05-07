@@ -121,6 +121,25 @@ namespace Insight
 					}
 					ImGui::EndDisabled();
 
+					ImGui::BeginDisabled(m_selectedEntities.size() == 0);
+					if (ImGui::MenuItem("Show only this"))
+					{
+						std::vector<Ptr<ECS::Entity>> entities = activeWorld->GetAllEntitiesFlatten();
+						for (size_t entityIdx = 0; entityIdx < entities.size(); ++entityIdx)
+						{
+							const Ptr<ECS::Entity>& entity = entities[entityIdx];
+							if (m_selectedEntities.find(entity->GetGUID()) == m_selectedEntities.end())
+							{
+								entity->SetEnabled(false);
+							}
+							else
+							{
+								entity->SetEnabled(true);
+							}
+						}
+					}
+					ImGui::EndDisabled();
+
 					if (inputDevice->WasReleased(Input::MouseButtons::Left)
 						&& !ImGui::IsItemHovered())
 					{

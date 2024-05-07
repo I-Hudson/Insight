@@ -51,7 +51,7 @@ namespace Insight
 
 			//IS_SERIALISABLE_H(Mesh)
 
-			void Draw(Graphics::RHI_CommandList* cmd_list, u32 lod_index = 0);
+			void Draw(Graphics::RHI_CommandList* cmd_list, const u32 lod_index = 0) const;
 
 			const std::string_view GetName() const;
 
@@ -66,7 +66,8 @@ namespace Insight
 
 			const AssetInfo* GetAssetInfo() const;
 
-			static const u32 s_LOD_Count = 4;
+			u32 GetLODCount() const;
+			static const u32 s_MAX_LOD_COUNT = 4;
 
 		private:
 			std::vector<MeshLOD> m_lods;

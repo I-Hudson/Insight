@@ -79,7 +79,7 @@ namespace Insight
 			context->m_frameDescriptorAllocator.Setup();
 
 			context->m_rhiMemoryInfo.Setup();
-			//context->m_renderDocAPI.Initialise();
+			context->m_renderDocAPI.Initialise();
 
 #ifdef RENDERGRAPH_V2_ENABLED
 			context->m_renderGraphV2 = ::New<RenderGraphV2>();
