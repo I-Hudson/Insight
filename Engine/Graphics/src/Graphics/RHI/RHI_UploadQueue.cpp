@@ -103,6 +103,7 @@ namespace Insight
 							return;
 						}
 
+						request->Request->Status = DeviceUploadStatus::Uploading;
 						PipelineBarrier barreir;
 						barreir.SrcStage = +PipelineStageFlagBits::TopOfPipe;
 						barreir.DstStage = +PipelineStageFlagBits::Transfer;
@@ -223,6 +224,7 @@ namespace Insight
 				if (uploadRequest->Request->Status == DeviceUploadStatus::Completed)
 				{
 					completedRequests.push_back(uploadRequest.Get());
+					uploadRequest->Request->Resource->m_uploadStatus = DeviceUploadStatus::Completed;
 				}
 			}
 
@@ -241,10 +243,11 @@ namespace Insight
 			// Bind our work completed function.
 			for (size_t i = 0; i < m_queuedUploads.size(); ++i)
 			{
-				m_queuedUploads.at(i)->CommandList = cmdList;
-				m_queuedUploads.at(i)->CommandList->OnWorkCompleted.Bind<&RHI_UploadQueueRequestInternal::OnWorkComplete>(m_queuedUploads.at(i).Get());
+				m_queuedUploads[i]->CommandList = cmdList;
+				m_queuedUploads[i]->CommandList->OnWorkCompleted.Bind<&RHI_UploadQueueRequestInternal::OnWorkComplete>(m_queuedUploads[i].Get());
+				//m_queuedUploads[i]->Request->Resource->m_uploadStatus = DeviceUploadStatus::Uploading;
 				// Call the upload functions.
-				m_queuedUploads.at(i)->UploadFunction(m_queuedUploads.at(i).Get(), cmdList);
+				m_queuedUploads[i]->UploadFunction(m_queuedUploads.at(i).Get(), cmdList);
 			}
 			// Move all  our requests to the running vector.
 			std::move(m_queuedUploads.begin(), m_queuedUploads.end(), std::back_inserter(m_runningUploads));
@@ -279,7 +282,7 @@ namespace Insight
 				/// We need a staging buffer to upload data from CPU to GPU.
 				RHI_Buffer* stagingBuffer = Renderer::CreateStagingBuffer(sizeInBytes);
 				stagingBuffer->Upload(data, sizeInBytes, 0, 0);
-
+				uploadRequest->Request->Resource->m_uploadStatus = DeviceUploadStatus::Uploading;
 				RHI_CommandList* cmdList = RenderContext::Instance().GetCommandListManager().GetCommandList();
 				switch (uploadType)
 				{
@@ -304,6 +307,8 @@ namespace Insight
 				RenderContext::Instance().SubmitCommandListAndWait(cmdList);
 				RenderContext::Instance().GetCommandListManager().ReturnCommandList(cmdList);
 				Renderer::FreeStagingBuffer(stagingBuffer);
+
+				uploadRequest->Request->Resource->m_uploadStatus = DeviceUploadStatus::Completed;
 				uploadRequest = {};
 			}
 			else
