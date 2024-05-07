@@ -332,7 +332,7 @@ namespace Insight
 
 				| aiProcess_CalcTangentSpace			/// Calculates the tangents and bitangents for the imported meshes.
 				| aiProcess_GenSmoothNormals			/// Ignored if the mesh already has normal.
-				//| aiProcess_GenUVCoords					/// Converts non-UV mappings (such as spherical or cylindrical mapping) to proper texture coordinate channels.
+				| aiProcess_GenUVCoords					/// Converts non-UV mappings (such as spherical or cylindrical mapping) to proper texture coordinate channels.
 				
 
 				//| aiProcess_RemoveRedundantMaterials	/// Searches for redundant/unreferenced materials and removes them
@@ -455,14 +455,6 @@ namespace Insight
 		{
 			Mesh* mesh = ::New<Mesh>();
 			modelAsset->m_meshes.push_back(mesh);
-
-			const char* nodeName = aiNode->mName.C_Str();
-			const char* meshName = aiMesh->mName.C_Str();
-			if (strcmp(nodeName, "sponza_ornament") == 0
-				|| strcmp(meshName, "sponza_ornament") == 0)
-			{
-				DEBUG_BREAK;
-			}
 
 			mesh->m_mesh_name = aiMesh->mName.C_Str();
 			mesh->m_transform_offset = AssimpToGLMMat4(aiNode->mTransformation);

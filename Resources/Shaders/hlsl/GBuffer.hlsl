@@ -24,7 +24,7 @@ VertexOutput VSMain(const GeoVertexInput input)
 	vsOut.Pos = mul(bf_Camera_Proj_View, vsOut.WorldPos);
 	
 	vsOut.WorldNormal = normalize(mul(bpo_Transform, float4(input.Normal.xyz, 0.0)));
-	vsOut.UV = input.UV;
+	vsOut.UV = GetUVsForAPI(input.UV);
 
 	vsOut.position_ss_current = mul(bf_Camera_View, vsOut.WorldPos);
 

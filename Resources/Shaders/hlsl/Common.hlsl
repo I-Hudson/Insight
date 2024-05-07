@@ -25,6 +25,16 @@ static float4x4 biasMat = float4x4(
 	0.0, 0.0, 1.0, 0.0,
 	0.5, 0.5, 0.0, 1.0 );
 
+// Return the correct UV format for if the shader is DX12 or Vulkan
+float2 GetUVsForAPI(float2 uv)
+{
+#ifdef DX12
+	return uv;
+#elif defined(Vulkan)
+    return float2(ux, 1.0 - uv.y)
+#endif
+}
+
 //================================================================
 // is_saturated
 //================================================================

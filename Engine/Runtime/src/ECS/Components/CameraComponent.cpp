@@ -138,6 +138,13 @@ namespace Insight
 			{
 				m_aspect = std::max(0.1f, m_aspect);
 				m_projection = Maths::Matrix4::CreatePerspective(m_fovY, m_aspect, m_nearPlane, m_farPlane);
+				
+				//float f = 1.0f / tan(m_fovY / 2.0f);
+				//m_projection = glm::mat4(
+				//	f / m_aspect, 0.0f, 0.0f, 0.0f,
+				//			  0.0f, f, 0.0f, 0.0f,
+				//			  0.0f, 0.0f, 0.0f, -1.0f,
+				//			  0.0f, 0.0f, m_nearPlane, 0.0f);
 			}
 			ComputeProjectionViewMatrix();
 			ComputeFrustm();
