@@ -482,7 +482,7 @@ namespace Insight
                         pso.DstColourBlendFactor = Graphics::BlendFactor::OneMinusSrcAlpha;
                         pso.ColourBlendOp = Graphics::BlendOp::Add;
                         pso.SrcAplhaBlendFactor = Graphics::BlendFactor::One;
-                        pso.DstAplhaBlendFactor = Graphics::BlendFactor::One;
+                        pso.DstAplhaBlendFactor = Graphics::BlendFactor::Zero;
                         pso.AplhaBlendOp = Graphics::BlendOp::Add;
 
                         if (Graphics::RenderContext::Instance().IsRenderOptionsEnabled(Graphics::RenderOptions::ReverseZ))

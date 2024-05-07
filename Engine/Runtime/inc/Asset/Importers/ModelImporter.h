@@ -12,6 +12,8 @@
 
 #include <vector>
 
+#define EXP_MODEL_LOADING 1
+
 struct aiNode;
 struct aiScene;
 struct aiMesh;
@@ -98,6 +100,13 @@ namespace Insight
             virtual void Import(Ref<Asset>& asset, const AssetInfo* assetInfo, const std::string_view path) const override;
 
         private:
+#if EXP_MODEL_LOADING
+            void ProcessNode(const aiScene* aiScene, const aiNode* aiNode, Ref<ModelAsset> modelAsset) const;
+            void ProcessMesh(const aiScene* aiScene, const aiNode* aiNode, const aiMesh* aiMesh, Ref<ModelAsset> modelAsset) const;
+            void ParseMeshData(const aiMesh* aiMesh, MeshData& meshData) const;
+            Ref<MaterialAsset> ProcessMaterial(const aiScene* aiScene, const aiNode* aiNode, const aiMaterial* aiMaterial, Ref<ModelAsset> modelAsset) const;
+#endif
+
             MeshNode* GetMeshHierarchy(const aiScene* aiScene, const aiNode* aiNode, const MeshNode* parentMeshNode, std::vector<MeshNode*>& meshNodes, MeshData* monolithMeshData = nullptr) const;
             void PreallocateVeretxAndIndexBuffers(MeshNode* meshNode) const;
             void ProcessNode(MeshNode* meshNode) const;

@@ -35,6 +35,10 @@ namespace Insight
 {
 	namespace Runtime
 	{
+#if EXP_MODEL_LOADING
+		std::unordered_map<const aiMaterial*, Ref<MaterialAsset>> MaterialCache;
+#endif
+
 		//=============================================
 		// CustomAssimpIOStrean
 		//=============================================
@@ -304,6 +308,8 @@ namespace Insight
 		{
 			IS_PROFILE_FUNCTION();
 
+			MaterialCache.clear();
+
 			Assimp::Importer importer;
 			// Remove points and lines.
 			importer.SetPropertyInteger(AI_CONFIG_PP_SBP_REMOVE, aiPrimitiveType_LINE | aiPrimitiveType_POINT);
@@ -321,12 +327,12 @@ namespace Insight
 				| aiProcess_SortByPType					/// Splits meshes with more than one primitive type in homogeneous sub-meshes.
 
 				| aiProcess_MakeLeftHanded				/// DirectX style.
-				//aiProcess_FlipUVs						/// DirectX style.
+				| aiProcess_FlipUVs						/// DirectX style.
 				| aiProcess_FlipWindingOrder			/// DirectX style.
 
 				| aiProcess_CalcTangentSpace			/// Calculates the tangents and bitangents for the imported meshes.
 				| aiProcess_GenSmoothNormals			/// Ignored if the mesh already has normal.
-				| aiProcess_GenUVCoords					/// Converts non-UV mappings (such as spherical or cylindrical mapping) to proper texture coordinate channels.
+				//| aiProcess_GenUVCoords					/// Converts non-UV mappings (such as spherical or cylindrical mapping) to proper texture coordinate channels.
 				
 
 				//| aiProcess_RemoveRedundantMaterials	/// Searches for redundant/unreferenced materials and removes them
@@ -350,6 +356,9 @@ namespace Insight
 			modelAsset.Ptr()->m_assetState = AssetState::Loading;
 			modelAsset->SetName(scene->mName.C_Str());
 
+#if EXP_MODEL_LOADING
+			ProcessNode(scene, scene->mRootNode, modelAsset);
+#else
 			std::unordered_map<const aiMaterial*, Ref<MaterialAsset>> materialCache;
 
 			std::vector<MeshNode*> meshNodes;
@@ -423,9 +432,240 @@ namespace Insight
 				Delete(meshNode);
 			}
 			meshNodes.clear();
-
+#endif
+			MaterialCache.clear();
 			modelAsset.Ptr()->m_assetState = AssetState::Loaded;
 		}
+
+#if EXP_MODEL_LOADING
+		void ModelImporter::ProcessNode(const aiScene* aiScene, const aiNode* aiNode, Ref<ModelAsset> modelAsset) const
+		{
+			for (size_t meshIdx = 0; meshIdx < aiNode->mNumMeshes; ++meshIdx)
+			{
+				ProcessMesh(aiScene, aiNode, aiScene->mMeshes[aiNode->mMeshes[meshIdx]], modelAsset);
+			}
+
+			for (size_t childIdx = 0; childIdx < aiNode->mNumChildren; ++childIdx)
+			{
+				ProcessNode(aiScene, aiNode->mChildren[childIdx], modelAsset);
+			}
+		}
+
+		void ModelImporter::ProcessMesh(const aiScene* aiScene, const aiNode* aiNode, const aiMesh* aiMesh, Ref<ModelAsset> modelAsset) const
+		{
+			Mesh* mesh = ::New<Mesh>();
+			modelAsset->m_meshes.push_back(mesh);
+
+			const char* nodeName = aiNode->mName.C_Str();
+			const char* meshName = aiMesh->mName.C_Str();
+			if (strcmp(nodeName, "sponza_ornament") == 0
+				|| strcmp(meshName, "sponza_ornament") == 0)
+			{
+				DEBUG_BREAK;
+			}
+
+			mesh->m_mesh_name = aiMesh->mName.C_Str();
+			mesh->m_transform_offset = AssimpToGLMMat4(aiNode->mTransformation);
+
+			MeshData meshData = { };
+			ParseMeshData(aiMesh, meshData);
+
+			if (!meshData.Vertices.empty() && !meshData.Indices.empty())
+			{
+				//meshData.GenerateLODs();
+				//meshData.Optimise();
+
+				ASSERT(mesh);
+
+				if (!meshData.RHI_VertexBuffer)
+				{
+					meshData.RHI_VertexBuffer = Renderer::CreateVertexBuffer(meshData.Vertices.size() * sizeof(Graphics::Vertex), sizeof(Graphics::Vertex));
+					meshData.RHI_VertexBuffer->Upload(meshData.Vertices.data(), meshData.RHI_VertexBuffer->GetSize());
+				}
+				else
+				{
+					// We already have a buffer, just upload out data.
+					FAIL_ASSERT();
+				}
+
+				if (!meshData.RHI_IndexBuffer)
+				{
+					meshData.RHI_IndexBuffer = Renderer::CreateIndexBuffer(meshData.Indices.size() * sizeof(u32));
+					meshData.RHI_IndexBuffer->Upload(meshData.Indices.data(), meshData.RHI_IndexBuffer->GetSize());
+				}
+				else
+				{
+					// We already have a buffer, just upload out data.
+					FAIL_ASSERT();
+				}
+
+				mesh->m_lods.resize(meshData.LODs.size());
+				for (size_t lodIdx = 0; lodIdx < meshData.LODs.size(); ++lodIdx)
+				{
+					MeshData::LOD meshDataLod = meshData.LODs[lodIdx];
+					MeshLOD& meshLod = mesh->m_lods[lodIdx];
+					meshLod.LOD_index = static_cast<u32>(lodIdx);
+
+					meshLod.Vertex_offset = static_cast<u32>(meshDataLod.Vertex_offset);
+					meshLod.Vertex_count = static_cast<u32>(meshDataLod.Vertex_count);
+					meshLod.First_index = static_cast<u32>(meshDataLod.First_index);
+					meshLod.Index_count = static_cast<u32>(meshDataLod.Index_count);
+
+					meshLod.Vertex_buffer = meshData.RHI_VertexBuffer;
+					meshLod.Index_buffer = meshData.RHI_IndexBuffer;
+
+					const std::string vertexBufferName = std::string(aiNode->mName.C_Str()) + "_" + aiMesh->mName.C_Str() + "_Veretx";
+					const std::string indexBufferName = std::string(aiNode->mName.C_Str()) + "_" + aiMesh->mName.C_Str() + "_Index";
+					meshLod.Vertex_buffer->SetName(vertexBufferName);
+					meshLod.Index_buffer->SetName(indexBufferName);
+				}
+			}
+
+			if (aiScene->HasMaterials())
+			{
+				const aiMaterial* aiMaterial = aiScene->mMaterials[aiMesh->mMaterialIndex];
+				Ref<MaterialAsset> material = ProcessMaterial(aiScene, aiNode, aiMaterial, modelAsset);
+
+				modelAsset->m_materials.push_back(material);
+				mesh->SetMaterial(material);
+			}
+		}
+
+		void ModelImporter::ParseMeshData(const aiMesh* aiMesh, MeshData& meshData) const
+		{
+			IS_PROFILE_FUNCTION();
+
+			//meshData.Vertices.reserve(meshData.Vertices.size() + static_cast<u64>(aiMesh->mNumVertices));
+			/// walk through each of the mesh's vertices
+			for (unsigned int i = 0; i < aiMesh->mNumVertices; ++i)
+			{
+				IS_PROFILE_SCOPE("Add Vertex");
+
+				Graphics::Vertex vertex = { };
+				glm::vec4 vector = { }; /// we declare a placeholder vector since assimp uses its own vector class that doesn't directly convert to glm's vec3 class 
+				/// so we transfer the data to this placeholder glm::vec3 first.
+				/// positions
+				vector.x = aiMesh->mVertices[i].x;
+				vector.y = aiMesh->mVertices[i].y;
+				vector.z = aiMesh->mVertices[i].z;
+				vector.w = 1.0f;
+				vertex.Position = vector;
+				//vertex.Position += glm::vec3(meshData.TransformOffset[3].xyz);
+
+				vector = { };
+				/// Normals
+				if (aiMesh->HasNormals())
+				{
+					vector.x = aiMesh->mNormals[i].x;
+					vector.y = aiMesh->mNormals[i].y;
+					vector.z = aiMesh->mNormals[i].z;
+					vector.w = 1.0f;
+					vector = glm::normalize(vector);
+				}
+				vertex.Normal = vector;
+
+				vector = { };
+				if (aiMesh->mColors[0])
+				{
+					vector.x = aiMesh->mColors[0]->r;
+					vector.y = aiMesh->mColors[0]->g;
+					vector.z = aiMesh->mColors[0]->b;
+					vector.w = aiMesh->mColors[0]->a;
+				}
+				else
+				{
+					vector.x = (rand() % 100 + 1) * 0.01f;
+					vector.y = (rand() % 100 + 1) * 0.01f;
+					vector.z = (rand() % 100 + 1) * 0.01f;
+					vector.w = 1.0f;
+				}
+				vertex.Colour = vector;
+
+				vector = { };
+				/// texture coordinates
+				if (aiMesh->mTextureCoords[0]) /// does the mesh contain texture coordinates?
+				{
+					glm::vec2 vec;
+					// a vertex can contain up to 8 different texture coordinates. We thus make the assumption that we won't 
+					// use models where a vertex can have multiple texture coordinates so we always take the first set (0).
+					vec.x = aiMesh->mTextureCoords[0][i].x;
+					vec.y = aiMesh->mTextureCoords[0][i].y;
+					vertex.UV = glm::vec4(vec, 0, 0);
+				}
+				else
+				{
+					FAIL_ASSERT();
+					///vertex.UV = glm::vec2(0.0f, 0.0f);
+				}
+
+				Graphics::VertexOptomised vertexOptomised(vertex);
+				meshData.Vertices.push_back(vertex);
+			}
+
+			//meshData.Indices.reserve(meshData.Indices.size() + (static_cast<u64>(aiMesh->mNumFaces) * 3));
+			/// Now walk through each of the mesh's faces (a face is a mesh its triangle) and retrieve the corresponding vertex indices.
+			for (unsigned int i = 0; i < aiMesh->mNumFaces; ++i)
+			{
+				aiFace face = aiMesh->mFaces[i];
+				/// retrieve all indices of the face and store them in the indices vector
+				for (unsigned int j = 0; j < face.mNumIndices; ++j)
+				{
+					meshData.Indices.push_back(face.mIndices[j]);
+				}
+			}
+
+			meshData.LODs.push_back(
+				MeshData::LOD(
+					0,
+					0,
+					static_cast<u32>(meshData.Vertices.size()),
+					0,
+					static_cast<u32>(meshData.Indices.size())));
+		}
+
+		Ref<MaterialAsset> ModelImporter::ProcessMaterial(const aiScene* aiScene, const aiNode* aiNode, const aiMaterial* aiMaterial, Ref<ModelAsset> modelAsset) const
+		{
+			IS_PROFILE_FUNCTION();
+
+			if (auto iter = MaterialCache.find(aiMaterial);
+				iter != MaterialCache.end())
+			{
+				return iter->second;
+			}
+
+			ASSERT_MSG(aiMaterial, "[ModelImporter::ProcessMaterial] AssimpMaterial from MeshNode was nullptr. This shouldn't happen.");
+			const std::string materialname = aiMaterial->GetName().C_Str();
+
+			const std::string_view Directory = modelAsset->GetAssetInfo()->FilePath;
+			const std::string diffuseTexturePath = GetTexturePath(aiMaterial, Directory, aiTextureType_BASE_COLOR, aiTextureType_DIFFUSE);
+			Ref<TextureAsset> diffuseTexture = AssetRegistry::Instance().LoadAsset(diffuseTexturePath).As<TextureAsset>();
+
+			const std::string normalTexturePath = GetTexturePath(aiMaterial, Directory, aiTextureType_NORMAL_CAMERA, aiTextureType_NORMALS);
+			Ref<TextureAsset> normalTexture = AssetRegistry::Instance().LoadAsset(normalTexturePath).As<TextureAsset>();
+
+			aiColor4D colour(1.0f);
+			aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_DIFFUSE, &colour);
+
+			float opacity(1.0f);
+			aiGetMaterialFloat(aiMaterial, AI_MATKEY_OPACITY, &opacity);
+
+			Ref<MaterialAsset> material = ::New<MaterialAsset>(modelAsset->GetAssetInfo());
+			material->SetName(materialname);
+
+			material->SetTexture(TextureAssetTypes::Diffuse, diffuseTexture);
+			material->SetTexture(TextureAssetTypes::Normal, normalTexture);
+
+			material->SetProperty(MaterialAssetProperty::Colour_R, colour.r);
+			material->SetProperty(MaterialAssetProperty::Colour_G, colour.g);
+			material->SetProperty(MaterialAssetProperty::Colour_B, colour.b);
+			material->SetProperty(MaterialAssetProperty::Colour_A, colour.a);
+
+			material->SetProperty(MaterialAssetProperty::Opacity, opacity);
+
+			MaterialCache[aiMaterial] = material;
+			return material;
+		}
+#endif
 
 		MeshNode* ModelImporter::GetMeshHierarchy(const aiScene* aiScene, const aiNode* aiNode, const MeshNode* parentMeshNode, std::vector<MeshNode*>& meshNodes, MeshData* monolithMeshData) const
 		{
