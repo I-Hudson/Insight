@@ -63,6 +63,8 @@ namespace Insight
 			bool Equal(const Vector4& other, const float errorRange) const;
 			bool NotEqual(const Vector4& other, const float errorRange) const;
 
+			Vector4 Reciprocal() const;
+
 			Vector4 operator-() const;
 
 			Vector4 operator=(float scalar);

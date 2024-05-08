@@ -39,17 +39,17 @@ namespace Insight
         {
         public:
             Plane() = default;
-            Plane(const Maths::Vector4& normal);
-            Plane(const Maths::Vector4& normal, float d);
+            Plane(const Maths::Vector3& normal);
+            Plane(const Maths::Vector3& normal, float d);
             ~Plane() = default;
 
             Plane Normalize();
             Plane Normalized() const { return Plane(normal).Normalize(); }
 
-            float Dot(const Maths::Vector4& v) const;
-            static float Dot(const Plane& p, const Maths::Vector4& v);
+            float Dot(const Maths::Vector3& v) const;
+            static float Dot(const Plane& p, const Maths::Vector3& v);
 
-            Maths::Vector4 normal;
+            Maths::Vector3 normal;
             float d = 0.0f; // distance from origin
         };
 
@@ -59,19 +59,19 @@ namespace Insight
             Frustum() = default;
             Frustum(const glm::mat4& mView, const glm::mat4& mProjection, float screenDepth);
             Frustum(const Maths::Matrix4& mView, const Maths::Matrix4& mProjection, float screenDepth);
-            Frustum(const Maths::Matrix4& viewProjection);
             ~Frustum() = default;
 
-            bool IsVisible(const glm::vec3& center, const glm::vec3& extent, bool ignore_near_plane = false) const;
+            bool IsVisible(const Maths::Vector3& center, const Maths::Vector3& extent, bool ignore_near_plane = false) const;
             bool IsVisible(const Graphics::BoundingBox& boundingbox) const;
             std::array<glm::vec3, 8> GetWorldPoints() const;
 
         private:
+            Intersection CheckSphere(const Maths::Vector3& center, float radius) const;
             Intersection CheckCube(const glm::vec3& center, const glm::vec3& extent) const;
-            Intersection CheckSphere(const glm::vec3& center, float radius) const;
 
             Plane m_planes[6];
 
+            Maths::Matrix4 m_projectionMatrix;
             glm::mat4 m_view;
             glm::mat4 m_projection;
 		};

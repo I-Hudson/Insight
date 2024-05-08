@@ -388,10 +388,22 @@ namespace Insight
 
                     for (const RenderWorld& world : m_renderingData.RenderFrame.RenderWorlds)
                     {
+                        //const RenderCamera& mainCamera = world.MainCamera;
+
                         for (const u64 meshIndex : world.OpaqueMeshIndexs)
                         {
                             IS_PROFILE_SCOPE("Draw Entity");
                             const RenderMesh& mesh = world.Meshes.at(meshIndex);
+
+                            const Graphics::Frustum mainCameraFrustm(
+                                m_editorCameraComponent->GetCamera().GetViewMatrix(), 
+                                m_editorCameraComponent->GetCamera().GetProjectionMatrix(), 
+                                m_editorCameraComponent->GetCamera().GetFarPlane());
+                            const bool isVisable = mainCameraFrustm.IsVisible(Maths::Vector3(mesh.Transform[3].xyz), mesh.BoudingBox.GetRadius());
+                            if (!isVisable)
+                            {
+                                continue;
+                            }
 
                             Graphics::BufferPerObject object = {};
                             object.Transform = mesh.Transform;
@@ -628,7 +640,7 @@ namespace Insight
                         {
                             if (i >= 32)
                             {
-                                IS_LOG_CORE_WARN("Only 32 spot lights are supported.");
+                                FAIL_ASSERT_MSG("Only 32 point lights are supported.");
                                 break;
                             }
 

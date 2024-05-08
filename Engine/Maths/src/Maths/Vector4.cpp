@@ -264,6 +264,11 @@ namespace Insight
 			return !(Equal(other, errorRange));
 		}
 
+		Vector4 Vector4::Reciprocal() const
+		{
+			return Vector4(1.0f / x, 1.0f / y, 1.0f / z, 1.0f / w);
+		}
+
 		Vector4 Vector4::operator-() const
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
