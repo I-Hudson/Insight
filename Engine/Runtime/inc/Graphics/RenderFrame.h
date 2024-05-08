@@ -67,7 +67,7 @@ namespace Insight
 
     struct IS_RUNTIME RenderCamera
     {
-        ECS::Camera Camra; 
+        ECS::Camera Camera; 
         Maths::Matrix4 Transform;
         bool IsSet = false;
     };

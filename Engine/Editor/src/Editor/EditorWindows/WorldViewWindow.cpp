@@ -388,17 +388,16 @@ namespace Insight
 
                     for (const RenderWorld& world : m_renderingData.RenderFrame.RenderWorlds)
                     {
-                        //const RenderCamera& mainCamera = world.MainCamera;
-
+                        const RenderCamera& mainCamera = world.MainCamera;
                         for (const u64 meshIndex : world.OpaqueMeshIndexs)
                         {
                             IS_PROFILE_SCOPE("Draw Entity");
                             const RenderMesh& mesh = world.Meshes.at(meshIndex);
 
                             const Graphics::Frustum mainCameraFrustm(
-                                m_editorCameraComponent->GetCamera().GetViewMatrix(), 
-                                m_editorCameraComponent->GetCamera().GetProjectionMatrix(), 
-                                m_editorCameraComponent->GetCamera().GetFarPlane());
+                                mainCamera.Camera.GetViewMatrix(),
+                                mainCamera.Camera.GetProjectionMatrix(),
+                                mainCamera.Camera.GetFarPlane());
                             const bool isVisable = mainCameraFrustm.IsVisible(Maths::Vector3(mesh.Transform[3].xyz), mesh.BoudingBox.GetRadius());
                             if (!isVisable)
                             {

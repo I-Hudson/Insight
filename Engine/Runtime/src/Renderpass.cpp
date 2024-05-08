@@ -211,8 +211,8 @@ namespace Insight
 
 			{
 				IS_PROFILE_SCOPE("BufferFrame cameras");
-				m_buffer_frame.Proj_View = renderFrame.MainCamera.Camra.GetProjectionViewMatrix();
-				m_buffer_frame.Projection = renderFrame.MainCamera.Camra.GetProjectionMatrix();
+				m_buffer_frame.Proj_View = renderFrame.MainCamera.Camera.GetProjectionViewMatrix();
+				m_buffer_frame.Projection = renderFrame.MainCamera.Camera.GetProjectionMatrix();
 				m_buffer_frame.View = renderFrame.MainCamera.Transform;
 			}
 
@@ -244,8 +244,8 @@ namespace Insight
 
 			{
 				IS_PROFILE_SCOPE("BufferFrame resolutions");
-				m_buffer_frame.View_Inverted = renderFrame.MainCamera.Camra.GetInvertedViewMatrix();
-				m_buffer_frame.Projection_View_Inverted = renderFrame.MainCamera.Camra.GetInvertedProjectionViewMatrix();
+				m_buffer_frame.View_Inverted = renderFrame.MainCamera.Camera.GetInvertedViewMatrix();
+				m_buffer_frame.Projection_View_Inverted = renderFrame.MainCamera.Camera.GetInvertedProjectionViewMatrix();
 
 				m_buffer_frame.Render_Resolution = RenderGraph::Instance().GetRenderResolution();
 				m_buffer_frame.Ouput_Resolution = RenderGraph::Instance().GetOutputResolution();
@@ -339,9 +339,9 @@ namespace Insight
 
 			renderFrame = App::Engine::Instance().GetSystemRegistry().GetSystem<Runtime::GraphicsSystem>()->GetRenderFrame();
 
-			m_buffer_frame.Proj_View = renderFrame.MainCamera.Camra.GetProjectionViewMatrix();
-			m_buffer_frame.Projection = renderFrame.MainCamera.Camra.GetProjectionMatrix();
-			m_buffer_frame.View = renderFrame.MainCamera.Camra.GetViewMatrix();
+			m_buffer_frame.Proj_View = renderFrame.MainCamera.Camera.GetProjectionViewMatrix();
+			m_buffer_frame.Projection = renderFrame.MainCamera.Camera.GetProjectionMatrix();
+			m_buffer_frame.View = renderFrame.MainCamera.Camera.GetViewMatrix();
 
 			if (enableFSR)
 			{
@@ -366,8 +366,8 @@ namespace Insight
 				}
 			}
 
-			m_buffer_frame.View_Inverted = renderFrame.MainCamera.Camra.GetInvertedViewMatrix();
-			m_buffer_frame.Projection_View_Inverted = renderFrame.MainCamera.Camra.GetInvertedProjectionViewMatrix();
+			m_buffer_frame.View_Inverted = renderFrame.MainCamera.Camera.GetInvertedViewMatrix();
+			m_buffer_frame.Projection_View_Inverted = renderFrame.MainCamera.Camera.GetInvertedProjectionViewMatrix();
 
 			m_buffer_frame.Render_Resolution = RenderGraph::Instance().GetRenderResolution();
 			m_buffer_frame.Ouput_Resolution = RenderGraph::Instance().GetOutputResolution();
@@ -1154,9 +1154,9 @@ namespace Insight
 			PassData passData = {};
 			passData.BufferFrame = m_buffer_frame;
 
-			passData.NearPlane = renderFrame.MainCamera.Camra.GetNearPlane();
-			passData.FarPlane = renderFrame.MainCamera.Camra.GetFarPlane();
-			passData.FOVY = renderFrame.MainCamera.Camra.GetFovY();
+			passData.NearPlane = renderFrame.MainCamera.Camera.GetNearPlane();
+			passData.FarPlane = renderFrame.MainCamera.Camera.GetFarPlane();
+			passData.FOVY = renderFrame.MainCamera.Camera.GetFovY();
 
 			RenderGraph::Instance().AddPass<PassData>("FSR2",
 				[](PassData& data, RenderGraphBuilder& builder)

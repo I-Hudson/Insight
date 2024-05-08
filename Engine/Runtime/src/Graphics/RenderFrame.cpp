@@ -109,7 +109,7 @@ namespace Insight
 
                 if (!MainCamera.IsSet)
                 {
-                    MainCamera.Camra = cameraComponent->GetCamera();
+                    MainCamera.Camera = cameraComponent->GetCamera();
                     MainCamera.Transform = cameraComponent->GetViewMatrix();
                     MainCamera.IsSet = true;
                 }
@@ -144,7 +144,7 @@ namespace Insight
                         {
                             IS_PROFILE_SCOPE("Visible check");
                             boundingBox = boundingBox.Transform(renderMesh.Transform);
-                            //isVisible = renderWorld.MainCamera.Camra.IsVisible(boundingBox);
+                            //isVisible = renderWorld.MainCamera.Camera.IsVisible(boundingBox);
                         }
                         if (!renderWorld.MainCamera.IsSet || !isVisible)
                         {
