@@ -56,12 +56,12 @@ namespace Insight
     //=====================================================
     void RenderWorld::SetMainCamera(ECS::Camera mainCamera, const Maths::Matrix4 transform)
     {
-        MainCamera = RenderCamrea{ std::move(mainCamera), std::move(transform), true};
+        MainCamera = RenderCamera{ std::move(mainCamera), std::move(transform), true};
     }
 
     void RenderWorld::AddCamrea(ECS::Camera camera, const Maths::Matrix4 transform)
     {
-        Cameras.push_back(RenderCamrea{ std::move(camera), std::move(transform), true });
+        Cameras.push_back(RenderCamera{ std::move(camera), std::move(transform), true });
     }
 
     //=====================================================

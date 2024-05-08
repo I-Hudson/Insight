@@ -65,7 +65,7 @@ namespace Insight
         float __pad1;
     };
 
-    struct IS_RUNTIME RenderCamrea
+    struct IS_RUNTIME RenderCamera
     {
         ECS::Camera Camra; 
         Maths::Matrix4 Transform;
@@ -81,9 +81,9 @@ namespace Insight
         void AddCamrea(ECS::Camera camera, const Maths::Matrix4 transform);
 
         /// @brief The main rendering camera for this world.
-        RenderCamrea MainCamera;
+        RenderCamera MainCamera;
         /// @brief Addition cameras within the world.
-        std::vector<RenderCamrea> Cameras;
+        std::vector<RenderCamera> Cameras;
 
         /// @brief All meshes within the world.
         std::vector<RenderMesh> Meshes;
@@ -107,7 +107,7 @@ namespace Insight
 
         std::vector<RenderWorld> RenderWorlds;
         /// @brief The main rendering camera for all render worlds.
-        RenderCamrea MainCamera;
+        RenderCamera MainCamera;
 
         /// @brief Create our render frame from the world system.
         /// @param world 

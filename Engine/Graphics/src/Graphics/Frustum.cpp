@@ -20,6 +20,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 #include "Core/Defines.h"
+#include "Core/TypeAlias.h"
 #include "Graphics/Frustum.h"
 
 #include "Core/Profiler.h"
@@ -31,55 +32,41 @@ namespace Insight
 {
     namespace Graphics
     {
-        Plane::Plane(const glm::vec3& normal, float d)
+        Plane::Plane(const Maths::Vector4& normal)
+        {
+            this->normal = normal;
+            this->d = 0.0f;
+        }
+        Plane::Plane(const Maths::Vector4& normal, float d)
         {
             this->normal = normal;
             this->d = d;
         }
 
-        Plane::Plane(const glm::vec3& normal, const glm::vec3& point)
+        Plane Plane::Normalize()
         {
-            this->normal = glm::normalize(normal);
-            d = -glm::dot(this->normal, point);
+            float lengthSq = normal.LengthSquared();
+            // Prevent divide by zero
+            if (lengthSq > 0.0f)
+            {
+                lengthSq = 1.0f / lengthSq;
+            }
+            normal = Maths::Vector4(
+                normal[0] * lengthSq,
+                normal[1] * lengthSq,
+                normal[2] * lengthSq,
+                normal[3] * lengthSq);
+
+            return *this;
         }
 
-        Plane::Plane(const glm::vec3& a, const glm::vec3& b, const glm::vec3& c)
-        {
-            const glm::vec3 ab = b - a;
-            const glm::vec3 ac = c - a;
 
-            const glm::vec3 cross = glm::cross(ab, ac);
-            this->normal = glm::normalize(cross);
-            this->d = -glm::dot(normal, a);
+        float Plane::Dot(const Maths::Vector4& v) const
+        {
+            return (normal.x * v.x) + (normal.y * v.y) + (normal.z * v.z);
         }
 
-        void Plane::Normalize()
-        {
-            Plane result;
-
-            result.normal = glm::normalize(this->normal);
-            const float nominator = sqrtf(result.normal.x * result.normal.x + result.normal.y * result.normal.y + result.normal.z * result.normal.z);
-            const float denominator = sqrtf(this->normal.x * this->normal.x + this->normal.y * this->normal.y + this->normal.z * this->normal.z);
-            const float fentity = nominator / denominator;
-            result.d = this->d * fentity;
-
-            this->normal = result.normal;
-            this->d = result.d;
-        }
-
-        Plane Plane::Normalize(const Plane& plane)
-        {
-            Plane newPlane = plane;
-            newPlane.Normalize();
-            return newPlane;
-        }
-
-        float Plane::Dot(const glm::vec3& v) const
-        {
-            return (this->normal.x * v.x) + (this->normal.y * v.y) + (this->normal.z * v.z) + this->d;
-        }
-
-        float Plane::Dot(const Plane& p, const glm::vec3& v)
+        float Plane::Dot(const Plane& p, const Maths::Vector4& v)
         {
             const Plane& newPlane = p;
             return newPlane.Dot(v);
@@ -247,6 +234,37 @@ namespace Insight
             m_planes[5].Normalize();
         }
 
+        Frustum::Frustum(const Maths::Matrix4& viewProjection)
+        {
+            IS_PROFILE_FUNCTION();
+            // We are interested in columns of the matrix, so transpose because we can access only rows:
+            const Maths::Matrix4 mat = viewProjection.Inversed();
+
+            // Near plane:
+            m_planes[0] = mat[2];
+            m_planes[0].Normalize();
+
+            // Far plane:
+            m_planes[1] = mat[3] - mat[2];
+            m_planes[1].Normalize();
+
+            // Left plane:
+            m_planes[2] = mat[3] + mat[0];
+            m_planes[2].Normalize();
+
+            // Right plane:
+            m_planes[3] = mat[3] - mat[0];
+            m_planes[3].Normalize();
+
+            // Top plane:
+            m_planes[4] = mat[3] - mat[1];
+            m_planes[4].Normalize();
+
+            // Bottom plane:
+            m_planes[5] = mat[3] + mat[1];
+            m_planes[5].Normalize();
+        }
+
 
         bool Frustum::IsVisible(const glm::vec3& center, const glm::vec3& extent, bool ignore_near_plane /*= false*/) const
         {
@@ -262,12 +280,13 @@ namespace Insight
                 constexpr float z = std::numeric_limits<float>::infinity(); /// reverse-z only (but I must read form Renderer)
                 radius = glm::max(extent.x, glm::max(extent.y, z));
             }
+            radius = std::abs(radius);
 
             /// Check sphere first as it's cheaper
             if (CheckSphere(center, radius) != Intersection::Outside)
                 return true;
 
-            if (CheckCube(center, glm::vec3(radius)) != Intersection::Outside)
+            if (CheckCube(center, extent) != Intersection::Outside)
                 return true;
 
             return false;
@@ -316,28 +335,65 @@ namespace Insight
 
             // Check if any one point of the cube is in the view frustum.
 
+            const Maths::Vector4 max(Maths::Vector3(center) + Maths::Vector3(extent));
+            const Maths::Vector4 min(Maths::Vector3(center) - Maths::Vector3(extent));
+            u8 boundingBoxPlanesWithIn = 0;
+
             for (const Plane& plane : m_planes)
             {
-                plane_abs.normal = glm::abs(plane.normal);
-                plane_abs.d = plane.d;
+                const Maths::Vector4 lt(
+                    plane.normal[0] < Maths::Vector4::Zero[0] ? 1 : 0,
+                    plane.normal[1] < Maths::Vector4::Zero[1] ? 1 : 0,
+                    plane.normal[2] < Maths::Vector4::Zero[2] ? 1 : 0,
+                    plane.normal[3] < Maths::Vector4::Zero[3] ? 1 : 0
+                );
 
-                const float d = center.x * plane.normal.x + center.y * plane.normal.y + center.z * plane.normal.z;
-                const float r = extent.x * plane_abs.normal.x + extent.y * plane_abs.normal.y + extent.z * plane_abs.normal.z;
+                const Maths::Vector4 furthestFromPlane(
+                    lt[0] == 0 ? max[0] : min[0],
+                    lt[1] == 0 ? max[1] : min[1],
+                    lt[2] == 0 ? max[2] : min[2],
+                    lt[3] == 0 ? max[3] : min[3]);
 
-                const float d_p_r = d + r;
-                const float d_m_r = d - r;
-
-                if (d_p_r < -plane.d)
+                const float planeDot = plane.Dot(furthestFromPlane);
+                if (planeDot < 0.0f)
                 {
-                    result = Intersection::Outside;
-                    break;
+                    return Intersection::Outside;
                 }
+                //++boundingBoxPlanesWithIn;
 
-                if (d_m_r < -plane.d)
-                {
-                    result = Intersection::Intersects;
-                }
+                //plane_abs.normal = glm::abs(plane.normal);
+                //plane_abs.d = plane.d;
+                //
+                //const float d = center.x * plane.normal.x + center.y * plane.normal.y + center.z * plane.normal.z;
+                //const float r = extent.x * plane_abs.normal.x + extent.y * plane_abs.normal.y + extent.z * plane_abs.normal.z;
+                //
+                //const float d_p_r = d + r;
+                //const float d_m_r = d - r;
+                //
+                //if (d_p_r < -plane.d)
+                //{
+                //    result = Intersection::Outside;
+                //    break;
+                //}
+                //
+                //if (d_m_r < -plane.d)
+                //{
+                //    result = Intersection::Intersects;
+                //}
             }
+
+            //if (boundingBoxPlanesWithIn == 0)
+            //{
+            //    return Intersection::Outside;
+            //}
+            //else if (boundingBoxPlanesWithIn == 0 < 6)
+            //{
+            //    return Intersection::Intersects;
+            //}
+            //else
+            //{
+            //    return Intersection::Inside;
+            //}
 
             return result;
         }
@@ -345,28 +401,28 @@ namespace Insight
         Intersection Frustum::CheckSphere(const glm::vec3& center, float radius) const
         {
             IS_PROFILE_FUNCTION();
-
+            return Intersection::Outside;
             // calculate our distances to each of the planes
-            for (const auto& plane : m_planes)
-            {
-                // find the distance to this plane
-                const float distance = glm::dot(plane.normal, center) + plane.d;
-
-                // if this distance is < -sphere.radius, we are outside
-                if (distance < -radius)
-                {
-                    return Intersection::Outside;
-                }
-
-                // else if the distance is between +- radius, then we intersect
-                if (static_cast<float>(glm::abs(distance)) < radius)
-                {
-                    return Intersection::Intersects;
-                }
-            }
-
-            // otherwise we are fully in view
-            return Intersection::Inside;
+            //for (const auto& plane : m_planes)
+            //{
+            //    // find the distance to this plane
+            //    const float distance = glm::dot(plane.normal, center) + plane.d;
+            //
+            //    // if this distance is < -sphere.radius, we are outside
+            //    if (distance < -radius)
+            //    {
+            //        return Intersection::Outside;
+            //    }
+            //
+            //    // else if the distance is between +- radius, then we intersect
+            //    if (static_cast<float>(glm::abs(distance)) < radius)
+            //    {
+            //        return Intersection::Intersects;
+            //    }
+            //}
+            //
+            //// otherwise we are fully in view
+            //return Intersection::Inside;
         }
     }
 }

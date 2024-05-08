@@ -39,24 +39,17 @@ namespace Insight
         {
         public:
             Plane() = default;
-
-            Plane(const glm::vec3& normal, float d);
-
-            // Construct from a normal vector and a point on the plane
-            Plane(const glm::vec3& normal, const glm::vec3& point);
-
-            // Construct from 3 vertices
-            Plane(const glm::vec3& a, const glm::vec3& b, const glm::vec3& c);
-
+            Plane(const Maths::Vector4& normal);
+            Plane(const Maths::Vector4& normal, float d);
             ~Plane() = default;
 
-            void Normalize();
-            static Plane Normalize(const Plane& plane);
+            Plane Normalize();
+            Plane Normalized() const { return Plane(normal).Normalize(); }
 
-            float Dot(const glm::vec3& v) const;
-            static float Dot(const Plane& p, const glm::vec3& v);
+            float Dot(const Maths::Vector4& v) const;
+            static float Dot(const Plane& p, const Maths::Vector4& v);
 
-            glm::vec3 normal = glm::vec3(0, 0, 0);
+            Maths::Vector4 normal;
             float d = 0.0f; // distance from origin
         };
 
@@ -66,6 +59,7 @@ namespace Insight
             Frustum() = default;
             Frustum(const glm::mat4& mView, const glm::mat4& mProjection, float screenDepth);
             Frustum(const Maths::Matrix4& mView, const Maths::Matrix4& mProjection, float screenDepth);
+            Frustum(const Maths::Matrix4& viewProjection);
             ~Frustum() = default;
 
             bool IsVisible(const glm::vec3& center, const glm::vec3& extent, bool ignore_near_plane = false) const;

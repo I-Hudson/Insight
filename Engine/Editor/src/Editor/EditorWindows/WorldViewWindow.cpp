@@ -388,7 +388,6 @@ namespace Insight
 
                     for (const RenderWorld& world : m_renderingData.RenderFrame.RenderWorlds)
                     {
-
                         for (const u64 meshIndex : world.OpaqueMeshIndexs)
                         {
                             IS_PROFILE_SCOPE("Draw Entity");

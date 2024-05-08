@@ -334,6 +334,7 @@ namespace Insight
 				| aiProcess_GenSmoothNormals			/// Ignored if the mesh already has normal.
 				| aiProcess_GenUVCoords					/// Converts non-UV mappings (such as spherical or cylindrical mapping) to proper texture coordinate channels.
 				
+				| aiProcess_GenBoundingBoxes			//
 
 				//| aiProcess_RemoveRedundantMaterials	/// Searches for redundant/unreferenced materials and removes them
 				//| aiProcess_JoinIdenticalVertices		/// Triangulates all faces of all meshes
@@ -456,11 +457,15 @@ namespace Insight
 			Mesh* mesh = ::New<Mesh>();
 			modelAsset->m_meshes.push_back(mesh);
 
-			mesh->m_mesh_name = aiMesh->mName.C_Str();
-			mesh->m_transform_offset = AssimpToGLMMat4(aiNode->mTransformation);
-
 			MeshData meshData = { };
 			ParseMeshData(aiMesh, meshData);
+			
+			mesh->m_mesh_name = aiMesh->mName.C_Str();
+			mesh->m_transform_offset = AssimpToGLMMat4(aiNode->mTransformation);
+			//mesh->m_boundingBox = Graphics::BoundingBox(meshData.Vertices.data(), static_cast<u32>(meshData.Vertices.size()));
+			mesh->m_boundingBox = Graphics::BoundingBox(
+				glm::vec3(aiMesh->mAABB.mMin.x, aiMesh->mAABB.mMin.y, aiMesh->mAABB.mMin.z),
+				glm::vec3(aiMesh->mAABB.mMax.x, aiMesh->mAABB.mMax.y, aiMesh->mAABB.mMax.z));
 
 			if (!meshData.Vertices.empty() && !meshData.Indices.empty())
 			{
