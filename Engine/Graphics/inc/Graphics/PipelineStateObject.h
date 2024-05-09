@@ -27,6 +27,7 @@ namespace Insight
 
 			std::array<RHI_Texture*, RenderTargetCount> RenderTargets;
 			RHI_Texture* DepthStencil = nullptr;
+			PixelFormat DepthStencilFormat = PixelFormat::Unknown;
 
 			PrimitiveTopologyType PrimitiveTopologyType = PrimitiveTopologyType::TriangleList;
 			PolygonMode PolygonMode;

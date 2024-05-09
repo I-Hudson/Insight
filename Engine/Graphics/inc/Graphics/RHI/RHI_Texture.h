@@ -59,6 +59,18 @@ namespace Insight
 				info.Layer_Count = layer_count;
 				return info;
 			}
+			static RHI_TextureInfo Cubemap(const u32 width, const u32 height, const PixelFormat format, const ImageUsageFlags usage)
+			{
+				RHI_TextureInfo info = { };
+				info.TextureType = TextureType::TexCube;
+				info.Width = width;
+				info.Height = height;
+				info.Depth = 1;
+				info.Format = format;
+				info.ImageUsage = usage;
+				info.Layer_Count = 6;
+				return info;
+			}
 		};
 
 		class IS_GRAPHICS RHI_Texture : public RHI_Resource

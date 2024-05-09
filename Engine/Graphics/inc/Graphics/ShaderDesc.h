@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Graphics/Defines.h"
 #include "Graphics/PixelFormat.h"
 
 #include <string>
@@ -9,7 +10,7 @@ namespace Insight
 {
 	namespace Graphics
 	{
-		struct ShaderInputLayout
+		struct IS_GRAPHICS ShaderInputLayout
 		{
 			ShaderInputLayout()
 			{ }
@@ -34,7 +35,7 @@ namespace Insight
 			}
 		};
 
-		struct ShaderDesc
+		struct IS_GRAPHICS ShaderDesc
 		{
 			ShaderDesc()
 			{ }
@@ -78,6 +79,18 @@ namespace Insight
 			bool IsValid() const
 			{
 				return !ShaderName.empty();
+			}
+
+			static std::vector<ShaderInputLayout> GetDefaultShaderInputLayout()
+			{
+				std::vector<ShaderInputLayout> DefaultShaderInputLayout =
+				{
+					ShaderInputLayout(0, PixelFormat::R32G32B32_Float, 0, "POSITION"),
+					ShaderInputLayout(1, PixelFormat::R32G32B32_Float, 12, "NORMAL0"),
+					ShaderInputLayout(2, PixelFormat::R32G32B32_Float, 24, "COLOR0"),
+					ShaderInputLayout(3, PixelFormat::R32G32_Float, 36, "TEXCOORD0"),
+				};
+				return DefaultShaderInputLayout;
 			}
 		};
 	}

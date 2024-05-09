@@ -53,6 +53,8 @@ namespace Insight
 
 			void SetIcon(const std::string& file_path);
 
+			float GetAspect() const { return static_cast<float>(GetWidth()) / static_cast<float>(GetHeight()); }
+
 			int GetX() const;
 			int GetY() const;
 			glm::ivec2 GetPosition() const;

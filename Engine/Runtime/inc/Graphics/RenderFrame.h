@@ -57,12 +57,16 @@ namespace Insight
 
     struct RenderPointLight
     {
-        Maths::Vector3 Position;
+        Maths::Matrix4 Projection;
+        Maths::Matrix4 View;
         Maths::Vector3 LightColour;
         float Intensity;
         float Radius;
+        float FarPlane;
         float __pad0;
+        Graphics::RHI_Texture* DepthTexture; // In HLSL this is just 8 bytes worth of padding.
         float __pad1;
+        float __pad2;
     };
 
     struct IS_RUNTIME RenderCamera

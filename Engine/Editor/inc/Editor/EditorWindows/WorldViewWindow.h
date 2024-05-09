@@ -39,6 +39,7 @@ namespace Insight
             void ContentWindowDragTarget();
             
             void SetupRenderGraphPasses();
+            void LightShadowPass();
             void GBufferDepthPrepass();
             void GBufferPass();
             void TransparentGBufferPass();

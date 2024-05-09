@@ -129,6 +129,10 @@ namespace Insight
 					RHI_Texture_DX12* depthTargetDX12 = static_cast<RHI_Texture_DX12*>(pso.DepthStencil);
 					psoDesc.DSVFormat = PixelFormatToDX12(depthTargetDX12->GetFormat());
 				}
+				else if (pso.DepthStencilFormat != PixelFormat::Unknown)
+				{
+					psoDesc.DSVFormat = PixelFormatToDX12(pso.DepthStencilFormat);
+				}
 
 				ThrowIfFailed(m_context->GetDevice()->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pipeline)));
 				SetName(pso.Name + "_Pipeline");

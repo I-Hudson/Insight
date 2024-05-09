@@ -8,6 +8,11 @@
 
 namespace Insight
 {
+	namespace Graphics
+	{
+		class RHI_Texture;
+	}
+
 	namespace ECS
 	{
 		REFLECT_CLASS()
@@ -22,11 +27,23 @@ namespace Insight
 
 			IS_SERIALISABLE_H(PointLightComponent);
 
+			// Component - Begin
+			/// @brief Called on creation (When the object is newed).
+			virtual void OnCreate() override;
+			/// @brief Called on destruction (Just before the object is deleted).
+			virtual void OnDestroy() override;
+			// Component - End
+
 			float GetRadius() const;
 
+			Graphics::RHI_Texture* GetShadowMap() const;
+
 		private:
-			REFLECT_PROPERTY(EditorVisible)
+			REFLECT_PROPERTY(EditorVisible);
 			float m_radius = 5.0f;
+			//LightComponentShadowMapResolutions m_shadowMapResolution = LightComponentShadowMapResolutions::_1024;
+
+			Graphics::RHI_Texture* m_shadowCubemap = nullptr;
 		};
 	}
 

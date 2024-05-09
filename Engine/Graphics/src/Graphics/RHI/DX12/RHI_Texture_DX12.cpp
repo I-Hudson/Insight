@@ -268,6 +268,23 @@ namespace Insight
 						shaderResouceViewDesc.Texture2DArray.PlaneSlice = 0u;
 						shaderResouceViewDesc.Texture2DArray.ResourceMinLODClamp = 0.0f;
 					}
+					else if (GetType() == TextureType::TexCube)
+					{
+						if (layer_count == 6)
+						{
+							shaderResouceViewDesc.TextureCube.MipLevels = mip_count;
+							shaderResouceViewDesc.TextureCube.MostDetailedMip = 0;
+						}
+						else
+						{
+							shaderResouceViewDesc.Texture2DArray.ArraySize = layer_count;
+							shaderResouceViewDesc.Texture2DArray.FirstArraySlice = layer_index;
+							shaderResouceViewDesc.Texture2DArray.MipLevels = mip_count;
+							shaderResouceViewDesc.Texture2DArray.MostDetailedMip = 0u;
+							shaderResouceViewDesc.Texture2DArray.PlaneSlice = 0u;
+							shaderResouceViewDesc.Texture2DArray.ResourceMinLODClamp = 0.0f;
+						}
+					}
 					m_context->GetDevice()->CreateShaderResourceView(m_allocation->GetResource(), &shaderResouceViewDesc, handle.CPUPtr);
 				}
 				else if (heap == DescriptorHeapTypes::RenderTargetView)
@@ -285,7 +302,7 @@ namespace Insight
 					{
 						desc.Texture2D.MipSlice = mip_index;
 					}
-					else if (GetType() == TextureType::Tex2DArray)
+					else if (GetType() == TextureType::Tex2DArray || GetType() == TextureType::TexCube)
 					{
 						desc.Texture2DArray.MipSlice = mip_index;
 						desc.Texture2DArray.ArraySize = layer_count;

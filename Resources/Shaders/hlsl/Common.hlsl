@@ -1,23 +1,8 @@
 #include "Defines.hlsl"
 #include "Common_Buffers.hlsl"
+#include "Common_Structs.hlsl"
 #include "Common_Textures.hlsl"
 #include "Common_Samplers.hlsl"
-
-struct GeoVertexInput
-{
-	float3 Pos : POSITION;
-	float3 Normal : NORMAL0;
-	float3 Colour : COLOR0;
-	float2 UV : TEXCOORD0;
-};
-
-struct GeoPixelInput
-{
-	float3 Position : SV_POSITION;
-	float3 Normal : NORMAL0;
-	float3 Colour : COLOR0;
-	float2 UV : TEXCOORD0;
-};
 
 static float4x4 biasMat = float4x4( 
 	0.5, 0.0, 0.0, 0.0,

@@ -3,6 +3,8 @@
 #include "World/World.h"
 #include "World/WorldSystem.h"
 
+#include "Graphics/Window.h"
+
 #include "ECS/Components/TransformComponent.h"
 #include "ECS/Components/MeshComponent.h"
 #include "ECS/Components/PointLightComponent.h"
@@ -201,10 +203,17 @@ namespace Insight
                 {
                     ECS::PointLightComponent* pointLightComponent = entity->GetComponent<ECS::PointLightComponent>();
                     RenderPointLight pointLight;
-                    pointLight.Position = transformComponent->GetPosition();
+                    pointLight.Projection = Maths::Matrix4::CreatePerspective(90.0f, Graphics::Window::Instance().GetAspect(), 0.1f, 128.0f);
+
+                    pointLight.View = Maths::Matrix4::Identity;
+                    pointLight.View[3] = Maths::Vector4(Maths::Vector3(transformComponent->GetPosition()), 1.0f);
+
                     pointLight.LightColour = pointLightComponent->GetLightColour();
                     pointLight.Intensity = pointLightComponent->GetIntensity();
                     pointLight.Radius = pointLightComponent->GetRadius();
+
+                    pointLight.DepthTexture = pointLightComponent->GetShadowMap();
+                    pointLight.FarPlane = 512.0f;
 
                     renderWorld.PointLights.push_back(std::move(pointLight));
                 }

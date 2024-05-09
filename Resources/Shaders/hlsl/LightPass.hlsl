@@ -2,17 +2,24 @@
 
 Texture2D<float4> EditorColourTexture : register(t0, space6);
 Texture2D<float4> EditorDepthTexture : register(t1, space6);
+TextureCube<float4> PointLightShadowMap[32] : register(t0, space7);
 
 struct RenderPointLight
 {
-    float3 Position;
-    float __pad0;
+    float4x4 Projection;
+    float4x4 View;
     float3 LightColour;
     float __pad1;
+
     float Intensity;
     float Radius;
+    float FarPlane;
     float __pad2;
-    float __pad3;
+
+    float __pad3_pTex1;
+    float __pad4_pTex2;
+    float __pad5;
+    float __pad6;
 };
 
 cbuffer PointLightBuffers : register(b0, space6)
@@ -26,6 +33,14 @@ struct VertexOutput
 	float4 Position : SV_POSITION;
 	float2 UV : TEXCOORD0;
 };
+
+float PointShadowCalculation(TextureCube<float4> depthTexture, const float3 worldPosition, const RenderPointLight light)
+{
+    float3 wPosToLightPos = worldPosition - light.View[3].xyz;
+    float closestDepth = depthTexture.Sample(Clamp_Sampler, wPosToLightPos).r;
+    closestDepth *= light.FarPlane;
+    return closestDepth;
+}
 
 VertexOutput VSMain(uint id : SV_VertexID)
 {
@@ -53,9 +68,10 @@ float4 PSMain(VertexOutput input) : SV_TARGET
         for (int lightIdx = 0; lightIdx < PointLightSize; lightIdx++)
         {
             const RenderPointLight light = PointLights[lightIdx];
+            float3 lightPosition = light.View[3].xyz;
 
             const float lightDistance = distance(
-                float4(light.Position, 1.0f), 
+                float4(lightPosition, 1.0f), 
                 float4(worldPosition, 1.0f));
 
             if (lightDistance < light.Radius)
@@ -64,9 +80,12 @@ float4 PSMain(VertexOutput input) : SV_TARGET
                 const float attenuation = smoothstep(1.0, 0.0, radius);
                 const float3 albedoLightColour = albedo * light.LightColour;
                 const float3 albedoAttenuation = albedoLightColour * attenuation;
+
+                const float shadow = PointShadowCalculation(PointLightShadowMap[lightIdx], worldPosition, light);
                 currentAlbedo += albedoAttenuation * light.Intensity;
+                currentAlbedo = float3(shadow, shadow, shadow);
             }
         }
     }
-	return float4(ambientAlbedo + currentAlbedo, 1.0f);
+	return float4(currentAlbedo, 1.0f);
 }

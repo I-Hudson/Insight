@@ -11,6 +11,7 @@
 #include "Graphics/GraphicsSystem.h"
 #include "Graphics/RenderGraph/RenderGraph.h"
 #include "Graphics/Enums.h"
+#include "Graphics/ShaderDesc.h"
 
 #include "ECS/Components/TransformComponent.h"
 #include "ECS/Components/FreeCameraControllerComponent.h"
@@ -106,7 +107,7 @@ namespace Insight
 
                     ECS::Entity* entity = Runtime::WorldSystem::Instance().GetEntityByGUID(*selectedEntites.begin());
                     ECS::TransformComponent* transformComponent = entity->GetComponent<ECS::TransformComponent>();
-                    glm::mat4 entityMatrix = transformComponent->GetLocalTransform();
+                    glm::mat4 entityMatrix = transformComponent->GetTransform();
 
                     ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, ImGui::GetWindowSize().x, ImGui::GetWindowSize().y);
                     ImGuizmo::Manipulate(&viewMatrix[0][0], &projectionMatrix[0][0], ImGuizmo::TRANSLATE, ImGuizmo::LOCAL, &entityMatrix[0][0]);
@@ -179,6 +180,7 @@ namespace Insight
                     m_renderingData.FrameView = cmdList->UploadUniform(m_renderingData.BufferFrame);
                 });
 
+            LightShadowPass();
             if (m_enableDepthPrepass)
             {
                 GBufferDepthPrepass();
@@ -186,6 +188,174 @@ namespace Insight
             GBufferPass();
             TransparentGBufferPass();
             LightPass();
+        }
+
+        void WorldViewWindow::LightShadowPass()
+        {
+            IS_PROFILE_FUNCTION();
+
+            struct WorldTransparentGBufferData
+            {
+                glm::ivec2 RenderResolution;
+                RenderFrame RenderFrame;
+            };
+
+            WorldTransparentGBufferData passData;
+            passData.RenderResolution = glm::ivec2(ImGui::GetWindowSize().x, ImGui::GetWindowSize().y);
+            passData.RenderFrame = App::Engine::Instance().GetSystemRegistry().GetSystem<Runtime::GraphicsSystem>()->GetRenderFrame();
+
+            Graphics::RenderGraph::Instance().AddPass<WorldTransparentGBufferData>("EditorWorldLightShadowPass",
+                [](WorldTransparentGBufferData& data, Graphics::RenderGraphBuilder& builder)
+                {
+                    IS_PROFILE_SCOPE("LightShadowPass pass setup");
+
+                    const u32 renderResolutionX = builder.GetRenderResolution().x;
+                    const u32 renderResolutionY = builder.GetRenderResolution().y;
+
+                    Graphics::ShaderDesc shaderDesc("LightShadowPass", {}, Graphics::ShaderStageFlagBits::ShaderStage_Vertex);
+                    shaderDesc.InputLayout = Graphics::ShaderDesc::GetDefaultShaderInputLayout();
+                    builder.SetShader(shaderDesc);
+
+                    Graphics::PipelineStateObject pso = { };
+                    {
+                        pso.Name = "EditorWorldLightShadowPass";
+                        pso.CullMode = Graphics::CullMode::Front;
+                        pso.FrontFace = Graphics::FrontFace::CounterClockwise;
+                        pso.DepthTest = true;
+                        pso.DepthWrite = true;
+                        pso.DepthClampEnabled = false;
+                        pso.DepthBaisEnabled = true;
+                        pso.DepthConstantBaisValue = Graphics::RenderContext::Instance().IsRenderOptionsEnabled(Graphics::RenderOptions::ReverseZ) ? -4.0f : 4.0f;
+                        pso.DepthSlopeBaisValue = Graphics::RenderContext::Instance().IsRenderOptionsEnabled(Graphics::RenderOptions::ReverseZ) ? -1.5f : 1.5f;
+                        pso.ShaderDescription = shaderDesc;
+                        pso.DepthStencilFormat = PixelFormat::D32_Float;
+                        if (Graphics::RenderContext::Instance().IsRenderOptionsEnabled(Graphics::RenderOptions::ReverseZ))
+                        {
+                            pso.DepthCompareOp = Graphics::CompareOp::GreaterOrEqual;
+                        }
+                        else
+                        {
+                            pso.DepthCompareOp = Graphics::CompareOp::LessOrEqual;
+                        }
+                    }
+                    builder.SetPipeline(pso);
+
+                    Graphics::RenderpassDescription renderpassDescription = { };
+                    renderpassDescription.AddAttachment(Graphics::AttachmentDescription::Default(PixelFormat::D32_Float, Graphics::ImageLayout::ShaderReadOnly));
+                    renderpassDescription.Attachments.back().InitalLayout = Graphics::ImageLayout::DepthStencilAttachment;
+                    builder.SetRenderpass(renderpassDescription);
+
+                    builder.SetViewport(1024, 1024);
+                    builder.SetScissor(1024, 1024);
+                },
+                [this](WorldTransparentGBufferData& data, Graphics::RenderGraph& render_graph, Graphics::RHI_CommandList* cmdList)
+                {
+                    IS_PROFILE_SCOPE("EditorWorldLightShadowPass pass execute");
+
+                    Graphics::PipelineStateObject pso = render_graph.GetPipelineStateObject("EditorWorldLightShadowPass");
+                    cmdList->BindPipeline(pso, nullptr);
+
+                    for (size_t worldIdx = 0; worldIdx < data.RenderFrame.RenderWorlds.size(); ++worldIdx)
+                    {
+                        const RenderWorld& renderWorld = data.RenderFrame.RenderWorlds[worldIdx];
+                        for (size_t pointLightIdx = 0; pointLightIdx < renderWorld.PointLights.size(); ++pointLightIdx)
+                        {
+                            const RenderPointLight& pointLight = renderWorld.PointLights[pointLightIdx];
+                            for (size_t arrayIdx = 0; arrayIdx < 6; ++arrayIdx)
+                            {
+                                Graphics::RenderpassDescription renderpassDescription = render_graph.GetRenderpassDescription("EditorWorldLightShadowPass");
+                                renderpassDescription.DepthStencil = pointLight.DepthTexture;
+                                renderpassDescription.DepthStencilAttachment.Layer_Array_Index = static_cast<u32>(arrayIdx);
+                                cmdList->BeginRenderpass(renderpassDescription);
+
+                                Maths::Vector3 lightCentre = pointLight.View[3];
+                                switch (arrayIdx)
+                                {
+                                case 0:
+                                {
+                                    lightCentre += Maths::Vector3(1, 0, 0);
+                                    break;
+                                }
+                                case 1:
+                                {
+                                    lightCentre += Maths::Vector3(-1, 0, 0);
+                                    break;
+                                }
+                                case 2:
+                                {
+                                    lightCentre += Maths::Vector3(0, 1, 0);
+                                    break;
+                                }
+                                case 3:
+                                {
+                                    lightCentre += Maths::Vector3(0, -1, 0);
+                                    break;
+                                }
+                                case 4:
+                                {
+                                    lightCentre += Maths::Vector3(0, 0, 1);
+                                    break;
+                                }
+                                case 5:
+                                {
+                                    lightCentre += Maths::Vector3(0, 0, -1);
+                                    break;
+                                }
+                                case 6:
+                                {
+                                    lightCentre += Maths::Vector3(1, 0, 0);
+                                    break;
+                                }
+                                default:
+                                    break;
+                                }
+
+                                const Maths::Vector3 lightDirection = lightCentre - pointLight.View[3];
+                                const Maths::Matrix4 lightView = Maths::Matrix4::LookAt(pointLight.View[3], lightCentre, Maths::Vector3(0,1,0));
+
+                                struct alignas(16) LightBuffer
+                                {
+                                    Maths::Matrix4 ProjectionView;
+                                };
+                                LightBuffer lightBuffer =
+                                {
+                                    pointLight.Projection * lightView
+                                };
+                                cmdList->SetUniform(0, 0, lightBuffer);
+
+                                for (const u64 meshIndex : renderWorld.OpaqueMeshIndexs)
+                                {
+                                    const RenderMesh& mesh = renderWorld.Meshes.at(meshIndex);
+                                    Graphics::Frustum pointLightFrustum(pointLight.View, pointLight.Projection, pointLight.FarPlane);
+
+                                    const bool isVisable = pointLightFrustum.IsVisible(Maths::Vector3(mesh.Transform[3].xyz), mesh.BoudingBox.GetRadius());
+                                    if (!isVisable)
+                                    {
+                                        //continue;
+                                    }
+
+                                    struct alignas(16) Object
+                                    {
+                                        glm::mat4 Transform;
+                                    };
+                                    Object object =
+                                    {
+                                        mesh.Transform,
+                                    };
+                                    cmdList->SetUniform(1, 0, object);
+
+                                    const Runtime::MeshLOD& renderMeshLod = mesh.GetLOD(0);
+                                    cmdList->SetVertexBuffer(renderMeshLod.Vertex_buffer);
+                                    cmdList->SetIndexBuffer(renderMeshLod.Index_buffer, Graphics::IndexType::Uint32);
+                                    cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
+                                    ++Graphics::RenderStats::Instance().MeshCount;
+                                }
+
+                                cmdList->EndRenderpass();
+                            }
+                        }
+                    }
+                }, std::move(passData));
         }
 
         void WorldViewWindow::GBufferDepthPrepass()
@@ -219,7 +389,7 @@ namespace Insight
                 builder.WriteDepthStencil(depthStencil);
 
                 Graphics::ShaderDesc shaderDesc("GBuffer", {}, Graphics::ShaderStageFlagBits::ShaderStage_Vertex | Graphics::ShaderStageFlagBits::ShaderStage_Pixel);
-                shaderDesc.InputLayout = Graphics::GetDefaultShaderInputLayout();
+                shaderDesc.InputLayout = Graphics::ShaderDesc::GetDefaultShaderInputLayout();
                 builder.SetShader(shaderDesc);
 
                 Graphics::PipelineStateObject gbufferPso = { };
@@ -346,7 +516,7 @@ namespace Insight
                     builder.WriteDepthStencil(depthStencil);
 
                     Graphics::ShaderDesc shaderDesc("GBuffer", {}, Graphics::ShaderStageFlagBits::ShaderStage_Vertex | Graphics::ShaderStageFlagBits::ShaderStage_Pixel);
-                    shaderDesc.InputLayout = Graphics::GetDefaultShaderInputLayout();
+                    shaderDesc.InputLayout = Graphics::ShaderDesc::GetDefaultShaderInputLayout();
                     builder.SetShader(shaderDesc);
 
                     Graphics::PipelineStateObject gbufferPso = { };
@@ -477,7 +647,7 @@ namespace Insight
                     builder.SetRenderpass(renderpassDescription);
 
                     Graphics::ShaderDesc shaderDesc("GBuffer", {}, Graphics::ShaderStageFlagBits::ShaderStage_Vertex | Graphics::ShaderStageFlagBits::ShaderStage_Pixel);
-                    shaderDesc.InputLayout = Graphics::GetDefaultShaderInputLayout();
+                    shaderDesc.InputLayout = Graphics::ShaderDesc::GetDefaultShaderInputLayout();
                     builder.SetShader(shaderDesc);
 
                     Graphics::PipelineStateObject pso = { };
@@ -628,9 +798,11 @@ namespace Insight
 
                     for (const RenderWorld& world : data.RenderFrame.RenderWorlds)
                     {
+                        const u32 c_MaxPointLights = 32;
+
                         struct PointLightBuffer
                         {
-                            RenderPointLight PointLights[32];
+                            RenderPointLight PointLights[c_MaxPointLights];
                             int PointLightSize;
                         };
 
@@ -644,6 +816,7 @@ namespace Insight
                             }
 
                             pointLightBuffer.PointLights[i] = world.PointLights[i];
+                            cmdList->SetTexture(7, 0 + i, world.PointLights[i].DepthTexture);
                         }
                         pointLightBuffer.PointLightSize = world.PointLights.size();
 

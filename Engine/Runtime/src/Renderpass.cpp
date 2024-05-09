@@ -515,11 +515,8 @@ namespace Insight
 					builder.WriteDepthStencil(depth_tex);
 					data.Depth_Tex = depth_tex;
 
-					builder.SetViewport(Shadow_Depth_Tex_Size, Shadow_Depth_Tex_Size);
-					builder.SetScissor(Shadow_Depth_Tex_Size, Shadow_Depth_Tex_Size);
-
 					ShaderDesc shader_description("CascadeShaderMap", {}, ShaderStageFlagBits::ShaderStage_Vertex);
-					shader_description.InputLayout = GetDefaultShaderInputLayout();
+					shader_description.InputLayout = ShaderDesc::GetDefaultShaderInputLayout();
 					builder.SetShader(shader_description);
 
 					PipelineStateObject pso = { };
@@ -541,6 +538,9 @@ namespace Insight
 					}
 					pso.Dynamic_States = { DynamicState::Viewport, DynamicState::Scissor };
 					builder.SetPipeline(pso);
+
+					builder.SetViewport(Shadow_Depth_Tex_Size, Shadow_Depth_Tex_Size);
+					builder.SetScissor(Shadow_Depth_Tex_Size, Shadow_Depth_Tex_Size);
 				},
 				[this](PassData& data, RenderGraph& render_graph, RHI_CommandList* cmdList)
 				{
@@ -741,7 +741,7 @@ namespace Insight
 					builder.ReadTexture(builder.GetTexture("Cascade_Shadow_Tex"));
 
 					ShaderDesc shaderDesc("GBuffer", {}, ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
-					shaderDesc.InputLayout = GetDefaultShaderInputLayout();
+					shaderDesc.InputLayout = ShaderDesc::GetDefaultShaderInputLayout();
 					builder.SetShader(shaderDesc);
 
 					PipelineStateObject gbufferPso = { };
@@ -931,7 +931,7 @@ namespace Insight
 					builder.SetRenderpass(renderpassDescription);
 
 					ShaderDesc shaderDesc("GBuffer", {}, ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
-					shaderDesc.InputLayout = GetDefaultShaderInputLayout();
+					shaderDesc.InputLayout = ShaderDesc::GetDefaultShaderInputLayout();
 					builder.SetShader(shaderDesc);
 
 					PipelineStateObject pso = { };
@@ -1456,17 +1456,22 @@ namespace Insight
 		{
 			std::vector<Byte> shaderData = Runtime::AssetRegistry::Instance().LoadAssetData(EnginePaths::GetResourcePath() + "/Shaders/hlsl/Cascade_Shadow.hlsl");
 			ShaderDesc shaderDesc("CascadeShaderMap", shaderData, ShaderStageFlagBits::ShaderStage_Vertex);
-			shaderDesc.InputLayout = GetDefaultShaderInputLayout();
+			shaderDesc.InputLayout = ShaderDesc::GetDefaultShaderInputLayout();
 			RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
 
 			shaderData = Runtime::AssetRegistry::Instance().LoadAssetData(EnginePaths::GetResourcePath() + "/Shaders/hlsl/Depth_Prepass.hlsl");
 			shaderDesc = ShaderDesc("DepthPrepass", shaderData, ShaderStageFlagBits::ShaderStage_Vertex);
-			shaderDesc.InputLayout = GetDefaultShaderInputLayout();
+			shaderDesc.InputLayout = ShaderDesc::GetDefaultShaderInputLayout();
 			//RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
+
+			shaderData = Runtime::AssetRegistry::Instance().LoadAssetData(EnginePaths::GetResourcePath() + "/Shaders/hlsl/LightDepth.hlsl");
+			shaderDesc = ShaderDesc("LightShadowPass", shaderData, ShaderStageFlagBits::ShaderStage_Vertex);
+			shaderDesc.InputLayout = ShaderDesc::GetDefaultShaderInputLayout();
+			RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
 
 			shaderData = Runtime::AssetRegistry::Instance().LoadAssetData(EnginePaths::GetResourcePath() + "/Shaders/hlsl/GBuffer.hlsl");
 			shaderDesc = ShaderDesc("GBuffer", shaderData, ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
-			shaderDesc.InputLayout = GetDefaultShaderInputLayout();
+			shaderDesc.InputLayout = ShaderDesc::GetDefaultShaderInputLayout();
 			RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
 
 			shaderData = Runtime::AssetRegistry::Instance().LoadAssetData(EnginePaths::GetResourcePath() + "/Shaders/hlsl/Composite.hlsl");
@@ -1628,17 +1633,5 @@ namespace Insight
 				buffer_light.SplitDepth[i] = light.SplitDepth[i];
 			}
 		}
-
-		std::vector<ShaderInputLayout> GetDefaultShaderInputLayout()
-		{
-			std::vector<ShaderInputLayout> DefaultShaderInputLayout =
-			{
-				ShaderInputLayout(0, PixelFormat::R32G32B32_Float, 0, "POSITION"),
-				ShaderInputLayout(1, PixelFormat::R32G32B32_Float, 12, "NORMAL0"),
-				ShaderInputLayout(2, PixelFormat::R32G32B32_Float, 24, "COLOR0"),
-				ShaderInputLayout(3, PixelFormat::R32G32_Float, 36, "TEXCOORD0"),
-			};
-			return DefaultShaderInputLayout;
-		}
-}
+	}
 }
