@@ -37,9 +37,15 @@ struct VertexOutput
 float PointShadowCalculation(TextureCube<float4> depthTexture, const float3 worldPosition, const RenderPointLight light)
 {
     float3 wPosToLightPos = worldPosition - light.View[3].xyz;
-    float closestDepth = depthTexture.Sample(Clamp_Sampler, wPosToLightPos).r;
-    closestDepth *= light.FarPlane;
-    return closestDepth;
+    float lightDistance = length(worldPosition - light.View[3].xyz);
+
+    // Map the light distance from 0-FarPlane to 0-1
+    lightDistance = lightDistance / light.FarPlane;
+    // Invert the distance from 0-1 to 1-0 so the close to the light you are the brighter it is.
+    lightDistance = 1.0 - lightDistance;
+    //float closestDepth = depthTexture.Sample(Clamp_Sampler, wPosToLightPos).r;
+    //closestDepth *= light.FarPlane;
+    return lightDistance;
 }
 
 VertexOutput VSMain(uint id : SV_VertexID)
@@ -67,7 +73,8 @@ float4 PSMain(VertexOutput input) : SV_TARGET
     {
         for (int lightIdx = 0; lightIdx < PointLightSize; lightIdx++)
         {
-            const RenderPointLight light = PointLights[lightIdx];
+            RenderPointLight light = PointLights[lightIdx];
+            light.View = transpose(light.View);
             float3 lightPosition = light.View[3].xyz;
 
             const float lightDistance = distance(

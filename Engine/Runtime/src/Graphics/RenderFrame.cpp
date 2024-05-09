@@ -213,7 +213,7 @@ namespace Insight
                     pointLight.Radius = pointLightComponent->GetRadius();
 
                     pointLight.DepthTexture = pointLightComponent->GetShadowMap();
-                    pointLight.FarPlane = 512.0f;
+                    pointLight.FarPlane = 16.0f;
 
                     renderWorld.PointLights.push_back(std::move(pointLight));
                 }

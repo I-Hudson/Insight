@@ -40,7 +40,7 @@ namespace Insight
 
 		private:
 			REFLECT_PROPERTY(EditorVisible);
-			float m_radius = 5.0f;
+			float m_radius = 16.0f;
 			//LightComponentShadowMapResolutions m_shadowMapResolution = LightComponentShadowMapResolutions::_1024;
 
 			Graphics::RHI_Texture* m_shadowCubemap = nullptr;
