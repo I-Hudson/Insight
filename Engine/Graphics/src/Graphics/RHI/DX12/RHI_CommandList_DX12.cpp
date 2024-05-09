@@ -575,41 +575,57 @@ namespace Insight
 						{
 						case DescriptorType::Unifom_Buffer:
 						{
-							if (binding.RHI_Buffer_View.IsValid())
+							ASSERT(binding.RHI_Buffer_View.size() <= 1);
+							if (binding.RHI_Buffer_View.size() > 0)
 							{
-								IS_PROFILE_SCOPE("Root constant buffer");
+								const RHI_BufferView& buffer = binding.RHI_Buffer_View[0];
+								if (buffer.IsValid())
+								{
+									IS_PROFILE_SCOPE("Root constant buffer");
 
-								RHI::DX12::RHI_Buffer_DX12* bufferDX12 = static_cast<RHI::DX12::RHI_Buffer_DX12*>(binding.RHI_Buffer_View.GetBuffer());
-								m_commandList->SetGraphicsRootConstantBufferView(rootParameterIdx,
-									bufferDX12->GetResource()->GetGPUVirtualAddress() + binding.RHI_Buffer_View.GetOffset());
-								++RenderStats::Instance().DescriptorSetBindings;
+									RHI::DX12::RHI_Buffer_DX12* bufferDX12 = static_cast<RHI::DX12::RHI_Buffer_DX12*>(buffer.GetBuffer());
+									m_commandList->SetGraphicsRootConstantBufferView(rootParameterIdx,
+										bufferDX12->GetResource()->GetGPUVirtualAddress() + buffer.GetOffset());
+									++RenderStats::Instance().DescriptorSetBindings;
+								}
 							}
+
 							break;
 						}
 						case DescriptorType::Storage_Buffer:
 						{
-							if (binding.RHI_Buffer_View.IsValid())
+							ASSERT(binding.RHI_Buffer_View.size() <= 1);
+							if (binding.RHI_Buffer_View.size() > 0)
 							{
-								IS_PROFILE_SCOPE("Root UAV buffer");
+								const RHI_BufferView& buffer = binding.RHI_Buffer_View[0];
+								if (buffer.IsValid())
+								{
+									IS_PROFILE_SCOPE("Root UAV buffer");
 
-								RHI::DX12::RHI_Buffer_DX12* bufferDX12 = static_cast<RHI::DX12::RHI_Buffer_DX12*>(binding.RHI_Buffer_View.GetBuffer());
-								m_commandList->SetGraphicsRootUnorderedAccessView(rootParameterIdx,
-									bufferDX12->GetResource()->GetGPUVirtualAddress() + binding.RHI_Buffer_View.GetOffset());
-								++RenderStats::Instance().DescriptorSetBindings;
+									RHI::DX12::RHI_Buffer_DX12* bufferDX12 = static_cast<RHI::DX12::RHI_Buffer_DX12*>(buffer.GetBuffer());
+									m_commandList->SetGraphicsRootUnorderedAccessView(rootParameterIdx,
+										bufferDX12->GetResource()->GetGPUVirtualAddress() + buffer.GetOffset());
+									++RenderStats::Instance().DescriptorSetBindings;
+								}
 							}
 							break;
 						}
 						case DescriptorType::Storage_Image:
 						{
-							if (binding.RHI_Texture)
+							ASSERT(binding.RHI_Texture.size() <= 1);
+							if (binding.RHI_Texture.size() > 0)
 							{
-								RHI_Texture_DX12 const* textureDX12 = static_cast<RHI_Texture_DX12 const*>(binding.RHI_Texture);
-								if (textureDX12->GetResource())
+								const RHI_Texture* texture = binding.RHI_Texture[0];
+								if (texture)
 								{
-									IS_PROFILE_SCOPE("Root UAV texture");
+									RHI_Texture_DX12 const* textureDX12 = static_cast<RHI_Texture_DX12 const*>(texture);
+									if (textureDX12->GetResource())
+									{
+										IS_PROFILE_SCOPE("Root UAV texture");
 
-									m_commandList->SetGraphicsRootUnorderedAccessView(rootParameterIdx, textureDX12->GetResource()->GetGPUVirtualAddress());
-									++RenderStats::Instance().DescriptorSetBindings;
+										m_commandList->SetGraphicsRootUnorderedAccessView(rootParameterIdx, textureDX12->GetResource()->GetGPUVirtualAddress());
+										++RenderStats::Instance().DescriptorSetBindings;
+									}
 								}
 							}
 							break;
@@ -641,88 +657,101 @@ namespace Insight
 
 							for (auto const& binding : set.Bindings)
 							{
-								if ((binding.Type == DescriptorType::Unifom_Buffer
-									|| binding.Type == DescriptorType::Storage_Buffer)
-									&& binding.RHI_Buffer_View.IsValid())
+								for (size_t bindingCountIdx = 0; bindingCountIdx < binding.Count; ++bindingCountIdx)
 								{
-									DescriptorHeapHandle_DX12 dstHandle = resouceHeap.GetNextHandle();
-									if (firstHandle.CPUPtr.ptr == 0)
+									if ((binding.Type == DescriptorType::Unifom_Buffer
+										|| binding.Type == DescriptorType::Storage_Buffer)
+										&& bindingCountIdx < binding.RHI_Buffer_View.size())
 									{
-										firstHandle = dstHandle;
-									}
-
-									if (binding.RHI_Buffer_View.IsValid())
-									{
-										IS_PROFILE_SCOPE("Create constant buffer");
-
-										D3D12_CONSTANT_BUFFER_VIEW_DESC desc = {};
-										RHI::DX12::RHI_Buffer_DX12* bufferDX12 = static_cast<RHI::DX12::RHI_Buffer_DX12*>(binding.RHI_Buffer_View.GetBuffer());
-										desc.BufferLocation = bufferDX12->GetResource()->GetGPUVirtualAddress() + binding.RHI_Buffer_View.GetOffset();
-										desc.SizeInBytes = static_cast<UINT>(binding.RHI_Buffer_View.GetSize());
-										m_contextDX12->GetDevice()->CreateConstantBufferView(&desc, dstHandle.CPUPtr);
-										++RenderStats::Instance().DescriptorSetUpdates;
-									}
-									else
-									{
-										IS_PROFILE_SCOPE("Copy null buffer");
-
-										m_contextDX12->GetDevice()->CopyDescriptorsSimple(1, dstHandle.CPUPtr, m_contextDX12->GetDescriptorCBVNullHandle().CPUPtr, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-										++RenderStats::Instance().DescriptorSetUpdates;
-									}
-								}
-
-								if (binding.Type == DescriptorType::Sampled_Image)
-								{
-									DescriptorHeapHandle_DX12 dstHandle = resouceHeap.GetNextHandle();
-									if (firstHandle.CPUPtr.ptr == 0)
-									{
-										firstHandle = dstHandle;
-									}
-
-									if (binding.RHI_Texture)
-									{
-										RHI_Texture_DX12 const* textureDX12 = static_cast<RHI_Texture_DX12 const*>(binding.RHI_Texture);
-										if (textureDX12->GetResource())
+										const RHI_BufferView& buffer = binding.RHI_Buffer_View[bindingCountIdx];
+										if (!buffer.IsValid())
 										{
-											IS_PROFILE_SCOPE("Copy texture");
+											continue;
+										}
+										
+										DescriptorHeapHandle_DX12 dstHandle = resouceHeap.GetNextHandle();
+										if (firstHandle.CPUPtr.ptr == 0)
+										{
+											firstHandle = dstHandle;
+										}
 
-											DescriptorHeapHandle_DX12 srvHandle = textureDX12->GetDescriptorHandle();
-											m_contextDX12->GetDevice()->CopyDescriptorsSimple(1, dstHandle.CPUPtr, srvHandle.CPUPtr, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+										if (buffer.IsValid())
+										{
+											IS_PROFILE_SCOPE("Create constant buffer");
+
+											D3D12_CONSTANT_BUFFER_VIEW_DESC desc = {};
+											RHI::DX12::RHI_Buffer_DX12* bufferDX12 = static_cast<RHI::DX12::RHI_Buffer_DX12*>(buffer.GetBuffer());
+											desc.BufferLocation = bufferDX12->GetResource()->GetGPUVirtualAddress() + buffer.GetOffset();
+											desc.SizeInBytes = static_cast<UINT>(buffer.GetSize());
+											m_contextDX12->GetDevice()->CreateConstantBufferView(&desc, dstHandle.CPUPtr);
+											++RenderStats::Instance().DescriptorSetUpdates;
+										}
+										else
+										{
+											IS_PROFILE_SCOPE("Copy null buffer");
+
+											m_contextDX12->GetDevice()->CopyDescriptorsSimple(1, dstHandle.CPUPtr, m_contextDX12->GetDescriptorCBVNullHandle().CPUPtr, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 											++RenderStats::Instance().DescriptorSetUpdates;
 										}
 									}
-									else
-									{
-										IS_PROFILE_SCOPE("Copy null texture");
 
-										//m_contextDX12->GetDevice()->CopyDescriptorsSimple(1, dstHandle.CPUPtr, m_contextDX12->GetDescriptorSRVNullHandle().CPUPtr, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-										++RenderStats::Instance().DescriptorSetUpdates;
+									if (binding.Type == DescriptorType::Sampled_Image
+										&& bindingCountIdx < binding.RHI_Texture.size())
+									{
+										DescriptorHeapHandle_DX12 dstHandle = resouceHeap.GetNextHandle();
+										if (firstHandle.CPUPtr.ptr == 0)
+										{
+											firstHandle = dstHandle;
+										}
+
+										const RHI_Texture* texture = binding.RHI_Texture[bindingCountIdx];
+										if (texture)
+										{
+											RHI_Texture_DX12 const* textureDX12 = static_cast<RHI_Texture_DX12 const*>(texture);
+											if (textureDX12->GetResource())
+											{
+												IS_PROFILE_SCOPE("Copy texture");
+
+												DescriptorHeapHandle_DX12 srvHandle = textureDX12->GetDescriptorHandle();
+												m_contextDX12->GetDevice()->CopyDescriptorsSimple(1, dstHandle.CPUPtr, srvHandle.CPUPtr, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+												++RenderStats::Instance().DescriptorSetUpdates;
+											}
+										}
+										else
+										{
+											IS_PROFILE_SCOPE("Copy null texture");
+
+											//m_contextDX12->GetDevice()->CopyDescriptorsSimple(1, dstHandle.CPUPtr, m_contextDX12->GetDescriptorSRVNullHandle().CPUPtr, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+											++RenderStats::Instance().DescriptorSetUpdates;
+										}
 									}
-								}
 
-								if (binding.Type == DescriptorType::Sampler
-									&& binding.RHI_Sampler)
-								{
-									DescriptorHeapHandle_DX12 samplerHandle = samplerHeap.GetNextHandle();
-									if (firstHandle.CPUPtr.ptr == 0)
+									if (binding.Type == DescriptorType::Sampler
+										&& bindingCountIdx < binding.RHI_Sampler.size())
 									{
-										firstHandle = samplerHandle;
-									}
-									if (binding.RHI_Sampler)
-									{
-										IS_PROFILE_SCOPE("Copy sampler");
+										DescriptorHeapHandle_DX12 samplerHandle = samplerHeap.GetNextHandle();
+										if (firstHandle.CPUPtr.ptr == 0)
+										{
+											firstHandle = samplerHandle;
+										}
 
-										RHI_Sampler_DX12 const* samplerDX12 = static_cast<RHI_Sampler_DX12 const*>(binding.RHI_Sampler);
-										DescriptorHeapHandle_DX12 srvHandle = samplerDX12->Handle;
-										m_contextDX12->GetDevice()->CopyDescriptorsSimple(1, samplerHandle.CPUPtr, srvHandle.CPUPtr, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
-										++RenderStats::Instance().DescriptorSetUpdates;
-									}
-									else
-									{
-										IS_PROFILE_SCOPE("Copy null sampler");
+										const RHI_Sampler* sampler = binding.RHI_Sampler[bindingCountIdx];
+										if (sampler)
+										{
+											IS_PROFILE_SCOPE("Copy sampler");
 
-										//m_contextDX12->GetDevice()->CopyDescriptorsSimple(1, samplerHandle.CPUPtr, m_contextDX12->GetDescriptorSAMNullHandle().CPUPtr, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
-										++RenderStats::Instance().DescriptorSetUpdates;
+											RHI_Sampler_DX12 const* samplerDX12 = static_cast<RHI_Sampler_DX12 const*>(sampler);
+											DescriptorHeapHandle_DX12 srvHandle = samplerDX12->Handle;
+											m_contextDX12->GetDevice()->CopyDescriptorsSimple(1, samplerHandle.CPUPtr, srvHandle.CPUPtr, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+											++RenderStats::Instance().DescriptorSetUpdates;
+										}
+										else
+										{
+											IS_PROFILE_SCOPE("Copy null sampler");
+
+											//m_contextDX12->GetDevice()->CopyDescriptorsSimple(1, samplerHandle.CPUPtr, m_contextDX12->GetDescriptorSAMNullHandle().CPUPtr, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+											++RenderStats::Instance().DescriptorSetUpdates;
+										}
 									}
 								}
 							}

@@ -48,21 +48,23 @@ namespace Insight
 
 					if (CheckForRootDescriptors(set))
 					{
-						m_rootSignatureParameters.DescriptorRanges.push_back({});
+						m_rootSignatureParameters.DescriptorRanges.push_back(GetDescriptoirRangesFromSet(set));
 						// Root Descriptors
 						m_rootSignatureParameters.RootDescriptors.push_back(GetRootDescriptor(set));
 						std::vector<DescriptorType> descriptorTypes;
 						for (size_t i = 0; i < set.Bindings.size(); ++i)
 						{
-							descriptorTypes.push_back(set.Bindings.at(i).Type);
+							descriptorTypes.push_back(set.Bindings[i].Type);
 						}
 						m_rootSignatureParameters.RootDescriptorTypes.push_back(descriptorTypes);
+						m_rootSignatureParameters.DescriptorBinding.push_back(set.Bindings);
 						RootSignitureCurrentSlotsUsed += 2;
 					}
 					else
 					{
 						m_rootSignatureParameters.RootDescriptors.push_back({});
 						m_rootSignatureParameters.RootDescriptorTypes.push_back({});
+						m_rootSignatureParameters.DescriptorBinding.push_back({});
 						// Root Tables
 						m_rootSignatureParameters.DescriptorRanges.push_back(GetDescriptoirRangesFromSet(set));
 						RootSignitureCurrentSlotsUsed += 1;
@@ -80,14 +82,20 @@ namespace Insight
 						continue;
 					}
 
-					if (m_rootSignatureParameters.RootDescriptors.at(rootParameterIdx).size() > 0)
+					if (m_rootSignatureParameters.RootDescriptors[rootParameterIdx].size() > 0)
 					{
-						std::vector<DescriptorType> const& descriptorTypes = m_rootSignatureParameters.RootDescriptorTypes.at(rootParameterIdx);
+						const std::vector<DescriptorBinding>& bindings = m_rootSignatureParameters.DescriptorBinding[rootParameterIdx];
+						const std::vector<DescriptorType>& descriptorTypes = m_rootSignatureParameters.RootDescriptorTypes[rootParameterIdx];
+						const std::vector<CD3DX12_DESCRIPTOR_RANGE>& descriptorRanges = m_rootSignatureParameters.DescriptorRanges[rootParameterIdx];
+
 						u32 rootIdx = 0;
 
-						for (CD3DX12_ROOT_DESCRIPTOR const& root : m_rootSignatureParameters.RootDescriptors.at(rootParameterIdx))
+						for (CD3DX12_ROOT_DESCRIPTOR const& root : m_rootSignatureParameters.RootDescriptors[rootParameterIdx])
 						{
-							DescriptorType descriptorType = descriptorTypes.at(rootIdx);
+							const DescriptorBinding& binding = bindings[rootIdx];
+							const DescriptorType& descriptorType = descriptorTypes[rootIdx];
+							const CD3DX12_DESCRIPTOR_RANGE& descriptorRange = descriptorRanges[rootIdx];
+
 							CD3DX12_ROOT_PARAMETER paramter;
 
 							switch (descriptorType)
@@ -214,7 +222,7 @@ namespace Insight
 
 					descriptorRanges.push_back(CD3DX12_DESCRIPTOR_RANGE(
 						DescriptorRangeTypeToDX12(binding.Type), 
-						1,
+						binding.Count,
 						binding.Binding,
 						binding.Set));
 				}

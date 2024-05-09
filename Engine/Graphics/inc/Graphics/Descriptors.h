@@ -18,7 +18,7 @@ namespace Insight
 		struct DescriptorBinding
 		{
 			DescriptorBinding() NO_EXPECT;
-			DescriptorBinding(int set, int binding, int stages, u32 size, DescriptorType type) NO_EXPECT;
+			DescriptorBinding(const u32 set, const u32 binding, const u32 stages, const u32 size, const u32 count, const DescriptorType type) NO_EXPECT;
 			//DescriptorBinding(const DescriptorBinding& other) NO_EXPECT;
 			//DescriptorBinding(DescriptorBinding&& other) NO_EXPECT;
 
@@ -35,14 +35,15 @@ namespace Insight
 			u32 Binding = 0;
 			u32 Stages = -1;
 			u32 Size = 0;
+			u32 Count = 0;
 			DescriptorType Type = DescriptorType::Unknown;
 
 			u64 Hash_No_Resource = 0;
 			u64 Hash_Resource = 0;
 
-			RHI_BufferView RHI_Buffer_View = { };
-			const RHI_Texture* RHI_Texture = nullptr;
-			const RHI_Sampler* RHI_Sampler = nullptr;
+			std::vector<RHI_BufferView> RHI_Buffer_View;
+			std::vector<const RHI_Texture*> RHI_Texture;
+			std::vector<const RHI_Sampler*> RHI_Sampler;
 		};
 
 		struct DescriptorSet

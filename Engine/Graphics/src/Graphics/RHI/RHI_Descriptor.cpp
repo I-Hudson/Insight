@@ -221,45 +221,57 @@ namespace Insight
 
 					if (descriptor.Type == DescriptorType::Sampler)
 					{
-						if (descriptor.RHI_Sampler)
+						for (size_t samplerIdx = 0; samplerIdx < descriptor.RHI_Sampler.size(); ++samplerIdx)
 						{
-							const RHI_Sampler* rhi_sampler = descriptor.RHI_Sampler;
-							VkSampler sampler_vulkan = *reinterpret_cast<const VkSampler*>(&rhi_sampler->Resource);
+							const RHI_Sampler* sampler = descriptor.RHI_Sampler[samplerIdx];
+							if (sampler)
+							{
+								const RHI_Sampler* rhi_sampler = sampler;
+								VkSampler sampler_vulkan = *reinterpret_cast<const VkSampler*>(&rhi_sampler->Resource);
 
-							imageInfo[imageInfoIndex].imageView = VkImageView();
-							imageInfo[imageInfoIndex].imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-							imageInfo[imageInfoIndex].sampler = sampler_vulkan;
-							writeDescriptorSet.pImageInfo = &imageInfo[imageInfoIndex];
-							++imageInfoIndex;
-							add_write = true;
+								imageInfo[imageInfoIndex].imageView = VkImageView();
+								imageInfo[imageInfoIndex].imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+								imageInfo[imageInfoIndex].sampler = sampler_vulkan;
+								writeDescriptorSet.pImageInfo = &imageInfo[imageInfoIndex];
+								++imageInfoIndex;
+								add_write = true;
+							}
 						}
+
 					}
 
 					if (descriptor.Type == DescriptorType::Sampled_Image)
 					{
-						if (descriptor.RHI_Texture && descriptor.RHI_Texture->GetUploadStatus() == DeviceUploadStatus::Completed)
+						for (size_t textureIdx = 0; textureIdx < descriptor.RHI_Texture.size(); ++textureIdx)
 						{
-							imageInfo[imageInfoIndex].imageView = static_cast<const RHI::Vulkan::RHI_Texture_Vulkan*>(descriptor.RHI_Texture)->GetImageView();
-							imageInfo[imageInfoIndex].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-							imageInfo[imageInfoIndex].sampler = VkSampler();
-							writeDescriptorSet.pImageInfo = &imageInfo[imageInfoIndex];
-							++imageInfoIndex;
-							add_write = true;
+							const RHI_Texture* texture = descriptor.RHI_Texture[textureIdx];
+							if (texture && texture->GetUploadStatus() == DeviceUploadStatus::Completed)
+							{
+								imageInfo[imageInfoIndex].imageView = static_cast<const RHI::Vulkan::RHI_Texture_Vulkan*>(texture)->GetImageView();
+								imageInfo[imageInfoIndex].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+								imageInfo[imageInfoIndex].sampler = VkSampler();
+								writeDescriptorSet.pImageInfo = &imageInfo[imageInfoIndex];
+								++imageInfoIndex;
+								add_write = true;
+							}
 						}
 					}
 
 					if (descriptor.Type == DescriptorType::Unifom_Buffer)
 					{
-						if (descriptor.RHI_Buffer_View.IsValid())
+						for (size_t bufferIdx = 0; bufferIdx < descriptor.RHI_Buffer_View.size(); ++bufferIdx)
 						{
-							RHI::Vulkan::RHI_Buffer_Vulkan* buffer_vulkan = static_cast<RHI::Vulkan::RHI_Buffer_Vulkan*>(descriptor.RHI_Buffer_View.GetBuffer());
-							bufferInfo[bufferInfoIndex].buffer = buffer_vulkan ? buffer_vulkan->GetBuffer() : nullptr;
-							bufferInfo[bufferInfoIndex].offset = descriptor.RHI_Buffer_View.GetOffset();
-							bufferInfo[bufferInfoIndex].range = descriptor.RHI_Buffer_View.GetSize();
-							writeDescriptorSet.pBufferInfo = &bufferInfo[bufferInfoIndex];
-							++bufferInfoIndex;
-							add_write = true;
-
+							const RHI_BufferView& buffer = descriptor.RHI_Buffer_View[bufferIdx];
+							if (buffer.IsValid())
+							{
+								RHI::Vulkan::RHI_Buffer_Vulkan* buffer_vulkan = static_cast<RHI::Vulkan::RHI_Buffer_Vulkan*>(buffer.GetBuffer());
+								bufferInfo[bufferInfoIndex].buffer = buffer_vulkan ? buffer_vulkan->GetBuffer() : nullptr;
+								bufferInfo[bufferInfoIndex].offset = buffer.GetOffset();
+								bufferInfo[bufferInfoIndex].range = buffer.GetSize();
+								writeDescriptorSet.pBufferInfo = &bufferInfo[bufferInfoIndex];
+								++bufferInfoIndex;
+								add_write = true;
+							}
 						}
 					}
 
@@ -485,8 +497,8 @@ namespace Insight
 					}
 					//if (descriptorBinding->RHI_Buffer_View != bufferView)
 					{
-						descriptorBinding->RHI_Buffer_View = UploadUniform(data, size);
-						HashCombine(descriptorSet->DX_Hash, descriptorBinding->RHI_Buffer_View);
+						descriptorBinding->RHI_Buffer_View[binding] = UploadUniform(data, size);
+						HashCombine(descriptorSet->DX_Hash, descriptorBinding->RHI_Buffer_View[binding]);
 					}
 				}
 			}
@@ -509,10 +521,12 @@ namespace Insight
 			{
 				if (DescriptorBinding* descriptorBinding = GetDescriptorBinding(descriptorSet, binding, DescriptorType::Unifom_Buffer))
 				{
+					const u32 bindingIdx = binding - descriptorBinding->Binding;
+
 					//if (descriptorBinding->RHI_Buffer_View != buffer_view)
 					{
-						descriptorBinding->RHI_Buffer_View = buffer_view;
-						HashCombine(descriptorSet->DX_Hash, descriptorBinding->RHI_Buffer_View);
+						descriptorBinding->RHI_Buffer_View[bindingIdx] = buffer_view;
+						HashCombine(descriptorSet->DX_Hash, descriptorBinding->RHI_Buffer_View[bindingIdx]);
 					}
 				}
 			}
@@ -536,10 +550,11 @@ namespace Insight
 			{
 				if (DescriptorBinding* descriptorBinding = GetDescriptorBinding(descriptorSet, binding, DescriptorType::Sampled_Image))
 				{
+					const u32 bindingIdx = binding - descriptorBinding->Binding;
 					//if (descriptorBinding->RHI_Texture != texture)
 					{
-						descriptorBinding->RHI_Texture = texture;
-						HashCombine(descriptorSet->DX_Hash, descriptorBinding->RHI_Texture);
+						descriptorBinding->RHI_Texture[bindingIdx] = texture;
+						HashCombine(descriptorSet->DX_Hash, descriptorBinding->RHI_Texture[bindingIdx]);
 					}
 				}
 			}
@@ -563,10 +578,11 @@ namespace Insight
 			{
 				if (DescriptorBinding* descriptorBinding = GetDescriptorBinding(descriptorSet, binding, DescriptorType::Sampler))
 				{
-					if (descriptorBinding->RHI_Sampler != sampler)
+					const u32 bindingIdx = binding - descriptorBinding->Binding;
+					if (descriptorBinding->RHI_Sampler[bindingIdx] != sampler)
 					{
-						descriptorBinding->RHI_Sampler = sampler;
-						HashCombine(descriptorSet->DX_Hash, descriptorBinding->RHI_Sampler);
+						descriptorBinding->RHI_Sampler[bindingIdx] = sampler;
+						HashCombine(descriptorSet->DX_Hash, descriptorBinding->RHI_Sampler[bindingIdx]);
 					}
 				}
 			}
@@ -602,7 +618,10 @@ namespace Insight
 				{
 					if (binding.Type == DescriptorType::Uniform_Buffer_Dynamic) 
 					{
-						offsets.push_back(static_cast<u32>(binding.RHI_Buffer_View.GetOffset()));
+						for (size_t bufferIdx = 0; bufferIdx < binding.RHI_Buffer_View.size(); ++bufferIdx)
+						{
+							offsets.push_back(static_cast<u32>(binding.RHI_Buffer_View[bufferIdx].GetOffset()));
+						}
 					}
 				}
 			}
@@ -666,7 +685,11 @@ namespace Insight
 			bool foundBinding = false;
 			for (size_t i = 0; i < descriptor_set->Bindings.size(); ++i)
 			{
-				if (descriptor_set->Bindings.at(i).Binding == binding)
+				const DescriptorBinding& descriptorBinding = descriptor_set->Bindings[i];
+				const u32 startBindingIdx = descriptorBinding.Binding;
+				const u32 endBindingIdx = descriptorBinding.Binding + descriptorBinding.Count;
+
+				if (binding >= startBindingIdx && binding < endBindingIdx)
 				{
 					foundBinding = true;
 					break;
@@ -701,7 +724,7 @@ namespace Insight
 			}
 
 
-			for (auto& descriptorBinding : set->Bindings)
+			for (DescriptorBinding& descriptorBinding : set->Bindings)
 			{
 				if (descriptorBinding.Binding == binding
 					&& descriptorBinding.Type == descriptorType)

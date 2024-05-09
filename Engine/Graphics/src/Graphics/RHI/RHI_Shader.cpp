@@ -392,6 +392,7 @@ namespace Insight
 						binding.binding,
 						stage,
 						block.size,
+						binding.count,
 						descriptor_type);
 					descriptor.SetHashs();
 

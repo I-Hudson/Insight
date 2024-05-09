@@ -6,13 +6,47 @@ namespace Insight
 	{
 		DescriptorBinding::DescriptorBinding() NO_EXPECT
 		{ }
-		DescriptorBinding::DescriptorBinding(int set, int binding, int stages, u32 size, DescriptorType type) NO_EXPECT
+		DescriptorBinding::DescriptorBinding(const u32 set, const u32 binding, const u32 stages, const u32 size, const u32 count, const DescriptorType type) NO_EXPECT
 			: Set(set)
 			, Binding(binding)
 			, Stages(stages)
 			, Size(size)
+			, Count(count)
 			, Type(type)
-		{ }
+		{
+			switch (Type)
+			{
+			case Insight::Graphics::DescriptorType::Sampler:
+			{
+				RHI_Sampler.resize(count);
+				break;
+			}
+			case Insight::Graphics::DescriptorType::Sampled_Image:
+			case Insight::Graphics::DescriptorType::Storage_Image:
+			{
+				RHI_Texture.resize(count);
+				break;
+			}
+			case Insight::Graphics::DescriptorType::Unifom_Buffer:
+			case Insight::Graphics::DescriptorType::Storage_Buffer:
+			case Insight::Graphics::DescriptorType::Uniform_Buffer_Dynamic:
+			case Insight::Graphics::DescriptorType::Storage_Buffer_Dyanmic:
+			{
+				RHI_Buffer_View.resize(count);
+				break;
+			}
+			case Insight::Graphics::DescriptorType::Uniform_Texel_Buffer:
+			case Insight::Graphics::DescriptorType::Storage_Texel_Buffer:
+			case Insight::Graphics::DescriptorType::Input_Attachment:
+			case Insight::Graphics::DescriptorType::Unknown:
+			{
+				FAIL_ASSERT();
+				break;
+			}
+			default:
+				break;
+			}
+		}
 		/*DescriptorBinding::DescriptorBinding(const DescriptorBinding& other) NO_EXPECT
 		{
 			*this = other;
@@ -95,25 +129,38 @@ namespace Insight
 			HashCombine(hash, static_cast<u64>(Type));
 			if (includeResource)
 			{
-				if (RHI_Buffer_View.IsValid())
+				for (size_t bufferIdx = 0; bufferIdx < RHI_Buffer_View.size(); ++bufferIdx)
 				{
-					if (Type == DescriptorType::Uniform_Buffer_Dynamic)
+					const RHI_BufferView& buffer = RHI_Buffer_View[bufferIdx];
+					if (buffer.IsValid())
 					{
-						HashCombine(hash, RHI_Buffer_View.GetBuffer());
-						HashCombine(hash, RHI_Buffer_View.GetSize());
-					}
-					else
-					{
-						HashCombine(hash, RHI_Buffer_View);
+						if (Type == DescriptorType::Uniform_Buffer_Dynamic)
+						{
+							HashCombine(hash, buffer.GetBuffer());
+							HashCombine(hash, buffer.GetSize());
+						}
+						else
+						{
+							HashCombine(hash, buffer);
+						}
 					}
 				}
-				if (RHI_Texture)
+
+				for (size_t textureIdx = 0; textureIdx < RHI_Texture.size(); ++textureIdx)
 				{
-					HashCombine(hash, RHI_Texture);
+					const Graphics::RHI_Texture* texture = RHI_Texture[textureIdx];
+					if (texture)
+					{
+						HashCombine(hash, texture);
+					}
 				}
-				if (RHI_Sampler)
+				for (size_t samplerIdx = 0; samplerIdx < RHI_Sampler.size(); ++samplerIdx)
 				{
-					HashCombine(hash, RHI_Sampler);
+					const Graphics::RHI_Sampler* sampler = RHI_Sampler[samplerIdx];
+					if (sampler)
+					{
+						HashCombine(hash, sampler);
+					}
 				}
 			}
 			return hash;

@@ -21,6 +21,7 @@ namespace Insight
                 std::vector<CD3DX12_ROOT_PARAMETER> RootParameters;
                 std::vector<std::vector<CD3DX12_ROOT_DESCRIPTOR>> RootDescriptors;
                 std::vector<std::vector<DescriptorType>> RootDescriptorTypes;
+                std::vector<std::vector<DescriptorBinding>> DescriptorBinding;
                 std::vector<std::vector<CD3DX12_DESCRIPTOR_RANGE>> DescriptorRanges;
             };
 
