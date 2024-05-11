@@ -35,13 +35,14 @@ namespace Insight
 			// Component - End
 
 			float GetRadius() const;
+			LightComponentShadowMapResolutions GetShadowResolution() const;
 
 			Graphics::RHI_Texture* GetShadowMap() const;
 
 		private:
 			REFLECT_PROPERTY(EditorVisible);
-			float m_radius = 16.0f;
-			//LightComponentShadowMapResolutions m_shadowMapResolution = LightComponentShadowMapResolutions::_1024;
+			float m_radius = 8.0f;
+			LightComponentShadowMapResolutions m_shadowMapResolution = LightComponentShadowMapResolutions::_1024;
 
 			Graphics::RHI_Texture* m_shadowCubemap = nullptr;
 		};

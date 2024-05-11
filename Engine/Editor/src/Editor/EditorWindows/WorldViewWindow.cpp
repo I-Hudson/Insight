@@ -225,8 +225,8 @@ namespace Insight
                         pso.DepthWrite = true;
                         pso.DepthClampEnabled = false;
                         pso.DepthBaisEnabled = true;
-                        pso.DepthConstantBaisValue = Graphics::RenderContext::Instance().IsRenderOptionsEnabled(Graphics::RenderOptions::ReverseZ) ? -4.0f : 4.0f;
-                        pso.DepthSlopeBaisValue = Graphics::RenderContext::Instance().IsRenderOptionsEnabled(Graphics::RenderOptions::ReverseZ) ? -1.5f : 1.5f;
+                        //pso.DepthConstantBaisValue = Graphics::RenderContext::Instance().IsRenderOptionsEnabled(Graphics::RenderOptions::ReverseZ) ? -4.0f : 4.0f;
+                        //pso.DepthSlopeBaisValue = Graphics::RenderContext::Instance().IsRenderOptionsEnabled(Graphics::RenderOptions::ReverseZ) ? -1.5f : 1.5f;
                         pso.ShaderDescription = shaderDesc;
                         pso.DepthStencilFormat = PixelFormat::D32_Float;
                         if (Graphics::RenderContext::Instance().IsRenderOptionsEnabled(Graphics::RenderOptions::ReverseZ))
@@ -269,26 +269,29 @@ namespace Insight
                                 cmdList->BeginRenderpass(renderpassDescription);
 
                                 Maths::Vector3 lightCentre = pointLight.View[3];
+                                Maths::Vector3 upDirection(0, 1, 0);
                                 switch (arrayIdx)
                                 {
                                 case 0:
                                 {
-                                    lightCentre += Maths::Vector3(1, 0, 0);
+                                    lightCentre += Maths::Vector3(-1, 0, 0);
                                     break;
                                 }
                                 case 1:
                                 {
-                                    lightCentre += Maths::Vector3(-1, 0, 0);
+                                    lightCentre += Maths::Vector3(1, 0, 0);
                                     break;
                                 }
                                 case 2:
                                 {
                                     lightCentre += Maths::Vector3(0, 1, 0);
+                                    upDirection = Maths::Vector3(0, 0, 1);
                                     break;
                                 }
                                 case 3:
                                 {
                                     lightCentre += Maths::Vector3(0, -1, 0);
+                                    upDirection = Maths::Vector3(0, 0, -1);
                                     break;
                                 }
                                 case 4:
@@ -301,17 +304,12 @@ namespace Insight
                                     lightCentre += Maths::Vector3(0, 0, -1);
                                     break;
                                 }
-                                case 6:
-                                {
-                                    lightCentre += Maths::Vector3(1, 0, 0);
-                                    break;
-                                }
                                 default:
                                     break;
                                 }
 
                                 const Maths::Vector3 lightDirection = lightCentre - pointLight.View[3];
-                                const Maths::Matrix4 lightView = Maths::Matrix4::LookAt(pointLight.View[3], lightCentre, Maths::Vector3(0,1,0));
+                                const Maths::Matrix4 lightView = Maths::Matrix4::LookAt(pointLight.View[3], lightCentre, upDirection);
 
                                 struct alignas(16) LightBuffer
                                 {
@@ -804,6 +802,7 @@ namespace Insight
                         {
                             RenderPointLight PointLights[c_MaxPointLights];
                             int PointLightSize;
+                            float CameraFarPlane;
                         };
 
                         PointLightBuffer pointLightBuffer;
@@ -819,6 +818,7 @@ namespace Insight
                             cmdList->SetTexture(7, 0 + i, world.PointLights[i].DepthTexture);
                         }
                         pointLightBuffer.PointLightSize = world.PointLights.size();
+                        pointLightBuffer.CameraFarPlane = world.MainCamera.Camera.GetFarPlane();
 
                         Graphics::RHI_BufferView spotLightRHIBuffer = cmdList->UploadUniform(pointLightBuffer);
                         cmdList->SetUniform(6, 0, spotLightRHIBuffer);

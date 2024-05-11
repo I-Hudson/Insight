@@ -26,6 +26,7 @@ cbuffer PointLightBuffers : register(b0, space6)
 {
     RenderPointLight PointLights[32];
     int PointLightSize;
+    float CameraFarPlane;
 }
 
 struct VertexOutput
@@ -34,18 +35,40 @@ struct VertexOutput
 	float2 UV : TEXCOORD0;
 };
 
-float PointShadowCalculation(TextureCube<float4> depthTexture, const float3 worldPosition, const RenderPointLight light)
+float4 PointShadowCalculation(TextureCube<float4> depthTexture, const float3 worldPosition, const RenderPointLight light)
 {
     float3 wPosToLightPos = worldPosition - light.View[3].xyz;
+    float3 wPosToLightNormal = normalize(wPosToLightPos);
+    wPosToLightNormal.x = 1;
+
+    float4x4 lightProjView = mul(light.Projection, light.View);
+    //float wPosInLightSpace =
+
     float lightDistance = length(worldPosition - light.View[3].xyz);
 
     // Map the light distance from 0-FarPlane to 0-1
     lightDistance = lightDistance / light.FarPlane;
     // Invert the distance from 0-1 to 1-0 so the close to the light you are the brighter it is.
-    lightDistance = 1.0 - lightDistance;
-    //float closestDepth = depthTexture.Sample(Clamp_Sampler, wPosToLightPos).r;
-    //closestDepth *= light.FarPlane;
-    return lightDistance;
+    //lightDistance = 1.0 - lightDistance;
+    
+    float shadowDepth = depthTexture.Sample(Clamp_Sampler, wPosToLightPos).r;
+    float linearShadowDepth = LineariseFloat(shadowDepth, 0.1, light.FarPlane);
+    linearShadowDepth /= light.FarPlane;
+    float worldShadowDepth = linearShadowDepth * light.FarPlane;
+
+    float currentDepth = length(wPosToLightPos);
+    // Map our current depth to 0-1
+    float currentDepthClamp = currentDepth / CameraFarPlane;
+    // now test for shadows
+    float bias = 0.05; 
+    float shadow = 0.0;
+    
+    if (shadowDepth > currentDepth)
+    {
+        shadow = 1.0; 
+    }
+
+    return float4(linearShadowDepth, linearShadowDepth, linearShadowDepth, shadowDepth);
 }
 
 VertexOutput VSMain(uint id : SV_VertexID)
@@ -67,7 +90,7 @@ float4 PSMain(VertexOutput input) : SV_TARGET
 	const float3 albedo = (EditorColourTexture.Sample(Clamp_Sampler, input.UV).xyz);
     const float3 ambientAlbedo = albedo * 0.15;
 
-    float3 currentAlbedo = float3(0, 0, 0);
+    float4 currentAlbedo = float4(0, 0, 0, 0);
 
     if (PointLightSize > 0)
     {
@@ -88,11 +111,11 @@ float4 PSMain(VertexOutput input) : SV_TARGET
                 const float3 albedoLightColour = albedo * light.LightColour;
                 const float3 albedoAttenuation = albedoLightColour * attenuation;
 
-                const float shadow = PointShadowCalculation(PointLightShadowMap[lightIdx], worldPosition, light);
-                currentAlbedo += albedoAttenuation * light.Intensity;
-                currentAlbedo = float3(shadow, shadow, shadow);
+                const float4 shadow = PointShadowCalculation(PointLightShadowMap[lightIdx], worldPosition, light);
+                //currentAlbedo += albedoAttenuation * light.Intensity;
+                currentAlbedo = shadow;
             }
         }
     }
-	return float4(currentAlbedo, 1.0f);
+	return currentAlbedo;//float4(, 1.0f);
 }

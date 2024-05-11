@@ -164,44 +164,41 @@ namespace Insight
 		{
 			IS_PROFILE_FUNCTION();
 
-			std::vector<Graphics::Vertex> optimisedVertices;
+			ASSERT(LODs.size() == 1);
+
+			const u32 vertexCount = LODs[0].Vertex_count;
+			const u32 indexCount = LODs[0].Index_count;
+			const u32 vertexSize = sizeof(Vertices[0]);
+
+			std::vector<u32> remap(indexCount);
+			const u64 optimisedVertexCount = meshopt_generateVertexRemap(remap.data(), 
+				Indices.data(),
+				indexCount, 
+				Vertices.data(), 
+				vertexCount,
+				vertexSize);
+
 			std::vector<u32> optimisedIndices;
+			optimisedIndices.resize(indexCount);
 
-			for (size_t i = 0; i < LODs.size(); ++i)
-			{
-				const u64 vertexOffset = LODs[i].Vertex_offset;
-				const u64 indexOffset = LODs[i].First_index;
+			std::vector<Graphics::Vertex> optimisedVertices;
+			optimisedVertices.resize(optimisedVertexCount);
 
-				const u64 vertex_count = LODs[i].Vertex_count;
-				const u64 index_count = LODs[i].Index_count;
+			// Optimisation 1: Remove all duplicate vertices
+			meshopt_remapIndexBuffer(optimisedIndices.data(), Indices.data(), indexCount, remap.data());
+			meshopt_remapVertexBuffer(optimisedVertices.data(), Vertices.data(), vertexCount, vertexSize, remap.data());
 
-				const u64 vertex_size = sizeof(Graphics::Vertex);
+			// Vertex cache optimization - reordering triangles to maximize cache locality
+			IS_LOG_INFO("Optimizing vertex cache...");
+			meshopt_optimizeVertexCache(optimisedIndices.data(), optimisedIndices.data(), indexCount, optimisedVertexCount);
 
-				/// The optimization order is important
-				std::vector<u32> remapTable(index_count); /// allocate temporary memory for the remap table
-				size_t total_vertices_optimized = meshopt_generateVertexRemap(remapTable.data(), NULL, index_count, Vertices.data() + vertexOffset, vertex_count, sizeof(Graphics::Vertex));
-				
-				optimisedIndices.reserve(optimisedIndices.size() + index_count);
-				optimisedVertices.reserve(optimisedVertices.size() + total_vertices_optimized);
+			// Overdraw optimizations - reorders triangles to minimize overdraw from all directions
+			IS_LOG_INFO("Optimizing overdraw...");
+			meshopt_optimizeOverdraw(optimisedIndices.data(), optimisedIndices.data(), indexCount, &(Vertices[0].Position.x), optimisedVertexCount, vertexSize, 1.05f);
 
-				std::vector<Graphics::Vertex> remapVertices(vertex_count);
-				std::vector<u32> remapIndices(index_count);
-
-				meshopt_remapIndexBuffer(remapIndices.data(), NULL, index_count, remapTable.data());
-				meshopt_remapVertexBuffer(remapVertices.data(), Vertices.data() + vertexOffset, vertex_count, sizeof(Graphics::Vertex), remapTable.data());
-
-				/// Vertex cache optimization - reordering triangles to maximize cache locality
-				IS_LOG_INFO("Optimizing vertex cache...");
-				meshopt_optimizeVertexCache(remapIndices.data(), Indices.data() + indexOffset, index_count, vertex_count);
-
-				/// Overdraw optimizations - reorders triangles to minimize overdraw from all directions
-				IS_LOG_INFO("Optimizing overdraw...");
-				meshopt_optimizeOverdraw(optimisedIndices.data() + optimisedIndices.size(), remapIndices.data(), index_count, &Vertices.data()->Position.x, vertex_count, vertex_size, 1.05f);
-
-				/// Vertex fetch optimization - reorders triangles to maximize memory access locality
-				IS_LOG_INFO("Optimizing vertex fetch...");
-				meshopt_optimizeVertexFetch(optimisedVertices.data() + optimisedVertices.size(), Indices.data() + indexOffset, index_count, remapVertices.data(), vertex_count, vertex_size);
-			}
+			// Vertex fetch optimization - reorders triangles to maximize memory access locality
+			IS_LOG_INFO("Optimizing vertex fetch...");
+			meshopt_optimizeVertexFetch(optimisedVertices.data(), optimisedIndices.data(), indexCount, optimisedVertices.data(), optimisedVertexCount, vertexSize);
 		}
 
 		void MeshData::GenerateLODs()
@@ -337,7 +334,7 @@ namespace Insight
 				| aiProcess_GenBoundingBoxes			//
 
 				//| aiProcess_RemoveRedundantMaterials	/// Searches for redundant/unreferenced materials and removes them
-				//| aiProcess_JoinIdenticalVertices		/// Triangulates all faces of all meshes
+				| aiProcess_JoinIdenticalVertices		/// Triangulates all faces of all meshes
 				//| aiProcess_FindDegenerates			/// Convert degenerate primitives to proper lines or points.
 				//| aiProcess_FindInvalidData			/// This step searches all meshes for invalid data, such as zeroed normal vectors or invalid UV coords and removes / fixes them
 				//| aiProcess_FindInstances				/// This step searches for duplicate meshes and replaces them with references to the first mesh
@@ -469,8 +466,8 @@ namespace Insight
 
 			if (!meshData.Vertices.empty() && !meshData.Indices.empty())
 			{
+				meshData.Optimise();
 				//meshData.GenerateLODs();
-				//meshData.Optimise();
 
 				ASSERT(mesh);
 

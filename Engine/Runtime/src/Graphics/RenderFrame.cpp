@@ -203,7 +203,9 @@ namespace Insight
                 {
                     ECS::PointLightComponent* pointLightComponent = entity->GetComponent<ECS::PointLightComponent>();
                     RenderPointLight pointLight;
-                    pointLight.Projection = Maths::Matrix4::CreatePerspective(90.0f, Graphics::Window::Instance().GetAspect(), 0.1f, 128.0f);
+
+                    const float shadowMapResolution = static_cast<float>(pointLightComponent->GetShadowResolution());
+                    pointLight.Projection = Maths::Matrix4::CreatePerspective(90.0f, shadowMapResolution / shadowMapResolution, 0.1f, 128.0f);
 
                     pointLight.View = Maths::Matrix4::Identity;
                     pointLight.View[3] = Maths::Vector4(Maths::Vector3(transformComponent->GetPosition()), 1.0f);
@@ -213,7 +215,7 @@ namespace Insight
                     pointLight.Radius = pointLightComponent->GetRadius();
 
                     pointLight.DepthTexture = pointLightComponent->GetShadowMap();
-                    pointLight.FarPlane = 16.0f;
+                    pointLight.FarPlane = pointLightComponent->GetRadius();
 
                     renderWorld.PointLights.push_back(std::move(pointLight));
                 }

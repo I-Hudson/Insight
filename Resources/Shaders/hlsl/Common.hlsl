@@ -20,6 +20,11 @@ float2 GetUVsForAPI(float2 uv)
 #endif
 }
 
+float LineariseFloat(const float v, const float min, const float max)
+{
+	return min * max / (max + v * (min - max));
+}
+
 //================================================================
 // is_saturated
 //================================================================

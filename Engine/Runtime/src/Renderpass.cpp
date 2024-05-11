@@ -128,7 +128,7 @@ namespace Insight
 			sampler_create_info.MagFilter = Filter::Linear;
 			sampler_create_info.MinFilter = Filter::Linear;
 			sampler_create_info.MipmapMode = SamplerMipmapMode::Nearest;
-			sampler_create_info.AddressMode = SamplerAddressMode::ClampToEdge;
+			sampler_create_info.AddressMode = SamplerAddressMode::ClampToBoarder;
 			sampler_create_info.CompareEnabled = true;
 			if (Reverse_Z_For_Depth)
 			{

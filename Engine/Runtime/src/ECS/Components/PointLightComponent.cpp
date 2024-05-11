@@ -20,30 +20,8 @@ namespace Insight
 			ASSERT(!m_shadowCubemap);
 			m_shadowCubemap = Renderer::CreateTexture();
 			
-			u32 shadowMapResolution = 1024;
-			//switch (m_shadowMapResolution)
-			//{
-			//case Insight::ECS::LightComponentShadowMapResolutions::_64:
-			//	shadowMapResolution = 64;
-			//	break;
-			//case Insight::ECS::LightComponentShadowMapResolutions::_128:
-			//	shadowMapResolution = 128;
-			//	break;
-			//case Insight::ECS::LightComponentShadowMapResolutions::_256:
-			//	shadowMapResolution = 256;
-			//	break;
-			//case Insight::ECS::LightComponentShadowMapResolutions::_512:
-			//	shadowMapResolution = 512;
-			//	break;
-			//case Insight::ECS::LightComponentShadowMapResolutions::_1024:
-			//	shadowMapResolution = 1024;
-			//	break;
-			//case Insight::ECS::LightComponentShadowMapResolutions::_2048:
-			//	shadowMapResolution = 2048;
-			//	break;
-			//default:
-			//	break;
-			//}
+			const u32 shadowMapResolution = static_cast<u32>(m_shadowMapResolution);
+
 			Graphics::RHI_TextureInfo createInfo = Graphics::RHI_TextureInfo::Cubemap(
 				shadowMapResolution, 
 				shadowMapResolution, 
@@ -60,6 +38,11 @@ namespace Insight
 		float PointLightComponent::GetRadius() const
 		{
 			return m_radius;
+		}
+
+		LightComponentShadowMapResolutions PointLightComponent::GetShadowResolution() const
+		{
+			return m_shadowMapResolution;
 		}
 
 		Graphics::RHI_Texture* PointLightComponent::GetShadowMap() const
