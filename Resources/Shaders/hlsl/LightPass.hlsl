@@ -15,20 +15,18 @@ struct RenderPointLight
 
     float Intensity;
     float Radius;
-    float FarPlane;
-    float __pad3;
 
-    float __pad4_pTex1;
+    float __pad5_pTex1;
     float __pad5_pTex2;
-    float __pad6;
-    float __pad7;
 };
 
 cbuffer PointLightBuffers : register(b0, space6)
 {
     RenderPointLight PointLights[32];
     int PointLightSize;
-    float CameraFarPlane;
+    float __pad0;
+    float __pad1;
+    float __pad2;
 }
 
 struct VertexOutput
@@ -37,14 +35,11 @@ struct VertexOutput
 	float2 UV : TEXCOORD0;
 };
 
-float4 PointShadowCalculation(TextureCube<float4> depthTexture, const float3 worldPosition, const RenderPointLight light)
+float PointShadowCalculation(TextureCube<float4> depthTexture, const float3 worldPosition, const RenderPointLight light)
 {
     float3 wPosToLightPos = worldPosition - light.Position;
 
     float shadowDepth = depthTexture.Sample(Clamp_Sampler, wPosToLightPos).r;
-    float linearShadowDepth = LineariseFloat(shadowDepth, 0.1, light.FarPlane);
-    linearShadowDepth /= light.FarPlane;
-    float worldShadowDepth = linearShadowDepth * light.FarPlane;
 
     const uint shadowSliceIndex = DirectionToCubeFaceIndex(wPosToLightPos);
     float4x4 shadowProjectionView = mul(light.Projection, light.View[shadowSliceIndex]);
@@ -52,9 +47,9 @@ float4 PointShadowCalculation(TextureCube<float4> depthTexture, const float3 wor
 
     if (shadowDepth < shadowNDC.z)
     {
-        return float4(0,0,0,1);
+        return 0;
     }
-    return float4(1,1,1,1);
+    return 1;
 }
 
 VertexOutput VSMain(uint id : SV_VertexID)
@@ -95,9 +90,9 @@ float4 PSMain(VertexOutput input) : SV_TARGET
                 const float3 albedoLightColour = albedo * light.LightColour;
                 const float3 albedoAttenuation = albedoLightColour * attenuation;
 
-                const float4 shadow = PointShadowCalculation(PointLightShadowMap[lightIdx], worldPosition, light);
-                //currentAlbedo += albedoAttenuation * light.Intensity;
-                currentAlbedo = shadow;
+                const float shadow = PointShadowCalculation(PointLightShadowMap[lightIdx], worldPosition, light);
+                currentAlbedo += (albedoAttenuation * light.Intensity) * shadow;
+                //currentAlbedo = shadow;
             }
         }
     }

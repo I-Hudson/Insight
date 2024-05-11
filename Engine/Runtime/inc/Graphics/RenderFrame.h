@@ -63,11 +63,7 @@ namespace Insight
         Maths::Vector3 Position;
         float Intensity;
         float Radius;
-        float FarPlane;
-        float __pad0;
         Graphics::RHI_Texture* DepthTexture; // In HLSL this is just 8 bytes worth of padding.
-        float __pad1;
-        float __pad2;
 
         void CreateViewMatrixs(const Maths::Vector3& position)
         {

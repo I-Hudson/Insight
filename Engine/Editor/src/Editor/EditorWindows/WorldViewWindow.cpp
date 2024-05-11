@@ -219,7 +219,7 @@ namespace Insight
                     Graphics::PipelineStateObject pso = { };
                     {
                         pso.Name = "EditorWorldLightShadowPass";
-                        pso.CullMode = Graphics::CullMode::Front;
+                        pso.CullMode = Graphics::CullMode::Back;
                         pso.FrontFace = Graphics::FrontFace::CounterClockwise;
                         pso.DepthTest = true;
                         pso.DepthWrite = true;
@@ -241,7 +241,7 @@ namespace Insight
                     builder.SetPipeline(pso);
 
                     Graphics::RenderpassDescription renderpassDescription = { };
-                    renderpassDescription.AddAttachment(Graphics::AttachmentDescription::Default(PixelFormat::D32_Float, Graphics::ImageLayout::ShaderReadOnly));
+                    renderpassDescription.AddAttachment(Graphics::AttachmentDescription::Default(pso.DepthStencilFormat, Graphics::ImageLayout::ShaderReadOnly));
                     renderpassDescription.Attachments.back().InitalLayout = Graphics::ImageLayout::DepthStencilAttachment;
                     builder.SetRenderpass(renderpassDescription);
 
@@ -281,7 +281,7 @@ namespace Insight
                                 for (const u64 meshIndex : renderWorld.OpaqueMeshIndexs)
                                 {
                                     const RenderMesh& mesh = renderWorld.Meshes.at(meshIndex);
-                                    Graphics::Frustum pointLightFrustum(pointLight.View[arrayIdx], pointLight.Projection, pointLight.FarPlane);
+                                    Graphics::Frustum pointLightFrustum(pointLight.View[arrayIdx], pointLight.Projection, pointLight.Radius);
 
                                     const bool isVisable = pointLightFrustum.IsVisible(Maths::Vector3(mesh.Transform[3].xyz), mesh.BoudingBox.GetRadius());
                                     if (!isVisable)
@@ -759,7 +759,6 @@ namespace Insight
                         {
                             RenderPointLight PointLights[c_MaxPointLights];
                             int PointLightSize;
-                            float CameraFarPlane;
                         };
 
                         PointLightBuffer pointLightBuffer;
@@ -775,7 +774,6 @@ namespace Insight
                             cmdList->SetTexture(7, 0 + i, world.PointLights[i].DepthTexture);
                         }
                         pointLightBuffer.PointLightSize = world.PointLights.size();
-                        pointLightBuffer.CameraFarPlane = world.MainCamera.Camera.GetFarPlane();
 
                         Graphics::RHI_BufferView spotLightRHIBuffer = cmdList->UploadUniform(pointLightBuffer);
                         cmdList->SetUniform(6, 0, spotLightRHIBuffer);
