@@ -225,8 +225,8 @@ namespace Insight
                         pso.DepthWrite = true;
                         pso.DepthClampEnabled = false;
                         pso.DepthBaisEnabled = true;
-                        //pso.DepthConstantBaisValue = Graphics::RenderContext::Instance().IsRenderOptionsEnabled(Graphics::RenderOptions::ReverseZ) ? -4.0f : 4.0f;
-                        //pso.DepthSlopeBaisValue = Graphics::RenderContext::Instance().IsRenderOptionsEnabled(Graphics::RenderOptions::ReverseZ) ? -1.5f : 1.5f;
+                        pso.DepthConstantBaisValue = Graphics::RenderContext::Instance().IsRenderOptionsEnabled(Graphics::RenderOptions::ReverseZ) ? -4.0f : 4.0f;
+                        pso.DepthSlopeBaisValue = Graphics::RenderContext::Instance().IsRenderOptionsEnabled(Graphics::RenderOptions::ReverseZ) ? -1.5f : 1.5f;
                         pso.ShaderDescription = shaderDesc;
                         pso.DepthStencilFormat = PixelFormat::D32_Float;
                         if (Graphics::RenderContext::Instance().IsRenderOptionsEnabled(Graphics::RenderOptions::ReverseZ))
@@ -268,22 +268,20 @@ namespace Insight
                                 renderpassDescription.DepthStencilAttachment.Layer_Array_Index = static_cast<u32>(arrayIdx);
                                 cmdList->BeginRenderpass(renderpassDescription);
 
-                                
-
                                 struct alignas(16) LightBuffer
                                 {
                                     Maths::Matrix4 ProjectionView;
                                 };
                                 LightBuffer lightBuffer =
                                 {
-                                    pointLight.Projection * lightView
+                                    pointLight.Projection * pointLight.View[arrayIdx]
                                 };
                                 cmdList->SetUniform(0, 0, lightBuffer);
 
                                 for (const u64 meshIndex : renderWorld.OpaqueMeshIndexs)
                                 {
                                     const RenderMesh& mesh = renderWorld.Meshes.at(meshIndex);
-                                    Graphics::Frustum pointLightFrustum(pointLight.View, pointLight.Projection, pointLight.FarPlane);
+                                    Graphics::Frustum pointLightFrustum(pointLight.View[arrayIdx], pointLight.Projection, pointLight.FarPlane);
 
                                     const bool isVisable = pointLightFrustum.IsVisible(Maths::Vector3(mesh.Transform[3].xyz), mesh.BoudingBox.GetRadius());
                                     if (!isVisable)

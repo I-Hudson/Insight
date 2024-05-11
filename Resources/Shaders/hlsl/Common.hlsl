@@ -25,8 +25,9 @@ float LineariseFloat(const float v, const float min, const float max)
 	return min * max / (max + v * (min - max));
 }
 
-uint DirectionToCubeFaceIndex(const float3 direction)
+uint DirectionToCubeFaceIndex(float3 direction)
 {
+    direction = normalize(direction);
     // find the absolute values of the direction components
     float3 abs_direction = abs(direction);
 

@@ -69,7 +69,7 @@ namespace Insight
         float __pad1;
         float __pad2;
 
-        void CreateViewMatrixs(Maths::Vector3 position)
+        void CreateViewMatrixs(const Maths::Vector3& position)
         {
             for (size_t i = 0; i < 6; i++)
             {

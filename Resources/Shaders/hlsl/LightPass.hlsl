@@ -40,40 +40,21 @@ struct VertexOutput
 float4 PointShadowCalculation(TextureCube<float4> depthTexture, const float3 worldPosition, const RenderPointLight light)
 {
     float3 wPosToLightPos = worldPosition - light.Position;
-    float3 wPosToLightNormal = normalize(wPosToLightPos);
 
-    float4x4 lightProjView = mul(light.Projection, light.View);
-    //float wPosInLightSpace =
-
-    float lightDistance = length(worldPosition - light.View[3].xyz);
-
-    // Map the light distance from 0-FarPlane to 0-1
-    lightDistance = lightDistance / light.FarPlane;
-    // Invert the distance from 0-1 to 1-0 so the close to the light you are the brighter it is.
-    //lightDistance = 1.0 - lightDistance;
-    
-    float shadowDepth = depthTexture.Sample(Clamp_Sampler, wPosToLightNormal).r;
+    float shadowDepth = depthTexture.Sample(Clamp_Sampler, wPosToLightPos).r;
     float linearShadowDepth = LineariseFloat(shadowDepth, 0.1, light.FarPlane);
     linearShadowDepth /= light.FarPlane;
     float worldShadowDepth = linearShadowDepth * light.FarPlane;
 
-    const uint shadowSliceIndex = DirectionToCubeFaceIndex(wPosToLightNormal);
+    const uint shadowSliceIndex = DirectionToCubeFaceIndex(wPosToLightPos);
     float4x4 shadowProjectionView = mul(light.Projection, light.View[shadowSliceIndex]);
     float3 shadowNDC = world_to_ndc(worldPosition, shadowProjectionView);
 
-    float currentDepth = length(wPosToLightPos);
-    // Map our current depth to 0-1
-    float currentDepthClamp = currentDepth / CameraFarPlane;
-    // now test for shadows
-    float bias = 0.05; 
-    float shadow = 0.0;
-    
-    if (shadowDepth > currentDepth)
+    if (shadowDepth < shadowNDC.z)
     {
-        shadow = 1.0; 
+        return float4(0,0,0,1);
     }
-
-    return float4(shadowNDC.z, shadowNDC.z, shadowNDC.z, shadowDepth);
+    return float4(1,1,1,1);
 }
 
 VertexOutput VSMain(uint id : SV_VertexID)
@@ -102,11 +83,9 @@ float4 PSMain(VertexOutput input) : SV_TARGET
         for (int lightIdx = 0; lightIdx < PointLightSize; lightIdx++)
         {
             RenderPointLight light = PointLights[lightIdx];
-            //light.View = transpose(light.View);
-            float3 lightPosition = light.View[3].xyz;
 
             const float lightDistance = distance(
-                float4(lightPosition, 1.0f), 
+                float4(light.Position, 1.0f), 
                 float4(worldPosition, 1.0f));
 
             if (lightDistance < light.Radius)
