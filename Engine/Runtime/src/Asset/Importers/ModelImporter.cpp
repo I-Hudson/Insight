@@ -324,7 +324,7 @@ namespace Insight
 				| aiProcess_SortByPType					/// Splits meshes with more than one primitive type in homogeneous sub-meshes.
 
 				| aiProcess_MakeLeftHanded				/// DirectX style.
-				| aiProcess_FlipUVs						/// DirectX style.
+				//| aiProcess_FlipUVs						/// DirectX style.
 				| aiProcess_FlipWindingOrder			/// DirectX style.
 
 				| aiProcess_CalcTangentSpace			/// Calculates the tangents and bitangents for the imported meshes.

@@ -205,12 +205,13 @@ namespace Insight
                     RenderPointLight pointLight;
 
                     const float shadowMapResolution = static_cast<float>(pointLightComponent->GetShadowResolution());
-                    pointLight.Projection = Maths::Matrix4::CreatePerspective(90.0f, shadowMapResolution / shadowMapResolution, 0.1f, 128.0f);
+                    pointLight.Projection = Maths::Matrix4::CreatePerspective(glm::radians(90.0f), shadowMapResolution / shadowMapResolution, 0.1f, pointLightComponent->GetRadius());
 
                     pointLight.View = Maths::Matrix4::Identity;
                     pointLight.View[3] = Maths::Vector4(Maths::Vector3(transformComponent->GetPosition()), 1.0f);
 
                     pointLight.LightColour = pointLightComponent->GetLightColour();
+                    pointLight.Position = pointLight.View[3];
                     pointLight.Intensity = pointLightComponent->GetIntensity();
                     pointLight.Radius = pointLightComponent->GetRadius();
 

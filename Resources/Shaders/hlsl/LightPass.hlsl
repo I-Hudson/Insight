@@ -7,19 +7,21 @@ TextureCube<float4> PointLightShadowMap[32] : register(t0, space7);
 struct RenderPointLight
 {
     float4x4 Projection;
-    float4x4 View;
+    float4x4 View[6];
     float3 LightColour;
     float __pad1;
+    float3 Position;
+    float __pad2;
 
     float Intensity;
     float Radius;
     float FarPlane;
-    float __pad2;
+    float __pad3;
 
-    float __pad3_pTex1;
-    float __pad4_pTex2;
-    float __pad5;
+    float __pad4_pTex1;
+    float __pad5_pTex2;
     float __pad6;
+    float __pad7;
 };
 
 cbuffer PointLightBuffers : register(b0, space6)
@@ -37,9 +39,8 @@ struct VertexOutput
 
 float4 PointShadowCalculation(TextureCube<float4> depthTexture, const float3 worldPosition, const RenderPointLight light)
 {
-    float3 wPosToLightPos = worldPosition - light.View[3].xyz;
+    float3 wPosToLightPos = worldPosition - light.Position;
     float3 wPosToLightNormal = normalize(wPosToLightPos);
-    wPosToLightNormal.x = 1;
 
     float4x4 lightProjView = mul(light.Projection, light.View);
     //float wPosInLightSpace =
@@ -51,10 +52,14 @@ float4 PointShadowCalculation(TextureCube<float4> depthTexture, const float3 wor
     // Invert the distance from 0-1 to 1-0 so the close to the light you are the brighter it is.
     //lightDistance = 1.0 - lightDistance;
     
-    float shadowDepth = depthTexture.Sample(Clamp_Sampler, wPosToLightPos).r;
+    float shadowDepth = depthTexture.Sample(Clamp_Sampler, wPosToLightNormal).r;
     float linearShadowDepth = LineariseFloat(shadowDepth, 0.1, light.FarPlane);
     linearShadowDepth /= light.FarPlane;
     float worldShadowDepth = linearShadowDepth * light.FarPlane;
+
+    const uint shadowSliceIndex = DirectionToCubeFaceIndex(wPosToLightNormal);
+    float4x4 shadowProjectionView = mul(light.Projection, light.View[shadowSliceIndex]);
+    float3 shadowNDC = world_to_ndc(worldPosition, shadowProjectionView);
 
     float currentDepth = length(wPosToLightPos);
     // Map our current depth to 0-1
@@ -68,7 +73,7 @@ float4 PointShadowCalculation(TextureCube<float4> depthTexture, const float3 wor
         shadow = 1.0; 
     }
 
-    return float4(linearShadowDepth, linearShadowDepth, linearShadowDepth, shadowDepth);
+    return float4(shadowNDC.z, shadowNDC.z, shadowNDC.z, shadowDepth);
 }
 
 VertexOutput VSMain(uint id : SV_VertexID)
@@ -97,7 +102,7 @@ float4 PSMain(VertexOutput input) : SV_TARGET
         for (int lightIdx = 0; lightIdx < PointLightSize; lightIdx++)
         {
             RenderPointLight light = PointLights[lightIdx];
-            light.View = transpose(light.View);
+            //light.View = transpose(light.View);
             float3 lightPosition = light.View[3].xyz;
 
             const float lightDistance = distance(

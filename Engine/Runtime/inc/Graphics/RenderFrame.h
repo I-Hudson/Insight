@@ -58,8 +58,9 @@ namespace Insight
     struct RenderPointLight
     {
         Maths::Matrix4 Projection;
-        Maths::Matrix4 View;
+        Maths::Matrix4 View[6];
         Maths::Vector3 LightColour;
+        Maths::Vector3 Position;
         float Intensity;
         float Radius;
         float FarPlane;
@@ -67,6 +68,56 @@ namespace Insight
         Graphics::RHI_Texture* DepthTexture; // In HLSL this is just 8 bytes worth of padding.
         float __pad1;
         float __pad2;
+
+        void CreateViewMatrixs(Maths::Vector3 position)
+        {
+            for (size_t i = 0; i < 6; i++)
+            {
+                Maths::Vector3 lightCentre = position;
+                Maths::Vector3 upDirection(0, 1, 0);
+                switch (i)
+                {
+                case 0:
+                {
+                    lightCentre += Maths::Vector3(1, 0, 0);
+                    break;
+                }
+                case 1:
+                {
+                    lightCentre += Maths::Vector3(-1, 0, 0);
+                    break;
+                }
+                case 2:
+                {
+                    lightCentre += Maths::Vector3(0, 1, 0);
+                    upDirection = Maths::Vector3(0, 0, 1);
+                    break;
+                }
+                case 3:
+                {
+                    lightCentre += Maths::Vector3(0, -1, 0);
+                    upDirection = Maths::Vector3(0, 0, -1);
+                    break;
+                }
+                case 4:
+                {
+                    lightCentre += Maths::Vector3(0, 0, 1);
+                    break;
+                }
+                case 5:
+                {
+                    lightCentre += Maths::Vector3(0, 0, -1);
+                    break;
+                }
+                default:
+                    break;
+                }
+
+                const Maths::Vector3 lightDirection = lightCentre - position;
+                const Maths::Matrix4 lightView = Maths::Matrix4::LookAt(position, lightCentre, upDirection);
+                View[i] = lightView;
+            }
+        }
     };
 
     struct IS_RUNTIME RenderCamera

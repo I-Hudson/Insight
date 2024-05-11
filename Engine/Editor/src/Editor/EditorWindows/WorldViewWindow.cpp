@@ -268,48 +268,7 @@ namespace Insight
                                 renderpassDescription.DepthStencilAttachment.Layer_Array_Index = static_cast<u32>(arrayIdx);
                                 cmdList->BeginRenderpass(renderpassDescription);
 
-                                Maths::Vector3 lightCentre = pointLight.View[3];
-                                Maths::Vector3 upDirection(0, 1, 0);
-                                switch (arrayIdx)
-                                {
-                                case 0:
-                                {
-                                    lightCentre += Maths::Vector3(-1, 0, 0);
-                                    break;
-                                }
-                                case 1:
-                                {
-                                    lightCentre += Maths::Vector3(1, 0, 0);
-                                    break;
-                                }
-                                case 2:
-                                {
-                                    lightCentre += Maths::Vector3(0, 1, 0);
-                                    upDirection = Maths::Vector3(0, 0, 1);
-                                    break;
-                                }
-                                case 3:
-                                {
-                                    lightCentre += Maths::Vector3(0, -1, 0);
-                                    upDirection = Maths::Vector3(0, 0, -1);
-                                    break;
-                                }
-                                case 4:
-                                {
-                                    lightCentre += Maths::Vector3(0, 0, 1);
-                                    break;
-                                }
-                                case 5:
-                                {
-                                    lightCentre += Maths::Vector3(0, 0, -1);
-                                    break;
-                                }
-                                default:
-                                    break;
-                                }
-
-                                const Maths::Vector3 lightDirection = lightCentre - pointLight.View[3];
-                                const Maths::Matrix4 lightView = Maths::Matrix4::LookAt(pointLight.View[3], lightCentre, upDirection);
+                                
 
                                 struct alignas(16) LightBuffer
                                 {
