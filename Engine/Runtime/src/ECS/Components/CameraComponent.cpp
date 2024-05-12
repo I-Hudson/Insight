@@ -39,6 +39,14 @@ namespace Insight
 			m_invertView = invertViewMatrix;
 		}
 
+		void Camera::SetProjectionMatrix(const Maths::Matrix4 projection)
+		{
+			m_projection = projection;
+			ComputeProjectionViewMatrix();
+			ComputeFrustm();
+		}
+
+
 		void Camera::SetViewMatrix(Maths::Matrix4 viewMatrix)
 		{
 			m_view = viewMatrix;

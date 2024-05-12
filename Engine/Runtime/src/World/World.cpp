@@ -3,6 +3,8 @@
 #include "Core/Profiler.h"
 #include "Core/Logger.h"
 
+#include "ECS/Components/TransformComponent.h"
+
 #include "Event/EventSystem.h"
 #include "Runtime/RuntimeEvents.h"
 #include "Serialisation/Archive.h"
@@ -68,6 +70,7 @@ namespace Insight
 			IS_PROFILE_FUNCTION();
 			if (m_worldState == WorldStates::Paused)
 			{
+				m_entityManager.UpdateComponents<ECS::TransformComponent>();
 				return;
 			}
 			m_entityManager.Update(deltaTime);

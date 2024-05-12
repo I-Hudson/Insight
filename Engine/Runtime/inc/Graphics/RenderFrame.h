@@ -37,6 +37,7 @@ namespace Insight
     struct IS_RUNTIME RenderMesh
     {
         glm::mat4 Transform;
+        glm::mat4 PreviousTransform;
         Graphics::BoundingBox BoudingBox;
         /// @brief All render calls for this mesh.
         std::vector<Runtime::MeshLOD> MeshLods;

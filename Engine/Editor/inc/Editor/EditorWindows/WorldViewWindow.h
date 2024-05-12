@@ -44,16 +44,21 @@ namespace Insight
             void GBufferPass();
             void TransparentGBufferPass();
             void LightPass();
+            void FSR2Pass();
 
             void BindCommonResources(Graphics::RHI_CommandList* cmd_list, RenderData& renderData);
 
-            Graphics::BufferFrame GetBufferFrame() const;
+            Graphics::BufferFrame GetBufferFrame();
             Graphics::BufferSamplers GetBufferSamplers() const;
 
         private:
             constexpr static const char* c_WorldName = "EditorWorldView";
             ECS::Entity* m_editorCameraEntity;
             ECS::CameraComponent* m_editorCameraComponent;
+
+            glm::ivec2 m_renderResolution = glm::vec2(0, 0);
+            bool m_fsr2Enabled = false;
+            glm::vec2 m_taaJitterPrevious = glm::vec2(0, 0);
 
             bool m_enableDepthPrepass = false;
             RenderData m_renderingData;

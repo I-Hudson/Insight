@@ -140,6 +140,7 @@ namespace Insight
 
                         RenderMesh renderMesh;
                         renderMesh.Transform = transformComponent->GetTransform();
+                        renderMesh.PreviousTransform = transformComponent->GetPreviousTransform();
 
                         Graphics::BoundingBox boundingBox = mesh->GetBoundingBox();
                         bool isVisible = true; 

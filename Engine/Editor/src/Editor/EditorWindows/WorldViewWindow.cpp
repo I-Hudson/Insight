@@ -72,6 +72,7 @@ namespace Insight
             {
                 "EditorWorldLightRT",
                 "EditorWorldColourRT",
+                "EditorFSR_Output",
             };
             static int editorOutput = 0;
             ImGui::Combo("Editor Output", &editorOutput, editorOutputItems, ARRAY_COUNT(editorOutputItems));
@@ -188,6 +189,7 @@ namespace Insight
             GBufferPass();
             TransparentGBufferPass();
             LightPass();
+            FSR2Pass();
         }
 
         void WorldViewWindow::LightShadowPass()
@@ -531,7 +533,7 @@ namespace Insight
 
                             Graphics::BufferPerObject object = {};
                             object.Transform = mesh.Transform;
-                            object.Previous_Transform = mesh.Transform;
+                            object.Previous_Transform = mesh.PreviousTransform;
 
                             {
                                 IS_PROFILE_SCOPE("Set textures");
@@ -706,7 +708,7 @@ namespace Insight
                     Graphics::RHI_TextureInfo textureCreateInfo = Graphics::RHI_TextureInfo::Tex2D(
                           renderResolutionX
                         , renderResolutionY
-                        , PixelFormat::R32G32B32A32_Float
+                        , PixelFormat::R8G8B8A8_UNorm
                         , Graphics::ImageUsageFlagsBits::ColourAttachment | Graphics::ImageUsageFlagsBits::Sampled);
                     Graphics::RGTextureHandle lightRT = builder.CreateTexture("EditorWorldLightRT", textureCreateInfo);
                     builder.WriteTexture(lightRT);
@@ -787,6 +789,79 @@ namespace Insight
                 }, std::move(passData));
         }
 
+        void WorldViewWindow::FSR2Pass()
+        {
+            IS_PROFILE_FUNCTION();
+
+            static float fsrSharpness;
+            bool reset = false;
+            if (ImGui::Checkbox("Editor Enable FSR", &m_fsr2Enabled))
+            {
+                //reset = true;
+            }
+            ImGui::DragFloat("Editor FSR sharpness", &fsrSharpness, 0.05f, 0.0f, 1.0f);
+
+            if (m_renderResolution == glm::ivec2(0, 0))
+            {
+                m_renderResolution = Graphics::RenderGraph::Instance().GetRenderResolution();
+            }
+
+            ImGui::InputInt2("Render Resolution", &m_renderResolution.x);
+            if (ImGui::Button("Apply Render Resolution"))
+            {
+                Graphics::RenderGraph::Instance().SetRenderResolution(m_renderResolution);
+                return;
+            }
+
+            if (Graphics::RenderGraph::Instance().GetRenderResolution() == Graphics::RenderGraph::Instance().GetOutputResolution()
+                || !m_fsr2Enabled)
+            {
+                return;
+            }
+
+            struct PassData
+            {
+                float NearPlane;
+                float FarPlane;
+                float FOVY;
+            };
+            PassData passData = {};
+
+            passData.NearPlane = m_editorCameraComponent->GetCamera().GetNearPlane();
+            passData.FarPlane = m_editorCameraComponent->GetCamera().GetFarPlane();
+            passData.FOVY = m_editorCameraComponent->GetCamera().GetFovY();
+
+            Graphics::RenderGraph::Instance().AddPass<PassData>("EditorFSR2",
+                [](PassData& data, Graphics::RenderGraphBuilder& builder)
+                {
+                    Graphics::RHI_TextureInfo create_info = Graphics::RHI_TextureInfo::Tex2D(
+                        builder.GetOutputResolution().x
+                        , builder.GetOutputResolution().y
+                        , PixelFormat::R8G8B8A8_UNorm
+                        , Graphics::ImageUsageFlagsBits::Sampled | Graphics::ImageUsageFlagsBits::Storage);
+                    Graphics::RGTextureHandle textureHandle = builder.CreateTexture("EditorFSR_Output", create_info);
+
+                    builder.SetViewport(Graphics::RenderGraph::Instance().GetOutputResolution().x, Graphics::RenderGraph::Instance().GetOutputResolution().y);
+                    builder.SetScissor(Graphics::RenderGraph::Instance().GetOutputResolution().x, Graphics::RenderGraph::Instance().GetOutputResolution().y);
+
+                    builder.SkipTextureWriteBarriers();
+                },
+                [this, reset](PassData& data, Graphics::RenderGraph& render_graph, Graphics::RHI_CommandList* cmd_list)
+                {
+                    Graphics::RHI_FSR::Instance().Dispatch(cmd_list
+                    , render_graph.GetRHITexture("EditorWorldLightRT")
+                    , render_graph.GetRHITexture("EditorWorldDepthStencilRT")
+                    , render_graph.GetRHITexture("EditorWorldVelocityRT")
+                    , render_graph.GetRHITexture("EditorFSR_Output")
+                    , data.NearPlane
+                    , data.FarPlane
+                    , data.FOVY
+                    , App::Engine::s_FrameTimer.GetElapsedTimeMillFloat()
+                    , fsrSharpness
+                    , reset);
+                }, std::move(passData));
+        }
+
         void WorldViewWindow::BindCommonResources(Graphics::RHI_CommandList* cmd_list, RenderData& renderData)
         {
             IS_PROFILE_FUNCTION();
@@ -799,12 +874,16 @@ namespace Insight
             cmd_list->SetSampler(4, 3, renderData.BufferSamplers.MirroredRepeat_Sampler);
         }
 
-        Graphics::BufferFrame WorldViewWindow::GetBufferFrame() const
+        Graphics::BufferFrame WorldViewWindow::GetBufferFrame()
         {
             IS_PROFILE_FUNCTION();
 
             Graphics::BufferFrame bufferFrame;
             
+            Graphics::RHI_FSR::Instance().GenerateJitterSample(&bufferFrame.TAA_Jitter_Current.x, &bufferFrame.TAA_Jitter_Current.y);
+            bufferFrame.TAA_Jitter_Previous = m_taaJitterPrevious;
+            m_taaJitterPrevious = bufferFrame.TAA_Jitter_Current;
+
             if (Graphics::RenderContext::Instance().IsRenderOptionsEnabled(Graphics::RenderOptions::ReverseZ))
             {
                 m_editorCameraComponent->CreatePerspective(
@@ -812,6 +891,15 @@ namespace Insight
                     , m_editorCameraComponent->GetAspect()
                     , m_editorCameraComponent->GetFarPlane()
                     , m_editorCameraComponent->GetNearPlane());
+            }
+
+            if (m_fsr2Enabled)
+            {
+                Maths::Matrix4 projection = m_editorCameraComponent->GetProjectionMatrix();
+                Maths::Matrix4 translation = Maths::Matrix4::Identity;
+                translation[3] = Maths::Vector4(bufferFrame.TAA_Jitter_Current.x, bufferFrame.TAA_Jitter_Current.y, 0.0f, 1.0f);
+                projection *= translation;
+                m_editorCameraComponent->GetCamera().SetProjectionMatrix(projection);
             }
 
             bufferFrame.Proj_View = m_editorCameraComponent->GetProjectionViewMatrix();
@@ -823,6 +911,7 @@ namespace Insight
 
             bufferFrame.Render_Resolution = Graphics::RenderGraph::Instance().GetRenderResolution();
             bufferFrame.Ouput_Resolution = Graphics::RenderGraph::Instance().GetOutputResolution();
+
             return bufferFrame;
         }
 

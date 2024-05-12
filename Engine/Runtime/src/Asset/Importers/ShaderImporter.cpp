@@ -7,7 +7,8 @@ namespace Insight
 {
     namespace Runtime
     {
-        ShaderImporter::ShaderImporter(std::vector<const char*> validFileExtensions)
+        ShaderImporter::ShaderImporter()
+            : IAssetImporter({ ".hlsl"} )
         { }
 
         ShaderImporter::~ShaderImporter()
@@ -24,10 +25,6 @@ namespace Insight
 
             Graphics::ShaderDesc shaderDesc;
             shaderDesc.MainFunc = "Main";
-
-            Graphics::RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
-
-            shader->m_name = ;
         }
     }
 }

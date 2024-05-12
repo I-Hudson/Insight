@@ -9,7 +9,7 @@ namespace Insight
         class ShaderImporter : public IAssetImporter
         {
         public:
-            ShaderImporter(std::vector<const char*> validFileExtensions);
+            ShaderImporter();
             virtual ~ShaderImporter() override;
 
             virtual Ref<Asset> CreateAsset(const AssetInfo* assetInfo) const override;

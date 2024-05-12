@@ -2,6 +2,7 @@
 
 #include "Graphics/RenderContext.h"
 #include "Graphics/PixelFormatExtensions.h"
+#include "Graphics/RenderGraph/RenderGraph.h"
 
 #include "Runtime/CommandLineDefines.h"
 #include "Runtime/Engine.h"
@@ -75,6 +76,10 @@ namespace Insight
 
 		void GraphicsSystem::Render()
 		{
+			const u32 width = Graphics::Window::Instance().GetWidth();
+			const u32 height = Graphics::Window::Instance().GetHeight();
+			Graphics::RenderGraph::Instance().SetOutputResolution({ width, height });
+
 			m_context->Render();
 		}
 

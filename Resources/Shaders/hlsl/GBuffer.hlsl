@@ -44,10 +44,6 @@ struct PixelOutput
 [earlydepthstencil]
 PixelOutput PSMain(VertexOutput input)
 {	
-    float2 position_uv_current  = ndc_to_uv(input.position_ss_current.xy / input.position_ss_current.w);
-    float2 position_uv_previous = ndc_to_uv(input.position_ss_previous.xy / input.position_ss_previous.w);
-    float2 velocity_uv          = position_uv_current - position_uv_previous;
-
 	PixelOutput Out;
 	if(bpo_Textures_Set[0] == 1)
 	{
@@ -58,7 +54,14 @@ PixelOutput PSMain(VertexOutput input)
 		Out.Colour = input.Colour;
 	}
 	Out.World_Normal = float4(input.WorldNormal.xyz, 1.0);
-	Out.Velocity = velocity_uv;
+    
+	float2 position_ndc_current = (input.position_ss_current.xy / input.position_ss_current.w);
+	float2 position_ndc_previous = (input.position_ss_previous.xy / input.position_ss_previous.w);
+
+	position_ndc_current -= bf_TAA_Jitter_Current;
+    position_ndc_previous -= bf_TAA_Jitter_Previous;
+
+	Out.Velocity = ndc_to_uv(position_ndc_current) - ndc_to_uv(position_ndc_previous);
 
 	return Out;
 }

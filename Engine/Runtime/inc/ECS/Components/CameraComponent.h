@@ -31,12 +31,14 @@ namespace Insight
 			void CreateOrthographic(float left, float right, float bottom, float top, float nearPlane, float farPlane);
 
 			void SetInvertViewMatrix(bool invertViewMatrix);
+			void SetProjectionMatrix(const Maths::Matrix4 projection);
 			void SetViewMatrix(const Maths::Matrix4 viewMatrix);
 
 			void SetNearPlane(float nearPlane);
 			void SetFarPlane(float farPlane);
 			void SetAspect(float aspect);
 			void SetFovY(float fovy);
+
 
 			Maths::Matrix4 GetProjectionViewMatrix()			const { return m_projectionView; }
 			Maths::Matrix4 GetProjectionMatrix()				const { return m_projection; }

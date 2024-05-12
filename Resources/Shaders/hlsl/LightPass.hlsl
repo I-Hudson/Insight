@@ -71,7 +71,7 @@ float4 PSMain(VertexOutput input) : SV_TARGET
 	const float3 albedo = (EditorColourTexture.Sample(Clamp_Sampler, input.UV).xyz);
     const float3 ambientAlbedo = albedo * 0.15;
 
-    float4 currentAlbedo = float4(0, 0, 0, 0);
+    float3 currentAlbedo = float3(0, 0, 0);
 
     if (PointLightSize > 0)
     {
@@ -96,5 +96,5 @@ float4 PSMain(VertexOutput input) : SV_TARGET
             }
         }
     }
-	return currentAlbedo;//float4(, 1.0f);
+	return float4(currentAlbedo, 1.0f);
 }

@@ -34,6 +34,11 @@ namespace Insight
 
             void Reload();
 
+            // Asset - Begin
+        protected:
+            virtual void OnUnload() override;
+            // Asset - End
+
         private:
             std::string m_name;
             Graphics::ShaderStageFlags m_shaderStages;

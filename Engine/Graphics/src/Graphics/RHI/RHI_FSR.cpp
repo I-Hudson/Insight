@@ -28,6 +28,7 @@ namespace Insight
         FfxFsr2Context              RHI_FSR::m_ffx_fsr2_context;
         FfxFsr2ContextDescription   RHI_FSR::m_ffx_fsr2_context_description;
         FfxFsr2DispatchDescription  RHI_FSR::m_ffx_fsr2_dispatch_description;
+        bool                        RHI_FSR::m_fsr2IsEnabled;
 
         void RHI_FSR::Init()
         {
@@ -79,8 +80,17 @@ namespace Insight
                 m_ffx_fsr2_context_description.callbacks.scratchBuffer = nullptr;
             }
         }
-           
 
+        void RHI_FSR::SetIsEnabled(const bool value) const
+        {
+            m_fsr2IsEnabled = value;
+        }
+
+        bool RHI_FSR::IsEnabled() const
+        {
+            return m_fsr2IsEnabled;
+        }
+           
 		void RHI_FSR::GenerateJitterSample(float* x, float* y)
 		{
 			// Get render and output resolution from the context description (safe to do as we are not using dynamic resolution)
@@ -92,7 +102,8 @@ namespace Insight
 			// Generate jitter sample
 			static uint32_t index = 0; index++;
 			const int32_t jitter_phase_count = ffxFsr2GetJitterPhaseCount(resolution_render_x, resolution_output_x);
-			ASSERT(ffxFsr2GetJitterOffset(&m_ffx_fsr2_dispatch_description.jitterOffset.x, &m_ffx_fsr2_dispatch_description.jitterOffset.y, index, jitter_phase_count) == FFX_OK);
+            FfxErrorCode jitterOffsetErrorCode = ffxFsr2GetJitterOffset(&m_ffx_fsr2_dispatch_description.jitterOffset.x, &m_ffx_fsr2_dispatch_description.jitterOffset.y, index, jitter_phase_count);
+            ASSERT(jitterOffsetErrorCode == FFX_OK);
 
             m_ffx_fsr2_dispatch_description.jitterOffset.x = (m_ffx_fsr2_dispatch_description.jitterOffset.x / resolution_render_x);
             m_ffx_fsr2_dispatch_description.jitterOffset.y = (m_ffx_fsr2_dispatch_description.jitterOffset.y / resolution_render_y);
@@ -178,7 +189,6 @@ namespace Insight
 
             m_ffx_fsr2_dispatch_description.motionVectorScale.x     = -static_cast<float>(resolution_render_x);
             m_ffx_fsr2_dispatch_description.motionVectorScale.y     = -static_cast<float>(resolution_render_y);
-            m_ffx_fsr2_dispatch_description.reset                   = reset;                                    // A boolean value which when set to true, indicates the camera has moved discontinuously.
             m_ffx_fsr2_dispatch_description.enableSharpening        = sharpness != 0.0f;
             m_ffx_fsr2_dispatch_description.sharpness               = sharpness;
             m_ffx_fsr2_dispatch_description.frameTimeDelta          = delta_time * 1000.0f;                     // Seconds to milliseconds.
@@ -188,8 +198,9 @@ namespace Insight
             m_ffx_fsr2_dispatch_description.cameraNear              = camera_near_plane;
             m_ffx_fsr2_dispatch_description.cameraFar               = camera_far_plane;
             m_ffx_fsr2_dispatch_description.cameraFovAngleVertical  = camera_vertical_fov;
+            m_ffx_fsr2_dispatch_description.reset                   = reset;                                    // A boolean value which when set to true, indicates the camera has moved discontinuously.
 
-            //ASSERT(ffxFsr2ContextDispatch(&m_ffx_fsr2_context, &m_ffx_fsr2_dispatch_description) == FFX_OK);
+            ASSERT(ffxFsr2ContextDispatch(&m_ffx_fsr2_context, &m_ffx_fsr2_dispatch_description) == FFX_OK);
 
             cmd_list->SetImageLayout(tex_input, ImageLayout::ColourAttachment);
             cmd_list->SetImageLayout(tex_output, ImageLayout::ShaderReadOnly);
@@ -235,11 +246,11 @@ namespace Insight
                 ASSERT(errorCode == FFX_OK);
 
                 m_ffx_fsr2_context_description.device = ffxGetDeviceDX12(renderContextDX12->GetDevice());
-                m_ffx_fsr2_context_description.maxRenderSize.width = renderWidth;
-                m_ffx_fsr2_context_description.maxRenderSize.height = renderHeight;
+                m_ffx_fsr2_context_description.maxRenderSize.width = std::min(renderWidth, displayWidth);
+                m_ffx_fsr2_context_description.maxRenderSize.height = std::min(renderHeight, displayHeight);
                 m_ffx_fsr2_context_description.displaySize.width = displayWidth;
                 m_ffx_fsr2_context_description.displaySize.height = displayHeight;
-                m_ffx_fsr2_context_description.flags = FFX_FSR2_ENABLE_AUTO_EXPOSURE;
+                //m_ffx_fsr2_context_description.flags = FFX_FSR2_ENABLE_AUTO_EXPOSURE;
 
                  FfxErrorCode createErrorCode = ffxFsr2ContextCreate(&m_ffx_fsr2_context, &m_ffx_fsr2_context_description);
                  ASSERT(createErrorCode == FFX_OK);

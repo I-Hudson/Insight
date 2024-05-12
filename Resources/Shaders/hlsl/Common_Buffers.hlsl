@@ -13,7 +13,11 @@ cbuffer BufferFrame : register(b0, FrameSpace)
 
     float2 Render_Resolution;
     float2 Output_Resolution;
+
+    float bf_TAA_Jitter_Current;
+    float bf_TAA_Jitter_Previous;
     float Delta_Time;
+    float bf__pad0;
 }
 
 #define s_Cascade_Count 4

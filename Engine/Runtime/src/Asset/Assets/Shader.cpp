@@ -6,10 +6,8 @@ namespace Insight
 {
     namespace Runtime
     {
-        ShaderAsset::ShaderAsset(const AssetInfo* assetInfo, std::string name, Graphics::ShaderStageFlags)
+        ShaderAsset::ShaderAsset(const AssetInfo* assetInfo)
             : Asset(assetInfo)
-            , m_name(std::move(name))
-            , m_shaderStages(m_shaderStages)
         { }
 
         ShaderAsset::~ShaderAsset()
@@ -39,6 +37,10 @@ namespace Insight
         {
             Graphics::RenderContext::Instance().GetShaderManager().DestroyShader(m_rhiShader);
             m_rhiShader = Graphics::RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
+        }
+
+        void ShaderAsset::OnUnload()
+        {
         }
     }
 }

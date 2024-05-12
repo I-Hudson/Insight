@@ -26,6 +26,9 @@ namespace Insight
             void Init();
             void Destroy();
 
+            void SetIsEnabled(const bool value) const;
+            bool IsEnabled() const;
+
             void GenerateJitterSample(float* x, float* y);
             void Dispatch(
                 RHI_CommandList* cmd_list,
@@ -48,6 +51,8 @@ namespace Insight
 			static FfxFsr2Context m_ffx_fsr2_context;
 			static FfxFsr2ContextDescription m_ffx_fsr2_context_description;
 			static FfxFsr2DispatchDescription m_ffx_fsr2_dispatch_description;
+
+            static bool m_fsr2IsEnabled;
 		};
 	}
 }

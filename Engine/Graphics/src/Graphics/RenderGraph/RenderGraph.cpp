@@ -545,15 +545,21 @@ namespace Insight
 
 		void RenderGraph::SetRenderResolution(glm::ivec2 render_resolution)
 		{
-			m_render_resolution = render_resolution;
-			m_render_resolution_has_changed = true;
-			Core::EventSystem::Instance().DispatchEvent(MakeRPtr<Core::GraphicsRenderResolutionChange>(m_render_resolution.x, m_render_resolution.y));
+			if (m_render_resolution != render_resolution)
+			{
+				m_render_resolution = render_resolution;
+				m_render_resolution_has_changed = true;
+				Core::EventSystem::Instance().DispatchEvent(MakeRPtr<Core::GraphicsRenderResolutionChange>(m_render_resolution.x, m_render_resolution.y));
+			}
 		}
 
 		void RenderGraph::SetOutputResolution(glm::ivec2 output_resolution)
 		{
-			m_context->SetSwaphchainResolution(output_resolution);
-			m_output_resolution = m_context->GetSwaphchainResolution();
+			if (m_output_resolution != output_resolution)
+			{
+				m_context->SetSwaphchainResolution(output_resolution);
+				m_output_resolution = m_context->GetSwaphchainResolution();
+			}
 		}
 	}
 }

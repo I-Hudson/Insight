@@ -32,13 +32,15 @@ namespace Insight
 			Maths::Matrix4 Projection_View_Inverted = { };
 
 			glm::vec2 Render_Resolution = {};
-			float pad0 = 0.0f;
-			float pad1 = 0.0f;
-
 			glm::vec2 Ouput_Resolution = {};
+
+			glm::vec2 TAA_Jitter_Current;
+			glm::vec2 TAA_Jitter_Previous;
+
 			float Delta_Time;
-			
-			float pad2 = 0.0f;
+			float __pad0;
+			float __pad1;
+			float __pad2;
 		};
 
 		struct BufferSamplers

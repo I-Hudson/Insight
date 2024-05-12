@@ -158,7 +158,7 @@ namespace Insight
 
 			CreateAllCommonShaders();
 
-			//Graphics::RHI_FSR::Instance().Init();
+			Graphics::RHI_FSR::Instance().Init();
 		}
 
 		void Renderpass::Render(bool render)

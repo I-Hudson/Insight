@@ -85,6 +85,26 @@ namespace Insight
 			Entity* AddNewEntity(std::string entity_name, const Core::GUID& guid);
 			Component* AddComponentToEntity(const Core::GUID& entityGuid, const Core::GUID& componentGuid, std::string componentTypeName);
 
+			template<typename T, std::enable_if_t<std::is_base_of_v<Component, T>, int> = 0>
+			void UpdateComponents()
+			{
+				std::vector<Ptr<ECS::Entity>> entities = GetAllEntitiesWithComponentByName(T::Type_Name);
+				for (size_t entityIdx = 0; entityIdx < entities.size(); ++entityIdx)
+				{
+					entities[entityIdx]->GetComponent<T>()->OnUpdate(0.0f);
+				}
+			}
+
+			template<typename T, std::enable_if_t<std::is_base_of_v<Component, T>, int> = 0>
+			void UpdateEntitiesWithComponents()
+			{
+				std::vector<Ptr<ECS::Entity>> entities = GetAllEntitiesWithComponentByName(Component::Type_Name);
+				for (size_t entityIdx = 0; entityIdx < entities.size(); ++entityIdx)
+				{
+					entities[entityIdx]->Update(0.0f);
+				}
+			}
+
 		private:
 #ifdef ECS_ENABLED
 			ECSWorld* m_ecsWorld = nullptr;
@@ -93,6 +113,8 @@ namespace Insight
 #endif
 			std::vector<UPtr<Entity>> m_entities;
 			mutable std::shared_mutex m_lock;
+
+			friend class Runtime::World;
 		};
 #endif
 	}
