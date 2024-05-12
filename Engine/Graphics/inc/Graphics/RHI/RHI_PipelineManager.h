@@ -39,6 +39,8 @@ namespace Insight
 			RHI_Pipeline* GetOrCreatePSO(PipelineStateObject pso);
 			void Destroy();
 
+			void DestroyPipelineWithShader(const ShaderDesc& shaderDesc);
+
 		private:
 			std::map<u64, RHI_Pipeline*> m_pipelineStateObjects;
 			RenderContext* m_context = nullptr;

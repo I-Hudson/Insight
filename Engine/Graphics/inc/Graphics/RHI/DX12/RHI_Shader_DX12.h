@@ -23,6 +23,12 @@ namespace Insight
 				IDxcBlob* GetStage(ShaderStageFlagBits stage);
 				D3D12_INPUT_LAYOUT_DESC GetInputLayout() const { return m_inputLayout; }
 
+				// RHI_Resource - Begin
+				virtual void Release() override { Destroy(); }
+				virtual bool ValidResource() override { return m_compiled; }
+				virtual void SetName(std::string name) { }
+				// RHI_Resource - End
+
 			private:
 				virtual void Create(RenderContext* context, ShaderDesc desc) override;
 				virtual void Destroy() override;

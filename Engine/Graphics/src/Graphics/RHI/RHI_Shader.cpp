@@ -66,6 +66,34 @@ namespace Insight
 			return shader;
 		}
 
+		void RHI_ShaderManager::DestroyShader(RHI_Shader* shader)
+		{
+			if (!shader)
+			{
+				return;
+			}
+
+			const ShaderDesc desc = shader->GetDesc();
+			if (!desc.IsValid())
+			{
+				return;
+			}
+
+			const u64 hash = desc.GetHash();
+
+			std::lock_guard shaderLock(m_shaderLock);
+			auto itr = m_shaders.find(hash);
+			if (itr != m_shaders.end())
+			{
+				RenderContext::Instance().GpuWaitForIdle();
+
+				m_context->GetPipelineManager().DestroyPipelineWithShader(desc);
+
+				shader->Release();
+				m_shaders.erase(hash);
+			}
+		}
+
 		std::vector<RHI_Shader*> RHI_ShaderManager::GetAllShaders() const
 		{
 			std::vector<RHI_Shader*> shaders;

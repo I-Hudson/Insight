@@ -29,6 +29,12 @@ namespace Insight
 				const VertexInputLayout_Vulkan& GetVertexInputLayout() const { return m_vertexInputLayout; }
 				std::string_view GetMainFuncName(ShaderStageFlagBits stage) const;
 
+				// RHI_Resource - Begin
+				virtual void Release() override {  }
+				virtual bool ValidResource() override { return m_compiled; }
+				virtual void SetName(std::string name) {  }
+				// RHI_Resource - End
+
 			private:
 				virtual void Create(RenderContext* context, ShaderDesc desc) override;
 				virtual void Destroy() override;

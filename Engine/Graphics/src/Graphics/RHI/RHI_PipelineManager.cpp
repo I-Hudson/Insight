@@ -2,6 +2,8 @@
 #include "Graphics/RHI/RHI_Pipeline.h"
 #include "Graphics/RHI/RHI_PipelineLayout.h"
 
+#include "Graphics/RenderContext.h"
+
 #include "Core/Profiler.h"
 #include "Graphics/Descriptors.h"
 #include "Graphics/RHI/RHI_Shader.h"
@@ -117,6 +119,25 @@ namespace Insight
 				Delete(pair.second);
 			}
 			m_pipelineStateObjects.clear();
+		}
+
+		void RHI_PipelineManager::DestroyPipelineWithShader(const ShaderDesc& shaderDesc)
+		{
+			m_context->GpuWaitForIdle();
+			std::vector<u64> hashes;
+			for (auto& [hash, pipeline] : m_pipelineStateObjects)
+			{
+				if (pipeline->ShaderDesc.GetHash() == shaderDesc.GetHash())
+				{
+					pipeline->Release();
+					hashes.push_back(hash);
+				}
+			}
+
+			for (size_t i = 0; i < hashes.size(); ++i)
+			{
+				m_pipelineStateObjects.erase(hashes[i]);
+			}
 		}
 	}
 }

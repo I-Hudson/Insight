@@ -16,6 +16,8 @@ namespace Insight
 
 			static RHI_Pipeline* New();
 			virtual void Create(RenderContext* context, PipelineStateObject pso) = 0;
+
+			ShaderDesc ShaderDesc;
 		};
 	}
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Graphics/Defines.h"
+#include "Graphics/Defines.h"
 
 #include "Graphics/PixelFormat.h"
 #include "Graphics/RHI/RHI_Descriptor.h"
@@ -24,7 +25,7 @@ namespace Insight
 		class RHI_ShaderManager;
 		class RenderContext;
 
-		class IS_GRAPHICS RHI_Shader
+		class IS_GRAPHICS RHI_Shader : public RHI_Resource
 		{
 		public:
 			virtual ~RHI_Shader() { }
@@ -59,6 +60,9 @@ namespace Insight
 
 			void SetRenderContext(RenderContext* context) { m_context = context; }
 			RHI_Shader* GetOrCreateShader(ShaderDesc desc);
+
+			void DestroyShader(RHI_Shader* shader);
+
 			std::vector<RHI_Shader*> GetAllShaders() const;
 			void Destroy();
 
