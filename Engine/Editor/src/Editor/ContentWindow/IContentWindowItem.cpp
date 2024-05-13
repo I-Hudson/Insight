@@ -2,6 +2,8 @@
 
 #include "Asset/AssetInfo.h"
 
+#include <iterator>
+
 namespace Insight
 {
     namespace Editor

@@ -504,7 +504,7 @@ namespace Insight
 			{
 				pass.SetCommandList(cmdList);
 
-				cmdList->BeginTimeBlock("PlaceBarriersInToPipeline", glm::vec4(1, 0, 0, 1));
+				cmdList->BeginTimeBlock("PlaceBarriersInToPipeline", Maths::Vector4(1, 0, 0, 1));
 				PlaceBarriersInToPipeline(&pass, cmdList);
 				cmdList->EndTimeBlock();
 
@@ -512,7 +512,7 @@ namespace Insight
 				cmdList->SetScissor(0, 0, pass.m_viewport.x, pass.m_viewport.y);
 
 				std::string passName = std::string(pass.PassName.begin(), pass.PassName.end());
-				cmdList->BeginTimeBlock(passName + "_Execute", glm::vec4(0, 1, 0, 1));
+				cmdList->BeginTimeBlock(passName + "_Execute", Maths::Vector4(0, 1, 0, 1));
 				GPUProfiler::Instance().StartProfile(cmdList, passName);
 				pass.Execute();
 				GPUProfiler::Instance().EndProfile(cmdList);
@@ -585,14 +585,14 @@ namespace Insight
 			return m_graphicsPasses.at(m_passesRenderIndex);
 		}
 
-		void RenderGraphV2::SetRenderResolution(glm::ivec2 render_resolution)
+		void RenderGraphV2::SetRenderResolution(Maths::Vector2 render_resolution)
 		{
 			m_render_resolution = render_resolution;
 			m_render_resolution_has_changed = true;
 			Core::EventSystem::Instance().DispatchEvent(MakeRPtr<Core::GraphicsRenderResolutionChange>(m_render_resolution.x, m_render_resolution.y));
 		}
 
-		void RenderGraphV2::SetOutputResolution(glm::ivec2 output_resolution)
+		void RenderGraphV2::SetOutputResolution(Maths::Vector2 output_resolution)
 		{
 			m_context->SetSwaphchainResolution(output_resolution);
 			m_output_resolution = m_context->GetSwaphchainResolution();

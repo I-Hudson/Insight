@@ -53,7 +53,7 @@ namespace Insight
 			float GetAspect()									const { return m_aspect; }
 			float GetFovY()										const { return m_fovY; }
 
-			bool IsVisible(const glm::vec3& center, const glm::vec3& extent, bool ignore_near_plane = false) const;
+			bool IsVisible(const Maths::Vector3& center, const Maths::Vector3& extent, bool ignore_near_plane = false) const;
 			bool IsVisible(const Graphics::BoundingBox& boundingbox) const;
 
 		private:

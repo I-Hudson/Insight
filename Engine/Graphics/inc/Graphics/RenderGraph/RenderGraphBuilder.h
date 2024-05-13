@@ -6,7 +6,7 @@
 #include "Graphics/ShaderDesc.h"
 #include "Graphics/RHI/RHI_Renderpass.h"
 
-#include <glm/ext/vector_int2.hpp>
+#include "Maths/Vector2.h"
 
 namespace Insight
 {
@@ -27,8 +27,8 @@ namespace Insight
 
 			void SetRenderpass(RenderpassDescription description);
 
-			glm::ivec2 GetRenderResolution() const;
-			glm::ivec2 GetOutputResolution() const;
+			Maths::Vector2 GetRenderResolution() const;
+			Maths::Vector2 GetOutputResolution() const;
 
 			RGTextureHandle CreateTexture(std::string textureName, RHI_TextureInfo desc);
 			RGTextureHandle GetTexture(std::string textureName);

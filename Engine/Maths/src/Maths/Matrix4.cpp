@@ -14,22 +14,22 @@ namespace Insight
 {
 	namespace Maths
 	{
-		const Matrix4 Matrix4::Zero     = Matrix4();
-		const Matrix4 Matrix4::One		= Matrix4(
-												1.0f, 1.0f, 1.0f, 1.0f,
-												1.0f, 1.0f, 1.0f, 1.0f,
-												1.0f, 1.0f, 1.0f, 1.0f,
-												1.0f, 1.0f, 1.0f, 1.0f);
+		const Matrix4 Matrix4::Zero = Matrix4();
+		const Matrix4 Matrix4::One = Matrix4(
+			1.0f, 1.0f, 1.0f, 1.0f,
+			1.0f, 1.0f, 1.0f, 1.0f,
+			1.0f, 1.0f, 1.0f, 1.0f,
+			1.0f, 1.0f, 1.0f, 1.0f);
 
-		const Matrix4 Matrix4::Identity = Matrix4(	1.0f, 0.0f, 0.0f, 0.0f, 
-													0.0f, 1.0f, 0.0f, 0.0f,
-													0.0f, 0.0f, 1.0f, 0.0f,
-													0.0f, 0.0f, 0.0f, 1.0f);
+		const Matrix4 Matrix4::Identity = Matrix4(1.0f, 0.0f, 0.0f, 0.0f,
+			0.0f, 1.0f, 0.0f, 0.0f,
+			0.0f, 0.0f, 1.0f, 0.0f,
+			0.0f, 0.0f, 0.0f, 1.0f);
 
 		Matrix4::Matrix4()
 #ifdef IS_MATHS_DIRECTX_MATHS
 			: xmmatrix(DirectX::XMMatrixSet(
-				  0.0f, 0.0f, 0.0f, 0.0f
+				0.0f, 0.0f, 0.0f, 0.0f
 				, 0.0f, 0.0f, 0.0f, 0.0f
 				, 0.0f, 0.0f, 0.0f, 0.0f
 				, 0.0f, 0.0f, 0.0f, 0.0f))
@@ -40,13 +40,13 @@ namespace Insight
 			, m_30(0.0f), m_31(0.0f), m_32(0.0f), m_33(0.0f)
 #endif
 		{ }
-		Matrix4::Matrix4(	float m00, float m01, float m02, float m03,
-							float m10, float m11, float m12, float m13,
-							float m20, float m21, float m22, float m23,
-							float m30, float m31, float m32, float m33)
+		Matrix4::Matrix4(float m00, float m01, float m02, float m03,
+			float m10, float m11, float m12, float m13,
+			float m20, float m21, float m22, float m23,
+			float m30, float m31, float m32, float m33)
 #ifdef IS_MATHS_DIRECTX_MATHS
 			: xmmatrix(DirectX::XMMatrixSet(
-				  m00, m01, m02, m03
+				m00, m01, m02, m03
 				, m10, m11, m12, m13
 				, m20, m21, m22, m23
 				, m30, m31, m32, m33))
@@ -91,9 +91,9 @@ namespace Insight
 		Matrix4::Matrix4(DirectX::XMMATRIX&& other)
 			: xmmatrix(other)
 		{ }
-		Matrix4::Matrix4(const DirectX::XMFLOAT4X4 & other)
+		Matrix4::Matrix4(const DirectX::XMFLOAT4X4& other)
 			: xmmatrix(DirectX::XMMatrixSet(
-				  other._11, other._12, other._13, other._14
+				other._11, other._12, other._13, other._14
 				, other._21, other._22, other._23, other._24
 				, other._31, other._32, other._33, other._34
 				, other._41, other._42, other._43, other._44))
@@ -226,7 +226,7 @@ namespace Insight
 			mat4 = glm::transpose(mat4);
 #else
 			Matrix4 tran(
-				m_00, m_10, m_20, m_30, 
+				m_00, m_10, m_20, m_30,
 				m_01, m_11, m_21, m_31,
 				m_02, m_12, m_22, m_32,
 				m_03, m_13, m_23, m_33);
@@ -494,7 +494,7 @@ namespace Insight
 			return *this;
 		}
 		Matrix4 Matrix4::operator/=(const Vector4& other)
-		{	
+		{
 			v0 /= other;
 			v1 /= other;
 			v2 /= other;
@@ -509,7 +509,7 @@ namespace Insight
 #elif defined(IS_MATHS_GLM)
 			mat4 -= other.mat4;
 #else
-			*this = Matrix4(*this) - other;
+			* this = Matrix4(*this) - other;
 #endif
 			return *this;
 		}
@@ -529,7 +529,7 @@ namespace Insight
 #elif defined(IS_MATHS_GLM)
 			mat4 += other.mat4;
 #else
-			*this = Matrix4(*this) + other;
+			* this = Matrix4(*this) + other;
 #endif
 			return *this;
 		}
@@ -545,6 +545,20 @@ namespace Insight
 		const float* Matrix4::Data() const
 		{
 			return v0.Data();
+		}
+
+		Matrix4 AxisAngleMatrix(const Vector3& axis, const float angle)
+		{
+			const float c = std::cos(angle);
+			const float s = std::sin(angle);
+			const float t = 1 - c;
+			const Vector3 n = axis.Normalised();
+
+			return Matrix4(
+				t * n.x * n.x + c, t * n.x * n.y + n.z * s, t * n.x * n.z - n.y * s, 0.0f,
+				t * n.x * n.y - n.z * s, t * n.y * n.y + c, t * n.y * n.z + n.x * s, 0.0f,
+				t * n.x * n.z + n.y * s, t * n.y * n.z - n.x * s, t * n.z * n.z + c, 0.0f,
+				0.0f, 0.0f, 0.0f, 1.0f);
 		}
 	}
 }

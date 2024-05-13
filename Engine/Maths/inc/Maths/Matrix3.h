@@ -4,6 +4,8 @@
 #include "Vector3.h"
 #include "Vector4.h"
 
+#include <Reflect/Core/Defines.h>
+
 #ifdef IS_MATHS_DIRECTX_MATHS
 #include <DirectXMath.h>
 #endif
@@ -17,6 +19,7 @@ namespace Insight
 	{
 
 		/// @brief three by three matrix (3 by 3). Row majoir.
+		REFLECT_CLASS(REFLECT_LOOKUP_ONLY);
 		class IS_MATHS Matrix3
 		{
 		public:

@@ -2,14 +2,10 @@
 
 #include "Runtime/Defines.h"
 
-#include "Core/TypeAlias.h"
 #include "Core/GUID.h"
 #include "Serialisation/Serialiser.h"
 
-#include "Reflect.h"
-
 #include <string>
-#include <unordered_set>
 
 namespace Insight
 {

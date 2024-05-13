@@ -385,7 +385,7 @@ namespace Insight
 				if (Window::Instance().GetSize() != m_swapchainBufferSize)
 				{
 					IS_PROFILE_SCOPE("Swapchain resize");
-					SetSwaphchainResolution({ Window::Instance().GetWidth(), Window::Instance().GetHeight() });
+					SetSwaphchainResolution(Maths::Vector2(Window::Instance().GetWidth(), Window::Instance().GetHeight()));
 					return false;
 				}
 
@@ -464,7 +464,7 @@ namespace Insight
 				// Swap chain can not be 0.
 				desc.Width = std::max(1u, desc.Width);
 				desc.Height = std::max(1u, desc.Height);
-				m_swapchainBufferSize = { desc.Width, desc.Height };
+				m_swapchainBufferSize = Maths::Vector2(desc.Width, desc.Height);
 
 				BOOL allowTearing = FALSE;
 				bool tearingSupported = FALSE;
@@ -579,7 +579,7 @@ namespace Insight
 				m_frameIndex = m_swapchain->GetCurrentBackBufferIndex();
 			}
 
-			void RenderContext_DX12::SetSwaphchainResolution(glm::ivec2 resolution)
+			void RenderContext_DX12::SetSwaphchainResolution(Maths::Vector2 resolution)
 			{
 				m_gpu_defered_manager.Instance().Push([this, resolution](RHI_CommandList* cmdList)
 					{
@@ -594,7 +594,7 @@ namespace Insight
 					});
 			}
 
-			glm::ivec2 RenderContext_DX12::GetSwaphchainResolution() const
+			Maths::Vector2 RenderContext_DX12::GetSwaphchainResolution() const
 			{
 				return m_swapchainBufferSize;
 			}

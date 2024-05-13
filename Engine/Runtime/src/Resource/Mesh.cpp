@@ -39,7 +39,7 @@ namespace Insight
 			return m_mesh_name;
 		}
 
-		glm::mat4 Mesh::GetTransform() const
+		Maths::Matrix4 Mesh::GetTransform() const
 		{
 			return m_transform_offset;
 		}

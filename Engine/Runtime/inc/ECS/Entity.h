@@ -13,7 +13,7 @@
 
 #include "Generated/Entity_reflect_generated.h"
 
-#include <Reflect.h>
+#include <Reflect/Reflect.h>
 
 #include <string>
 #include <string_view>

@@ -6,8 +6,7 @@
 #include "Graphics/RHI/RHI_UploadQueue.h"
 #include "Graphics/GPUDeferedManager.h"
 
-#include <glm/vec2.hpp>
-#include <glm/vec4.hpp>
+#include "Maths/Vector4.h"
 
 #include <vector>
 
@@ -31,7 +30,7 @@ namespace Insight
 			u32 Mip_Count = 1;
 			u32 Layer_Count = 1;
 
-			glm::vec4 ClearColour = glm::vec4(0, 0, 0, 1);
+			Maths::Vector4 ClearColour = Maths::Vector4(0, 0, 0, 1);
 
 			ImageLayout Layout = ImageLayout::Undefined;
 			DeviceUploadStatus InitalStatus = DeviceUploadStatus::NotUploaded;
@@ -89,7 +88,7 @@ namespace Insight
 			TextureType		 GetType					(u32 mip = 0)	const { if (mip < m_infos.size()) { return m_infos.at(mip).TextureType; }	return TextureType::Unknown; }
 			PixelFormat		 GetFormat				    (u32 mip = 0)	const { if (mip < m_infos.size()) { return m_infos.at(mip).Format; }		return PixelFormat::Unknown; }
 			ImageLayout		 GetLayout				    (u32 mip = 0)	const { if (mip < m_infos.size()) { return m_infos.at(mip).Layout; }		return ImageLayout::Undefined; }
-			glm::vec4		 GetClearColour				()				const { if (m_infos.size() > 0)   { return m_infos.at(0).ClearColour; }		return glm::vec4(0, 0, 0, 0); }
+			Maths::Vector4	 GetClearColour				()				const { if (m_infos.size() > 0)   { return m_infos.at(0).ClearColour; }		return Maths::Vector4(0, 0, 0, 0); }
 			bool			 HasAplha					()				const { return m_hasAlpha; }
 
 			void			SetLayout(ImageLayout newLayout, u32 mip = 0) { if (mip < m_infos.size()) { m_infos.at(mip).Layout = newLayout; } }

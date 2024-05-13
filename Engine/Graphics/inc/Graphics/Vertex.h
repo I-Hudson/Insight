@@ -2,9 +2,10 @@
 
 #include "Graphics/Defines.h"
 
-#include <glm/vec2.hpp>
-#include <glm/vec3.hpp>
-#include <glm/vec4.hpp>
+#include "Maths/Vector2.h"
+#include "Maths/Vector3.h"
+
+#include <cstring>
 
 namespace Insight
 {
@@ -24,18 +25,33 @@ namespace Insight
 		{
 			Vertex()
 			{ }
-			Vertex(glm::vec3 pos, glm::vec3 nor, glm::vec3 colour, glm::vec2 uv)
-				: Position(pos), Normal(nor), Colour(colour), UV(uv)
-			{ }
+			Vertex(Maths::Vector3 pos, Maths::Vector3 nor, Maths::Vector3 colour, Maths::Vector2 uv)
+			{
+				Position[0] = pos[0];
+				Position[1] = pos[1];
+				Position[2] = pos[2];
 
-			glm::vec3 Position;
-			glm::vec3 Normal;
-			glm::vec3 Colour;
-			glm::vec2 UV;
+				Normal[0] = nor[0];
+				Normal[1] = nor[1];
+				Normal[2] = nor[2];
+
+				Colour[0] = colour[0];
+				Colour[1] = colour[1];
+				Colour[2] = colour[2];
+
+				UV[0] = uv[0];
+				UV[1] = uv[1];
+			}
+
+			float Position[3];
+			float Normal[3];
+			float Colour[3];
+			float UV[2];
 
 			constexpr int GetStride() { return sizeof(Vertex); }
 		};
 
+		/*
 		struct IS_GRAPHICS VertexOptomised
 		{
 #define POS_BIT_MASK 0b1111'1111'1111'1111'0000'0000'0000'0000
@@ -164,10 +180,11 @@ namespace Insight
 				return floatValue;
 			}
 
-			glm::vec<3, short> Position;
-			glm::vec<3, short> Normal;
-			glm::vec<3, short> Colour;
-			glm::vec<2, short> UV;
+			Maths::Vector3 Position;
+			Maths::Vector3 Normal;
+			Maths::Vector3 Colour;
+			Maths::Vector2 UV;
 		};
+		*/
     }
 }

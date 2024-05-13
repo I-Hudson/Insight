@@ -66,7 +66,7 @@ namespace Insight
 				virtual void BindPipeline(PipelineStateObject pso, bool clearDescriptors) override { FAIL_ASSERT(); }
 
 				virtual void BeginTimeBlock(const std::string& blockName) override;
-				virtual void BeginTimeBlock(const std::string& blockName, glm::vec4 colour) override;
+				virtual void BeginTimeBlock(const std::string& blockName, Maths::Vector4 colour) override;
 				virtual void EndTimeBlock() override;
 
 			protected:

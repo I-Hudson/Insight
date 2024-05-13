@@ -56,8 +56,8 @@ namespace Insight
 			const std::string_view GetName() const;
 
 			/// @brief Return the transform from orgin from the model file.
-			/// @return glm::mat4
-			glm::mat4 GetTransform() const;
+			/// @return Maths::Matrix4
+			Maths::Matrix4 GetTransform() const;
 
 			void SetMaterial(Ref<MaterialAsset> material);
 			Ref<MaterialAsset> GetMaterialAsset() const;
@@ -76,7 +76,7 @@ namespace Insight
 
 			std::string m_mesh_name;
 			/// @brief Transform offset from the imported model.
-			glm::mat4 m_transform_offset = glm::mat4(1.0f);
+			Maths::Matrix4 m_transform_offset = Maths::Matrix4::Identity;
 
 			// If this mesh was loaded from an asset on disk then this will be valid.
 			const AssetInfo* m_assetInfo = nullptr;

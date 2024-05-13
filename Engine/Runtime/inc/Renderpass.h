@@ -12,8 +12,6 @@
 
 #include "Core/TypeAlias.h"
 
-#include <glm/mat4x4.hpp>
-
 namespace Insight
 {
 	namespace Graphics
@@ -31,11 +29,11 @@ namespace Insight
 			Maths::Matrix4 View_Inverted = { };
 			Maths::Matrix4 Projection_View_Inverted = { };
 
-			glm::vec2 Render_Resolution = {};
-			glm::vec2 Ouput_Resolution = {};
+			float Render_Resolution[2];
+			float Ouput_Resolution[2];
 
-			glm::vec2 TAA_Jitter_Current;
-			glm::vec2 TAA_Jitter_Previous;
+			float TAA_Jitter_Current[2];
+			float TAA_Jitter_Previous[2];
 
 			float Delta_Time;
 			float __pad0;
@@ -72,10 +70,10 @@ namespace Insight
 
 		struct BufferPerObject
 		{
-			glm::mat4 Transform = {};
-			glm::mat4 Previous_Transform = { };
+			Maths::Matrix4 Transform = {};
+			Maths::Matrix4 Previous_Transform = { };
 
-			glm::vec4 Textures_Set;
+			Maths::Vector4 Textures_Set;
 		};
 
 		class IS_RUNTIME Renderpass

@@ -10,32 +10,32 @@ namespace Insight
 		{ 
 			m_removeable = false;
 			m_allow_multiple = false;
-			m_previous_transform = glm::mat4(1.0f);
+			m_previous_transform = Maths::Matrix4::Identity;
 		}
 
 		TransformComponent::~TransformComponent()
 		{ }
 
-		glm::mat4 TransformComponent::GetTransform() const
+		Maths::Matrix4 TransformComponent::GetTransform() const
 		{
 			IS_PROFILE_FUNCTION();
-			glm::mat4 transform = m_transform;
+			Maths::Matrix4 transform = m_transform;
 			Entity* parentEntity = GetOwnerEntity()->GetParent();
 			while (parentEntity != nullptr)
 			{
-				glm::mat4 parentTransform = parentEntity->GetComponent<ECS::TransformComponent>()->GetTransform();
+				Maths::Matrix4 parentTransform = parentEntity->GetComponent<ECS::TransformComponent>()->GetTransform();
 				transform = transform * parentTransform;
 				parentEntity = parentEntity->GetParent();
 			}
 			return transform;
 		}
 
-		glm::mat4 TransformComponent::GetLocalTransform() const
+		Maths::Matrix4 TransformComponent::GetLocalTransform() const
 		{
 			return m_transform;
 		}
 
-		glm::vec3 TransformComponent::GetPosition() const
+		Maths::Vector3 TransformComponent::GetPosition() const
 		{
 			return GetTransform()[3];
 		}

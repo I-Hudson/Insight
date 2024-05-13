@@ -27,12 +27,12 @@ namespace Insight
 			m_pass->m_renderpassDescription = std::move(description);
 		}
 
-		glm::ivec2 RenderGraphBuilder::GetRenderResolution() const
+		Maths::Vector2 RenderGraphBuilder::GetRenderResolution() const
 		{
 			return m_rg->GetRenderResolution();
 		}
 
-		glm::ivec2 RenderGraphBuilder::GetOutputResolution() const
+		Maths::Vector2 RenderGraphBuilder::GetOutputResolution() const
 		{
 			return m_rg->GetOutputResolution();
 		}
@@ -99,12 +99,12 @@ namespace Insight
 
 		void RenderGraphBuilder::SetViewport(u32 width, u32 height)
 		{
-			m_pass->m_viewport = glm::ivec2(width, height);
+			m_pass->m_viewport = Maths::Vector2(width, height);
 		}
 
 		void RenderGraphBuilder::SetScissor(u32 width, u32 height)
 		{
-			m_pass->m_scissor = glm::ivec2(width, height);
+			m_pass->m_scissor = Maths::Vector2(width, height);
 		}
 
 		void RenderGraphBuilder::SkipTextureWriteBarriers()

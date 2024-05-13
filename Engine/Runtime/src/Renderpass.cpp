@@ -18,13 +18,10 @@
 #include "ECS/Components/MeshComponent.h"
 #include "ECS/Components/FreeCameraControllerComponent.h"
 
+#include "Maths/Utils.h"
+
 #include "Asset/Assets/Model.h"
 #include "Resource/Mesh.h"
-
-#include <glm/gtx/matrix_interpolation.hpp>
-#include <glm/ext/matrix_clip_space.hpp>
-#include <glm/ext/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 namespace Insight
 {
@@ -43,7 +40,7 @@ namespace Insight
 
 	float cascade_split_lambda = 0.85f;
 
-	glm::vec3 dir_light_direction = glm::vec3(0.5f, -0.7f, 0.5f);
+	Maths::Vector3 dir_light_direction = Maths::Vector3(0.5f, -0.7f, 0.5f);
 
 	int pendingRenderResolution[2] = { 0, 0 };
 
@@ -117,7 +114,7 @@ namespace Insight
 
 			m_buffer_frame = {};
 			aspect = (float)Window::Instance().GetWidth() / (float)Window::Instance().GetHeight();
-			m_buffer_frame.Projection = Maths::Matrix4::CreatePerspective(glm::radians(90.0f), aspect, 0.1f, 1024.0f);
+			m_buffer_frame.Projection = Maths::Matrix4::CreatePerspective(Maths::DegreesToRadians(90.0f), aspect, 0.1f, 1024.0f);
 			m_buffer_frame.View = Maths::Matrix4::Identity;
 			MainCameraFrustum = Graphics::Frustum(m_buffer_frame.View, m_buffer_frame.Projection, Main_Camera_Far_Plane);
 
@@ -148,8 +145,8 @@ namespace Insight
 
 			const u32 width = Window::Instance().GetWidth();
 			const u32 height = Window::Instance().GetHeight();
-			RenderGraph::Instance().SetRenderResolution({ width, height });
-			RenderGraph::Instance().SetOutputResolution({ width, height });
+			RenderGraph::Instance().SetRenderResolution(Maths::Vector2(width, height));
+			RenderGraph::Instance().SetOutputResolution(Maths::Vector2(width, height));
 
 			pendingRenderResolution[0] = RenderGraph::Instance().GetRenderResolution().x;
 			pendingRenderResolution[1] = RenderGraph::Instance().GetRenderResolution().y;
@@ -183,8 +180,8 @@ namespace Insight
 						{
 							ECS::Entity* entity = modelsToAddToScene.at(i).first->CreateEntityHierarchy();
 
-							glm::mat4 transform(1.0f);
-							//transform[3] = glm::vec4(10.0f, 0.0f, 25.0f, 1.0f);
+							Maths::Matrix4 transform = Maths::Matrix4::Identity;
+							//transform[3] = Maths::Vector4(10.0f, 0.0f, 25.0f, 1.0f);
 							entity->GetComponent<ECS::TransformComponent>()->SetTransform(transform);
 						}
 
@@ -199,7 +196,7 @@ namespace Insight
 				ImGui::DragInt2("Render Resolution", pendingRenderResolution);
 				if (ImGui::Button("Apply Render Resolution"))
 				{
-					RenderGraph::Instance().SetRenderResolution({ pendingRenderResolution[0], pendingRenderResolution[1] });
+					RenderGraph::Instance().SetRenderResolution(Maths::Vector2(pendingRenderResolution[0], pendingRenderResolution[1]));
 				}
 				ImGui::End();
 			}
@@ -220,13 +217,13 @@ namespace Insight
 				IS_PROFILE_SCOPE("FSR2");
 				if (enableFSR)
 				{
-					glm::ivec2 const renderResolution = RenderGraph::Instance().GetRenderResolution();
+					Maths::Vector2 const renderResolution = RenderGraph::Instance().GetRenderResolution();
 					RHI_FSR::Instance().GenerateJitterSample(&m_taaJitterX, &m_taaJitterY);
 					m_taaJitterX = (m_taaJitterX / static_cast<float>(renderResolution.x));
 					m_taaJitterY = (m_taaJitterY / static_cast<float>(renderResolution.y));
 
 					Maths::Matrix4 translation = Maths::Matrix4::Identity.Translated(Maths::Vector4(m_taaJitterX, m_taaJitterY, 0.0f, 0.0f));
-					glm::mat4 trans = glm::translate(glm::mat4(1.0f), glm::vec3(m_taaJitterX, m_taaJitterY, 0.0f));
+					Maths::Matrix4 trans = Maths::Matrix4::Identity.Translated(Maths::Vector3(m_taaJitterX, m_taaJitterY, 0.0f));
 					m_buffer_frame.Projection = m_buffer_frame.Projection * translation;
 
 					if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan)
@@ -247,8 +244,12 @@ namespace Insight
 				m_buffer_frame.View_Inverted = renderFrame.MainCamera.Camera.GetInvertedViewMatrix();
 				m_buffer_frame.Projection_View_Inverted = renderFrame.MainCamera.Camera.GetInvertedProjectionViewMatrix();
 
-				m_buffer_frame.Render_Resolution = RenderGraph::Instance().GetRenderResolution();
-				m_buffer_frame.Ouput_Resolution = RenderGraph::Instance().GetOutputResolution();
+				m_buffer_frame.Render_Resolution[0] = RenderGraph::Instance().GetRenderResolution().x;
+				m_buffer_frame.Render_Resolution[1] = RenderGraph::Instance().GetRenderResolution().y;
+
+
+				m_buffer_frame.Ouput_Resolution[0] = RenderGraph::Instance().GetOutputResolution().x;
+				m_buffer_frame.Ouput_Resolution[1] = RenderGraph::Instance().GetOutputResolution().y;
 			}
 
 			{
@@ -316,8 +317,8 @@ namespace Insight
 						{
 							ECS::Entity* entity = modelsToAddToScene.at(i).first->CreateEntityHierarchy();
 
-							glm::mat4 transform(1.0f);
-							//transform[3] = glm::vec4(10.0f, 0.0f, 25.0f, 1.0f);
+							Maths::Matrix4 transform = Maths::Matrix4::Identity;
+							//transform[3] = Maths::Vector4(10.0f, 0.0f, 25.0f, 1.0f);
 							entity->GetComponent<ECS::TransformComponent>()->SetTransform(transform);
 						}
 
@@ -332,7 +333,7 @@ namespace Insight
 				ImGui::DragInt2("Render Resolution", pendingRenderResolution);
 				if (ImGui::Button("Apply Render Resolution"))
 				{
-					RenderGraph::Instance().SetRenderResolution({ pendingRenderResolution[0], pendingRenderResolution[1] });
+					RenderGraph::Instance().SetRenderResolution(Maths::Vector2(pendingRenderResolution[0], pendingRenderResolution[1]));
 				}
 				ImGui::End();
 			}
@@ -345,13 +346,13 @@ namespace Insight
 
 			if (enableFSR)
 			{
-				glm::ivec2 const renderResolution = RenderGraph::Instance().GetRenderResolution();
+				Maths::Vector2 const renderResolution = RenderGraph::Instance().GetRenderResolution();
 				RHI_FSR::Instance().GenerateJitterSample(&m_taaJitterX, &m_taaJitterY);
 				m_taaJitterX = (m_taaJitterX / static_cast<float>(renderResolution.x));
 				m_taaJitterY = (m_taaJitterY / static_cast<float>(renderResolution.y));
 
 				Maths::Matrix4 translation = Maths::Matrix4::Identity.Translated(Maths::Vector4(m_taaJitterX, m_taaJitterY, 0.0f, 0.0f));
-				glm::mat4 trans = glm::translate(glm::mat4(1.0f), glm::vec3(m_taaJitterX, m_taaJitterY, 0.0f));
+				Maths::Matrix4 trans = Maths::Matrix4::Identity.Translated(Maths::Vector3(m_taaJitterX, m_taaJitterY, 0.0f));
 				m_buffer_frame.Projection = m_buffer_frame.Projection * translation;
 
 				if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan)
@@ -369,8 +370,11 @@ namespace Insight
 			m_buffer_frame.View_Inverted = renderFrame.MainCamera.Camera.GetInvertedViewMatrix();
 			m_buffer_frame.Projection_View_Inverted = renderFrame.MainCamera.Camera.GetInvertedProjectionViewMatrix();
 
-			m_buffer_frame.Render_Resolution = RenderGraph::Instance().GetRenderResolution();
-			m_buffer_frame.Ouput_Resolution = RenderGraph::Instance().GetOutputResolution();
+			m_buffer_frame.Render_Resolution[0] = RenderGraph::Instance().GetRenderResolution().x;
+			m_buffer_frame.Render_Resolution[1] = RenderGraph::Instance().GetRenderResolution().y;
+
+			m_buffer_frame.Ouput_Resolution[0] = RenderGraph::Instance().GetOutputResolution().x;
+			m_buffer_frame.Ouput_Resolution[1] = RenderGraph::Instance().GetOutputResolution().y;
 
 			BufferLight::GetCascades(m_directional_light, m_buffer_frame, 4, 0.95f);
 
@@ -414,13 +418,13 @@ namespace Insight
 			ImGuiPass();
 		}
 
-		glm::vec2 swapchainColour = { 0,0 };
-		glm::vec2 swapchainColour2 = { 0,0 };
+		Maths::Vector2 swapchainColour = Maths::Vector2(0,0);
+		Maths::Vector2 swapchainColour2 = Maths::Vector2(0,0);
 
-		glm::mat4 MakeInfReversedZProjRH(float fovY_radians, float aspectWbyH, float zNear)
+		Maths::Matrix4 MakeInfReversedZProjRH(float fovY_radians, float aspectWbyH, float zNear)
 		{
 			float f = 1.0f / tan(fovY_radians / 2.0f);
-			return glm::mat4(
+			return Maths::Matrix4(
 				f / aspectWbyH, 0.0f, 0.0f, 0.0f,
 				0.0f, f, 0.0f, 0.0f,
 				0.0f, 0.0f, 0.0f, -1.0f,
@@ -437,13 +441,13 @@ namespace Insight
 			float a = -ShadowZNear / (ShadowZFar - ShadowZNear);
 			float b = (ShadowZNear * ShadowZFar) / (ShadowZFar - ShadowZNear);
 
-			shadowCamera.Projection = glm::mat4(
+			shadowCamera.Projection = Maths::Matrix4(
 				w, 0.0f, 0.0f, 0.0f,
 				0.0f, -h, 0.0f, 0.0f,
 				0.0f, 0.0f, a, 1.0f,
 				0.0f, 0.0f, b, 0.0f);*/
 
-			glm::mat4 reverseZProj = glm::mat4(1);
+			Maths::Matrix4 reverseZProj = Maths::Matrix4::Identity;
 			reverseZProj[2][2] = -1;
 			reverseZProj[2][3] = 1;
 			//shadowCamera.Projection = MakeInfReversedZProjRH(glm::radians(ShadowFOV), 1.0f, ShadowZNear);
@@ -452,7 +456,7 @@ namespace Insight
 			return shadowCamera;
 		}
 
-		void ImGuiMat4(glm::mat4& matrix)
+		void ImGuiMat4(Maths::Matrix4& matrix)
 		{
 			float x_row[4] = { matrix[0].x, matrix[0].y, matrix[0].z, matrix[0].w };
 			float y_row[4] = { matrix[1].x, matrix[1].y, matrix[1].z, matrix[1].w };
@@ -462,10 +466,10 @@ namespace Insight
 			ImGui::DragFloat4("Camera Y Row", y_row);
 			ImGui::DragFloat4("Camera Z Row", z_row);
 			ImGui::DragFloat4("Camera W Row", w_row);
-			matrix[0] = glm::vec4(x_row[0], x_row[1], x_row[2], x_row[3]);
-			matrix[1] = glm::vec4(y_row[0], y_row[1], y_row[2], y_row[3]);
-			matrix[2] = glm::vec4(z_row[0], z_row[1], z_row[2], z_row[3]);
-			matrix[3] = glm::vec4(w_row[0], w_row[1], w_row[2], w_row[3]);
+			matrix[0] = Maths::Vector4(x_row[0], x_row[1], x_row[2], x_row[3]);
+			matrix[1] = Maths::Vector4(y_row[0], y_row[1], y_row[2], y_row[3]);
+			matrix[2] = Maths::Vector4(z_row[0], z_row[1], z_row[2], z_row[3]);
+			matrix[3] = Maths::Vector4(w_row[0], w_row[1], w_row[2], w_row[3]);
 		}
 
 		void Renderpass::ShadowPass()
@@ -492,7 +496,7 @@ namespace Insight
 				float dir[3] = { dir_light_direction.x, dir_light_direction.y, dir_light_direction.z };
 				if (ImGui::DragFloat3("Direction", dir, 0.001f, -1.0f, 1.0f))
 				{
-					dir_light_direction = glm::vec3(dir[0], dir[1], dir[2]);
+					dir_light_direction = Maths::Vector3(dir[0], dir[1], dir[2]);
 				}
 
 				ImGui::DragFloat("Dpeth bias constant factor", &depth_constant_factor, 0.01f);
@@ -574,7 +578,7 @@ namespace Insight
 
 								struct alignas(16) Object
 								{
-									glm::mat4 Transform;
+									Maths::Matrix4 Transform;
 									int CascadeIndex;
 								};
 								Object object =
@@ -665,7 +669,7 @@ namespace Insight
 						}
 
 						ECS::TransformComponent* transform_component = static_cast<ECS::TransformComponent*>(e->GetComponentByName(ECS::TransformComponent::Type_Name));
-						glm::mat4 transform = transform_component->GetTransform();
+						Maths::Matrix4 transform = transform_component->GetTransform();
 
 						BufferPerObject object = {};
 						object.Transform = transform;
@@ -1253,11 +1257,11 @@ namespace Insight
 
 					struct Line
 					{
-						Line(glm::vec3 pos, glm::vec4 color)
-							: Pos(glm::vec4(pos, 1.0f)), Color(color)
+						Line(Maths::Vector3 pos, Maths::Vector4 color)
+							: Pos(Maths::Vector4(pos, 1.0f)), Color(color)
 						{}
-						glm::vec4 Pos;
-						glm::vec4 Color;
+						Maths::Vector4 Pos;
+						Maths::Vector4 Color;
 					};
 
 					struct GFXHelperDrawCall
@@ -1346,7 +1350,7 @@ namespace Insight
 					swapchainPso.ShaderDescription = shaderDesc;
 					pass.SetPipeline(swapchainPso);
 
-					const glm::ivec2 renderGraphOutputResolution = pass.RenderGraph->GetOutputResolution();
+					const Maths::Vector2 renderGraphOutputResolution = pass.RenderGraph->GetOutputResolution();
 					pass.SetViewport(renderGraphOutputResolution.x, renderGraphOutputResolution.y);
 					pass.SetScissor(renderGraphOutputResolution.x, renderGraphOutputResolution.y);
 				},
@@ -1575,13 +1579,13 @@ namespace Insight
 				for (u32 i = 0; i < 8; ++i)
 				{
 					float distance = (frustumCorners[i] - frustumCenter).Length();
-					float glmDistance = glm::length(glm::vec3(frustumCorners[i].x, frustumCorners[i].y, frustumCorners[i].z) - glm::vec3(frustumCenter.x, frustumCenter.y, frustumCenter.z));
-					radius = glm::max(radius, distance);
+					float glmDistance = Maths::Vector3Distance(Maths::Vector3(frustumCorners[i].x, frustumCorners[i].y, frustumCorners[i].z), Maths::Vector3(frustumCenter.x, frustumCenter.y, frustumCenter.z));
+					radius = std::max(radius, distance);
 				}
 				radius = std::ceil(radius * 16.0f) / 16.0f;
 
 				Maths::Vector3 maxExtents = Maths::Vector3(radius);
-				glm::vec3 v;
+				Maths::Vector3 v;
 				v = -v;
 				Maths::Vector3 minExtents = -maxExtents;
 

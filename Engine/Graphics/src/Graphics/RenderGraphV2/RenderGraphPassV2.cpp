@@ -111,12 +111,12 @@ namespace Insight
 
 		void RenderGraphGraphicsPassV2::SetViewport(const u32 width, const u32 height)
 		{
-			m_viewport = glm::ivec2(width, height);
+			m_viewport = Maths::Vector2(width, height);
 		}
 
 		void RenderGraphGraphicsPassV2::SetScissor(const u32 width, const u32 height)
 		{
-			m_scissor = glm::ivec2(width, height);
+			m_scissor = Maths::Vector2(width, height);
 		}
 
 		void RenderGraphGraphicsPassV2::SetShader(const ShaderDesc shaderDesc)

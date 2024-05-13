@@ -33,11 +33,11 @@ namespace InsightReflectTool
 
             Utils::WriteSourceFunctionDefinition(file, "void", ResourceRegister::c_RegisterAllResources, {}, [&](std::fstream& file)
             {
-                        for (const Reflect::Parser::ReflectContainerData& reflectData : resourceClasses)
-                        {
-                            TAB_N(3);
-                            file << "ResourceRegister::RegisterResource<::" + reflectData.NameWithNamespace + ">();" << NEW_LINE;
-                        }
+                for (const Reflect::Parser::ReflectContainerData& reflectData : resourceClasses)
+                {
+                    TAB_N(3);
+                    file << "ResourceRegister::RegisterResource<::" + reflectData.NameWithNamespace + ">();" << NEW_LINE;
+                }
             }, 2);
 
             TAB_N(1);

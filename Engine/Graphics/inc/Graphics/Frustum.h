@@ -26,9 +26,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "Maths/Matrix4.h"
 
-#include <glm/vec3.hpp>
-#include <glm/mat4x4.hpp>
-
 #include <array>
 
 namespace Insight
@@ -57,23 +54,22 @@ namespace Insight
 		{
         public:
             Frustum() = default;
-            Frustum(const glm::mat4& mView, const glm::mat4& mProjection, float screenDepth);
             Frustum(const Maths::Matrix4& mView, const Maths::Matrix4& mProjection, float screenDepth);
             ~Frustum() = default;
 
             bool IsVisible(const Maths::Vector3& center, const Maths::Vector3& extent, bool ignore_near_plane = false) const;
             bool IsVisible(const Graphics::BoundingBox& boundingbox) const;
-            std::array<glm::vec3, 8> GetWorldPoints() const;
+            std::array<Maths::Vector3, 8> GetWorldPoints() const;
 
         private:
             Intersection CheckSphere(const Maths::Vector3& center, float radius) const;
-            Intersection CheckCube(const glm::vec3& center, const glm::vec3& extent) const;
+            Intersection CheckCube(const Maths::Vector3& center, const Maths::Vector3& extent) const;
 
             Plane m_planes[6];
 
             Maths::Matrix4 m_projectionMatrix;
-            glm::mat4 m_view;
-            glm::mat4 m_projection;
+            Maths::Matrix4 m_view;
+            Maths::Matrix4 m_projection;
 		};
 	}
 }

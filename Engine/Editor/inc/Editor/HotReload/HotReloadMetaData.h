@@ -3,7 +3,7 @@
 #include "Editor/Defines.h"
 #include "Core/Defines.h"
 
-#include <Reflect.h>
+#include <Reflect/Reflect.h>
 
 namespace Insight::Editor
 {

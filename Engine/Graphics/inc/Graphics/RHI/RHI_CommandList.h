@@ -7,10 +7,12 @@
 #include "Graphics/PipelineStateObject.h"
 #include "Graphics/PipelineBarrier.h"
 
+#include "Maths/Vector2.h"
+#include "Maths/Vector4.h"
+
 #include "Core/Delegate.h"
 
 #include <unordered_set>
-#include <glm/vec2.hpp>
 
 namespace Insight
 {
@@ -37,8 +39,8 @@ namespace Insight
 		/// Store relevant draw data.
 		struct RHI_CommandListCurrentDrawData
 		{
-			glm::vec2 Viewport;
-			glm::ivec2 Siccsior;
+			Maths::Vector2 Viewport;
+			Maths::Vector2 Siccsior;
 
 			RHI_Buffer* VertexBuffer = nullptr;
 			RHI_Buffer* IndexBuffer = nullptr;
@@ -110,7 +112,7 @@ namespace Insight
 			virtual void BindPipeline(PipelineStateObject pso, bool clearDescriptors) = 0;
 
 			virtual void BeginTimeBlock(const std::string& blockName);
-			virtual void BeginTimeBlock(const std::string& blockName, glm::vec4 colour);
+			virtual void BeginTimeBlock(const std::string& blockName, Maths::Vector4 colour);
 			virtual void EndTimeBlock();
 
 			bool IsDiscard() const { return m_discard; }

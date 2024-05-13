@@ -9,7 +9,7 @@
 #include <DirectXMath.h>
 #endif 
 
-#include <Reflect.h>
+#include <Reflect/Core/Defines.h>
 
 namespace Insight
 {

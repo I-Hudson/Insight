@@ -2,13 +2,14 @@
 
 #include "Editor/TypeDrawers/ITypeDrawer.h"
 
-#include "Generated/TypeDrawer_GLMMat4_reflect_generated.h"
+#include "Generated/TypeDrawer_Matrix4_reflect_generated.h"
+
 namespace Insight
 {
     namespace Editor
     {
         REFLECT_CLASS()
-        class IS_EDITOR TypeDrawer_GLMMat4 : public ITypeDrawer
+        class IS_EDITOR TypeDrawer_Matrix4 : public ITypeDrawer
         {
             REFLECT_GENERATED_BODY()
         public:

@@ -7,11 +7,11 @@
 
 #include "Input/InputSystem.h"
 
+#include "Maths/Vector2.h"
 
 #include <string>
 #include <unordered_map>
 
-#include <glm/ext/vector_int2.hpp>
 #include <GLFW/glfw3.h>
 
 namespace Insight
@@ -57,19 +57,19 @@ namespace Insight
 
 			int GetX() const;
 			int GetY() const;
-			glm::ivec2 GetPosition() const;
+			Maths::Vector2 GetPosition() const;
 
 			void SetX(int x);
 			void SetY(int y);
-			void SetPosition(glm::ivec2 position);
+			void SetPosition(Maths::Vector2 position);
 
 			int GetWidth() const;
 			int GetHeight() const;
-			glm::ivec2 GetSize() const;
+			Maths::Vector2 GetSize() const;
 
 			void SetWidth(int width);
 			void SetHeight(int height);
-			void SetSize(glm::ivec2 size);
+			void SetSize(Maths::Vector2 size);
 
 			void SetFullScreen();
 			void SetWindowed();
@@ -89,10 +89,10 @@ namespace Insight
 			std::string m_title;
 			static std::unordered_map<GLFWwindow*, WindowInputs> m_windowInputs;
 
-			glm::ivec2 m_fullScreenSize = {0,0};
-			glm::ivec2 m_fullScreenPosition = {0,0};
-			glm::ivec2 m_windowedSize = { 0,0 };
-			glm::ivec2 m_windowedPosition = { 0,0 };
+			Maths::Vector2 m_fullScreenSize = {0,0};
+			Maths::Vector2 m_fullScreenPosition = {0,0};
+			Maths::Vector2 m_windowedSize = { 0,0 };
+			Maths::Vector2 m_windowedPosition = { 0,0 };
 
 			GLFWwindow* m_glfwWindow = nullptr;
 			Input::InputSystem* m_inputSystem = nullptr;

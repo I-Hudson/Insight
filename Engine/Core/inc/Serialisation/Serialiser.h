@@ -53,7 +53,7 @@ namespace Insight::Serialisation::Internal
             if (VersionCheck(version, versionAdded, versionRemoved))
             {
                 using PropertyType = typename std::decay<decltype(data)>::type;
-                data = std::move(::Insight::Serialisation::DeserialiseProperty<TypeSerialiser, PropertyType>(serialiser, propertyName));
+                data = ::Insight::Serialisation::DeserialiseProperty<TypeSerialiser, PropertyType>(serialiser, propertyName);
             }
         }
         else if (options.Action == SerialiseAction::GetData)
@@ -62,7 +62,7 @@ namespace Insight::Serialisation::Internal
                 options.GetDataName == propertyName)
             {
                 using PropertyType = typename std::decay<decltype(data)>::type;
-                return std::move(::Insight::Serialisation::DeserialiseProperty<TypeSerialiser, PropertyType>(serialiser, propertyName));
+                return ::Insight::Serialisation::DeserialiseProperty<TypeSerialiser, PropertyType>(serialiser, propertyName);
             }
         }
         return TData();

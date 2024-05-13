@@ -56,9 +56,9 @@ namespace Insight
             ECS::Entity* m_editorCameraEntity;
             ECS::CameraComponent* m_editorCameraComponent;
 
-            glm::ivec2 m_renderResolution = glm::vec2(0, 0);
+            Maths::Vector2 m_renderResolution = Maths::Vector2(0, 0);
             bool m_fsr2Enabled = false;
-            glm::vec2 m_taaJitterPrevious = glm::vec2(0, 0);
+            Maths::Vector2 m_taaJitterPrevious = Maths::Vector2(0, 0);
 
             bool m_enableDepthPrepass = false;
             RenderData m_renderingData;

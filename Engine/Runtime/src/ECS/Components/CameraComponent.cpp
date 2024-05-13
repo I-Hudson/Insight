@@ -1,10 +1,10 @@
 #include "ECS/Components/CameraComponent.h"
 #include "ECS/Components/TransformComponent.h"
 
+#include "Maths/Utils.h"
+
 #include "Graphics/RenderContext.h"
 #include "Graphics/Window.h"
-
-#include <glm/gtc/matrix_transform.hpp>
 
 namespace Insight
 {
@@ -102,25 +102,25 @@ namespace Insight
 				float _32 = m_view[3][2];
 				float _33 = m_view[3][3];
 
-				glm::mat4 glmView(
+				Maths::Matrix4 glmView(
 					m_view[0][0], m_view[0][1], m_view[0][2], m_view[0][3],
 					m_view[1][0], m_view[1][1], m_view[1][2], m_view[1][3],
 					m_view[2][0], m_view[2][1], m_view[2][2], m_view[2][3],
 					m_view[3][0], m_view[3][1], m_view[3][2], m_view[3][3]);
 
-				glm::mat4 glmProj(
+				Maths::Matrix4  glmProj(
 					m_projection[0][0], m_projection[0][1], m_projection[0][2], m_projection[0][3],
 					m_projection[1][0], m_projection[1][1], m_projection[1][2], m_projection[1][3],
 					m_projection[2][0], m_projection[2][1], m_projection[2][2], m_projection[2][3],
 					m_projection[3][0], m_projection[3][1], m_projection[3][2], m_projection[3][3]);
 
-				glm::mat4 glmViewInv = glm::inverse(glmView);
-				glm::mat4 glmProjView = glmProj * glmViewInv;
-				glm::mat4 glmProjViewInv =  glm::inverse(glmProjView);
+				const Maths::Matrix4 glmViewInv = glmView.Inversed();
+				const Maths::Matrix4 glmProjView = glmProj * glmViewInv;
+				const Maths::Matrix4 glmProjViewInv = glmProjView.Inversed();
 
-				Maths::Matrix4 viewInv = m_view.Inversed();
-				Maths::Matrix4 projView = m_projection * viewInv;
-				Maths::Matrix4 projViewInv = projView.Inversed();
+				const Maths::Matrix4 viewInv = m_view.Inversed();
+				const Maths::Matrix4 projView = m_projection * viewInv;
+				const Maths::Matrix4 projViewInv = projView.Inversed();
 				return projViewInv;
 			}
 			else
@@ -130,7 +130,7 @@ namespace Insight
 			}
 		}
 
-		bool Camera::IsVisible(const glm::vec3& center, const glm::vec3& extent, bool ignore_near_plane /*= false*/) const
+		bool Camera::IsVisible(const Maths::Vector3& center, const Maths::Vector3& extent, bool ignore_near_plane /*= false*/) const
 		{
 			return m_frusum.IsVisible(center, extent, ignore_near_plane);
 		}
@@ -148,7 +148,7 @@ namespace Insight
 				m_projection = Maths::Matrix4::CreatePerspective(m_fovY, m_aspect, m_nearPlane, m_farPlane);
 				
 				//float f = 1.0f / tan(m_fovY / 2.0f);
-				//m_projection = glm::mat4(
+				//m_projection = Maths::Matrix4(
 				//	f / m_aspect, 0.0f, 0.0f, 0.0f,
 				//			  0.0f, f, 0.0f, 0.0f,
 				//			  0.0f, 0.0f, 0.0f, -1.0f,
@@ -201,7 +201,7 @@ namespace Insight
 		void CameraComponent::OnCreate()
 		{
 			const float aspect = (float)Graphics::Window::Instance().GetWidth() / (float)Graphics::Window::Instance().GetHeight();
-			CreatePerspective(glm::radians(90.0f), aspect, 0.1f, 1024.0f);
+			CreatePerspective(Maths::DegreesToRadians(90.0f), aspect, 0.1f, 1024.0f);
 		}
 
 		void CameraComponent::CreatePerspective(float fovy, float aspect, float nearPlane, float farPlane)
@@ -246,7 +246,7 @@ namespace Insight
 			TransformComponent* transformComponent = static_cast<TransformComponent*>(GetOwnerEntity()->GetComponentByName(TransformComponent::Type_Name));
 			if (transformComponent != nullptr)
 			{
-				glm::mat4 transformMatrix = transformComponent->GetTransform();
+				Maths::Matrix4 transformMatrix = transformComponent->GetTransform();
 				Maths::Matrix4 m(
 					transformMatrix[0][0], transformMatrix[0][1], transformMatrix[0][2], transformMatrix[0][3],
 					transformMatrix[1][0], transformMatrix[1][1], transformMatrix[1][2], transformMatrix[1][3],

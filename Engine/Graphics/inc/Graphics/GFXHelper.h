@@ -5,21 +5,18 @@
 #include "Graphics/Frustum.h"
 
 #include <vector>
-#include <glm/vec3.hpp>
-#include <glm/vec4.hpp>
-
 namespace Insight
 {
 	class GFXHelperLine
 	{
 	public:
 
-		GFXHelperLine(glm::vec3 start, glm::vec3 end, glm::vec4 colour);
-		GFXHelperLine(glm::vec3 start, glm::vec3 direction, float distance, glm::vec4 colour);
+		GFXHelperLine(Maths::Vector3 start, Maths::Vector3 end, Maths::Vector4 colour);
+		GFXHelperLine(Maths::Vector3 start, Maths::Vector3 direction, float distance, Maths::Vector4 colour);
 
-		glm::vec3 Start;
-		glm::vec3 End;
-		glm::vec4 Colour;
+		Maths::Vector3 Start;
+		Maths::Vector3 End;
+		Maths::Vector4 Colour;
 	};
 
 	class IS_GRAPHICS GFXHelper
@@ -27,12 +24,12 @@ namespace Insight
 	public:
 
 		void static Reset();
-		void static AddLine(glm::vec3 start, glm::vec3 end, glm::vec4 colour = DefaultColour);
-		void static AddLine(glm::vec3 start, glm::vec3 direction, float distance, glm::vec4 colour = DefaultColour);
-		void static AddCube(glm::vec3 position, glm::vec3 extents, glm::vec4 colour = DefaultColour);
-		void static AddFrustum(Graphics::Frustum frustum, glm::vec4 colour = DefaultColour);
+		void static AddLine(const Maths::Vector3& start, const Maths::Vector3& end, const Maths::Vector4& colour = DefaultColour);
+		void static AddLine(const Maths::Vector3& start, const Maths::Vector3& direction, float distance, const Maths::Vector4& colour = DefaultColour);
+		void static AddCube(const Maths::Vector3& position, const Maths::Vector3& extents, const Maths::Vector4& colour = DefaultColour);
+		void static AddFrustum(Graphics::Frustum frustum, const Maths::Vector4& colour = DefaultColour);
 	
-		CONSTEXPR static glm::vec4 DefaultColour = glm::vec4(1, 1, 1, 1);
+		static Maths::Vector4 DefaultColour;
 		static std::vector<GFXHelperLine> m_lines;
 	};
 }

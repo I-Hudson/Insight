@@ -3,7 +3,7 @@
 #include "Maths/Defines.h"
 #include "Maths/Vectors/Float2.h"
 
-#include <Reflect.h>
+#include <Reflect/Core/Defines.h>
 
 namespace Insight
 {
@@ -14,8 +14,8 @@ namespace Insight
 		{
 		public:
 			Vector2();
-			Vector2(float x, float y);
-			Vector2(float value);
+			Vector2(const float x, const float y);
+			Vector2(const float value);
 
 			Vector2(const Float2& other);
 			Vector2(Float2&& other);

@@ -60,7 +60,7 @@ namespace Insight
             Graphics::RHI_Buffer* RHI_MonolithVertexBuffer = nullptr;
             Graphics::RHI_Buffer* RHI_MonolithIndexBuffer = nullptr;
 
-            glm::mat4 TransformOffset;
+            Maths::Matrix4 TransformOffset;
         };
 
         struct MeshNode
@@ -120,7 +120,6 @@ namespace Insight
             /// @return 
             std::string GetTexturePath(const aiMaterial* aiMaterial, const std::string_view directory, const aiTextureType textureTypePBR, const aiTextureType textureTypeLegacy) const;
 
-            glm::mat4 AssimpToGLMMat4(const aiMatrix4x4& transform) const;
             Maths::Matrix4 AssimpToInsightMatrix4(const aiMatrix4x4& transform) const;
         };
     }

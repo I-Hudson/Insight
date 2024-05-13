@@ -4,11 +4,7 @@
 #include "Graphics/Enums.h"
 #include "Graphics/PixelFormat.h"
 
-#include <glm/ext/vector_float4.hpp>
-#include <glm/ext/vector_float2.hpp>
-
 #include <unordered_map>
-#include <array>
 #include <vector>
 
 namespace Insight

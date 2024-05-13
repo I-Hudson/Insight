@@ -9,7 +9,7 @@
 
 #include "Graphics/PipelineBarrier.h"
 
-#include <glm/ext/vector_int2.hpp>
+#include "Maths/Vector2.h"
 
 #include <functional>
 #include <vector>
@@ -62,8 +62,8 @@ namespace Insight
 			ShaderDesc m_shader = { };
 			PipelineStateObject m_pso = { };
 
-			glm::ivec2 m_viewport;
-			glm::ivec2 m_scissor;
+			Maths::Vector2 m_viewport;
+			Maths::Vector2 m_scissor;
 
 			std::vector<PipelineBarrier> m_textureIncomingBarriers; /// These should be done before rendering.
 

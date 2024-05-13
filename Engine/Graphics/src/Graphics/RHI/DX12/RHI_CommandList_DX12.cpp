@@ -350,8 +350,8 @@ namespace Insight
 					AttachmentDescription const& description = renderDescription.Attachments.at(idx);
 					if (description.LoadOp == AttachmentLoadOp::Clear)
 					{
-						glm::vec4 const clearColour = textureDX12->GetClearColour();
-						ClearRenderTargetView(rtvHandle.CPUPtr, glm::value_ptr(clearColour), 0, nullptr);
+						Maths::Vector4 const clearColour = textureDX12->GetClearColour();
+						ClearRenderTargetView(rtvHandle.CPUPtr, &clearColour[0], 0, nullptr);
 					}
 
 					renderTargetHandles.push_back(rtvHandle.CPUPtr);
@@ -512,10 +512,10 @@ namespace Insight
 
 			void RHI_CommandList_DX12::BeginTimeBlock(const std::string& blockName)
 			{
-				BeginTimeBlock(blockName, glm::vec4(1, 1, 1, 1));
+				BeginTimeBlock(blockName, Maths::Vector4(1, 1, 1, 1));
 			}
 
-			void RHI_CommandList_DX12::BeginTimeBlock(const std::string& blockName, glm::vec4 colour)
+			void RHI_CommandList_DX12::BeginTimeBlock(const std::string& blockName, Maths::Vector4 colour)
 			{
 				colour.x = std::max(0.0f, std::min(1.0f, colour.x));
 				colour.y = std::max(0.0f, std::min(1.0f, colour.y));

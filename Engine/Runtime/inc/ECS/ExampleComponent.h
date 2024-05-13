@@ -3,8 +3,6 @@
 #include "ECS/ECS.h"
 
 #include <iostream>
-#include <glm/vec3.hpp>
-#include <glm/gtc/quaternion.hpp>
 
 #ifdef IS_EXP_ECS
 namespace Insight
@@ -41,9 +39,9 @@ namespace Insight
 
 		struct TransformComponent
 		{
-			glm::vec3 Position;
+			Maths::Vector3 Position;
 			glm::quat Qauternion;
-			glm::vec3 Scale;
+			Maths::Vector3 Scale;
 		};
 
 		struct TagComponent

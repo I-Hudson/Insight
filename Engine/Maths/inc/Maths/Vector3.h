@@ -9,7 +9,7 @@
 #include <DirectXMath.h>
 #endif
 
-#include <Reflect.h>
+#include <Reflect/Core/Defines.h>
 
 namespace Insight
 {
@@ -98,5 +98,7 @@ namespace Insight
 			static const Vector3 Infinity;
 			static const Vector3 InfinityNeg;
 		};
+
+		IS_MATHS float Vector3Distance(const Vector3& a, const Vector3& b);
 	}
 }

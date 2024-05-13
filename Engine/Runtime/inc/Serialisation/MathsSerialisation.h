@@ -1,6 +1,6 @@
 #pragma once
 
-#if 0
+#if 1
 
 #include "Serialisation/PropertySerialiser.h"
 
@@ -12,6 +12,8 @@
 #include "Maths/Matrix2.h"
 #include "Maths/Matrix3.h"
 #include "Maths/Matrix4.h"
+
+#include <string>
 
 namespace Insight
 {
@@ -109,7 +111,7 @@ namespace Insight
         //================================================================
         // PropertyDeserialiser
         //================================================================
-        Maths::Vector4 GetVectorComponents(const std::string& data)
+        static Maths::Vector4 GetVectorComponents(const std::string& data)
         {
             Maths::Vector4 vec;
             int idx = 0;
@@ -168,7 +170,7 @@ namespace Insight
             }
         };
 
-        Maths::Matrix4 GetMatrixComponents(const std::string& data)
+        static Maths::Matrix4 GetMatrixComponents(const std::string& data)
         {
             PropertyDeserialiser<Maths::Vector4> vecDeserialiser;
             Maths::Matrix4 mat;

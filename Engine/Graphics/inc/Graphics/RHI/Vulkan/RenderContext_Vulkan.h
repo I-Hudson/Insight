@@ -53,8 +53,8 @@ namespace Insight
 				virtual void PostRender(RHI_CommandList* cmdList) override;
 
 				virtual void CreateSwapchain(SwapchainDesc desc) override;
-				virtual void SetSwaphchainResolution(glm::ivec2 resolution) override;
-				virtual glm::ivec2 GetSwaphchainResolution() const override;
+				virtual void SetSwaphchainResolution(Maths::Vector2 resolution) override;
+				virtual Maths::Vector2 GetSwaphchainResolution() const override;
 
 				virtual void GpuWaitForIdle() override;
 				virtual void SubmitCommandListAndWait(RHI_CommandList* cmdList) override;

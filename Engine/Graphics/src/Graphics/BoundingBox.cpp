@@ -23,57 +23,57 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "Graphics/Vertex.h"
 #include "Core/Profiler.h"
 
-#include <algorithm>
+#include "Maths/Matrix2.h"
 
 namespace Insight
 {
 	namespace Graphics
 	{
-        const BoundingBox BoundingBox::Zero(glm::vec3(0), glm::vec3(0));
+        const BoundingBox BoundingBox::Zero(Maths::Vector3(0), Maths::Vector3(0));
 
         BoundingBox::BoundingBox()
         {
-            m_min = glm::vec3((float)UINT32_MAX);
-            m_max = glm::vec3((float)INT32_MIN);
+            m_min = Maths::Vector3((float)UINT32_MAX);
+            m_max = Maths::Vector3((float)INT32_MIN);
         }
 
-        BoundingBox::BoundingBox(const glm::vec3& min, const glm::vec3& max)
+        BoundingBox::BoundingBox(const Maths::Vector3& min, const Maths::Vector3& max)
         {
             this->m_min = min;
             this->m_max = max;
         }
 
-        BoundingBox::BoundingBox(const glm::vec3* points, const uint32_t point_count)
+        BoundingBox::BoundingBox(const Maths::Vector3* points, const uint32_t point_count)
         {
-            m_min = glm::vec3((float)UINT32_MAX);
-            m_max = glm::vec3((float)INT32_MIN);
+            m_min = Maths::Vector3((float)UINT32_MAX);
+            m_max = Maths::Vector3((float)INT32_MIN);
 
             for (uint32_t i = 0; i < point_count; i++)
             {
-                m_max.x = glm::max(m_max.x, points[i].x);
-                m_max.y = glm::max(m_max.y, points[i].y);
-                m_max.z = glm::max(m_max.z, points[i].z);
+                m_max.x = std::max(m_max.x, points[i].x);
+                m_max.y = std::max(m_max.y, points[i].y);
+                m_max.z = std::max(m_max.z, points[i].z);
 
-                m_min.x = glm::min(m_min.x, points[i].x);
-                m_min.y = glm::min(m_min.y, points[i].y);
-                m_min.z = glm::min(m_min.z, points[i].z);
+                m_min.x = std::min(m_min.x, points[i].x);
+                m_min.y = std::min(m_min.y, points[i].y);
+                m_min.z = std::min(m_min.z, points[i].z);
             }
         }
 
         BoundingBox::BoundingBox(const Vertex* vertices, const uint32_t vertex_count)
         {
-            m_min = glm::vec3((float)UINT32_MAX);
-            m_max = glm::vec3((float)INT32_MIN);
+            m_min = Maths::Vector3((float)UINT32_MAX);
+            m_max = Maths::Vector3((float)INT32_MIN);
 
             for (uint32_t i = 0; i < vertex_count; ++i)
             {
-                m_max.x = glm::max(m_max.x, vertices[i].Position.x);
-                m_max.y = glm::max(m_max.y, vertices[i].Position.y);
-                m_max.z = glm::max(m_max.z, vertices[i].Position.z);
+                m_max.x = std::max(m_max.x, vertices[i].Position[0]);
+                m_max.y = std::max(m_max.y, vertices[i].Position[1]);
+                m_max.z = std::max(m_max.z, vertices[i].Position[2]);
 
-                m_min.x = glm::min(m_min.x, vertices[i].Position.x);
-                m_min.y = glm::min(m_min.y, vertices[i].Position.y);
-                m_min.z = glm::min(m_min.z, vertices[i].Position.z);
+                m_min.x = std::min(m_min.x, vertices[i].Position[0]);
+                m_min.y = std::min(m_min.y, vertices[i].Position[1]);
+                m_min.z = std::min(m_min.z, vertices[i].Position[2]);
             }
         }
 
@@ -82,7 +82,7 @@ namespace Insight
             return std::max(m_max.x - m_min.x, std::max(m_max.y - m_min.y, m_max.z - m_min.z));
         }
 
-        Intersection BoundingBox::IsInside(const glm::vec3& point) const
+        Intersection BoundingBox::IsInside(const Maths::Vector3& point) const
         {
             if (point.x < m_min.x || point.x > m_max.x ||
                 point.y < m_min.y || point.y > m_max.y ||
@@ -117,17 +117,17 @@ namespace Insight
             }
         }
 
-        BoundingBox BoundingBox::Transform(const glm::mat4& transform) const
+        BoundingBox BoundingBox::Transform(const Maths::Matrix4& transform) const
         {
             IS_PROFILE_FUNCTION();
 
-            const glm::vec3 center_new = transform * glm::vec4(GetCenter(), 1);
-            const glm::vec3 extent_old = GetExtents();
-            const glm::vec3 extend_new = glm::vec3
+            const Maths::Vector3 center_new = transform * Maths::Vector4(GetCenter(), 1);
+            const Maths::Vector3 extent_old = GetExtents();
+            const Maths::Vector3 extend_new = Maths::Vector3
             (
-                glm::abs(transform[0][0]) * extent_old.x + glm::abs(transform[1][0]) * extent_old.y + glm::abs(transform[2][0]) * extent_old.z,
-                glm::abs(transform[0][1]) * extent_old.x + glm::abs(transform[1][1]) * extent_old.y + glm::abs(transform[2][1]) * extent_old.z,
-                glm::abs(transform[0][2]) * extent_old.x + glm::abs(transform[1][2]) * extent_old.y + glm::abs(transform[2][2]) * extent_old.z
+                std::abs(transform[0][0]) * extent_old.x + std::abs(transform[1][0]) * extent_old.y + std::abs(transform[2][0]) * extent_old.z,
+                std::abs(transform[0][1]) * extent_old.x + std::abs(transform[1][1]) * extent_old.y + std::abs(transform[2][1]) * extent_old.z,
+                std::abs(transform[0][2]) * extent_old.x + std::abs(transform[1][2]) * extent_old.y + std::abs(transform[2][2]) * extent_old.z
             );
 
             return BoundingBox(center_new - extend_new, center_new + extend_new);
@@ -135,15 +135,15 @@ namespace Insight
 
         void BoundingBox::Merge(const BoundingBox& box)
         {
-            glm::mat2 matrix;
+            Maths::Matrix2 matrix;
             auto x = matrix[0];
 
-            m_min.x = glm::min(m_min.x, box.m_min.x);
-            m_min.y = glm::min(m_min.y, box.m_min.y);
-            m_min.z = glm::min(m_min.z, box.m_min.z);
-            m_max.x = glm::max(m_max.x, box.m_max.x);
-            m_max.y = glm::max(m_max.x, box.m_max.x);
-            m_max.z = glm::max(m_max.x, box.m_max.x);
+            m_min.x = std::min(m_min.x, box.m_min.x);
+            m_min.y = std::min(m_min.y, box.m_min.y);
+            m_min.z = std::min(m_min.z, box.m_min.z);
+            m_max.x = std::max(m_max.x, box.m_max.x);
+            m_max.y = std::max(m_max.x, box.m_max.x);
+            m_max.z = std::max(m_max.x, box.m_max.x);
         }
 	}
 }

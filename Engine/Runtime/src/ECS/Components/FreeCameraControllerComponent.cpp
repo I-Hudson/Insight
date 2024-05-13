@@ -9,8 +9,6 @@
 
 #include "Core/Logger.h"
 
-#include <glm/gtx/matrix_interpolation.hpp>
-
 namespace Insight
 {
 	namespace ECS
@@ -47,13 +45,13 @@ namespace Insight
 			const float deltaTime = delta_time;
 			bool negative_viewport = false;
 
-			glm::mat4 viewMatrix = m_transformComponent->GetTransform();
+			Maths::Matrix4 viewMatrix = m_transformComponent->GetTransform();
 
 			/// Get the camera's forward, right, up, and location vectors
-			glm::vec4 vForward = viewMatrix[2];
-			glm::vec4 vRight = viewMatrix[0];
-			glm::vec4 vUp = viewMatrix[1];
-			glm::vec4 vTranslation = viewMatrix[3];
+			Maths::Vector4 vForward = viewMatrix[2];
+			Maths::Vector4 vRight = viewMatrix[0];
+			Maths::Vector4 vUp = viewMatrix[1];
+			Maths::Vector4 vTranslation = viewMatrix[3];
 
 			Input::InputDevice_KeyboardMouse* device = Input::InputSystem::Instance().GetKeyboardMouseDevice();
 			float frameSpeed = device->WasHeld(Input::KeyboardButtons::Key_LShift) ? deltaTime * 200 : deltaTime * 25;
@@ -108,7 +106,7 @@ namespace Insight
 				m_previousLookX = mouseX;
 				m_previousLookY = mouseY;
 
-				glm::mat4 mMat;
+				Maths::Matrix4 mMat;
 
 				/// pitch
 				if (iDeltaY != 0)
@@ -118,7 +116,7 @@ namespace Insight
 					{
 						i_delta_y = -i_delta_y;
 					}
-					mMat = glm::axisAngleMatrix(vRight.xyz(), i_delta_y / 150.0f);
+					mMat = Maths::AxisAngleMatrix(vRight, i_delta_y / 150.0f);
 					vRight = mMat * vRight;
 					vUp = mMat * vUp;
 					vForward = mMat * vForward;
@@ -128,7 +126,7 @@ namespace Insight
 				if (iDeltaX != 0)
 				{
 					float i_delta_x = static_cast<float>(iDeltaX);
-					mMat = glm::axisAngleMatrix(glm::vec3(0, 1, 0), i_delta_x / 150.0f);
+					mMat = Maths::AxisAngleMatrix(Maths::Vector3(0, 1, 0), i_delta_x / 150.0f);
 					vRight = mMat * vRight;
 					vUp = mMat * vUp;
 					vForward = mMat * vForward;

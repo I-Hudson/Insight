@@ -4,7 +4,7 @@
 
 #include "Editor/HotReload/HotReloadExportFunctions.h"
 
-#include <CodeGenerate/CodeGenerate.h>
+#include <Reflect/CodeGenerate/CodeGenerate.h>
 
 #include <string>
 #include <filesystem>
@@ -85,7 +85,7 @@ namespace InsightReflectTool
 
     void GenerateEditorWindowRegister::WriteGetTypeInfos(std::fstream& file, const std::vector<Reflect::Parser::ReflectContainerData>& editorWindowClasses) const
     {
-        Utils::WriteIncludeLibraryFile(file, "Reflect.h");
+        Utils::WriteIncludeLibraryFile(file, "Reflect/Reflect.h");
 
         Utils::WriteSourceFunctionDefinition(file, "std::vector<Reflect::TypeInfo>", EditorWindowRegister::c_GetAllEditorWindowsTypeInfos, {}, [&](std::fstream& file)
             {

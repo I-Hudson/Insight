@@ -176,7 +176,7 @@ namespace Insight
 			}
 
 			m_title = std::move(title);
-			SetSize({ width, height });
+			SetSize(Maths::Vector2(width, height));
 
 			m_glfwInit = glfwInit();
 			if (!m_glfwInit)
@@ -206,15 +206,15 @@ namespace Insight
 
 			int windowPosX, windowPosY;
 			glfwGetWindowPos(m_glfwWindow, &windowPosX, &windowPosY);
-			SetPosition({ windowPosX , windowPosY });
+			SetPosition(Maths::Vector2(windowPosX , windowPosY));
 
 			glfwSetWindowPosCallback(m_glfwWindow, [](GLFWwindow* window, int xpos, int ypos)
 				{
-					Window::Instance().SetPosition({ xpos, ypos });
+					Window::Instance().SetPosition(Maths::Vector2(xpos, ypos));
 				});
 			glfwSetWindowSizeCallback(m_glfwWindow, [](GLFWwindow* window, int width, int height)
 				{
-					Window::Instance().SetSize({ width, height });
+					Window::Instance().SetSize(Maths::Vector2(width, height));
 				});
 
 			m_windowInputs[m_glfwWindow] = WindowInputs{ m_glfwWindow };
@@ -272,8 +272,8 @@ namespace Insight
 			IS_PROFILE_FUNCTION();
 
 			std::string oldTitle = m_title;
-			glm::ivec2 oldPosition = GetPosition();
-			glm::ivec2 oldSize = GetSize();
+			Maths::Vector2 oldPosition = GetPosition();
+			Maths::Vector2 oldSize = GetSize();
 
 			Destroy();
 			Init(m_inputSystem, oldSize.x, oldSize.y, oldTitle);
@@ -313,22 +313,22 @@ namespace Insight
 			return m_isFullScreen ? m_fullScreenPosition.y : m_windowedPosition.y;
 		}
 
-		glm::ivec2 Window::GetPosition() const
+		Maths::Vector2 Window::GetPosition() const
 		{
 			return m_isFullScreen ? m_fullScreenPosition : m_windowedPosition;
 		}
 
 		void Window::SetX(int x)
 		{
-			SetPosition({ x, m_windowedPosition.y });
+			SetPosition(Maths::Vector2(x, m_windowedPosition.y));
 		}
 
 		void Window::SetY(int y)
 		{
-			SetPosition({ m_windowedPosition.x, y });
+			SetPosition(Maths::Vector2(m_windowedPosition.x, y));
 		}
 
-		void Window::SetPosition(glm::ivec2 position)
+		void Window::SetPosition(Maths::Vector2 position)
 		{
 			if (IsFullScreen())
 			{
@@ -351,22 +351,22 @@ namespace Insight
 			return m_isFullScreen ? m_fullScreenSize.y : m_windowedSize.y;
 		}
 
-		glm::ivec2 Window::GetSize() const
+		Maths::Vector2 Window::GetSize() const
 		{
 			return m_isFullScreen ? m_fullScreenSize : m_windowedSize;
 		}
 
 		void Window::SetWidth(int width)
 		{
-			SetSize({ width, m_windowedSize.y });
+			SetSize(Maths::Vector2(width, m_windowedSize.y));
 		}
 
 		void Window::SetHeight(int height)
 		{
-			SetSize({ m_windowedSize.x, height });
+			SetSize(Maths::Vector2(m_windowedSize.x, height));
 		}
 
-		void Window::SetSize(glm::ivec2 size)
+		void Window::SetSize(Maths::Vector2 size)
 		{
 			if (IsFullScreen())
 			{
@@ -394,7 +394,7 @@ namespace Insight
 			//SetSize({ mode->width, mode->height });
 			//SetPosition({ 0, 0 });
 
-			m_fullScreenSize = { mode->width, mode->height };
+			m_fullScreenSize = Maths::Vector2(mode->width, mode->height);
 			m_fullScreenPosition = { 0, 0 };
 
 			glfwSetWindowMonitor(m_glfwWindow, monitor, 0, 0, mode->width, mode->height, GLFW_DONT_CARE);

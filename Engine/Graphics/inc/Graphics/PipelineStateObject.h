@@ -6,9 +6,6 @@
 #include <array>
 #include <memory>
 
-#include <glm/ext/vector_float2.hpp>
-#include <glm/ext/vector_float4.hpp>
-
 namespace Insight
 {
 	namespace Graphics

@@ -4,12 +4,16 @@
 #include "Vector4.h"
 #include "Vector3.h"
 
+#include <Reflect/Core/Defines.h>
+
 #ifdef IS_MATHS_DIRECTX_MATHS
 #include <DirectXMath.h>
 #endif
 #if defined(IS_MATHS_GLM) || defined(IS_MATHS_CONSTRUCTOR_GLM) || defined(IS_TESTING)
 #include <glm/glm.hpp>
-#endif 
+#endif
+
+#include <cmath>
 
 namespace Insight
 {
@@ -17,6 +21,7 @@ namespace Insight
 	{
 
 		/// @brief Four by Four matrix (4 by 4). Row majoir.
+		REFLECT_CLASS(REFLECT_LOOKUP_ONLY);
 		class IS_MATHS Matrix4
 		{
 		public:
@@ -136,5 +141,7 @@ namespace Insight
 			static const Matrix4 One;
 			static const Matrix4 Identity;
 		};
+
+		IS_MATHS Matrix4 AxisAngleMatrix(const Vector3& axis, const float angle);
 	}
 }

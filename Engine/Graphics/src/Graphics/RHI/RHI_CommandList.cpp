@@ -106,7 +106,7 @@ namespace Insight
 			FAIL_ASSERT();
 		}
 
-		void RHI_CommandList::BeginTimeBlock(const std::string& blockName, glm::vec4 colour)
+		void RHI_CommandList::BeginTimeBlock(const std::string& blockName, Maths::Vector4 colour)
 		{
 			FAIL_ASSERT();
 		}

@@ -1,7 +1,7 @@
 #include "Utils.h"
 
 #include <filesystem>
-#include <Reflect.h>
+#include <Reflect/Reflect.h>
 
 namespace InsightReflectTool
 {
@@ -156,7 +156,6 @@ namespace InsightReflectTool
                 {
                     continue;
                 }
-                assert(fileParsed.FileName != "Texture2d");
 
                 for (const auto& reflectData : fileParsed.ReflectData)
                 {

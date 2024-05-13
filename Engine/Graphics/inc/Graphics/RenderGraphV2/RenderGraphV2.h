@@ -77,17 +77,17 @@ namespace Insight
 
 			/// @brief Set the render resolution size.
 			/// @param render_resolution 
-			void SetRenderResolution(glm::ivec2 render_resolution);
+			void SetRenderResolution(Maths::Vector2 render_resolution);
 			/// @brief Return the render resoltuion size.
 			/// @return glm::ivec2
-			glm::ivec2 GetRenderResolution() const { return m_render_resolution; }
+			Maths::Vector2 GetRenderResolution() const { return m_render_resolution; }
 
 			/// @brief Attempt to set the output resolution. This is restricted by the window size (Best to leave alone).
 			/// @param output_resolution 
 			void SetOutputResolution(glm::ivec2 output_resolution);
 			/// @brief Return then output size.
 			/// @return glm::ivec2
-			glm::ivec2 GetOutputResolution() const { return m_output_resolution; }
+			Maths::Vector2 GetOutputResolution() const { return m_output_resolution; }
 
 		private:
 			void Build();
@@ -125,12 +125,12 @@ namespace Insight
 
 
 			/// @brief General render resolution to be used for all render passes. Can be overwritten.
-			glm::ivec2 m_render_resolution = {};
+			Maths::Vector2 m_render_resolution = {};
 			bool m_render_resolution_has_changed = false;
 			/// @brief Set the render resolution to the window resolution when the window resolution has changed automaticity.
 			bool m_set_render_resolution_to_window_resolution_auto = true;
 			/// @brief General ouput resolution to be used for all render passes. Can be overwritten.
-			glm::ivec2 m_output_resolution = {};
+			Maths::Vector2 m_output_resolution = {};
 
 			FrameResource<RHI_ResourceCache<RHI_Buffer>*> m_bufferCaches;
 			FrameResource<RHI_ResourceCache<RHI_Texture>*> m_textureCaches;

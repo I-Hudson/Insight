@@ -8,7 +8,8 @@
 
 #include "ECS/Components/CameraComponent.h"
 
-#include <glm/vec3.hpp>
+#include "Maths/Vector3.h"
+#include "Maths/Matrix4.h"
 
 #include <array>
 #include <vector>
@@ -36,8 +37,8 @@ namespace Insight
 
     struct IS_RUNTIME RenderMesh
     {
-        glm::mat4 Transform;
-        glm::mat4 PreviousTransform;
+        Maths::Matrix4 Transform;
+        Maths::Matrix4 PreviousTransform;
         Graphics::BoundingBox BoudingBox;
         /// @brief All render calls for this mesh.
         std::vector<Runtime::MeshLOD> MeshLods;
@@ -148,7 +149,7 @@ namespace Insight
         std::vector<RenderMaterailBatch> MaterialBatch;
         std::unordered_map<Core::GUID, u64> MaterialBatchLookup;
 
-        glm::vec3 DirectionalLight = glm::vec3(0, 0, 0);
+        Maths::Vector3 DirectionalLight = Maths::Vector3(0, 0, 0);
     };
 
     /// @brief Contain a vector of worlds for rendering.

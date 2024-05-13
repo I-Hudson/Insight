@@ -31,7 +31,7 @@ namespace Insight
 				{
 					const Core::GraphcisSwapchainResize& resizeEvent = static_cast<const Core::GraphcisSwapchainResize&>(event);
 
-					m_output_resolution = { resizeEvent.Width, resizeEvent.Height };
+					m_output_resolution = Maths::Vector2(resizeEvent.Width, resizeEvent.Height);
 					if (m_set_render_resolution_to_window_resolution_auto)
 					{
 						SetRenderResolution(m_output_resolution);
@@ -463,7 +463,7 @@ namespace Insight
 			/// TODO Low: Could be threaded? Leave as it is for now as it works.
 			for (UPtr<RenderGraphPassBase>& pass : GetRenderPasses())
 			{
-				cmdList->BeginTimeBlock("PlaceBarriersInToPipeline", glm::vec4(1, 0, 0, 1));
+				cmdList->BeginTimeBlock("PlaceBarriersInToPipeline", Maths::Vector4(1, 0, 0, 1));
 				PlaceBarriersInToPipeline(pass.Get(), cmdList);
 				cmdList->EndTimeBlock();
 
@@ -471,7 +471,7 @@ namespace Insight
 				cmdList->SetScissor(0, 0, pass->m_viewport.x, pass->m_viewport.y);
 
 				std::string passName = std::string(pass->m_passName.begin(), pass->m_passName.end());
-				cmdList->BeginTimeBlock(passName + "_Execute", glm::vec4(0, 1, 0, 1));
+				cmdList->BeginTimeBlock(passName + "_Execute", Maths::Vector4(0, 1, 0, 1));
 				GPUProfiler::Instance().StartProfile(cmdList, passName);
 				pass->Execute(*this, cmdList);
 				GPUProfiler::Instance().EndProfile(cmdList);
@@ -543,7 +543,7 @@ namespace Insight
 			return m_passes.at(m_passesRenderIndex);
 		}
 
-		void RenderGraph::SetRenderResolution(glm::ivec2 render_resolution)
+		void RenderGraph::SetRenderResolution(Maths::Vector2 render_resolution)
 		{
 			if (m_render_resolution != render_resolution)
 			{
@@ -553,7 +553,7 @@ namespace Insight
 			}
 		}
 
-		void RenderGraph::SetOutputResolution(glm::ivec2 output_resolution)
+		void RenderGraph::SetOutputResolution(Maths::Vector2 output_resolution)
 		{
 			if (m_output_resolution != output_resolution)
 			{

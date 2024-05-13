@@ -6,8 +6,8 @@
 
 #include "Utils.h"
 
-#include <Reflect.h>
-#include <CodeGenerate/CodeGenerate.h>
+#include <Reflect/Reflect.h>
+#include <Reflect/CodeGenerate/CodeGenerate.h>
 
 #include <fstream>
 #include <ostream>

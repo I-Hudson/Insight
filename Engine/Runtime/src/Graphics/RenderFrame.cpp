@@ -9,6 +9,9 @@
 #include "ECS/Components/MeshComponent.h"
 #include "ECS/Components/PointLightComponent.h"
 
+#include "Maths/Utils.h"
+#include "Maths/Vector3.h"
+
 #include "Core/Profiler.h"
 
 namespace Insight
@@ -208,7 +211,7 @@ namespace Insight
                     const float nearPlane = 0.01f;
                     const float shadowMapResolution = static_cast<float>(pointLightComponent->GetShadowResolution());
 
-                    pointLight.Projection = Maths::Matrix4::CreatePerspective(glm::radians(90.0f), shadowMapResolution / shadowMapResolution, nearPlane, pointLightComponent->GetRadius());
+                    pointLight.Projection = Maths::Matrix4::CreatePerspective(Maths::DegreesToRadians(90.0f), shadowMapResolution / shadowMapResolution, nearPlane, pointLightComponent->GetRadius());
 
                     pointLight.CreateViewMatrixs(Maths::Vector3(transformComponent->GetPosition()));
 
@@ -254,10 +257,10 @@ namespace Insight
                         const RenderMesh& meshA = world.Meshes[a];
                         const RenderMesh& meshB = world.Meshes[b];
 
-                        glm::vec3 const& positionA = meshA.Transform[3].xyz;
-                        glm::vec3 const& positionB = meshB.Transform[3].xyz;
-                        glm::vec3 const& cameraPositon = glm::vec3(world.MainCamera.Transform[3].x, world.MainCamera.Transform[3].y, world.MainCamera.Transform[3].z);
-                        return glm::distance(positionA, cameraPositon) < glm::distance(positionB, cameraPositon);
+                        Maths::Vector3 const& positionA = meshA.Transform[3];
+                        Maths::Vector3 const& positionB = meshB.Transform[3];
+                        Maths::Vector3 const& cameraPositon = Maths::Vector3(world.MainCamera.Transform[3].x, world.MainCamera.Transform[3].y, world.MainCamera.Transform[3].z);
+                        return Maths::Vector3Distance(positionA, cameraPositon) < Maths::Vector3Distance(positionB, cameraPositon);
                     });
             }
         }
@@ -276,10 +279,10 @@ namespace Insight
                         const RenderMesh& meshA = world.Meshes[a];
                         const RenderMesh& meshB = world.Meshes[b];
 
-                        glm::vec3 const& positionA = meshA.Transform[3].xyz;
-                        glm::vec3 const& positionB = meshB.Transform[3].xyz;
-                        glm::vec3 const& cameraPositon = glm::vec3(world.MainCamera.Transform[3].x, world.MainCamera.Transform[3].y, world.MainCamera.Transform[3].z);
-                        return glm::distance(positionA, cameraPositon) < glm::distance(positionB, cameraPositon);
+                        Maths::Vector3 const& positionA = meshA.Transform[3];
+                        Maths::Vector3 const& positionB = meshB.Transform[3];
+                        Maths::Vector3 const& cameraPositon = Maths::Vector3(world.MainCamera.Transform[3].x, world.MainCamera.Transform[3].y, world.MainCamera.Transform[3].z);
+                        return Maths::Vector3Distance(positionA, cameraPositon) < Maths::Vector3Distance(positionB, cameraPositon);
                     });
             }
         }

@@ -30,7 +30,7 @@ namespace Insight
 			y = 0.0f;
 #endif
 		}
-		Vector2::Vector2(float x, float y)
+		Vector2::Vector2(const float x, const float y)
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
 			xmvector = DirectX::XMVectorSet(x, y, 0.0f, 0.0f);
@@ -41,7 +41,7 @@ namespace Insight
 			this.y = y;
 #endif
 		}
-		Vector2::Vector2(float value)
+		Vector2::Vector2(const float value)
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
 			xmvector = DirectX::XMVectorSet(value, value, 0.0f, 0.0f);

@@ -32,8 +32,8 @@ namespace Insight
 
         void RHI_FSR::Init()
         {
-            glm::ivec2 render_resolution = RenderGraph::Instance().GetRenderResolution();
-            glm::ivec2 output_resolution = RenderGraph::Instance().GetOutputResolution();
+            Maths::Vector2 render_resolution = RenderGraph::Instance().GetRenderResolution();
+            Maths::Vector2 output_resolution = RenderGraph::Instance().GetOutputResolution();
             CreateContext(render_resolution.x, render_resolution.y, output_resolution.x, output_resolution.y);
 
             //Core::EventSystem::Instance().AddEventListener(this, Core::EventType::Graphics_Swapchain_Resize, [this](const Core::Event& event)
@@ -46,8 +46,8 @@ namespace Insight
             //        }
 
             //        RenderContext* render_context = &RenderContext::Instance();
-            //        glm::ivec2 render_resolution = RenderGraph::Instance().GetRenderResolution();
-            //        glm::ivec2 output_resolution = RenderGraph::Instance().GetOutputResolution();
+            //        Maths::Vector2 render_resolution = RenderGraph::Instance().GetRenderResolution();
+            //        Maths::Vector2 output_resolution = RenderGraph::Instance().GetOutputResolution();
             //        CreateContext(render_resolution.x, render_resolution.y, output_resolution.x, output_resolution.y);
             //    });
             Core::EventSystem::Instance().AddEventListener(this, Core::EventType::Graphics_Render_Resolution_Change, [this](const Core::Event& event)
@@ -63,8 +63,8 @@ namespace Insight
                             }
 
                             RenderContext* render_context = &RenderContext::Instance();
-                            glm::ivec2 render_resolution = RenderGraph::Instance().GetRenderResolution();
-                            glm::ivec2 output_resolution = RenderGraph::Instance().GetOutputResolution();
+                            Maths::Vector2 render_resolution = RenderGraph::Instance().GetRenderResolution();
+                            Maths::Vector2 output_resolution = RenderGraph::Instance().GetOutputResolution();
                             CreateContext(render_resolution.x, render_resolution.y, output_resolution.x, output_resolution.y);
                         });
                 });

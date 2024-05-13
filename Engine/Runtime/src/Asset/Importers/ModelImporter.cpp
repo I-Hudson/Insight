@@ -194,7 +194,7 @@ namespace Insight
 
 			// Overdraw optimizations - reorders triangles to minimize overdraw from all directions
 			IS_LOG_INFO("Optimizing overdraw...");
-			meshopt_optimizeOverdraw(optimisedIndices.data(), optimisedIndices.data(), indexCount, &(Vertices[0].Position.x), optimisedVertexCount, vertexSize, 1.05f);
+			meshopt_optimizeOverdraw(optimisedIndices.data(), optimisedIndices.data(), indexCount, &(Vertices[0].Position[0]), optimisedVertexCount, vertexSize, 1.05f);
 
 			// Vertex fetch optimization - reorders triangles to maximize memory access locality
 			IS_LOG_INFO("Optimizing vertex fetch...");
@@ -242,7 +242,7 @@ namespace Insight
 					result_lod.data()
 					, &*indices_begin
 					, static_cast<u64>(LOD0_IndicesCount)
-					, &(Vertices.data() + LOD0_VertexStart)->Position.x
+					, &(Vertices.data() + LOD0_VertexStart)->Position[0]
 					, LOD0_VertexCount
 					, sizeof(Graphics::Vertex)
 					, target_index_count
@@ -267,7 +267,7 @@ namespace Insight
 						  result_lod.data()
 						, &*indices_begin
 						, static_cast<u64>(LOD0_IndicesCount)
-						, &(Vertices.data() + LOD0_VertexStart)->Position.x
+						, &(Vertices.data() + LOD0_VertexStart)->Position[0]
 						, LOD0_VertexCount
 						, sizeof(Graphics::Vertex)
 						, target_index_count
@@ -458,11 +458,11 @@ namespace Insight
 			ParseMeshData(aiMesh, meshData);
 			
 			mesh->m_mesh_name = aiMesh->mName.C_Str();
-			mesh->m_transform_offset = AssimpToGLMMat4(aiNode->mTransformation);
+			mesh->m_transform_offset = AssimpToInsightMatrix4(aiNode->mTransformation);
 			//mesh->m_boundingBox = Graphics::BoundingBox(meshData.Vertices.data(), static_cast<u32>(meshData.Vertices.size()));
 			mesh->m_boundingBox = Graphics::BoundingBox(
-				glm::vec3(aiMesh->mAABB.mMin.x, aiMesh->mAABB.mMin.y, aiMesh->mAABB.mMin.z),
-				glm::vec3(aiMesh->mAABB.mMax.x, aiMesh->mAABB.mMax.y, aiMesh->mAABB.mMax.z));
+				Maths::Vector3(aiMesh->mAABB.mMin.x, aiMesh->mAABB.mMin.y, aiMesh->mAABB.mMin.z),
+				Maths::Vector3(aiMesh->mAABB.mMax.x, aiMesh->mAABB.mMax.y, aiMesh->mAABB.mMax.z));
 
 			if (!meshData.Vertices.empty() && !meshData.Indices.empty())
 			{
@@ -538,65 +538,59 @@ namespace Insight
 			{
 				IS_PROFILE_SCOPE("Add Vertex");
 
-				Graphics::Vertex vertex = { };
-				glm::vec4 vector = { }; /// we declare a placeholder vector since assimp uses its own vector class that doesn't directly convert to glm's vec3 class 
-				/// so we transfer the data to this placeholder glm::vec3 first.
+				Maths::Vector4 position; /// we declare a placeholder vector since assimp uses its own vector class that doesn't directly convert to glm's vec3 class 
+				/// so we transfer the data to this placeholder Maths::Vector3 first.
 				/// positions
-				vector.x = aiMesh->mVertices[i].x;
-				vector.y = aiMesh->mVertices[i].y;
-				vector.z = aiMesh->mVertices[i].z;
-				vector.w = 1.0f;
-				vertex.Position = vector;
-				//vertex.Position += glm::vec3(meshData.TransformOffset[3].xyz);
+				position.x = aiMesh->mVertices[i].x;
+				position.y = aiMesh->mVertices[i].y;
+				position.z = aiMesh->mVertices[i].z;
+				position.w = 1.0f;
+				//vertex.Position += Maths::Vector3(meshData.TransformOffset[3].xyz);
 
-				vector = { };
+				Maths::Vector4 normal;
 				/// Normals
 				if (aiMesh->HasNormals())
 				{
-					vector.x = aiMesh->mNormals[i].x;
-					vector.y = aiMesh->mNormals[i].y;
-					vector.z = aiMesh->mNormals[i].z;
-					vector.w = 1.0f;
-					vector = glm::normalize(vector);
+					normal.x = aiMesh->mNormals[i].x;
+					normal.y = aiMesh->mNormals[i].y;
+					normal.z = aiMesh->mNormals[i].z;
+					normal.w = 1.0f;
 				}
-				vertex.Normal = vector;
 
-				vector = { };
+				Maths::Vector4 colour;
 				if (aiMesh->mColors[0])
 				{
-					vector.x = aiMesh->mColors[0]->r;
-					vector.y = aiMesh->mColors[0]->g;
-					vector.z = aiMesh->mColors[0]->b;
-					vector.w = aiMesh->mColors[0]->a;
+					colour.x = aiMesh->mColors[0]->r;
+					colour.y = aiMesh->mColors[0]->g;
+					colour.z = aiMesh->mColors[0]->b;
+					colour.w = aiMesh->mColors[0]->a;
 				}
 				else
 				{
-					vector.x = (rand() % 100 + 1) * 0.01f;
-					vector.y = (rand() % 100 + 1) * 0.01f;
-					vector.z = (rand() % 100 + 1) * 0.01f;
-					vector.w = 1.0f;
+					colour.x = (rand() % 100 + 1) * 0.01f;
+					colour.y = (rand() % 100 + 1) * 0.01f;
+					colour.z = (rand() % 100 + 1) * 0.01f;
+					colour.w = 1.0f;
 				}
-				vertex.Colour = vector;
 
-				vector = { };
+				Maths::Vector2 uv;
 				/// texture coordinates
 				if (aiMesh->mTextureCoords[0]) /// does the mesh contain texture coordinates?
 				{
-					glm::vec2 vec;
+					Maths::Vector2 vec;
 					// a vertex can contain up to 8 different texture coordinates. We thus make the assumption that we won't 
 					// use models where a vertex can have multiple texture coordinates so we always take the first set (0).
-					vec.x = aiMesh->mTextureCoords[0][i].x;
-					vec.y = aiMesh->mTextureCoords[0][i].y;
-					vertex.UV = glm::vec4(vec, 0, 0);
+					uv.x = aiMesh->mTextureCoords[0][i].x;
+					uv.y = aiMesh->mTextureCoords[0][i].y;
 				}
 				else
 				{
 					FAIL_ASSERT();
-					///vertex.UV = glm::vec2(0.0f, 0.0f);
+					///vertex.UV = Maths::Vector2(0.0f, 0.0f);
 				}
 
-				Graphics::VertexOptomised vertexOptomised(vertex);
-				meshData.Vertices.push_back(vertex);
+				//Graphics::VertexOptomised vertexOptomised(vertex);
+				meshData.Vertices.push_back(Graphics::Vertex(position, normal, colour, uv));
 			}
 
 			//meshData.Indices.reserve(meshData.Indices.size() + (static_cast<u64>(aiMesh->mNumFaces) * 3));
@@ -744,10 +738,11 @@ namespace Insight
 				{
 					IS_PROFILE_SCOPE("Mesh evaluated");
 					const aiMesh* aiMesh = meshNode->AssimpMesh;// aiScene->mMeshes[aiNode->mMeshes[i]];
-					meshNode->MeshData->TransformOffset = AssimpToGLMMat4(aiNode->mTransformation);
+					meshNode->MeshData->TransformOffset = AssimpToInsightMatrix4(aiNode->mTransformation);
+
 					ProcessMesh(aiScene, aiMesh, meshNode->MeshData);
 					meshNode->Mesh->m_mesh_name = aiMesh->mName.C_Str();
-					meshNode->Mesh->m_transform_offset = AssimpToGLMMat4(aiNode->mTransformation);
+					meshNode->Mesh->m_transform_offset = AssimpToInsightMatrix4(aiNode->mTransformation);
 
 					if (aiScene->HasMaterials() && aiMesh->mMaterialIndex < aiScene->mNumMaterials)
 					{
@@ -825,65 +820,59 @@ namespace Insight
 			{
 				IS_PROFILE_SCOPE("Add Vertex");
 
-				Graphics::Vertex vertex = { };
-				glm::vec4 vector = { }; /// we declare a placeholder vector since assimp uses its own vector class that doesn't directly convert to glm's vec3 class 
-				/// so we transfer the data to this placeholder glm::vec3 first.
+				Maths::Vector4 position; /// we declare a placeholder vector since assimp uses its own vector class that doesn't directly convert to glm's vec3 class 
+				/// so we transfer the data to this placeholder Maths::Vector3 first.
 				/// positions
-				vector.x = aiMesh->mVertices[i].x;
-				vector.y = aiMesh->mVertices[i].y;
-				vector.z = aiMesh->mVertices[i].z;
-				vector.w = 1.0f;
-				vertex.Position = vector;
-				//vertex.Position += glm::vec3(meshData->TransformOffset[3].xyz);
+				position.x = aiMesh->mVertices[i].x;
+				position.y = aiMesh->mVertices[i].y;
+				position.z = aiMesh->mVertices[i].z;
+				position.w = 1.0f;
+				//vertex.Position += Maths::Vector3(meshData.TransformOffset[3].xyz);
 
-				vector = { };
+				Maths::Vector4 normal;
 				/// Normals
 				if (aiMesh->HasNormals())
 				{
-					vector.x = aiMesh->mNormals[i].x;
-					vector.y = aiMesh->mNormals[i].y;
-					vector.z = aiMesh->mNormals[i].z;
-					vector.w = 1.0f;
-					vector = glm::normalize(vector);
+					normal.x = aiMesh->mNormals[i].x;
+					normal.y = aiMesh->mNormals[i].y;
+					normal.z = aiMesh->mNormals[i].z;
+					normal.w = 1.0f;
 				}
-				vertex.Normal = vector;
 
-				vector = { };
+				Maths::Vector4 colour;
 				if (aiMesh->mColors[0])
 				{
-					vector.x = aiMesh->mColors[0]->r;
-					vector.y = aiMesh->mColors[0]->g;
-					vector.z = aiMesh->mColors[0]->b;
-					vector.w = aiMesh->mColors[0]->a;
+					colour.x = aiMesh->mColors[0]->r;
+					colour.y = aiMesh->mColors[0]->g;
+					colour.z = aiMesh->mColors[0]->b;
+					colour.w = aiMesh->mColors[0]->a;
 				}
 				else
 				{
-					vector.x = (rand() % 100 + 1) * 0.01f;
-					vector.y = (rand() % 100 + 1) * 0.01f;
-					vector.z = (rand() % 100 + 1) * 0.01f;
-					vector.w = 1.0f;
+					colour.x = (rand() % 100 + 1) * 0.01f;
+					colour.y = (rand() % 100 + 1) * 0.01f;
+					colour.z = (rand() % 100 + 1) * 0.01f;
+					colour.w = 1.0f;
 				}
-				vertex.Colour = vector;
 
-				vector = { };
+				Maths::Vector2 uv;
 				/// texture coordinates
 				if (aiMesh->mTextureCoords[0]) /// does the mesh contain texture coordinates?
 				{
-					glm::vec2 vec;
+					Maths::Vector2 vec;
 					// a vertex can contain up to 8 different texture coordinates. We thus make the assumption that we won't 
 					// use models where a vertex can have multiple texture coordinates so we always take the first set (0).
-					vec.x = aiMesh->mTextureCoords[0][i].x;
-					vec.y = aiMesh->mTextureCoords[0][i].y;
-					vertex.UV = glm::vec4(vec, 0, 0);
+					uv.x = aiMesh->mTextureCoords[0][i].x;
+					uv.y = aiMesh->mTextureCoords[0][i].y;
 				}
 				else
 				{
 					FAIL_ASSERT();
-					///vertex.UV = glm::vec2(0.0f, 0.0f);
+					///vertex.UV = Maths::Vector2(0.0f, 0.0f);
 				}
 
-				Graphics::VertexOptomised vertexOptomised(vertex);
-				meshData->Vertices.push_back(vertex);
+				//Graphics::VertexOptomised vertexOptomised(vertex);
+				meshData->Vertices.push_back(Graphics::Vertex(position, normal, colour, uv));
 			}
 
 			meshData->Indices.reserve(meshData->Indices.size() + (static_cast<u64>(aiMesh->mNumFaces) * 3));
@@ -982,17 +971,6 @@ namespace Insight
 			}
 
 			return std::string(directory) + "/" + texturePath.C_Str();
-		}
-
-		glm::mat4 ModelImporter::AssimpToGLMMat4(const aiMatrix4x4& transform) const
-		{
-			return glm::mat4
-			(
-				transform.a1, transform.b1, transform.c1, transform.d1,
-				transform.a2, transform.b2, transform.c2, transform.d2,
-				transform.a3, transform.b3, transform.c3, transform.d3,
-				transform.a4, transform.b4, transform.c4, transform.d4
-			);
 		}
 
 		Maths::Matrix4 ModelImporter::AssimpToInsightMatrix4(const aiMatrix4x4& transform) const

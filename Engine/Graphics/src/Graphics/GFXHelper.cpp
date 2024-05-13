@@ -2,15 +2,16 @@
 
 namespace Insight
 {
+	Maths::Vector4 GFXHelper::DefaultColour = Maths::Vector4(1, 1, 1, 1);
 	std::vector<GFXHelperLine> GFXHelper::m_lines;
 
-	GFXHelperLine::GFXHelperLine(glm::vec3 start, glm::vec3 end, glm::vec4 colour)
+	GFXHelperLine::GFXHelperLine(Maths::Vector3 start, Maths::Vector3 end, Maths::Vector4 colour)
 		: Start(std::move(start))
 		, End(std::move(end))
 		, Colour(std::move(colour))
 	{ }
 
-	GFXHelperLine::GFXHelperLine(glm::vec3 start, glm::vec3 direction, float distance, glm::vec4 colour)
+	GFXHelperLine::GFXHelperLine(Maths::Vector3 start, Maths::Vector3 direction, float distance, Maths::Vector4 colour)
 		: Start(std::move(start))
 		, Colour(std::move(colour))
 	{
@@ -22,45 +23,45 @@ namespace Insight
 		m_lines.clear();
 	}
 
-	void GFXHelper::AddLine(glm::vec3 start, glm::vec3 end, glm::vec4 colour)
+	void GFXHelper::AddLine(const Maths::Vector3& start, const Maths::Vector3& end, const Maths::Vector4& colour)
 	{
 		m_lines.push_back(GFXHelperLine(start, end, colour));
 	}
 
-	void GFXHelper::AddLine(glm::vec3 start, glm::vec3 direction, float distance, glm::vec4 colour)
+	void GFXHelper::AddLine(const Maths::Vector3& start, const Maths::Vector3& direction, float distance, const Maths::Vector4& colour)
 	{
 		m_lines.push_back(GFXHelperLine(start, direction, distance, colour));
 	}
 
-	void GFXHelper::AddCube(glm::vec3 position, glm::vec3 extents, glm::vec4 colour)
+	void GFXHelper::AddCube(const Maths::Vector3& position, const Maths::Vector3& extents, const Maths::Vector4& colour)
 	{
-		glm::vec3 topCentre = position + glm::vec3(0, extents.y, 0);
-		glm::vec3 topRight = topCentre + glm::vec3(extents.x, 0, 0);
-		glm::vec3 topLeft = topCentre - glm::vec3(extents.x, 0, 0);
+		const Maths::Vector3 topCentre = position + Maths::Vector3(0, extents.y, 0);
+		const Maths::Vector3 topRight = topCentre + Maths::Vector3(extents.x, 0, 0);
+		const Maths::Vector3 topLeft = topCentre - Maths::Vector3(extents.x, 0, 0);
 
-		glm::vec3 bottomCentre = position - glm::vec3(0, extents.y, 0);
-		glm::vec3 bottomRight = bottomCentre + glm::vec3(extents.x, 0, 0);
-		glm::vec3 bottomLeft = bottomCentre - glm::vec3(extents.x, 0, 0);
+		const Maths::Vector3 bottomCentre = position - Maths::Vector3(0, extents.y, 0);
+		const Maths::Vector3 bottomRight = bottomCentre + Maths::Vector3(extents.x, 0, 0);
+		const Maths::Vector3 bottomLeft = bottomCentre - Maths::Vector3(extents.x, 0, 0);
 
-		AddLine(topLeft  + glm::vec3(0, 0, extents.z), topRight + glm::vec3(0, 0, extents.z));
-		AddLine(topLeft  - glm::vec3(0, 0, extents.z), topRight - glm::vec3(0, 0, extents.z));
-		AddLine(topLeft  + glm::vec3(0, 0, extents.z), topLeft  - glm::vec3(0, 0, extents.z));
-		AddLine(topRight + glm::vec3(0, 0, extents.z), topRight - glm::vec3(0, 0, extents.z));
+		AddLine(topLeft  + Maths::Vector3(0, 0, extents.z), topRight + Maths::Vector3(0, 0, extents.z));
+		AddLine(topLeft  - Maths::Vector3(0, 0, extents.z), topRight - Maths::Vector3(0, 0, extents.z));
+		AddLine(topLeft  + Maths::Vector3(0, 0, extents.z), topLeft  - Maths::Vector3(0, 0, extents.z));
+		AddLine(topRight + Maths::Vector3(0, 0, extents.z), topRight - Maths::Vector3(0, 0, extents.z));
 
-		AddLine(bottomLeft  + glm::vec3(0, 0, extents.z), bottomRight + glm::vec3(0, 0, extents.z));
-		AddLine(bottomLeft  - glm::vec3(0, 0, extents.z), bottomRight - glm::vec3(0, 0, extents.z));
-		AddLine(bottomLeft  + glm::vec3(0, 0, extents.z), bottomLeft  - glm::vec3(0, 0, extents.z));
-		AddLine(bottomRight + glm::vec3(0, 0, extents.z), bottomRight - glm::vec3(0, 0, extents.z));
+		AddLine(bottomLeft  + Maths::Vector3(0, 0, extents.z), bottomRight + Maths::Vector3(0, 0, extents.z));
+		AddLine(bottomLeft  - Maths::Vector3(0, 0, extents.z), bottomRight - Maths::Vector3(0, 0, extents.z));
+		AddLine(bottomLeft  + Maths::Vector3(0, 0, extents.z), bottomLeft  - Maths::Vector3(0, 0, extents.z));
+		AddLine(bottomRight + Maths::Vector3(0, 0, extents.z), bottomRight - Maths::Vector3(0, 0, extents.z));
 
-		AddLine(bottomLeft  + glm::vec3(0, 0, extents.z), topLeft  + glm::vec3(0, 0, extents.z));
-		AddLine(bottomLeft  - glm::vec3(0, 0, extents.z), topLeft  - glm::vec3(0, 0, extents.z));
-		AddLine(bottomRight + glm::vec3(0, 0, extents.z), topRight + glm::vec3(0, 0, extents.z));
-		AddLine(bottomRight - glm::vec3(0, 0, extents.z), topRight - glm::vec3(0, 0, extents.z));
+		AddLine(bottomLeft  + Maths::Vector3(0, 0, extents.z), topLeft  + Maths::Vector3(0, 0, extents.z));
+		AddLine(bottomLeft  - Maths::Vector3(0, 0, extents.z), topLeft  - Maths::Vector3(0, 0, extents.z));
+		AddLine(bottomRight + Maths::Vector3(0, 0, extents.z), topRight + Maths::Vector3(0, 0, extents.z));
+		AddLine(bottomRight - Maths::Vector3(0, 0, extents.z), topRight - Maths::Vector3(0, 0, extents.z));
 	}
 
-	void GFXHelper::AddFrustum(Graphics::Frustum frustum, glm::vec4 colour)
+	void GFXHelper::AddFrustum(Graphics::Frustum frustum, const Maths::Vector4& colour)
 	{
-		std::array<glm::vec3, 8> worldPoints = frustum.GetWorldPoints();
+		std::array<Maths::Vector3, 8> worldPoints = frustum.GetWorldPoints();
 
 		AddLine(worldPoints.at(0), worldPoints.at(1), colour);
 		AddLine(worldPoints.at(1), worldPoints.at(2), colour);

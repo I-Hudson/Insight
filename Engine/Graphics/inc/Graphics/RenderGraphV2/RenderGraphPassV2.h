@@ -113,8 +113,8 @@ namespace Insight
 			ShaderDesc m_shader = { }; // Shader to be used for this pass.
 			PipelineStateObject m_PSO = { }; // PSO to be used for this pass.
 
-			glm::ivec2 m_viewport = glm::ivec2(0, 0);
-			glm::ivec2 m_scissor = glm::ivec2(0, 0);
+			Maths::Vector2 m_viewport = Maths::Vector2(0, 0);
+			Maths::Vector2 m_scissor = Maths::Vector2(0, 0);
 
 			bool m_renderOnTopOfSwapchain = false;
 

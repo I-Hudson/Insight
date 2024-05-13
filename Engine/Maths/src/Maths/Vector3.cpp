@@ -418,6 +418,11 @@ namespace Insight
 			*this = Vector3(*this) - other;
 			return *this;
 		}
+	
+		float Vector3Distance(const Vector3& a, const Vector3& b)
+		{
+			return (a - b).Length();
+		}
 	}
 }
 

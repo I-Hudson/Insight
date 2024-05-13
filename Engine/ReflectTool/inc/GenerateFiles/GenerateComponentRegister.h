@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Reflect.h"
+#include "Reflect/Reflect.h"
 
 namespace InsightReflectTool
 {

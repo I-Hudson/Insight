@@ -5,10 +5,9 @@
 
 #include "Core/Memory.h"
 
-#include "Reflect.h"
+#include "Reflect/Reflect.h"
 
 #include <typeinfo>
-#include <glm/glm.hpp>
 
 namespace Insight
 {

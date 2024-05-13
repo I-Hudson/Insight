@@ -5,6 +5,8 @@
 #include "Core/IObject.h"
 #include "Core/RefCount.h"
 
+#include <Reflect/Core/Defines.h>
+
 #include "Generated/Asset_reflect_generated.h"
 
 namespace Insight
@@ -28,7 +30,7 @@ namespace Insight
         REFLECT_CLASS();
         class IS_RUNTIME Asset : public Core::RefCount
         {
-            REFLECT_GENERATED_BODY();
+            REFLECT_GENERATED_BODY()
         public:
             Asset(const AssetInfo* assetInfo);
             virtual ~Asset() override;

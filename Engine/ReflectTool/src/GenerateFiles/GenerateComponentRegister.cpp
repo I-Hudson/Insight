@@ -5,7 +5,7 @@
 #include "Editor/HotReload/HotReloadExportFunctions.h"
 #include "Runtime/Defines.h"
 
-#include <CodeGenerate/CodeGenerate.h>
+#include <Reflect/CodeGenerate/CodeGenerate.h>
 
 #include <filesystem>
 
@@ -97,7 +97,7 @@ namespace InsightReflectTool
 
     void GenerateComponentRegister::WriteGetTypeInfos(std::fstream& file, const std::vector<Reflect::Parser::ReflectContainerData>& componentClasses) const
     {
-        Utils::WriteIncludeLibraryFile(file, "Reflect.h");
+        Utils::WriteIncludeLibraryFile(file, "Reflect/Reflect.h");
 
         Utils::WriteSourceFunctionDefinition(file, "std::vector<Reflect::TypeInfo>", ComponentRegister::c_GetAllComponentTypeInfos, {}, [&](std::fstream& file)
             {

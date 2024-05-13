@@ -16,6 +16,8 @@
 #include "ECS/Components/TransformComponent.h"
 #include "ECS/Components/FreeCameraControllerComponent.h"
 
+#include "Maths/Utils.h"
+
 #include "Core/Logger.h"
 
 #include <imgui.h>
@@ -55,7 +57,7 @@ namespace Insight
 
             m_editorCameraEntity->AddComponentByName(ECS::TransformComponent::Type_Name);
             m_editorCameraComponent = static_cast<ECS::CameraComponent*>(m_editorCameraEntity->AddComponentByName(ECS::CameraComponent::Type_Name));
-            m_editorCameraComponent->CreatePerspective(glm::radians(90.0f), aspect, 0.1f, 1024.0f);
+            m_editorCameraComponent->CreatePerspective(Maths::DegreesToRadians(90.0f), aspect, 0.1f, 1024.0f);
             m_editorCameraEntity->AddComponentByName(ECS::FreeCameraControllerComponent::Type_Name);
         }
 
@@ -108,7 +110,7 @@ namespace Insight
 
                     ECS::Entity* entity = Runtime::WorldSystem::Instance().GetEntityByGUID(*selectedEntites.begin());
                     ECS::TransformComponent* transformComponent = entity->GetComponent<ECS::TransformComponent>();
-                    glm::mat4 entityMatrix = transformComponent->GetTransform();
+                    Maths::Matrix4 entityMatrix = transformComponent->GetTransform();
 
                     ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, ImGui::GetWindowSize().x, ImGui::GetWindowSize().y);
                     ImGuizmo::Manipulate(&viewMatrix[0][0], &projectionMatrix[0][0], ImGuizmo::TRANSLATE, ImGuizmo::LOCAL, &entityMatrix[0][0]);
@@ -198,12 +200,12 @@ namespace Insight
 
             struct WorldTransparentGBufferData
             {
-                glm::ivec2 RenderResolution;
+                Maths::Vector2 RenderResolution;
                 RenderFrame RenderFrame;
             };
 
             WorldTransparentGBufferData passData;
-            passData.RenderResolution = glm::ivec2(ImGui::GetWindowSize().x, ImGui::GetWindowSize().y);
+            passData.RenderResolution = Maths::Vector2(ImGui::GetWindowSize().x, ImGui::GetWindowSize().y);
             passData.RenderFrame = App::Engine::Instance().GetSystemRegistry().GetSystem<Runtime::GraphicsSystem>()->GetRenderFrame();
 
             Graphics::RenderGraph::Instance().AddPass<WorldTransparentGBufferData>("EditorWorldLightShadowPass",
@@ -285,7 +287,7 @@ namespace Insight
                                     const RenderMesh& mesh = renderWorld.Meshes.at(meshIndex);
                                     Graphics::Frustum pointLightFrustum(pointLight.View[arrayIdx], pointLight.Projection, pointLight.Radius);
 
-                                    const bool isVisable = pointLightFrustum.IsVisible(Maths::Vector3(mesh.Transform[3].xyz), mesh.BoudingBox.GetRadius());
+                                    const bool isVisable = pointLightFrustum.IsVisible(Maths::Vector3(mesh.Transform[3]), mesh.BoudingBox.GetRadius());
                                     if (!isVisable)
                                     {
                                         //continue;
@@ -293,7 +295,7 @@ namespace Insight
 
                                     struct alignas(16) Object
                                     {
-                                        glm::mat4 Transform;
+                                        Maths::Matrix4 Transform;
                                     };
                                     Object object =
                                     {
@@ -321,12 +323,12 @@ namespace Insight
 
             struct WorldDepthPrepassData
             {
-                glm::ivec2 RenderResolution;
+                Maths::Vector2 RenderResolution;
             };
 
             WorldDepthPrepassData passData =
             {
-                glm::ivec2(ImGui::GetWindowSize().x, ImGui::GetWindowSize().y)
+                Maths::Vector2(ImGui::GetWindowSize().x, ImGui::GetWindowSize().y)
             };
 
             Graphics::RenderGraph::Instance().AddPass<WorldDepthPrepassData>("EditorWorldDepthPrepass",
@@ -424,13 +426,13 @@ namespace Insight
 
             struct WorldGBufferData
             {
-                glm::ivec2 RenderResolution;
+                Maths::Vector2 RenderResolution;
                 bool DepthPrepassEnabled;
             };
 
             WorldGBufferData passData =
             {
-                glm::ivec2(ImGui::GetWindowSize().x, ImGui::GetWindowSize().y),
+                Maths::Vector2(ImGui::GetWindowSize().x, ImGui::GetWindowSize().y),
                 m_enableDepthPrepass
             };
 
@@ -525,7 +527,7 @@ namespace Insight
                                 mainCamera.Camera.GetViewMatrix(),
                                 mainCamera.Camera.GetProjectionMatrix(),
                                 mainCamera.Camera.GetFarPlane());
-                            const bool isVisable = mainCameraFrustm.IsVisible(Maths::Vector3(mesh.Transform[3].xyz), mesh.BoudingBox.GetRadius());
+                            const bool isVisable = mainCameraFrustm.IsVisible(Maths::Vector3(mesh.Transform[3]), mesh.BoudingBox.GetRadius());
                             if (!isVisable)
                             {
                                 continue;
@@ -567,11 +569,11 @@ namespace Insight
 
             struct WorldTransparentGBufferData
             {
-                glm::ivec2 RenderResolution;
+                Maths::Vector2 RenderResolution;
             };
 
             WorldTransparentGBufferData passData;
-            passData.RenderResolution = glm::ivec2(ImGui::GetWindowSize().x, ImGui::GetWindowSize().y);
+            passData.RenderResolution = Maths::Vector2(ImGui::GetWindowSize().x, ImGui::GetWindowSize().y);
 
             Graphics::RenderGraph::Instance().AddPass<WorldTransparentGBufferData>("EditorWorldTransparentGBuffer",
                 [](WorldTransparentGBufferData& data, Graphics::RenderGraphBuilder& builder)
@@ -689,12 +691,12 @@ namespace Insight
 
             struct WorldTransparentGBufferData
             {
-                glm::ivec2 RenderResolution;
+                Maths::Vector2 RenderResolution;
                 RenderFrame RenderFrame;
             };
 
             WorldTransparentGBufferData passData;
-            passData.RenderResolution = glm::ivec2(ImGui::GetWindowSize().x, ImGui::GetWindowSize().y);
+            passData.RenderResolution = Maths::Vector2(ImGui::GetWindowSize().x, ImGui::GetWindowSize().y);
             passData.RenderFrame = App::Engine::Instance().GetSystemRegistry().GetSystem<Runtime::GraphicsSystem>()->GetRenderFrame();
 
             Graphics::RenderGraph::Instance().AddPass<WorldTransparentGBufferData>("EditorWorldLightPass",
@@ -801,14 +803,16 @@ namespace Insight
             }
             ImGui::DragFloat("Editor FSR sharpness", &fsrSharpness, 0.05f, 0.0f, 1.0f);
 
-            if (m_renderResolution == glm::ivec2(0, 0))
+            if (m_renderResolution == Maths::Vector2(0, 0))
             {
                 m_renderResolution = Graphics::RenderGraph::Instance().GetRenderResolution();
             }
 
-            ImGui::InputInt2("Render Resolution", &m_renderResolution.x);
+            int renderRes[2] = { m_renderResolution.x, m_renderResolution.y };
+            ImGui::InputInt2("Render Resolution", renderRes);
             if (ImGui::Button("Apply Render Resolution"))
             {
+                m_renderResolution = Maths::Vector2(renderRes[0], renderRes[1]);
                 Graphics::RenderGraph::Instance().SetRenderResolution(m_renderResolution);
                 return;
             }
@@ -880,9 +884,11 @@ namespace Insight
 
             Graphics::BufferFrame bufferFrame;
             
-            Graphics::RHI_FSR::Instance().GenerateJitterSample(&bufferFrame.TAA_Jitter_Current.x, &bufferFrame.TAA_Jitter_Current.y);
-            bufferFrame.TAA_Jitter_Previous = m_taaJitterPrevious;
-            m_taaJitterPrevious = bufferFrame.TAA_Jitter_Current;
+            Graphics::RHI_FSR::Instance().GenerateJitterSample(&bufferFrame.TAA_Jitter_Current[0], &bufferFrame.TAA_Jitter_Current[1]);
+            bufferFrame.TAA_Jitter_Previous[0] = m_taaJitterPrevious.x;
+            bufferFrame.TAA_Jitter_Previous[1] = m_taaJitterPrevious.y;
+
+            m_taaJitterPrevious = Maths::Vector2(bufferFrame.TAA_Jitter_Current[0], bufferFrame.TAA_Jitter_Current[1]);
 
             if (Graphics::RenderContext::Instance().IsRenderOptionsEnabled(Graphics::RenderOptions::ReverseZ))
             {
@@ -897,7 +903,7 @@ namespace Insight
             {
                 Maths::Matrix4 projection = m_editorCameraComponent->GetProjectionMatrix();
                 Maths::Matrix4 translation = Maths::Matrix4::Identity;
-                translation[3] = Maths::Vector4(bufferFrame.TAA_Jitter_Current.x, bufferFrame.TAA_Jitter_Current.y, 0.0f, 1.0f);
+                translation[3] = Maths::Vector4(bufferFrame.TAA_Jitter_Current[0], bufferFrame.TAA_Jitter_Current[1], 0.0f, 1.0f);
                 projection *= translation;
                 m_editorCameraComponent->GetCamera().SetProjectionMatrix(projection);
             }
@@ -909,8 +915,11 @@ namespace Insight
             bufferFrame.View_Inverted = m_editorCameraComponent->GetInvertedViewMatrix();
             bufferFrame.Projection_View_Inverted = m_editorCameraComponent->GetInvertedProjectionViewMatrix();
 
-            bufferFrame.Render_Resolution = Graphics::RenderGraph::Instance().GetRenderResolution();
-            bufferFrame.Ouput_Resolution = Graphics::RenderGraph::Instance().GetOutputResolution();
+            bufferFrame.Render_Resolution[0] = Graphics::RenderGraph::Instance().GetRenderResolution().x;
+            bufferFrame.Render_Resolution[1] = Graphics::RenderGraph::Instance().GetRenderResolution().y;
+
+            bufferFrame.Ouput_Resolution[0] = Graphics::RenderGraph::Instance().GetOutputResolution().x;
+            bufferFrame.Ouput_Resolution[1] = Graphics::RenderGraph::Instance().GetOutputResolution().y;
 
             return bufferFrame;
         }

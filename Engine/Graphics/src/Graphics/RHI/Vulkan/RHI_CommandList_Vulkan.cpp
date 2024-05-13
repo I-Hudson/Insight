@@ -249,7 +249,7 @@ namespace Insight
 						auto makeRenderingAttachment =
 							[](const RHI_Texture* texture, const AttachmentDescription& attachment_description) -> VkRenderingAttachmentInfo
 						{
-							glm::vec4 const textureClearColour = texture->GetClearColour();
+							const Maths::Vector4 textureClearColour = texture->GetClearColour();
 							std::array<float, 4> clearColourValues = {
 								  textureClearColour.x
 								, textureClearColour.y
@@ -495,10 +495,10 @@ namespace Insight
 
 			void RHI_CommandList_Vulkan::BeginTimeBlock(const std::string& blockName)
 			{
-				BeginTimeBlock(blockName, glm::vec4(1, 1, 1, 1));
+				BeginTimeBlock(blockName, Maths::Vector4(1, 1, 1, 1));
 			}
 
-			void RHI_CommandList_Vulkan::BeginTimeBlock(const std::string& blockName, glm::vec4 colour)
+			void RHI_CommandList_Vulkan::BeginTimeBlock(const std::string& blockName, Maths::Vector4 colour)
 			{
 				ASSERT(m_state == RHI_CommandListStates::Recording);
 				ASSERT_MSG(m_activeDebugUtilsLabel.pLabelName == VkDebugUtilsLabelEXT().pLabelName, "[RHI_CommandList_Vulkan::BeginTimeBlock] Time block must be ended before a new one can start.");
@@ -634,7 +634,7 @@ namespace Insight
 							RHI_Texture_Vulkan* textureVulkan = static_cast<RHI_Texture_Vulkan*>(rt);
 							imageViews.push_back(textureVulkan->GetImageView());
 
-							glm::vec4 const textureClearColour = rt->GetClearColour();
+							const Maths::Vector4 textureClearColour = rt->GetClearColour();
 
 							VkClearValue clearValue;
 							clearValue.color.float32[0] = textureClearColour.x;

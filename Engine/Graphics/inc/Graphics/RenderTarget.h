@@ -2,9 +2,10 @@
 
 #include "Graphics/PixelFormat.h"
 
-#include <glm/vec4.hpp>
-#include<map>
+#include "Maths/Vector4.h"
+
 #include <string>
+#include <map>
 
 namespace Insight
 {
@@ -23,14 +24,14 @@ namespace Insight
 			RenderTargetDesc(int width, int height, PixelFormat format)
 				: Width(width), Height(height), Format(format)
 			{ }
-			RenderTargetDesc(int width, int height, PixelFormat format, glm::vec4 clearColour)
+			RenderTargetDesc(int width, int height, PixelFormat format, Maths::Vector4 clearColour)
 				: Width(width), Height(height), Format(format), ClearColour(clearColour)
 			{ }
 
 			int Width;
 			int Height;
 			PixelFormat Format = PixelFormat::R8G8B8A8_UNorm;
-			glm::vec4 ClearColour = glm::vec4(0, 0, 0, 1);
+			Maths::Vector4 ClearColour = Maths::Vector4(0, 0, 0, 1);
 		};
 
 		class RenderTarget

@@ -33,33 +33,33 @@ namespace InsightReflectTool
 
             Utils::WriteSourceFunctionDefinition(file, "void", TypeDrawerRegister::c_RegisterAllTypeDrawers, {}, [&](std::fstream& file)
             {
-                        for (const Reflect::Parser::ReflectContainerData& reflectData : typeDrawerClasses)
-                        {
-                            TAB_N(3);
-                            file << "TypeDrawerRegister::Instance().RegisterTypeDrawer<::" + reflectData.NameWithNamespace + ">();" << NEW_LINE;
-                        }
+                for (const Reflect::Parser::ReflectContainerData& reflectData : typeDrawerClasses)
+                {
+                    TAB_N(3);
+                    file << "TypeDrawerRegister::Instance().RegisterTypeDrawer<::" + reflectData.NameWithNamespace + ">();" << NEW_LINE;
+                }
             }, 2);
 
             Utils::WriteSourceFunctionDefinition(file, "void", TypeDrawerRegister::c_UnregisterAllTypeDrawers, {}, [&](std::fstream& file)
             {
-                        for (const Reflect::Parser::ReflectContainerData& reflectData : typeDrawerClasses)
-                        {
-                            TAB_N(3);
-                            file << "TypeDrawerRegister::Instance().UnregisterTypeDrawer<::" + reflectData.NameWithNamespace + ">();" << NEW_LINE;
-                        }
+                for (const Reflect::Parser::ReflectContainerData& reflectData : typeDrawerClasses)
+                {
+                    TAB_N(3);
+                    file << "TypeDrawerRegister::Instance().UnregisterTypeDrawer<::" + reflectData.NameWithNamespace + ">();" << NEW_LINE;
+                }
             }, 2);
 
             Utils::WriteSourceFunctionDefinition(file, "std::vector<std::string>", TypeDrawerRegister::c_GetAllTypeDrawerNames, {}, [&](std::fstream& file)
                 {
-                            TAB_N(3);
-                            file << "std::vector<std::string> typeDrawerNames;" << NEW_LINE;
-                            for (const Reflect::Parser::ReflectContainerData& reflectData : typeDrawerClasses)
-                            {
-                                TAB_N(3);
-                                file << "typeDrawerNames.push_back(::" + reflectData.NameWithNamespace + "::GetTypeName());" << NEW_LINE;
-                            }
-                            TAB_N(3);
-                            file << "return typeDrawerNames;" << NEW_LINE;
+                    TAB_N(3);
+                    file << "std::vector<std::string> typeDrawerNames;" << NEW_LINE;
+                    for (const Reflect::Parser::ReflectContainerData& reflectData : typeDrawerClasses)
+                    {
+                        TAB_N(3);
+                        file << "typeDrawerNames.push_back(::" + reflectData.NameWithNamespace + "::GetTypeName());" << NEW_LINE;
+                    }
+                    TAB_N(3);
+                    file << "return typeDrawerNames;" << NEW_LINE;
                 }, 2);
 
             TAB_N(1);
