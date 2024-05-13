@@ -22,6 +22,7 @@ project "Insight_Maths"
     includedirs
     {
         "inc",
+        "../../vendor/glm",
         "%{IncludeDirs.spdlog}",
         "%{IncludeDirs.imgui}",
         "%{IncludeDirs.glm}",

@@ -1,24 +1,6 @@
 #pragma once
 
-#include "Serialisation/SerialiserBase.h"
-
-#include "Serialisation/PropertySerialiser.h"
-#include "Serialisation/SerialiserBase.h"
-
-#include "Platforms/Platform.h"
-
 #include "Core/GUID.h"
-
-#include <glm/ext/vector_float2.hpp>
-#include <glm/ext/vector_float3.hpp>
-#include <glm/ext/vector_float4.hpp>
-#include <glm/ext/vector_int2.hpp>
-#include <glm/ext/vector_int3.hpp>
-#include <glm/ext/vector_int4.hpp>
-
-#include <glm/ext/matrix_float2x2.hpp>
-#include <glm/ext/matrix_float3x3.hpp>
-#include <glm/ext/matrix_float4x4.hpp>
 
 namespace Insight
 {
@@ -140,7 +122,7 @@ namespace Insight
             }
         };
 
-
+#if 0
         //================================================================
         // GLM TYPES
         //================================================================
@@ -268,5 +250,6 @@ namespace Insight
                 return str;
             }
         };
+#endif
     }
 }

@@ -2,8 +2,6 @@
 
 #include "Core/TypeAlias.h"
 
-#include <string>
-#include <sstream>
 #include <assert.h>
 
 namespace Insight

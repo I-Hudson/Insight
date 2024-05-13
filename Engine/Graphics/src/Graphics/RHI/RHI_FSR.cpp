@@ -135,7 +135,7 @@ namespace Insight
             cmd_list->SetImageLayout(tex_output, ImageLayout::General);
 
             // Fill in the dispatch description
-            m_ffx_fsr2_dispatch_description = {};
+            //m_ffx_fsr2_dispatch_description = {};
             if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan)
             {
 #ifdef IS_VULKAN_ENABLED
@@ -210,6 +210,7 @@ namespace Insight
         {
             RenderContext* render_context = &RenderContext::Instance();
             render_context->GpuWaitForIdle();
+            m_ffx_fsr2_context_description = {};
             if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan)
             {
 #ifdef IS_VULKAN_ENABLED
