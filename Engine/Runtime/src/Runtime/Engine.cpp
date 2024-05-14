@@ -192,24 +192,24 @@ namespace Insight
 			Graphics::RenderContext::Instance().GpuWaitForIdle();
 
 			OnDestroy();
+
+			m_eventSystem.Shutdown();
+
+			m_projectSystem.Shutdown();
 			
-			m_assetRegistry.Shutdown();
+			m_taskSystem.Shutdown();
 
 			m_worldSystem.Shutdown();
+
+			m_audioSystem.Shutdown();
+
+			m_assetRegistry.Shutdown();
 
 			m_graphicsSystem.Shutdown();
 
 			m_imguiSystem.Shutdown();
 
 			m_inputSystem.Shutdown();
-			m_eventSystem.Shutdown();
-
-			m_projectSystem.Shutdown();
-
-			m_taskSystem.Shutdown();
-
-			m_audioSystem.Shutdown();
-
 
 			m_systemRegistry.VerifyAllSystemsStates(Core::SystemStates::Not_Initialised);
 

@@ -93,6 +93,7 @@ namespace Insight
 			if (m_render_resolution_has_changed)
 			{
 				m_render_resolution_has_changed = false;
+				m_render_resolution_has_changedSkip2ndFrame = true;
 
 				m_context->GpuWaitForIdle();
 
@@ -103,38 +104,46 @@ namespace Insight
 					textureCache->Release();
 				});
 				cmdList->EndTimeBlock();
+
+
 			}
-
-			cmdList->BeginTimeBlock("RG::PreRenderFunc");
-			Build();
-			cmdList->EndTimeBlock();
-
-			cmdList->BeginTimeBlock("RG::PlaceBarriers");
-			PlaceBarriers();
-			cmdList->EndTimeBlock();
-
-			for (RenderGraphSetPreRenderFunc& preRenderFunc : m_renderPreRenderFunc)
+			else if (m_render_resolution_has_changedSkip2ndFrame)
+			{
+				m_render_resolution_has_changedSkip2ndFrame = false;
+			}
+			else
 			{
 				cmdList->BeginTimeBlock("RG::PreRenderFunc");
-				if (preRenderFunc)
+				Build();
+				cmdList->EndTimeBlock();
+
+				cmdList->BeginTimeBlock("RG::PlaceBarriers");
+				PlaceBarriers();
+				cmdList->EndTimeBlock();
+
+				for (RenderGraphSetPreRenderFunc& preRenderFunc : m_renderPreRenderFunc)
 				{
-					preRenderFunc(*this, cmdList);
+					cmdList->BeginTimeBlock("RG::PreRenderFunc");
+					if (preRenderFunc)
+					{
+						preRenderFunc(*this, cmdList);
+					}
+					cmdList->EndTimeBlock();
+				}
+
+				Render(cmdList);
+
+				for (RenderGraphSetPostRenderFunc& postRenderFunc : m_renderPostRenderFunc)
+				{
+					cmdList->BeginTimeBlock("RG::PostRenderFunc");
+					if (postRenderFunc)
+					{
+						postRenderFunc(*this, cmdList);
+					}
+					cmdList->EndTimeBlock();
 				}
 				cmdList->EndTimeBlock();
 			}
-
-			Render(cmdList);
-
-			for (RenderGraphSetPostRenderFunc& postRenderFunc : m_renderPostRenderFunc)
-			{
-				cmdList->BeginTimeBlock("RG::PostRenderFunc");
-				if (postRenderFunc)
-				{
-					postRenderFunc(*this, cmdList);
-				}
-				cmdList->EndTimeBlock();
-			}
-			cmdList->EndTimeBlock();
 		}
 
 		RGTextureHandle RenderGraph::CreateTexture(std::string textureName, RHI_TextureInfo info)

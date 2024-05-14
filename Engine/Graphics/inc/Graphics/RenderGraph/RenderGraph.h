@@ -142,6 +142,12 @@ namespace Insight
 			/// @brief General render resolution to be used for all render passes. Can be overwritten.
 			Maths::Vector2 m_render_resolution = {};
 			bool m_render_resolution_has_changed = false;
+			
+			// Hack for ImGui. Currently there is an issue with ImGui and textures where if frame 1 resizes the window then all RenderGraph textures
+			// are destroyed, while this is happening on the RenderThread the GameThread has already updated ImGui to include pending/destroyed textures.
+			// To composate for this we just skip the frame after the window resize.
+			bool m_render_resolution_has_changedSkip2ndFrame = false;
+			
 			/// @brief Set the render resolution to the window resolution when the window resolution has changed automaticly.
 			bool m_set_render_resolution_to_window_resolution_auto = true;
 			/// @brief General ouput resolution to be used for all render passes. Can be overwritten.

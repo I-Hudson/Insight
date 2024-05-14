@@ -211,6 +211,7 @@ namespace Insight
             RenderContext* render_context = &RenderContext::Instance();
             render_context->GpuWaitForIdle();
             m_ffx_fsr2_context_description = {};
+
             if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan)
             {
 #ifdef IS_VULKAN_ENABLED
@@ -224,10 +225,10 @@ namespace Insight
                 ASSERT(errorCode == FFX_OK);
 
                 m_ffx_fsr2_context_description.device = ffxGetDeviceVK(renderContextVulkan->GetDevice());
-                m_ffx_fsr2_context_description.maxRenderSize.width = renderWidth;
-                m_ffx_fsr2_context_description.maxRenderSize.height = renderHeight;
-                m_ffx_fsr2_context_description.displaySize.width = displayWidth;
-                m_ffx_fsr2_context_description.displaySize.height = displayHeight;
+                m_ffx_fsr2_context_description.maxRenderSize.width = std::max(1u, renderWidth);
+                m_ffx_fsr2_context_description.maxRenderSize.height = std::max(1u, renderHeight);
+                m_ffx_fsr2_context_description.displaySize.width = std::max(1u, displayWidth);
+                m_ffx_fsr2_context_description.displaySize.height = std::max(1u, displayHeight);
                 m_ffx_fsr2_context_description.flags = FFX_FSR2_ENABLE_AUTO_EXPOSURE;
 
                 ffxFsr2ContextCreate(&m_ffx_fsr2_context, &m_ffx_fsr2_context_description);
@@ -247,10 +248,10 @@ namespace Insight
                 ASSERT(errorCode == FFX_OK);
 
                 m_ffx_fsr2_context_description.device = ffxGetDeviceDX12(renderContextDX12->GetDevice());
-                m_ffx_fsr2_context_description.maxRenderSize.width = std::min(renderWidth, displayWidth);
-                m_ffx_fsr2_context_description.maxRenderSize.height = std::min(renderHeight, displayHeight);
-                m_ffx_fsr2_context_description.displaySize.width = displayWidth;
-                m_ffx_fsr2_context_description.displaySize.height = displayHeight;
+                m_ffx_fsr2_context_description.maxRenderSize.width = std::max(2u, std::min(renderWidth, displayWidth));
+                m_ffx_fsr2_context_description.maxRenderSize.height = std::max(2u, std::min(renderHeight, displayHeight));
+                m_ffx_fsr2_context_description.displaySize.width = std::max(2u, displayWidth);
+                m_ffx_fsr2_context_description.displaySize.height = std::max(2u, displayHeight);
                 //m_ffx_fsr2_context_description.flags = FFX_FSR2_ENABLE_AUTO_EXPOSURE;
 
                  FfxErrorCode createErrorCode = ffxFsr2ContextCreate(&m_ffx_fsr2_context, &m_ffx_fsr2_context_description);
