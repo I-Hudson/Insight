@@ -188,7 +188,7 @@ workspace "Insight"
             "IS_PLATFORM_WINDOWS",
             "IS_PLATFORM_WIN32",
             "IS_MATHS_DIRECTX_MATHS",
-            "IS_MATHS_CONSTRUCTOR_GLM",
+            --"IS_MATHS_CONSTRUCTOR_GLM",
             --"IS_MATHS_GLM",
             "IS_DX12_ENABLED",
             "IS_CPP_WINRT",

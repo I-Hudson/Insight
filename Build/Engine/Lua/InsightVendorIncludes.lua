@@ -6,7 +6,7 @@ local InsightVendorIncludes = { }
 local VendorIncludes = {}
 VendorIncludes["doctest"] = "vendor/doctest/doctest"
 VendorIncludes["glfw"] = "vendor/glfw/include"
-VendorIncludes["glm"] = "vendor/glm"
+VendorIncludes["glm"] = ""
 VendorIncludes["imgui"] = "vendor/imgui"
 VendorIncludes["ImGuizmo"] = "vendor/ImGuizmo"
 VendorIncludes["implot"] = "vendor/implot"
@@ -35,6 +35,7 @@ VendorIncludes["reflect"] = "vendor/reflect/reflect/inc"
 VendorIncludes["simplygon"] = "vendor/SimplygonSDK_10.1.11000.0"
 VendorIncludes["zip"] = "vendor/zip/src"
 VendorIncludes["efsw"] = "vendor/efsw/include"
+VendorIncludes["miniaudio"] = "vendor/miniaudio"
 
 -- Shorthand form is less typing and doesn't use a local variable
 function InsightVendorIncludes.AddIncludes(includeTable, prefix)

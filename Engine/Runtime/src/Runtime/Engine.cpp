@@ -70,6 +70,7 @@ namespace Insight
 			m_systemRegistry.RegisterSystem(&m_assetRegistry);
 			m_assetRegistry.Initialise();
 
+			m_systemRegistry.RegisterSystem(&m_audioSystem);
 			m_systemRegistry.RegisterSystem(&m_taskSystem);
 			m_systemRegistry.RegisterSystem(&m_eventSystem);
 			m_systemRegistry.RegisterSystem(&m_inputSystem);
@@ -78,6 +79,7 @@ namespace Insight
 			m_systemRegistry.RegisterSystem(&m_worldSystem);
 			m_systemRegistry.RegisterSystem(&m_projectSystem);
 
+			m_audioSystem.Initialise();
 			m_taskSystem.Initialise();
 			m_eventSystem.Initialise();
 
@@ -206,6 +208,8 @@ namespace Insight
 
 			m_taskSystem.Shutdown();
 
+			m_audioSystem.Shutdown();
+
 
 			m_systemRegistry.VerifyAllSystemsStates(Core::SystemStates::Not_Initialised);
 
@@ -216,6 +220,7 @@ namespace Insight
 			m_systemRegistry.UnregisterSystem(&m_projectSystem);
 			m_systemRegistry.UnregisterSystem(&m_eventSystem);
 			m_systemRegistry.UnregisterSystem(&m_taskSystem);
+			m_systemRegistry.UnregisterSystem(&m_audioSystem);
 			m_systemRegistry.UnregisterSystem(&m_assetRegistry);
 
 			ASSERT(m_systemRegistry.IsEmpty());

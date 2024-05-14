@@ -89,6 +89,7 @@ namespace Insight
 
             std::vector<IObject*> GetObjectsFromAsset(const Core::GUID& guid) const;
 
+            std::string ValidatePath(const std::string& path) const;
         private:
             IAssetPackage* CreateAssetPackageInternal(std::string_view name, std::string_view path, AssetPackageType packageType);
 
@@ -99,7 +100,6 @@ namespace Insight
 
             bool AssetInfoValidate(const AssetInfo* assetInfo) const;
 
-            std::string ValidatePath(const std::string& path) const;
 
         private:
             /// @brief Store all asset infos here, then give pointers to the packages which they are included in.

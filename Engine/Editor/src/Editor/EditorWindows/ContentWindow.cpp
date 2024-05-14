@@ -89,6 +89,10 @@ namespace Insight::Editor
         m_fileExtensionToTexture[".isworld"] =
             Runtime::AssetRegistry::Instance().LoadAsset(EnginePaths::GetResourcePath() + "/Editor/Icons/World_File_Icon.png").As<Runtime::TextureAsset>();
 
+        m_fileExtensionToTexture[".mp3"] =
+            Runtime::AssetRegistry::Instance().LoadAsset(EnginePaths::GetResourcePath() + "/Editor/Icons/MP3_File_Icon.png").As<Runtime::TextureAsset>();
+        m_fileExtensionToTexture[".wav"] =
+            Runtime::AssetRegistry::Instance().LoadAsset(EnginePaths::GetResourcePath() + "/Editor/Icons/WAV_File_Icon.png").As<Runtime::TextureAsset>();
 
 
         m_thumbnailToTexture[ContentWindowThumbnailType::Folder] =

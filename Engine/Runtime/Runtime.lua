@@ -41,7 +41,8 @@ project "Insight_Runtime"
 
     defines
     {
-        "IS_EXPORT_RUNTIME_DLL"
+        "IS_EXPORT_RUNTIME_DLL",
+        "IS_AUDIO_MINIAUDIO_ENABLE",
     }
     
     includedirs
@@ -60,6 +61,7 @@ project "Insight_Runtime"
         "%{IncludeDirs.splash}",
         "%{IncludeDirs.qoi}",
         "%{IncludeDirs.zip}",
+        "%{IncludeDirs.miniaudio}",
         
         "%{IncludeDirs.assimp}",
         "%{IncludeDirs.assimp}/../build/include",
