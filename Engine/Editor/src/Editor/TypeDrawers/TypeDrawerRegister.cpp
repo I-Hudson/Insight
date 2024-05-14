@@ -30,6 +30,15 @@ namespace Insight
             {
                 return iter->second;
             }
+
+            for (auto&[name, drawer] : m_drawers)
+            {
+                if (name == typeName) 
+                {
+                    return drawer;
+                }
+            }
+
             return nullptr;
         }
 

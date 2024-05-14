@@ -196,8 +196,6 @@ namespace Insight
             }
 
             splashScreen.Destroy();
-
-            Runtime::AudioSystem::PlaySound("Music.mp3");
         }
 
         void Editor::OnUpdate()

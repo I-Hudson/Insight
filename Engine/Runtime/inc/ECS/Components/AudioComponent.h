@@ -25,6 +25,9 @@ namespace Insight
 
 			IS_SERIALISABLE_H(AudioComponent);
 
+			Ref<Runtime::AudioClipAsset> GetAudioClip() const;
+			void SetAudioClip(Ref<Runtime::AudioClipAsset> audioClip);
+
 		private:
 			REFLECT_PROPERTY(EditorVisible);
 			Ref<Runtime::AudioClipAsset> m_audioClip;

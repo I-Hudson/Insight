@@ -429,7 +429,7 @@ namespace Insight::Editor
 
                         if (contentResource)
                         {
-                            EditorGUI::ObjectFieldSource(c_ContentWindowResourceDragSource
+                            EditorGUI::ObjectFieldSource(c_ContentWindowAssetDragSource
                                 , contentResource->GetGuid().ToString().data()
                                 , Runtime::Asset::GetStaticTypeInfo().GetType());
                         }

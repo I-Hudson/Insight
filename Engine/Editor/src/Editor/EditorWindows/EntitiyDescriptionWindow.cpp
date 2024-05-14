@@ -14,6 +14,7 @@
 #include "Core/Memory.h"
 #include "Core/StringUtils.h"
 #include "Core/Profiler.h"
+#include "Core/ReferencePtr.h"
 #include "Algorithm/Vector.h"
 
 #include <imgui.h>
@@ -216,6 +217,31 @@ namespace Insight
                     if (typeDrawer)
                     {
                         typeDrawer->Draw(member.GetMemberPointer(), member, member.GetName());
+                    }
+                    else
+                    {
+                        /*
+                        const Reflect::TypeInfo memberTypeInfo = Reflect::TypeInfoRegistry::Instance().GetTypeInfo(member.GetTypeId());
+                        const Reflect::Type assetType = Reflect::Type::MakeType<Ref<Runtime::Asset>>();
+                        if (memberTypeInfo.IsDerivedFrom(assetType.GetTypeId()))
+                        {
+                            const ITypeDrawer* drawer = TypeDrawerRegister::Instance().GetDrawer(assetType.GetTypeName().data());
+                            if (drawer)
+                            {
+                                typeDrawer->Draw(member.GetMemberPointer(), member, member.GetName());
+                            }
+                        }
+                        const std::vector<Reflect::TypeInfo> parentTypeInfos = memberTypeInfo.GetParentInfos();
+                        for (size_t parentInfoIdx = 0; parentInfoIdx < parentTypeInfos.size(); ++parentInfoIdx)
+                        {
+                            const Reflect::TypeInfo& parentTypeInfo = parentTypeInfos[parentInfoIdx];
+                            const ITypeDrawer* drawer = TypeDrawerRegister::Instance().GetDrawer(parentTypeInfo.GetType().GetTypeName().data());
+                            if (drawer)
+                            {
+                                break;
+                            }
+                        }
+                        */
                     }
                 }
             }

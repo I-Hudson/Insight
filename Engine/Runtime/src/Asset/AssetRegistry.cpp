@@ -6,6 +6,8 @@
 
 #include "Asset/Importers/ModelImporter.h"
 #include "Asset/Importers/TextureImporter.h"
+#include "Asset/Importers/ShaderImporter.h"
+#include "Asset/Importers/AudioClipImporter.h"
 
 #include "Runtime/ProjectSystem.h"
 
@@ -27,6 +29,8 @@ namespace Insight::Runtime
     {
         m_importers.push_back(New<ModelImporter>());
         m_importers.push_back(New<TextureImporter>());
+        m_importers.push_back(New<ShaderImporter>());
+        m_importers.push_back(New<AudioClipImporter>());
 
         m_state = Core::SystemStates::Initialised;
     }
