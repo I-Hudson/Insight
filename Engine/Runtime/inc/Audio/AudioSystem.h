@@ -3,6 +3,9 @@
 #include "Runtime/Defines.h"
 #include "Core/ISysytem.h"
 #include "Core/Singleton.h"
+#include "Core/ReferencePtr.h"
+
+#include "Asset/Assets/AudioClip.h"
 
 #include <vector>
 
@@ -24,7 +27,10 @@ namespace Insight
             virtual void Shutdown() override;
 
             static u32 PlaySound(const char* fileName);
+            static u32 PlaySound(Ref<Runtime::AudioClipAsset> audioClip);
+
             static void StopSound(const u32 soundId);
+            static void StopSound(Ref<Runtime::AudioClipAsset> audioClip);
 
         private:
             static IAudioBackend* m_audioBackend;

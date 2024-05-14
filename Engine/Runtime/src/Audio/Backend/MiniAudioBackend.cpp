@@ -14,9 +14,12 @@ namespace Insight
     {
         void MiniAudioSound::Release()
         {
-            ASSERT(ma_sound_stop(&AudioSound) == MA_SUCCESS);
-            ma_sound_uninit(&AudioSound);
-            ASSERT(ma_decoder_uninit(&AudioDecoder) == MA_SUCCESS);
+            if (InUse)
+            {
+                ASSERT(ma_sound_stop(&AudioSound) == MA_SUCCESS);
+                ma_sound_uninit(&AudioSound);
+                ASSERT(ma_decoder_uninit(&AudioDecoder) == MA_SUCCESS);
+            }
         }
 
         MiniAudioBackend::MiniAudioBackend()
@@ -41,6 +44,7 @@ namespace Insight
             const std::string audioFilePath = AssetRegistry::Instance().ValidatePath(fileName);
 
             const AssetInfo* assetInfo = AssetRegistry::Instance().GetAssetInfo(audioFilePath);
+            MiniAudioSound* miniAudioSound = nullptr;
             {
                 std::lock_guard lock(m_soundsLock);
                 for (size_t i = 0; i < m_sounds.size(); ++i)
@@ -49,6 +53,10 @@ namespace Insight
                     if (sound->InUse && sound->AssetInfo == assetInfo)
                     {
                         return sound->Id;
+                    }
+                    else if (!sound->InUse && !miniAudioSound)
+                    {
+                        miniAudioSound = sound;
                     }
                 }
             }
@@ -59,11 +67,23 @@ namespace Insight
                 return 0;
             }
 
-            MiniAudioSound* miniAudioSound = ::New<MiniAudioSound>();
-            miniAudioSound->SoundBuffer = std::move(fileBuffer);
-            miniAudioSound->AssetInfo = assetInfo;
-            miniAudioSound->Id = m_sounds.size() + 1;
-            miniAudioSound->InUse = true;
+            if (!miniAudioSound)
+            {
+                miniAudioSound = ::New<MiniAudioSound>();
+                miniAudioSound->Id = m_sounds.size() + 1;
+                miniAudioSound->SoundBuffer = std::move(fileBuffer);
+                miniAudioSound->AssetInfo = assetInfo;
+                miniAudioSound->InUse = true;
+
+                std::lock_guard lock(m_soundsLock);
+                m_sounds.push_back(miniAudioSound);
+            }
+            else
+            {
+                miniAudioSound->SoundBuffer = std::move(fileBuffer);
+                miniAudioSound->AssetInfo = assetInfo;
+                miniAudioSound->InUse = true;
+            }
 
             const ma_result decoderInitResult = ma_decoder_init_memory(miniAudioSound->SoundBuffer.data(), miniAudioSound->SoundBuffer.size(), NULL, &miniAudioSound->AudioDecoder);
             if (decoderInitResult != MA_SUCCESS)
@@ -83,9 +103,13 @@ namespace Insight
                 return 0;
             }
 
-            std::lock_guard lock(m_soundsLock);
-            m_sounds.push_back(miniAudioSound);
-            return m_sounds.back()->Id;
+            return miniAudioSound->Id;
+        }
+
+        u32 MiniAudioBackend::PlaySound(Ref<Runtime::AudioClipAsset> audioClip)
+        {
+            ASSERT(audioClip);
+            return PlaySound(audioClip->GetAssetInfo()->GetFullFilePath().data());
         }
 
         void MiniAudioBackend::StopSound(const u32 soundId)
@@ -104,6 +128,28 @@ namespace Insight
 
                     return;
                 }
+            }
+        }
+
+        void MiniAudioBackend::StopSound(Ref<Runtime::AudioClipAsset> audioClip)
+        {
+            ASSERT(audioClip);
+            u32 soundId = 0;
+            {
+                std::lock_guard lock(m_soundsLock);
+                for (size_t i = 0; i < m_sounds.size(); ++i)
+                {
+                    if (m_sounds[i]->AssetInfo == audioClip->GetAssetInfo())
+                    {
+                        soundId = m_sounds[i]->Id;
+                        break;
+                    }
+                }
+            }
+
+            if (soundId != 0)
+            {
+                StopSound(soundId);
             }
         }
     }

@@ -5,6 +5,7 @@
 #include "Asset/AssetRegistry.h"
 
 #include "ECS/Components/AudioComponent.h"
+#include "Audio/AudioSystem.h"
 
 #include <imgui.h>
 
@@ -39,8 +40,16 @@ namespace Insight
                 {
                     return;
                 }
-
                 audioComponent->SetAudioClip(newAudioClipAsset);
+            }
+
+            if (ImGui::Button("Play"))
+            {
+                Runtime::AudioSystem::PlaySound(audioComponent->GetAudioClip());
+            }
+            if (ImGui::Button("Stop"))
+            {
+                Runtime::AudioSystem::StopSound(audioComponent->GetAudioClip());
             }
         }
     }

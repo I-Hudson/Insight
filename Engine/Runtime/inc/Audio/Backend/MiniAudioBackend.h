@@ -33,7 +33,10 @@ namespace Insight
             virtual ~MiniAudioBackend() override;
 
             virtual u32 PlaySound(const char* fileName) override;
+            virtual u32 PlaySound(Ref<Runtime::AudioClipAsset> audioClip) override;
+
             virtual void StopSound(const u32 soundId) override;
+            virtual void StopSound(Ref<Runtime::AudioClipAsset> audioClip) override;
 
         private:
             ma_engine m_audioEngine;

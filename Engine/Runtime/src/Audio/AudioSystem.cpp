@@ -41,9 +41,27 @@ namespace Insight
             return m_audioBackend->PlaySound(fileName);
         }
 
+        u32 AudioSystem::PlaySound(Ref<Runtime::AudioClipAsset> audioClip)
+        {
+            if (!audioClip)
+            {
+                return 0;
+            }
+            return m_audioBackend->PlaySound(audioClip);
+        }
+
         void AudioSystem::StopSound(const u32 soundId)
         {
             m_audioBackend->StopSound(soundId);
+        }
+
+        void AudioSystem::StopSound(Ref<Runtime::AudioClipAsset> audioClip)
+        {
+            if (!audioClip)
+            {
+                return;
+            }
+            m_audioBackend->StopSound(audioClip);
         }
     }
 }
