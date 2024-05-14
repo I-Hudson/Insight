@@ -38,6 +38,8 @@ namespace Insight
             virtual void StopSound(const u32 soundId) override;
             virtual void StopSound(Ref<Runtime::AudioClipAsset> audioClip) override;
 
+            virtual void SetVolume(const u32 soundId, float volume) override;
+
         private:
             ma_engine m_audioEngine;
             std::vector<MiniAudioSound*> m_sounds;

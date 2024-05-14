@@ -45,11 +45,18 @@ namespace Insight
 
             if (ImGui::Button("Play"))
             {
-                Runtime::AudioSystem::PlaySound(audioComponent->GetAudioClip());
+                audioComponent->Play();
             }
+            ImGui::SameLine();
             if (ImGui::Button("Stop"))
             {
-                Runtime::AudioSystem::StopSound(audioComponent->GetAudioClip());
+                audioComponent->Stop();
+            }
+
+            float volume = audioComponent->GetVolume();
+            if (ImGui::DragFloat("Volume", &volume, 0.01f, 0.0f, 1.0f))
+            {
+                audioComponent->SetVolume(volume);
             }
         }
     }

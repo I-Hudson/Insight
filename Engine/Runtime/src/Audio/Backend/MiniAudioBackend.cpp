@@ -152,6 +152,20 @@ namespace Insight
                 StopSound(soundId);
             }
         }
+
+        void MiniAudioBackend::SetVolume(const u32 soundId, float volume)
+        {
+            std::lock_guard lock(m_soundsLock);
+            for (size_t i = 0; i < m_sounds.size(); ++i)
+            {
+                MiniAudioSound* sound = m_sounds[i];
+                if (sound->Id == soundId && sound->InUse)
+                {
+                    ma_sound_set_volume(&sound->AudioSound, volume);
+                    return;
+                }
+            }
+        }
     }
 }
 #endif

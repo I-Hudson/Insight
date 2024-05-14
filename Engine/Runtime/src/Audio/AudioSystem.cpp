@@ -55,13 +55,11 @@ namespace Insight
             m_audioBackend->StopSound(soundId);
         }
 
-        void AudioSystem::StopSound(Ref<Runtime::AudioClipAsset> audioClip)
+
+        void AudioSystem::SetVolume(const u32 soundId, float volume)
         {
-            if (!audioClip)
-            {
-                return;
-            }
-            m_audioBackend->StopSound(audioClip);
+            volume = std::max(0.0f, std::min(1.0f, volume));
+            m_audioBackend->SetVolume(soundId, volume);
         }
     }
 }

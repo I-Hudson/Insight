@@ -30,7 +30,8 @@ namespace Insight
             static u32 PlaySound(Ref<Runtime::AudioClipAsset> audioClip);
 
             static void StopSound(const u32 soundId);
-            static void StopSound(Ref<Runtime::AudioClipAsset> audioClip);
+
+            static void SetVolume(const u32 soundId, float volume);
 
         private:
             static IAudioBackend* m_audioBackend;

@@ -28,9 +28,17 @@ namespace Insight
 			Ref<Runtime::AudioClipAsset> GetAudioClip() const;
 			void SetAudioClip(Ref<Runtime::AudioClipAsset> audioClip);
 
+			void Play();
+			void Stop();
+
+			float GetVolume() const;
+			void SetVolume(const float volume);
+
 		private:
 			REFLECT_PROPERTY(EditorVisible);
 			Ref<Runtime::AudioClipAsset> m_audioClip;
+			u32 m_audioClipId = 0;
+
 			REFLECT_PROPERTY(EditorVisible, Meta(ClampMin(0.0), ClampMax(1.0)));
 			float m_volume = 0.5f;
 			REFLECT_PROPERTY(EditorVisible, Meta(ClampMin(0.0), ClampMax(1.0)));

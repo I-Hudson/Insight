@@ -19,6 +19,8 @@ namespace Insight
             
             virtual void StopSound(const u32 soundId) = 0;
             virtual void StopSound(Ref<Runtime::AudioClipAsset> audioClip) = 0;
+
+            virtual void SetVolume(const u32 soundId, float volume) = 0;
         };
     }
 }
