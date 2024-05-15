@@ -3,6 +3,8 @@
 #include "Asset/Asset.h"
 #include "Asset/Assets/Material.h"
 
+#include "Resource/Skeleton.h"
+
 #include "ECS/ICreateEntityHierarchy.h"
 
 #include "Generated/Model_reflect_generated.h"
@@ -35,6 +37,8 @@ namespace Insight
             Ref<MaterialAsset> GetMaterialByIndex(u32 index) const;
             u32 GetMaterialCount() const;
 
+            Ref<Skeleton> GetSkeleton(const u32 index) const;
+
             //--ECS::ICreateEntityHierarchy
             virtual ECS::Entity* CreateEntityHierarchy() override;
             //--ECS::ICreateEntityHierarchy
@@ -47,6 +51,7 @@ namespace Insight
         private:
             std::vector<Mesh*> m_meshes;
             std::vector<Ref<MaterialAsset>> m_materials;
+            std::vector<Ref<Skeleton>> m_skeletons;
 
             Graphics::RHI_Buffer* m_vertex_buffer = nullptr;
             Graphics::RHI_Buffer* m_index_buffer = nullptr;

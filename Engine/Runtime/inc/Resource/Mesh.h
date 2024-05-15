@@ -41,7 +41,7 @@ namespace Insight
 		/// @brief Contain vertex and index buffers for use when rendering this mesh.
 		/// This class stores only geometry data.
 		REFLECT_CLASS()
-		class IS_RUNTIME Mesh
+		class IS_RUNTIME Mesh : public Core::RefCount
 		{
 			REFLECT_GENERATED_BODY()
 		

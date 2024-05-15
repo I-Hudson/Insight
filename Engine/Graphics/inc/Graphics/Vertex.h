@@ -23,6 +23,8 @@ namespace Insight
 
 		struct IS_GRAPHICS Vertex
 		{
+			const static uint32_t MAX_BONE_COUNT = 4;
+
 			Vertex()
 			{ }
 			Vertex(Maths::Vector3 pos, Maths::Vector3 nor, Maths::Vector3 colour, Maths::Vector2 uv)
@@ -41,12 +43,21 @@ namespace Insight
 
 				UV[0] = uv[0];
 				UV[1] = uv[1];
+
+				for (size_t boneIdx = 0; boneIdx < MAX_BONE_COUNT; ++boneIdx)
+				{
+					BoneIds[boneIdx] = -1; 
+					BoneWeights[boneIdx] = 0.0f;
+				}
 			}
 
 			float Position[3];
 			float Normal[3];
 			float Colour[3];
 			float UV[2];
+
+			float BoneIds[MAX_BONE_COUNT];
+			float BoneWeights[MAX_BONE_COUNT];
 
 			constexpr int GetStride() { return sizeof(Vertex); }
 		};

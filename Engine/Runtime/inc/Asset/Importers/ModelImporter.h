@@ -79,6 +79,8 @@ namespace Insight
             const MeshNode* Parent = nullptr;
             MeshData* MeshData = nullptr;
 
+            ModelAsset* Model = nullptr;
+
             // Store all the materials found when loading the model in a cache to be reused if needed by multiple meshes.
             std::unordered_map<const aiMaterial*, Ref<MaterialAsset>>* MaterialCache;
             mutable std::mutex MaterialCacheLock;
@@ -101,17 +103,21 @@ namespace Insight
 
         private:
 #if EXP_MODEL_LOADING
-            void ProcessNode(const aiScene* aiScene, const aiNode* aiNode, Ref<ModelAsset> modelAsset) const;
-            void ProcessMesh(const aiScene* aiScene, const aiNode* aiNode, const aiMesh* aiMesh, Ref<ModelAsset> modelAsset) const;
-            void ParseMeshData(const aiMesh* aiMesh, MeshData& meshData) const;
-            Ref<MaterialAsset> ProcessMaterial(const aiScene* aiScene, const aiNode* aiNode, const aiMaterial* aiMaterial, Ref<ModelAsset> modelAsset) const;
-#endif
+            void ProcessNode(const aiScene* aiScene, const aiNode* aiNode, ModelAsset* modelAsset) const;
+            void ProcessMesh(const aiScene* aiScene, const aiNode* aiNode, const aiMesh* aiMesh, ModelAsset* modelAsset) const;
+            void ParseMeshData(const aiScene* aiScene, const aiMesh* aiMesh, MeshData& meshData, ModelAsset* modelAsset) const;
+            Ref<MaterialAsset> ProcessMaterial(const aiScene* aiScene, const aiNode* aiNode, const aiMaterial* aiMaterial, ModelAsset* modelAsset) const;
 
+            void ExtractBoneWeights(const aiScene* aiScene, const aiMesh* aiMesh, MeshData* meshData, ModelAsset* modelAsset) const;
+            void SetVertexBoneData(Graphics::Vertex& vertex, const u32 boneId, const float boneWeight) const;
+#else
             MeshNode* GetMeshHierarchy(const aiScene* aiScene, const aiNode* aiNode, const MeshNode* parentMeshNode, std::vector<MeshNode*>& meshNodes, MeshData* monolithMeshData = nullptr) const;
             void PreallocateVeretxAndIndexBuffers(MeshNode* meshNode) const;
             void ProcessNode(MeshNode* meshNode) const;
-            void ProcessMesh(const aiScene* aiScene, const aiMesh* aiMesh, MeshData* meshData) const;
+            void ProcessMesh(const aiScene* aiScene, const aiMesh* aiMesh, MeshData* meshData, MeshNode* meshNode) const;
             Ref<MaterialAsset> ProcessMaterial(MeshNode* meshNode) const;
+#endif
+            
 
             /// @brief Returns the texture path from the model directory.
             /// @param aiMaterial 

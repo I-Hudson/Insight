@@ -355,7 +355,7 @@ namespace Insight
 			modelAsset->SetName(scene->mName.C_Str());
 
 #if EXP_MODEL_LOADING
-			ProcessNode(scene, scene->mRootNode, modelAsset);
+			ProcessNode(scene, scene->mRootNode, modelAsset.Ptr());
 #else
 			std::unordered_map<const aiMaterial*, Ref<MaterialAsset>> materialCache;
 
@@ -436,7 +436,7 @@ namespace Insight
 		}
 
 #if EXP_MODEL_LOADING
-		void ModelImporter::ProcessNode(const aiScene* aiScene, const aiNode* aiNode, Ref<ModelAsset> modelAsset) const
+		void ModelImporter::ProcessNode(const aiScene* aiScene, const aiNode* aiNode, ModelAsset* modelAsset) const
 		{
 			for (size_t meshIdx = 0; meshIdx < aiNode->mNumMeshes; ++meshIdx)
 			{
@@ -449,14 +449,14 @@ namespace Insight
 			}
 		}
 
-		void ModelImporter::ProcessMesh(const aiScene* aiScene, const aiNode* aiNode, const aiMesh* aiMesh, Ref<ModelAsset> modelAsset) const
+		void ModelImporter::ProcessMesh(const aiScene* aiScene, const aiNode* aiNode, const aiMesh* aiMesh, ModelAsset* modelAsset) const
 		{
 			Mesh* mesh = ::New<Mesh>();
 			modelAsset->m_meshes.push_back(mesh);
 
 			MeshData meshData = { };
-			ParseMeshData(aiMesh, meshData);
-			
+			ParseMeshData(aiScene, aiMesh, meshData, modelAsset);
+
 			mesh->m_mesh_name = aiMesh->mName.C_Str();
 			mesh->m_transform_offset = AssimpToInsightMatrix4(aiNode->mTransformation);
 			//mesh->m_boundingBox = Graphics::BoundingBox(meshData.Vertices.data(), static_cast<u32>(meshData.Vertices.size()));
@@ -528,7 +528,7 @@ namespace Insight
 			}
 		}
 
-		void ModelImporter::ParseMeshData(const aiMesh* aiMesh, MeshData& meshData) const
+		void ModelImporter::ParseMeshData(const aiScene* aiScene, const aiMesh* aiMesh, MeshData& meshData, ModelAsset* modelAsset) const
 		{
 			IS_PROFILE_FUNCTION();
 
@@ -589,6 +589,8 @@ namespace Insight
 					///vertex.UV = Maths::Vector2(0.0f, 0.0f);
 				}
 
+
+
 				//Graphics::VertexOptomised vertexOptomised(vertex);
 				meshData.Vertices.push_back(Graphics::Vertex(position, normal, colour, uv));
 			}
@@ -605,6 +607,8 @@ namespace Insight
 				}
 			}
 
+			ExtractBoneWeights(aiScene, aiMesh, &meshData, modelAsset);
+
 			meshData.LODs.push_back(
 				MeshData::LOD(
 					0,
@@ -614,7 +618,7 @@ namespace Insight
 					static_cast<u32>(meshData.Indices.size())));
 		}
 
-		Ref<MaterialAsset> ModelImporter::ProcessMaterial(const aiScene* aiScene, const aiNode* aiNode, const aiMaterial* aiMaterial, Ref<ModelAsset> modelAsset) const
+		Ref<MaterialAsset> ModelImporter::ProcessMaterial(const aiScene* aiScene, const aiNode* aiNode, const aiMaterial* aiMaterial, ModelAsset* modelAsset) const
 		{
 			IS_PROFILE_FUNCTION();
 
@@ -656,7 +660,62 @@ namespace Insight
 			MaterialCache[aiMaterial] = material;
 			return material;
 		}
-#endif
+
+		void ModelImporter::ExtractBoneWeights(const aiScene* aiScene, const aiMesh* aiMesh, MeshData* meshData, ModelAsset* modelAsset) const
+		{
+			if (aiMesh->HasBones() && !modelAsset->GetSkeleton(0))
+			{
+				modelAsset->m_skeletons.push_back(Ref<Skeleton>(::New<Skeleton>()));
+			}
+
+			Ref<Skeleton> skeleton = aiMesh->HasBones() ? modelAsset->GetSkeleton(0) : nullptr;
+
+			for (size_t boneIdx = 0; boneIdx < aiMesh->mNumBones; ++boneIdx)
+			{
+				int boneId = -1;
+				const aiBone* aiBone = aiMesh->mBones[boneIdx];
+				std::string boneName = aiBone->mName.C_Str();
+				const SkeletonBone& skeletonBone = skeleton->GetBone(boneName);
+
+				if (!skeletonBone.IsValid())
+				{
+					SkeletonBone newBone(skeleton->GetNumberOfBones() + 1, boneName, AssimpToInsightMatrix4(aiBone->mOffsetMatrix));
+					skeleton->m_bones.push_back(newBone);
+					boneId = newBone.Id;
+				}
+				else
+				{
+					boneId = skeletonBone.Id;
+				}
+				ASSERT(boneId != -1);
+				
+				const aiVertexWeight* aiBonewights = aiBone->mWeights;
+				// clamp the number of weights to evaluate between our max number we allow and the numer on the model.
+				const u32 numWeights = std::min(Graphics::Vertex::MAX_BONE_COUNT, aiBone->mNumWeights);
+
+				for (size_t weightIdx = 0; weightIdx < numWeights; ++weightIdx)
+				{
+					const u32 vertexId = aiBonewights[weightIdx].mVertexId;
+					const float weight = aiBonewights[weightIdx].mWeight;
+
+					SetVertexBoneData(meshData->Vertices[vertexId], boneId, weight);
+				}
+			}
+		}
+
+		void ModelImporter::SetVertexBoneData(Graphics::Vertex& vertex, const u32 boneId, const float boneWeight) const
+		{
+			for (int i = 0; i < Graphics::Vertex::MAX_BONE_COUNT; ++i)
+			{
+				if (vertex.BoneIds[i] < 0)
+				{
+					vertex.BoneWeights[i] = boneWeight;
+					vertex.BoneIds[i] = boneId;
+					break;
+				}
+			}
+		}
+#else
 
 		MeshNode* ModelImporter::GetMeshHierarchy(const aiScene* aiScene, const aiNode* aiNode, const MeshNode* parentMeshNode, std::vector<MeshNode*>& meshNodes, MeshData* monolithMeshData) const
 		{
@@ -740,7 +799,7 @@ namespace Insight
 					const aiMesh* aiMesh = meshNode->AssimpMesh;// aiScene->mMeshes[aiNode->mMeshes[i]];
 					meshNode->MeshData->TransformOffset = AssimpToInsightMatrix4(aiNode->mTransformation);
 
-					ProcessMesh(aiScene, aiMesh, meshNode->MeshData);
+					ProcessMesh(aiScene, aiMesh, meshNode->MeshData, meshNode);
 					meshNode->Mesh->m_mesh_name = aiMesh->mName.C_Str();
 					meshNode->Mesh->m_transform_offset = AssimpToInsightMatrix4(aiNode->mTransformation);
 
@@ -810,7 +869,7 @@ namespace Insight
 			}
 		}
 
-		void ModelImporter::ProcessMesh(const aiScene* aiScene, const aiMesh* aiMesh, MeshData* meshData) const
+		void ModelImporter::ProcessMesh(const aiScene* aiScene, const aiMesh* aiMesh, MeshData* meshData, MeshNode* meshNode) const
 		{
 			IS_PROFILE_FUNCTION();
 
@@ -943,6 +1002,8 @@ namespace Insight
 			(*meshNode->MaterialCache)[aiMaterial] = material;
 			return material;
 		}
+#endif
+
 
 		std::string ModelImporter::GetTexturePath(const aiMaterial* aiMaterial, const std::string_view directory, const aiTextureType textureTypePBR, const aiTextureType textureTypeLegacy) const
 		{

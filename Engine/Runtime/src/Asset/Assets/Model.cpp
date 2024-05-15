@@ -27,7 +27,12 @@ namespace Insight::Runtime
 
 	Mesh* ModelAsset::GetMeshByIndex(u32 index) const
 	{
-		return m_meshes.at(index);
+		if (index >= static_cast<u32>(m_meshes.size()))
+		{
+			IS_LOG_CORE_WARN("[ModelAsset::GetMeshByIndex] Index '{}' is out of range.", index);
+			return nullptr;
+		}
+		return m_meshes[index];
 	}
 
 	u32 ModelAsset::GetMeshCount() const
@@ -42,12 +47,27 @@ namespace Insight::Runtime
 
 	Ref<MaterialAsset> ModelAsset::GetMaterialByIndex(u32 index) const
 	{
+		if (index >= static_cast<u32>(m_materials.size()))
+		{
+			IS_LOG_CORE_WARN("[ModelAsset::GetMaterialByIndex] Index '{}' is out of range.", index);
+			return Ref<MaterialAsset>();
+		}
 		return m_materials[index];
 	}
 
 	u32 ModelAsset::GetMaterialCount() const
 	{
 		return static_cast<u32>(m_materials.size());
+	}
+
+	Ref<Skeleton> ModelAsset::GetSkeleton(const u32 index) const
+	{
+		if (index >= static_cast<u32>(m_skeletons.size()))
+		{
+			IS_LOG_CORE_WARN("[ModelAsset::GetSkeleton] Index '{}' is out of range.", index);
+			return Ref<Skeleton>();
+		}
+		return m_skeletons[index];
 	}
 
 	ECS::Entity* ModelAsset::CreateEntityHierarchy()
@@ -88,6 +108,12 @@ namespace Insight::Runtime
 			}
 		}
 		m_materials.clear();
+
+		for (Ref<Skeleton>& skeleton : m_skeletons)
+		{
+			skeleton.Reset();
+		}
+		m_skeletons.clear();
 
 		Renderer::FreeVertexBuffer(m_vertex_buffer);
 		Renderer::FreeIndexBuffer(m_index_buffer);
