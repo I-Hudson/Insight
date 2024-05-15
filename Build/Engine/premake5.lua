@@ -241,12 +241,15 @@ workspace "Insight"
         files 
         { 
             "vendor/doctest/doctest/doctest.h",
-        } 
+        }
+        includedirs
+        {
+            "../../vendor/glm",
+        }
         libdirs
         {
             "%{LibDirs.deps_testing_lib}",
         }
-    	
     
     filter "system:Unix"
     	system "linux"

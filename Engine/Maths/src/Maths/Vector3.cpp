@@ -218,6 +218,13 @@ namespace Insight
 			return (x * other.x) + (y * other.y) + (z * other.z);
 #endif
 		}
+		Vector3 Vector3::Cross(const Vector3& other) const
+		{
+			return Vector3(
+				y * other.z - other.y * z,
+				z * other.x - other.z * x,
+				x * other.y - other.x * y);
+		}
 
 		float& Vector3::operator[](int i)
 		{

@@ -92,6 +92,12 @@ project "Insight_Maths"
             "%{wks.location}/deps/lib/release",
         }
 
+    filter "configurations:Testing"
+        includedirs
+        {
+            "../../vendor/glm",
+        }
+
     filter "platforms:Win64"
         links
         {

@@ -5,10 +5,6 @@
 #include "Maths/Vectors/Float3.h"
 #include "Maths/Vectors/Float2.h"
 
-#ifdef IS_MATHS_DIRECTX_MATHS
-#include <DirectXMath.h>
-#endif 
-
 #include <Reflect/Core/Defines.h>
 
 namespace Insight

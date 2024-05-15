@@ -52,6 +52,7 @@ namespace Insight
 			Vector3 Normalised() const;
 
 			float Dot(const Vector3& other) const;
+			Vector3 Cross(const Vector3& other) const;
 
 			float& operator[](int i);
 			const float& operator[](int i) const;
