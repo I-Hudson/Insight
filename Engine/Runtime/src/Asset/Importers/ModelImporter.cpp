@@ -11,20 +11,17 @@
 #include "Core/Profiler.h"
 #include "Algorithm/Vector.h"
 
-#include "FileSystem/FileSystem.h"
-
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
 #include <assimp/mesh.h>
-#include <assimp/IOSystem.hpp>
 #include <assimp/DefaultIOSystem.h>
 #include <assimp/IOStream.hpp>
 
 #include <meshoptimizer.h>
 
-#include <future>
+#include <unordered_set>
 
 #define SINGLE_MESH 0
 
@@ -356,6 +353,7 @@ namespace Insight
 
 #if EXP_MODEL_LOADING
 			ProcessNode(scene, scene->mRootNode, modelAsset.Ptr());
+			ProcessAnimations(scene, modelAsset.Ptr());
 #else
 			std::unordered_map<const aiMaterial*, Ref<MaterialAsset>> materialCache;
 
@@ -715,8 +713,69 @@ namespace Insight
 				}
 			}
 		}
-#else
 
+		void ModelImporter::ProcessAnimations(const aiScene* aiScene, ModelAsset* modelAsset) const
+		{
+			if (!aiScene->HasAnimations())
+			{
+				return;
+			}
+
+			Ref<Skeleton> skeleton = modelAsset->GetSkeleton(0);
+			ASSERT(skeleton);
+
+			for (size_t animIdx = 0; animIdx < aiScene->mNumAnimations; ++animIdx)
+			{
+				Ref<AnimationClip> animationClip = Ref<AnimationClip>(::New<AnimationClip>());
+				modelAsset->m_animationClips.push_back(animationClip);
+
+				const aiAnimation* aiAnimation = aiScene->mAnimations[animIdx];
+
+				animationClip->m_duration = aiAnimation->mDuration;
+				animationClip->m_ticksPerSecond = aiAnimation->mTicksPerSecond;
+
+				for (size_t animChannelIdx = 0; animChannelIdx < aiAnimation->mNumChannels; ++animChannelIdx)
+				{
+					const aiNodeAnim* aiChannelAnim = aiAnimation->mChannels[animChannelIdx];
+
+					std::vector<AnimationBoneTrack::PositionKeyFrame> positions;
+					std::vector<AnimationBoneTrack::RotationKeyFrame> rotations;
+					std::vector<AnimationBoneTrack::ScaleKeyFrame> scales;
+
+					std::unordered_set<float> timestamps;
+
+					for (size_t posIdx = 0; posIdx < aiChannelAnim->mNumPositionKeys; ++posIdx)
+					{
+						const aiVectorKey aiPosition = aiChannelAnim->mPositionKeys[posIdx];
+						positions.push_back({ AssimpToInsightVector3(aiPosition.mValue), aiPosition.mTime });
+					}
+
+					for (size_t rotIdx = 0; rotIdx < aiChannelAnim->mNumRotationKeys; ++rotIdx)
+					{
+						const aiQuatKey aiRotation = aiChannelAnim->mRotationKeys[rotIdx];
+						rotations.push_back({ AssimpToInsightQuaternion(aiRotation.mValue), aiRotation.mTime });
+					}
+
+					for (size_t scaleIdx = 0; scaleIdx < aiChannelAnim->mNumScalingKeys; ++scaleIdx)
+					{
+						const aiVectorKey aiScale = aiChannelAnim->mScalingKeys[scaleIdx];
+						scales.push_back({ AssimpToInsightVector3(aiScale.mValue), aiScale.mTime });
+					}
+
+					const SkeletonBone& bone = skeleton->GetBone(aiChannelAnim->mNodeName.C_Str());
+					if (bone)
+					{
+						AnimationBoneTrack boneTrack(bone.Id, aiChannelAnim->mNodeName.C_Str(), positions, rotations, scales);
+						animationClip->m_boneTracks.push_back(boneTrack);
+					}
+					else
+					{
+						FAIL_ASSERT();
+					}
+				}
+			}
+		}
+#else
 		MeshNode* ModelImporter::GetMeshHierarchy(const aiScene* aiScene, const aiNode* aiNode, const MeshNode* parentMeshNode, std::vector<MeshNode*>& meshNodes, MeshData* monolithMeshData) const
 		{
 			IS_PROFILE_FUNCTION();
@@ -1032,6 +1091,16 @@ namespace Insight
 			}
 
 			return std::string(directory) + "/" + texturePath.C_Str();
+		}
+
+		Maths::Vector3 ModelImporter::AssimpToInsightVector3(const aiVector3D& vector) const
+		{
+			return Maths::Vector3(vector.x, vector.y, vector.z);
+		}
+
+		Maths::Quaternion ModelImporter::AssimpToInsightQuaternion(const aiQuaternion& quaternion) const
+		{
+			return Maths::Quaternion(quaternion.w, quaternion.x, quaternion.y, quaternion.z);
 		}
 
 		Maths::Matrix4 ModelImporter::AssimpToInsightMatrix4(const aiMatrix4x4& transform) const

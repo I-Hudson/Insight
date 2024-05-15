@@ -115,6 +115,12 @@ namespace Insight::Runtime
 		}
 		m_skeletons.clear();
 
+		for (Ref<AnimationClip>& animationClip : m_animationClips)
+		{
+			animationClip.Reset();
+		}
+		m_animationClips.clear();
+
 		Renderer::FreeVertexBuffer(m_vertex_buffer);
 		Renderer::FreeIndexBuffer(m_index_buffer);
 		m_vertex_buffer = nullptr;

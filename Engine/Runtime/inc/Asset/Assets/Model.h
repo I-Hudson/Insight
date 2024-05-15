@@ -4,6 +4,7 @@
 #include "Asset/Assets/Material.h"
 
 #include "Resource/Skeleton.h"
+#include "Resource/AnimationClip.h"
 
 #include "ECS/ICreateEntityHierarchy.h"
 
@@ -51,7 +52,9 @@ namespace Insight
         private:
             std::vector<Mesh*> m_meshes;
             std::vector<Ref<MaterialAsset>> m_materials;
+
             std::vector<Ref<Skeleton>> m_skeletons;
+            std::vector<Ref<AnimationClip>> m_animationClips;
 
             Graphics::RHI_Buffer* m_vertex_buffer = nullptr;
             Graphics::RHI_Buffer* m_index_buffer = nullptr;

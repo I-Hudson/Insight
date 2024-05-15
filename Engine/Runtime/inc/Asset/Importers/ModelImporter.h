@@ -7,8 +7,10 @@
 #include "Graphics/Vertex.h"
 
 #include "Maths/Matrix4.h"
+#include "Maths/Quaternion.h"
 
 #include <assimp/matrix4x4.h>
+#include <assimp/quaternion.h>
 
 #include <vector>
 
@@ -110,6 +112,8 @@ namespace Insight
 
             void ExtractBoneWeights(const aiScene* aiScene, const aiMesh* aiMesh, MeshData* meshData, ModelAsset* modelAsset) const;
             void SetVertexBoneData(Graphics::Vertex& vertex, const u32 boneId, const float boneWeight) const;
+
+            void ProcessAnimations(const aiScene* aiScene, ModelAsset* modelAsset) const;
 #else
             MeshNode* GetMeshHierarchy(const aiScene* aiScene, const aiNode* aiNode, const MeshNode* parentMeshNode, std::vector<MeshNode*>& meshNodes, MeshData* monolithMeshData = nullptr) const;
             void PreallocateVeretxAndIndexBuffers(MeshNode* meshNode) const;
@@ -126,6 +130,8 @@ namespace Insight
             /// @return 
             std::string GetTexturePath(const aiMaterial* aiMaterial, const std::string_view directory, const aiTextureType textureTypePBR, const aiTextureType textureTypeLegacy) const;
 
+            Maths::Vector3 AssimpToInsightVector3(const aiVector3D& vector) const;
+            Maths::Quaternion AssimpToInsightQuaternion(const aiQuaternion& quaternion) const;
             Maths::Matrix4 AssimpToInsightMatrix4(const aiMatrix4x4& transform) const;
         };
     }
