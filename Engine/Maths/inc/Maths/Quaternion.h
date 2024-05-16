@@ -33,6 +33,7 @@ namespace Insight
 
             Quaternion Inversed() const;
             float Dot(const Quaternion& q) const;
+            Quaternion Slerp(const Quaternion& q, const float time) const;
 
             Quaternion& operator=(const Quaternion& q) = default;
             Quaternion& operator +=(const Quaternion& q);
@@ -45,24 +46,24 @@ namespace Insight
             Quaternion operator+() const;
             Quaternion operator-() const;
 
-            friend Quaternion operator+(const Quaternion& q, const Quaternion& p);
-            friend Quaternion operator-(const Quaternion& q, const Quaternion& p);
+            IS_MATHS friend Quaternion operator+(const Quaternion& q, const Quaternion& p);
+            IS_MATHS friend Quaternion operator-(const Quaternion& q, const Quaternion& p);
 
-            friend Quaternion operator*(const Quaternion& q, const Quaternion& p);
+            IS_MATHS friend Quaternion operator*(const Quaternion& q, const Quaternion& p);
 
-            friend Vector3 operator*(const Quaternion& q, const Vector3& v);
-            friend Vector3 operator*(const Vector3& v, const Quaternion& q);
+            IS_MATHS friend Vector3 operator*(const Quaternion& q, const Vector3& v);
+            IS_MATHS friend Vector3 operator*(const Vector3& v, const Quaternion& q);
 
-            friend Vector4 operator*(const Quaternion& q, const Vector4& v);
-            friend Vector4 operator*(const Vector4& v, const Quaternion& q);
+            IS_MATHS friend Vector4 operator*(const Quaternion& q, const Vector4& v);
+            IS_MATHS friend Vector4 operator*(const Vector4& v, const Quaternion& q);
 
-            friend Quaternion operator*(const Quaternion& q, const float s);
-            friend Quaternion operator*(const float s, const Quaternion& q);
+            IS_MATHS friend Quaternion operator*(const Quaternion& q, const float s);
+            IS_MATHS friend Quaternion operator*(const float s, const Quaternion& q);
 
-            friend Quaternion operator/(const Quaternion& q, const float s);
+            IS_MATHS friend Quaternion operator/(const Quaternion& q, const float s);
 
-            friend bool operator==(const Quaternion& q1, const Quaternion& q2);
-            friend bool operator!=(const Quaternion& q1, const Quaternion& q2);
+            IS_MATHS friend bool operator==(const Quaternion& q1, const Quaternion& q2);
+            IS_MATHS friend bool operator!=(const Quaternion& q1, const Quaternion& q2);
 
         private:
             Quaternion Conjugate(const Quaternion& q) const;

@@ -260,6 +260,12 @@ namespace Insight
 			return !(Equal(other, errorRange));
 		}
 
+		Vector3 Vector3::Lerp(const Vector3& vec, const float time) const
+		{
+			assert(time >= 0.0f && time <= 1.0f);
+			return Vector3(*this * (1 - time) + (vec * time));
+		}
+
 		Vector3 Vector3::operator-() const
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
@@ -361,6 +367,7 @@ namespace Insight
 #endif
 		}
 
+		/*
 		Vector3 Vector3::operator-(float scalar) const
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
@@ -379,6 +386,38 @@ namespace Insight
 			return Vector3(vec3 - other.vec3);
 #else
 			return Vector3(x - other.x, y - other.y, z - other.z);
+#endif
+		}
+		*/
+
+		Vector3 operator-(float scalar, const Vector3& vec)
+		{
+#ifdef IS_MATHS_DIRECTX_MATHS
+			return Vector3(DirectX::XMVectorSubtract(DirectX::XMVectorSet(scalar, scalar, scalar, 0.0f), vec.xmvector));
+#elif defined(IS_MATHS_GLM)
+			return Vector3(scalar - vec);
+#else
+			return Vector3(scalar - vec.x, scalar - vec.y, scalar - vec.z);
+#endif
+		}
+		Vector3 operator-(const Vector3& vec, float scalar)
+		{
+#ifdef IS_MATHS_DIRECTX_MATHS
+			return Vector3(DirectX::XMVectorSubtract(vec.xmvector, DirectX::XMVectorSet(scalar, scalar, scalar, 0.0f)));
+#elif defined(IS_MATHS_GLM)
+			return Vector3(vec - scalar);
+#else
+			return Vector3(vec.x - scalar, vec.y - scalar, vec.z - scalar);
+#endif
+		}
+		Vector3 operator-(const Vector3& vec, const Vector3& vec1)
+		{
+#ifdef IS_MATHS_DIRECTX_MATHS
+			return Vector3(DirectX::XMVectorSubtract(vec.xmvector, vec1.xmvector));
+#elif defined(IS_MATHS_GLM)
+			return Vector3(vec.vec3 - vec1.vec3);
+#else
+			return Vector3(vec.x - otvvec1ec1her.x, vec.y - vec1.y, vec.z - vec1.z);
 #endif
 		}
 
@@ -737,6 +776,34 @@ namespace test
 			resultA = one -= Vector3(x3, y3, z3);
 
 			CHECK(resultA.Equal(glmVec3, 0.001f));
+		}
+
+		TEST_CASE("Lerp")
+		{
+			const float x1 = 6487.0f;
+			const float y1 = 2575.0f;
+			const float z1 = 845.0f;
+
+			const float x2 = 2006.0f;
+			const float y2 = 9618.0f;
+			const float z2 = 7453.0f;
+
+			Vector3 one = Vector3(x1, y1, z1);
+			Vector3 two = Vector3(x2, y2, z2);
+
+			glm::vec3 glmVec1 = glm::vec3(x1, y1, z1);
+			glm::vec3 glmVec2 = glm::vec3(x2, y2, z2);
+
+			for (size_t i = 0; i < 500; ++i)
+			{
+				const float f = (1.0f / 500) * i;
+				Vector3 lerp = one.Lerp(two, f);
+				glm::vec3 glmLerp = glm::mix(glmVec1, glmVec2, f);
+
+				CHECK(lerp.x == glmLerp.x);
+				CHECK(lerp.y == glmLerp.y);
+				CHECK(lerp.z == glmLerp.z);
+			}
 		}
 	}
 }

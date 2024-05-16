@@ -37,6 +37,33 @@ namespace Insight
 			, v2(v2)
 		{ }
 
+		Matrix3::Matrix3(const Quaternion & q)
+		{
+			*this = Identity;
+
+			const float qxx(q.x * q.x);
+			const float qyy(q.y * q.y);
+			const float qzz(q.z * q.z);
+			const float qxz(q.x * q.z);
+			const float qxy(q.x * q.y);
+			const float qyz(q.y * q.z);
+			const float qwx(q.w * q.x);
+			const float qwy(q.w * q.y);
+			const float qwz(q.w * q.z);
+
+			m_00 = 1.0f - 2.0f * (qyy + qzz);
+			m_01 = 2.0f * (qxy + qwz);
+			m_02 = 2.0f * (qxz - qwy);
+
+			m_10 = 2.0f * (qxy - qwz);
+			m_11 = 1.0f - 2.0f * (qxx + qzz);
+			m_12 = 2.0f * (qyz + qwx);
+
+			m_20 = 2.0f * (qxz + qwy);
+			m_21 = 2.0f * (qyz - qwx);
+			m_22 = 1.0f - 2.0f * (qxx + qyy);
+		}
+
 		Matrix3::Matrix3(	float m00, float m01, float m02,
 							float m10, float m11, float m12,
 							float m20, float m21, float m22)

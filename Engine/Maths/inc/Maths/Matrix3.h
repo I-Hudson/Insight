@@ -3,6 +3,7 @@
 #include "Maths/Defines.h"
 #include "Vector3.h"
 #include "Vector4.h"
+#include "Quaternion.h"
 
 #include <Reflect/Core/Defines.h>
 
@@ -27,7 +28,10 @@ namespace Insight
 			Matrix3(float m00, float m01, float m02,
 				float m10, float m11, float m12,
 				float m20, float m21, float m22);
+
 			Matrix3(Vector3 v0, Vector3 v1, Vector3 v2);
+			Matrix3(const Quaternion& q);
+
 			Matrix3(const Matrix3& other);
 			Matrix3(Matrix3&& other);
 #ifdef IS_MATHS_DIRECTX_MATHS

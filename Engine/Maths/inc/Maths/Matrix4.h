@@ -1,8 +1,10 @@
 #pragma once
 
 #include "Maths/Defines.h"
-#include "Vector4.h"
 #include "Vector3.h"
+#include "Vector4.h"
+#include "Matrix3.h"
+#include "Quaternion.h"
 
 #include <Reflect/Core/Defines.h>
 
@@ -30,9 +32,14 @@ namespace Insight
 				float m10, float m11, float m12, float m_13,
 				float m20, float m21, float m22, float m_23,
 				float m30, float m31, float m32, float m_33);
+			
 			Matrix4(const Vector4 v0, const Vector4 v1, const Vector4 v2, const Vector4 v3);
+
+			Matrix4(const Quaternion& q);
+
 			Matrix4(const Matrix4& other);
 			Matrix4(Matrix4&& other);
+
 #ifdef IS_MATHS_DIRECTX_MATHS
 			Matrix4(const DirectX::XMMATRIX& other);
 			Matrix4(DirectX::XMMATRIX&& other);
@@ -59,6 +66,9 @@ namespace Insight
 
 			Matrix4 Translate(const Vector4 vector);
 			Matrix4 Translated(const Vector4 vector) const { return Matrix4(*this).Translate(vector); }
+
+			Matrix4 Scale(const Vector4& vector);
+			Matrix4 Scaled(const Vector4& vector) const { return Matrix4(*this).Scale(vector); }
 
 			static Matrix4 CreatePerspective(const float fovy, const float aspect, const float zNear, const float zFar);
 			static Matrix4 CreateOrthographic(const float left, const float right, const float bottom, const float top);

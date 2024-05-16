@@ -13,4 +13,9 @@ namespace Insight::Maths
 	{
 		return radians * static_cast<float>(57.295779513082320876798154814105);
 	}
+
+	IS_MATHS constexpr float Lerp(const float a, const float b, const float f)
+	{
+		return a * (1.0f - f) + (b * f);
+	}
 }

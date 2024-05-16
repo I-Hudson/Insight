@@ -1,6 +1,8 @@
 #include "Maths/Quaternion.h"
+#include "Maths/Utils.h"
 
 #include <cmath>
+#include <limits>
 
 namespace Insight
 {
@@ -49,12 +51,42 @@ namespace Insight
         {
             return Conjugate(*this) / Dot(*this);
         }
-
         float Quaternion::Dot(const Quaternion& q) const
         {
             Vector4 tmp(w * q.w, x * q.x, y * q.y, z * q.z);
             return (tmp.x + tmp.y) + (tmp.z + tmp.w);
         }
+        Quaternion Quaternion::Slerp(const Quaternion& q, const float time) const
+        {
+            Quaternion z = q;
+            float cosTheta = Dot(q);
+
+            // If cosTheta < 0, the interpolation will take the long way around the sphere.
+            // To fix this, one quat must be negated.
+            if (cosTheta < 0.0f)
+            {
+                z = -q;
+                cosTheta = -cosTheta;
+            }
+
+            // Perform a linear interpolation when cosTheta is close to 1 to avoid side effect of sin(angle) becoming a zero denominator
+            if (cosTheta > 1.0f - std::numeric_limits<float>().epsilon())
+            {
+                // Linear interpolation
+                return Quaternion(
+                    Lerp(this->w, z.w, time),
+                    Lerp(this->x, z.x, time),
+                    Lerp(this->y, z.y, time),
+                    Lerp(this->z, z.z, time));
+            }
+            else
+            {
+                // Essential Mathematics, page 467
+                float angle = std::acos(cosTheta);
+                return (sin((1.0f - time) * angle) * *this + std::sin(time * angle) * z) / sin(angle);
+            }
+        }
+
 
         Quaternion& Quaternion::operator +=(const Quaternion& q)
         {
@@ -392,6 +424,36 @@ namespace test
 
 			
 		}
+
+        TEST_CASE("Slerp")
+        {
+            const float eulerX = 90.0f;
+            const float eulerY = 245.0f;
+            const float eulerZ = -35.0f;
+
+            const float eulerX1 = 4.0f;
+            const float eulerY1 = 23.0f;
+            const float eulerZ1 = -189.0f;
+
+            Quaternion eulerQVec(Vector3(eulerX, eulerY, eulerZ));
+            Quaternion eulerQVec1(Vector3(eulerX1, eulerY1, eulerZ1));
+
+            glm::quat glmEulerQ(glm::vec3(eulerX, eulerY, eulerZ));
+            glm::quat glmEulerQ1(glm::vec3(eulerX1, eulerY1, eulerZ1));
+
+            for (size_t i = 0; i < 50; ++i)
+            {
+                const float t = (1.0f / 50) * i;
+                Quaternion slerp = eulerQVec.Slerp(eulerQVec1, t);
+                glm::quat glmSlerp = glm::slerp(glmEulerQ, glmEulerQ1, t);
+
+
+                CHECK(slerp.w == glmSlerp.w);
+                CHECK(slerp.x == glmSlerp.x);
+                CHECK(slerp.y == glmSlerp.y);
+                CHECK(slerp.z == glmSlerp.z);
+            }
+        }
 	}
 }
 #endif

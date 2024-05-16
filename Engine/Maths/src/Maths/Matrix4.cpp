@@ -57,12 +57,23 @@ namespace Insight
 			, m_30(m30), m_31(m31), m_32(m32), m_33(m33)
 #endif
 		{ }
+
 		Matrix4::Matrix4(const Vector4 v0, const Vector4 v1, const Vector4 v2, const Vector4 v3)
 			: v0(v0)
 			, v1(v1)
 			, v2(v2)
 			, v3(v3)
 		{ }
+
+		Matrix4::Matrix4(const Quaternion& q)
+		{
+			Matrix3 mat(q);
+			v0 = Maths::Vector4(mat[0], 0.0f);
+			v1 = Maths::Vector4(mat[1], 0.0f);
+			v2 = Maths::Vector4(mat[2], 0.0f);
+			v3 = Maths::Vector4(0.0f, 0.0f, 0.0f, 1.0f);
+		}
+
 		Matrix4::Matrix4(const Matrix4& other)
 #ifdef IS_MATHS_DIRECTX_MATHS
 			: xmmatrix(other.xmmatrix)
@@ -240,6 +251,19 @@ namespace Insight
 			xmmatrix = DirectX::XMMatrixMultiply(DirectX::XMMatrixTranslationFromVector(vector.xmvector), xmmatrix);
 #elif defined(IS_MATHS_GLM)
 			mat4 = glm::translate(mat4, glm::vec3(vector.vec4));
+#else
+			assert(false);
+			return Matrix4();
+#endif
+			return *this;
+		}
+
+		Matrix4 Matrix4::Scale(const Vector4& vector)
+		{
+#ifdef IS_MATHS_DIRECTX_MATHS
+			xmmatrix = DirectX::XMMatrixMultiply(DirectX::XMMatrixScalingFromVector(vector.xmvector), xmmatrix);
+#elif defined(IS_MATHS_GLM)
+			mat4 = glm::scale(mat4, glm::vec3(vector.vec4));
 #else
 			assert(false);
 			return Matrix4();
@@ -565,6 +589,7 @@ namespace Insight
 
 #ifdef IS_TESTING
 #include "doctest.h"
+#include <glm/gtx/quaternion.hpp>
 namespace test
 {
 	using namespace Insight::Maths;
@@ -809,6 +834,34 @@ namespace test
 				CHECK(matrix2.m_31 == y4);
 				CHECK(matrix2.m_32 == z4);
 				CHECK(matrix2.m_33 == w4);
+			}
+
+			{
+				Quaternion eQ(90.0f, 24.0f, -89.0f);
+				Matrix4 mat(eQ);
+
+				glm::quat glmQ(glm::vec3(90.0f, 24.0f, -89.0f));
+				glm::mat4 qMat = glm::toMat4(glmQ);
+
+				CHECK(mat.m_00 == qMat[0][0]);
+				CHECK(mat.m_01 == qMat[0][1]);
+				CHECK(mat.m_02 == qMat[0][2]);
+				CHECK(mat.m_03 == qMat[0][3]);
+
+				CHECK(mat.m_10 == qMat[1][0]);
+				CHECK(mat.m_11 == qMat[1][1]);
+				CHECK(mat.m_12 == qMat[1][2]);
+				CHECK(mat.m_13 == qMat[1][3]);
+
+				CHECK(mat.m_20 == qMat[2][0]);
+				CHECK(mat.m_21 == qMat[2][1]);
+				CHECK(mat.m_22 == qMat[2][2]);
+				CHECK(mat.m_23 == qMat[2][3]);
+
+				CHECK(mat.m_30 == qMat[3][0]);
+				CHECK(mat.m_31 == qMat[3][1]);
+				CHECK(mat.m_32 == qMat[3][2]);
+				CHECK(mat.m_33 == qMat[3][3]);
 			}
 		}
 

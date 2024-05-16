@@ -63,6 +63,8 @@ namespace Insight
 			bool Equal(const Vector3& other, const float errorRange) const;
 			bool NotEqual(const Vector3& other, const float errorRange) const;
 
+			Vector3 Lerp(const Vector3& vec, const float time) const;
+
 			Vector3 operator-() const;
 
 			Vector3 operator=(float scalar);
@@ -77,8 +79,12 @@ namespace Insight
 			Vector3 operator+(float scalar) const;
 			Vector3 operator+(const Vector3& other) const;
 
-			Vector3 operator-(float scalar) const;
-			Vector3 operator-(const Vector3& other) const;
+			//Vector3 operator-(float scalar) const;
+			//Vector3 operator-(const Vector3& other) const;
+
+			IS_MATHS friend Vector3 operator-(float scalar, const Vector3& vec);
+			IS_MATHS friend Vector3 operator-(const Vector3& vec, float scalar);
+			IS_MATHS friend Vector3 operator-(const Vector3& vec, const Vector3& vec1);
 
 			Vector3 operator*=(float scalar);
 			Vector3 operator*=(const Vector3& other);
