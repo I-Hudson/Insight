@@ -11,8 +11,8 @@ namespace Insight
 {
     namespace Serialisation
     {
-        void ComplexSerialiser<MeshToGuid, Runtime::Mesh*, ECS::MeshComponent>::operator()
-            (ISerialiser* serialiser, Runtime::Mesh*& mesh, ECS::MeshComponent* meshComponent) const
+        void ComplexSerialiser<MeshToGuid, Ref<Runtime::Mesh>, ECS::MeshComponent>::operator()
+            (ISerialiser* serialiser, Ref<Runtime::Mesh>& mesh, ECS::MeshComponent* meshComponent) const
         {
 			constexpr const char* c_AssetGuid = "AssetGuid";
 			constexpr const char* c_MeshGuid = "MeshNameHash";
@@ -33,7 +33,7 @@ namespace Insight
 					{
 						for (u32 meshIdx = 0; meshIdx < model->GetMeshCount(); ++meshIdx)
 						{
-							Runtime::Mesh* assetResourceMesh = model->GetMeshByIndex(meshIdx);
+							Ref<Runtime::Mesh> assetResourceMesh = model->GetMeshByIndex(meshIdx);
 							if (assetResourceMesh->GetName() == meshName)
 							{
 								mesh = assetResourceMesh;

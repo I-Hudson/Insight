@@ -127,7 +127,7 @@ namespace Insight
             IS_PROFILE_FUNCTION();
 
             std::string resourceGuidString;
-            if (EditorGUI::ObjectFieldTarget(ContentWindow::c_ContentWindowResourceDragSource, resourceGuidString, Runtime::Asset::GetStaticTypeInfo().GetType()))
+            if (EditorGUI::ObjectFieldTarget(ContentWindow::c_ContentWindowAssetDragSource, resourceGuidString, Runtime::Asset::GetStaticTypeInfo().GetType()))
             {
                 Core::GUID resourceGuid;
                 resourceGuid.StringToGuid(resourceGuidString);
@@ -550,6 +550,27 @@ namespace Insight
                                 }
                             }
 
+                            object.SkinnedMesh = mesh.SkinnedMesh;
+                            if (object.SkinnedMesh)
+                            {
+                                const u32 c_Max_Bone_Matrices = 72;
+                                struct SkinnedBonesMatrices
+                                {
+                                    Maths::Matrix4 BoneMatrices[c_Max_Bone_Matrices];
+                                };
+                                ASSERT(mesh.BoneTransforms.size() <= c_Max_Bone_Matrices);
+
+                                SkinnedBonesMatrices skinnedBonesMatrices;
+                                if (mesh.BoneTransforms.size() > 0)
+                                {
+                                    Platform::MemCopy(
+                                        &skinnedBonesMatrices.BoneMatrices[0],
+                                        mesh.BoneTransforms.data(),
+                                        mesh.BoneTransforms.size() * sizeof(mesh.BoneTransforms[0]));
+                                }
+                                cmdList->SetUniform(2, 2, skinnedBonesMatrices);
+                            }
+
                             cmdList->SetUniform(2, 0, object);
 
                             const Runtime::MeshLOD& renderMeshLod = mesh.GetLOD(0);
@@ -666,8 +687,8 @@ namespace Insight
                                 Graphics::RHI_Texture* diffuseTexture = renderMaterial.Textures[(u64)Runtime::TextureAssetTypes::Diffuse];
                                 if (diffuseTexture)
                                 {
-                                    cmdList->SetTexture(3, 0, diffuseTexture);
-                                    object.Textures_Set[0] = 1;
+                                    //cmdList->SetTexture(3, 0, diffuseTexture);
+                                    //object.Textures_Set[0] = 1;
                                 }
                             }
 

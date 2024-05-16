@@ -75,6 +75,10 @@ namespace Insight
 
 					if (ImGui::CollapsingHeader(world->GetWorldName().data()))
 					{
+						bool worldPlay = world->GetWorldState() == Runtime::WorldStates::Running;
+						ImGui::Checkbox("Play World", &worldPlay);
+						world->SetWorldState(worldPlay ? Runtime::WorldStates::Running : Runtime::WorldStates::Paused);
+
 						auto entities = world->GetAllEntities();
 						for (size_t i = 0; i < entities.size(); ++i)
 						{

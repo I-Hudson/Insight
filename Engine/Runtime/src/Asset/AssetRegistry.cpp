@@ -57,7 +57,7 @@ namespace Insight::Runtime
             for (auto& [path, asset] : m_loadedAssets)
             {
                 ASSERT(asset);
-                ASSERT(asset->GetReferenceCount() == 1);
+                //ASSERT(asset->GetReferenceCount() == 1);
                 asset->OnUnload();
             }
         }

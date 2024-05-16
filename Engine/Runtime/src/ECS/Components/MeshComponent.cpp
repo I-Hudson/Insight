@@ -13,7 +13,7 @@ namespace Insight
 		MeshComponent::~MeshComponent()
 		{ }
 
-		void MeshComponent::SetMesh(Runtime::Mesh* mesh)
+		void MeshComponent::SetMesh(Ref<Runtime::Mesh> mesh)
 		{
 			m_mesh = mesh;
 		}

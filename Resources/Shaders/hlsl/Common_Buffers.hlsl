@@ -1,6 +1,3 @@
-// Set 0 - per frame
-// Set 1 - Per object
-
 #include "Defines.hlsl"
 
 cbuffer BufferFrame : register(b0, FrameSpace)

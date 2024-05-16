@@ -896,7 +896,20 @@ namespace test
 			translatedMatrix = Matrix_Test;
 			translatedMatrix.Translate(vector);
 			CHECK(translatedMatrix == glmTranslatedMatrix);
+		}
 
+		TEST_CASE("Scale")
+		{
+			Matrix4 mat = Matrix4::Identity;
+			glm::mat4 glmMat(1.0f);
+
+			Vector4 scaleVector(2.5f, 10.0f, 1.0f, 1.0f);
+			glm::vec3 glmScaleVector(2.5f, 10.0f, 1.0f);
+
+			Matrix4 scaledMat = mat.Scaled(scaleVector);
+			glm::mat4 glmScaledMat = glm::scale(glmMat, glmScaleVector);
+
+			CHECK(scaledMat == glmScaledMat);
 		}
 
 		TEST_CASE("CreatePerspective")

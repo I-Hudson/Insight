@@ -75,7 +75,7 @@ namespace Insight
             AnimationClip();
             virtual ~AnimationClip() override;
 
-            const AnimationBoneTrack& GetBoneTrack(const u32 boneId) const;
+            const AnimationBoneTrack* GetBoneTrack(const u32 boneId) const;
             double GetDuration() const;
             double GetTickPerSecond() const;
 

@@ -39,6 +39,9 @@ namespace Insight
             Maths::Matrix4 InterpolateRotation(const u32 boneId) const;
             Maths::Matrix4 InterpolateScale(const u32 boneId) const;
 
+            /// @brief Reset our animation time as either the skeleton or animation clip has changed.
+            void Reset();
+
         private:
             Ref<Skeleton> m_skelton;
             Ref<AnimationClip> m_animationClip;

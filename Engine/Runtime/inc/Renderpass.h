@@ -70,10 +70,11 @@ namespace Insight
 
 		struct BufferPerObject
 		{
-			Maths::Matrix4 Transform = {};
-			Maths::Matrix4 Previous_Transform = { };
+			Maths::Matrix4 Transform = Maths::Matrix4::Identity;
+			Maths::Matrix4 Previous_Transform = Maths::Matrix4::Identity;
 
 			Maths::Vector4 Textures_Set;
+			int SkinnedMesh = 0;
 		};
 
 		class IS_RUNTIME Renderpass

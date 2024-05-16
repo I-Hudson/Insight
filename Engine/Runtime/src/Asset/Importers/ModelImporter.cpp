@@ -321,7 +321,7 @@ namespace Insight
 				| aiProcess_SortByPType					/// Splits meshes with more than one primitive type in homogeneous sub-meshes.
 
 				| aiProcess_MakeLeftHanded				/// DirectX style.
-				//| aiProcess_FlipUVs						/// DirectX style.
+				| aiProcess_FlipUVs						/// DirectX style.
 				| aiProcess_FlipWindingOrder			/// DirectX style.
 
 				| aiProcess_CalcTangentSpace			/// Calculates the tangents and bitangents for the imported meshes.
@@ -353,7 +353,7 @@ namespace Insight
 			modelAsset->SetName(scene->mName.C_Str());
 
 #if EXP_MODEL_LOADING
-			ExtractSkeleton(scene, scene->mRootNode, modelAsset.Ptr());
+			ExtractSkeleton(scene, scene->mRootNode, Maths::Matrix4::Identity, modelAsset.Ptr());
 
 			const aiNode* rootBone = FindRootBone(scene, scene->mRootNode, modelAsset.Ptr());
 			BuildBoneHierarchy(scene, rootBone, Maths::Matrix4::Identity, nullptr, modelAsset.Ptr());
@@ -470,7 +470,7 @@ namespace Insight
 
 			if (!meshData.Vertices.empty() && !meshData.Indices.empty())
 			{
-				meshData.Optimise();
+				//meshData.Optimise();
 				//meshData.GenerateLODs();
 
 				ASSERT(mesh);
@@ -586,6 +586,12 @@ namespace Insight
 					// use models where a vertex can have multiple texture coordinates so we always take the first set (0).
 					uv.x = aiMesh->mTextureCoords[0][i].x;
 					uv.y = aiMesh->mTextureCoords[0][i].y;
+
+					uv.x = uv.x > 1.0f ? uv.x - 1.0f : uv.x;
+					uv.x = uv.x < 0.0f ? uv.x + 1.0f : uv.x;
+
+					uv.y = uv.y > 1.0f ? uv.y - 1.0f : uv.y;
+					uv.y = uv.y < 0.0f ? uv.y + 1.0f : uv.y;
 				}
 				else
 				{
@@ -665,8 +671,9 @@ namespace Insight
 			return material;
 		}
 
-		void ModelImporter::ExtractSkeleton(const aiScene* aiScene, const aiNode* aiNode, ModelAsset* modelAsset) const
+		void ModelImporter::ExtractSkeleton(const aiScene* aiScene, const aiNode* aiNode, Maths::Matrix4 parentTransform, ModelAsset* modelAsset) const
 		{
+			bool hasBones = false;
 			for (size_t meshIdx = 0; meshIdx < aiNode->mNumMeshes; ++meshIdx)
 			{
 				const aiMesh* aiMesh = aiScene->mMeshes[meshIdx];
@@ -680,6 +687,7 @@ namespace Insight
 
 				for (size_t boneIdx = 0; boneIdx < aiMesh->mNumBones; ++boneIdx)
 				{
+					hasBones = true;
 					const aiBone* aiBone = aiMesh->mBones[boneIdx];
 					std::string boneName = aiBone->mName.C_Str();
 					SkeletonBone newBone(skeleton->GetNumberOfBones(), boneName, AssimpToInsightMatrix4(aiBone->mOffsetMatrix));
@@ -687,9 +695,14 @@ namespace Insight
 				}
 			}
 
+			if (!hasBones)
+			{
+				parentTransform = AssimpToInsightMatrix4(aiNode->mTransformation) * parentTransform;
+			}
+
 			for (size_t i = 0; i < aiNode->mNumChildren; ++i)
 			{
-				ExtractSkeleton(aiScene, aiNode->mChildren[i], modelAsset);
+				ExtractSkeleton(aiScene, aiNode->mChildren[i], parentTransform, modelAsset);
 			}
 		}
 
@@ -733,7 +746,7 @@ namespace Insight
 				SkeletonBone& skeletonBone = skeleton->GetBone(bone->mName.C_Str());
 				if (skeletonBone)
 				{
-					skeletonBone.Offset = transform * skeletonBone.Offset;
+					skeletonBone.ParentTransform = transform;
 					transform = Maths::Matrix4::Identity;
 
 					if (parentBone)
@@ -787,7 +800,7 @@ namespace Insight
 				
 				const aiVertexWeight* aiBonewights = aiBone->mWeights;
 				// clamp the number of weights to evaluate between our max number we allow and the numer on the model.
-				const u32 numWeights = std::min(Graphics::Vertex::MAX_BONE_COUNT, aiBone->mNumWeights);
+				const u32 numWeights = aiBone->mNumWeights;
 
 				for (size_t weightIdx = 0; weightIdx < numWeights; ++weightIdx)
 				{
@@ -805,7 +818,7 @@ namespace Insight
 
 			for (int i = 0; i < Graphics::Vertex::MAX_BONE_COUNT; ++i)
 			{
-				if (vertex.BoneIds[i] < 0)
+				if (vertex.BoneIds[i] == -1)
 				{
 					vertex.BoneWeights[i] = boneWeight;
 					vertex.BoneIds[i] = boneId;

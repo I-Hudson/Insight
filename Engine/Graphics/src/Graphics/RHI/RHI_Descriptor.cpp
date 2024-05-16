@@ -495,10 +495,11 @@ namespace Insight
 						IS_LOG_CORE_WARN("[DescriptorAllocator::SetUniform] Size mismatch. Descriptor expects '{0}', provided '{1}'\n Set: {2}, Binding: {3}."
 							, descriptorBinding->Size, size, set, binding);
 					}
+					const u32 bindingIdx = binding - descriptorBinding->Binding;
 					//if (descriptorBinding->RHI_Buffer_View != bufferView)
 					{
-						descriptorBinding->RHI_Buffer_View[binding] = UploadUniform(data, size);
-						HashCombine(descriptorSet->DX_Hash, descriptorBinding->RHI_Buffer_View[binding]);
+						descriptorBinding->RHI_Buffer_View[bindingIdx] = UploadUniform(data, size);
+						HashCombine(descriptorSet->DX_Hash, descriptorBinding->RHI_Buffer_View[bindingIdx]);
 					}
 				}
 			}

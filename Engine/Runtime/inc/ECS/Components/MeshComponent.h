@@ -20,15 +20,15 @@ namespace Insight
 			MeshComponent();
 			virtual ~MeshComponent() override;
 
-			void						SetMesh(Runtime::Mesh* mesh);
-			Runtime::Mesh*				GetMesh()						const		{ return m_mesh; }
+			void						SetMesh(Ref<Runtime::Mesh> mesh);
+			Ref<Runtime::Mesh>			GetMesh()						const		{ return m_mesh; }
 			void						SetMaterial(Ref<Runtime::MaterialAsset> material);
 			Ref<Runtime::MaterialAsset>	GetMaterial()					const		{ return m_material; }
 
 			IS_SERIALISABLE_H(MeshComponent)
 
 		private:
-			Runtime::Mesh* m_mesh;
+			Ref<Runtime::Mesh> m_mesh;
 			Ref<Runtime::MaterialAsset> m_material;
 		};
 	}
@@ -37,9 +37,9 @@ namespace Insight
 	{
 		struct MeshToGuid {};
 		template<>
-		struct ComplexSerialiser<MeshToGuid, Runtime::Mesh*, ECS::MeshComponent>
+		struct ComplexSerialiser<MeshToGuid, Ref<Runtime::Mesh>, ECS::MeshComponent>
 		{
-			void operator()(ISerialiser* serialiser, Runtime::Mesh*& mesh, ECS::MeshComponent* meshComponent) const;
+			void operator()(ISerialiser* serialiser, Ref<Runtime::Mesh>& mesh, ECS::MeshComponent* meshComponent) const;
 		};
 		struct MaterialToGuid {};
 		template<>

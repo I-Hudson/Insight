@@ -3,6 +3,7 @@
 #include "Asset/Asset.h"
 #include "Asset/Assets/Material.h"
 
+#include "Resource/Mesh.h"
 #include "Resource/Skeleton.h"
 #include "Resource/AnimationClip.h"
 
@@ -20,7 +21,6 @@ namespace Insight
     namespace Runtime
     {
         class ModelImporter;
-        class Mesh;
 
         REFLECT_CLASS();
         class IS_RUNTIME ModelAsset : public Asset, public ECS::ICreateEntityHierarchy
@@ -30,8 +30,8 @@ namespace Insight
             ModelAsset(const AssetInfo* assetInfo);
             virtual ~ModelAsset() override;
 
-            Mesh* GetMesh() const;
-            Mesh* GetMeshByIndex(u32 index) const;
+            Ref<Mesh> GetMesh() const;
+            Ref<Mesh> GetMeshByIndex(u32 index) const;
             u32 GetMeshCount() const;
 
             Ref<MaterialAsset> GetMaterial() const;
@@ -50,7 +50,7 @@ namespace Insight
             // END Asset
 
         private:
-            std::vector<Mesh*> m_meshes;
+            std::vector<Ref<Mesh>> m_meshes;
             std::vector<Ref<MaterialAsset>> m_materials;
 
             std::vector<Ref<Skeleton>> m_skeletons;

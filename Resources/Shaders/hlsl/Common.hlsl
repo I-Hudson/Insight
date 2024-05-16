@@ -63,7 +63,7 @@ float2 ndc_to_uv(float2 x)
 float2 ndc_to_uv(float3 x)
 {
     float2 uv = x.xy * float2(0.5f, 0.5f) + 0.5f;
-	#ifdef DX12
+	#ifdef VULKAN
     uv.y = 1.0 - uv.y;
 	#endif
 	return uv;

@@ -21,6 +21,8 @@ namespace Insight
             operator bool() const;
             bool IsValid() const;
 
+            /// @brief This isn't actual it's parents transform, just a transform which needs to be applied before the offset is.
+            Maths::Matrix4 ParentTransform = Maths::Matrix4::Identity;
             Maths::Matrix4 Offset = Maths::Matrix4::Identity;
             std::string Name = "";
             u32 Id = -1;

@@ -16,10 +16,11 @@ namespace Insight
 
         void Animator::SetSkelton(Ref<Skeleton> skeleton)
         {
-            m_skelton = skeleton;
-            if (m_skelton)
+            if (m_skelton != skeleton)
             {
-                m_boneMatrices.resize(m_skelton->GetNumberOfBones());
+                m_skelton = skeleton;
+                m_boneMatrices.resize(m_skelton->GetNumberOfBones(), Maths::Matrix4::Identity);
+                Reset();
             }
         }
 
@@ -30,17 +31,20 @@ namespace Insight
 
         void Animator::SetAnimationClip(Ref<AnimationClip> animationClip)
         {
-            m_animationClip = animationClip;
+            if (m_animationClip != animationClip)
+            {
+                m_animationClip = animationClip;
+                Reset();
+            }
         }
 
         void Animator::Update(const float deltaTime)
         {
-            m_deltaTime = deltaTime;
             if (m_skelton && m_animationClip)
             {
                 m_currentAnimationTime += m_animationClip->GetTickPerSecond() * static_cast<double>(deltaTime);
                 m_currentAnimationTime = fmod(m_currentAnimationTime, m_animationClip->GetDuration());
-                CalculateBoneTransform(m_skelton->GetRootBone(), Maths::Matrix4::Identity);
+                CalculateBoneTransform(m_skelton->GetRootBone().Id, Maths::Matrix4::Identity);
             }
         }
 
@@ -61,7 +65,7 @@ namespace Insight
             const Maths::Matrix4 boneTransform = bonePositionMatrix * boneRotationMatrix * boneScaleMatrix;
             const Maths::Matrix4 globalTransform = parentTransform * boneTransform;
 
-            const Maths::Matrix4 boneOffsetTransform = globalTransform * bone.Offset;
+            const Maths::Matrix4 boneOffsetTransform = globalTransform * bone.ParentTransform * bone.Offset;
             m_boneMatrices[boneId] = boneOffsetTransform;
 
             for (size_t childBoneIdx = 0; childBoneIdx < bone.ChildrenBoneIds.size(); ++childBoneIdx)
@@ -87,18 +91,22 @@ namespace Insight
                 return Maths::Matrix4::Identity;
             }
             
-            const AnimationBoneTrack& boneTrack = m_animationClip->GetBoneTrack(boneId);
-            if (boneTrack.Positions.size() == 1)
+            const AnimationBoneTrack* boneTrack = m_animationClip->GetBoneTrack(boneId);
+            if (!boneTrack)
             {
-                const Maths::Vector4 position = Maths::Vector4(boneTrack.Positions[0].Position, 1.0f);
+                return Maths::Matrix4::Identity;
+            }
+            else if (boneTrack->Positions.size() == 1)
+            {
+                const Maths::Vector4 position = Maths::Vector4(boneTrack->Positions[0].Position, 1.0f);
                 return Maths::Matrix4::Identity.Translated(position);
             }
 
-            const u32 p0Index = boneTrack.GetPositionKeyFrameIndex(m_currentAnimationTime);
+            const u32 p0Index = boneTrack->GetPositionKeyFrameIndex(m_currentAnimationTime);
             const u32 p1Index = p0Index + 1;
 
-            const AnimationBoneTrack::PositionKeyFrame& p0KeyFrame = boneTrack.Positions[p0Index];
-            const AnimationBoneTrack::PositionKeyFrame& p1KeyFrame = boneTrack.Positions[p1Index];
+            const AnimationBoneTrack::PositionKeyFrame& p0KeyFrame = boneTrack->Positions[p0Index];
+            const AnimationBoneTrack::PositionKeyFrame& p1KeyFrame = boneTrack->Positions[p1Index];
 
             const float scaleFactor = GetScaleFactor(p0KeyFrame.TimeStamp, p1KeyFrame.TimeStamp);
             const Maths::Vector3 finalPosition = p0KeyFrame.Position.Lerp(p1KeyFrame.Position, scaleFactor);
@@ -113,17 +121,21 @@ namespace Insight
                 return Maths::Matrix4::Identity;
             }
 
-            const AnimationBoneTrack& boneTrack = m_animationClip->GetBoneTrack(boneId);
-            if (boneTrack.Rotations.size() == 1)
+            const AnimationBoneTrack* boneTrack = m_animationClip->GetBoneTrack(boneId);
+            if (!boneTrack)
             {
-                return Maths::Matrix4(boneTrack.Rotations[0].Rotation);
+                return Maths::Matrix4::Identity;
+            }
+            else if (boneTrack->Rotations.size() == 1)
+            {
+                return Maths::Matrix4(boneTrack->Rotations[0].Rotation);
             }
 
-            const u32 p0Index = boneTrack.GetRotationKeyFrameIndex(m_currentAnimationTime);
+            const u32 p0Index = boneTrack->GetRotationKeyFrameIndex(m_currentAnimationTime);
             const u32 p1Index = p0Index + 1;
 
-            const AnimationBoneTrack::RotationKeyFrame& p0KeyFrame = boneTrack.Rotations[p0Index];
-            const AnimationBoneTrack::RotationKeyFrame& p1KeyFrame = boneTrack.Rotations[p1Index];
+            const AnimationBoneTrack::RotationKeyFrame& p0KeyFrame = boneTrack->Rotations[p0Index];
+            const AnimationBoneTrack::RotationKeyFrame& p1KeyFrame = boneTrack->Rotations[p1Index];
 
             const float scaleFactor = GetScaleFactor(p0KeyFrame.TimeStamp, p1KeyFrame.TimeStamp);
             const Maths::Quaternion finalRotation = p0KeyFrame.Rotation.Slerp(p1KeyFrame.Rotation, scaleFactor);
@@ -138,23 +150,32 @@ namespace Insight
                 return Maths::Matrix4::Identity;
             }
 
-            const AnimationBoneTrack& boneTrack = m_animationClip->GetBoneTrack(boneId);
-            if (boneTrack.Scales.size() == 1)
+            const AnimationBoneTrack* boneTrack = m_animationClip->GetBoneTrack(boneId);
+            if (!boneTrack)
             {
-                const Maths::Vector4 scale = Maths::Vector4(boneTrack.Scales[0].Scale, 1.0f);
+                return Maths::Matrix4::Identity;
+            }
+            else if (boneTrack->Scales.size() == 1)
+            {
+                const Maths::Vector4 scale = Maths::Vector4(boneTrack->Scales[0].Scale, 1.0f);
                 return Maths::Matrix4::Identity.Scaled(scale);
             }
 
-            const u32 p0Index = boneTrack.GetScaleKeyFrameIndex(m_currentAnimationTime);
+            const u32 p0Index = boneTrack->GetScaleKeyFrameIndex(m_currentAnimationTime);
             const u32 p1Index = p0Index + 1;
 
-            const AnimationBoneTrack::ScaleKeyFrame& p0KeyFrame = boneTrack.Scales[p0Index];
-            const AnimationBoneTrack::ScaleKeyFrame& p1KeyFrame = boneTrack.Scales[p1Index];
+            const AnimationBoneTrack::ScaleKeyFrame& p0KeyFrame = boneTrack->Scales[p0Index];
+            const AnimationBoneTrack::ScaleKeyFrame& p1KeyFrame = boneTrack->Scales[p1Index];
 
             const float scaleFactor = GetScaleFactor(p0KeyFrame.TimeStamp, p1KeyFrame.TimeStamp);
             const Maths::Vector3 finalScale = p0KeyFrame.Scale.Lerp(p1KeyFrame.Scale, scaleFactor);
 
             return Maths::Matrix4::Identity.Scaled(Maths::Vector4(finalScale, 1.0f));
+        }
+
+        void Animator::Reset()
+        {
+            m_currentAnimationTime = 0;
         }
     }
 }

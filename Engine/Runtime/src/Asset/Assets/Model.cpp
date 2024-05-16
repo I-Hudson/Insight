@@ -7,6 +7,8 @@
 #include "World/WorldSystem.h"
 #include "ECS/Components/TransformComponent.h"
 #include "ECS/Components/MeshComponent.h"
+#include "ECS/Components/SkinnedMeshComponent.h"
+#include "ECS/Components/AnimationClipComponent.h"
 
 namespace Insight::Runtime
 {
@@ -20,12 +22,12 @@ namespace Insight::Runtime
 		OnUnload();
 	}
 
-	Mesh* ModelAsset::GetMesh() const
+	Ref<Mesh> ModelAsset::GetMesh() const
 	{
 		return GetMeshByIndex(0);
 	}
 
-	Mesh* ModelAsset::GetMeshByIndex(u32 index) const
+	Ref<Mesh> ModelAsset::GetMeshByIndex(u32 index) const
 	{
 		if (index >= static_cast<u32>(m_meshes.size()))
 		{
@@ -76,13 +78,26 @@ namespace Insight::Runtime
 		if (world)
 		{
 			Ptr<ECS::Entity> root_entity = world->AddEntity(GetName());
-			for (Mesh* mesh : m_meshes)
+			if (m_skeletons.size() > 0)
 			{
-				Ptr<ECS::Entity> entity = root_entity->AddChild(std::string(mesh->GetName()));
-				static_cast<ECS::TransformComponent*>(entity->GetComponentByName(ECS::TransformComponent::Type_Name))->SetTransform(mesh->GetTransform());
-				ECS::MeshComponent* meshComponent = static_cast<ECS::MeshComponent*>(entity->AddComponentByName(ECS::MeshComponent::Type_Name));
-				meshComponent->SetMesh(mesh);
-				meshComponent->SetMaterial(mesh->GetMaterialAsset());
+				ECS::SkinnedMeshComponent* skinnedMeshComponent = static_cast<ECS::SkinnedMeshComponent*>(root_entity->AddComponentByName(ECS::SkinnedMeshComponent::Type_Name));
+				skinnedMeshComponent->SetMesh(GetMesh());
+				skinnedMeshComponent->SetMaterial(GetMesh()->GetMaterialAsset());
+				skinnedMeshComponent->SetSkeleton(GetSkeleton(0));
+
+				ECS::AnimationClipComponent* animationClipComponent = static_cast<ECS::AnimationClipComponent*>(root_entity->AddComponentByName(ECS::AnimationClipComponent::Type_Name));
+				animationClipComponent->SetAnimationClip(m_animationClips[0]);
+			}
+			else
+			{
+				for (Ref<Mesh>& mesh : m_meshes)
+				{
+					Ptr<ECS::Entity> entity = root_entity->AddChild(std::string(mesh->GetName()));
+					static_cast<ECS::TransformComponent*>(entity->GetComponentByName(ECS::TransformComponent::Type_Name))->SetTransform(mesh->GetTransform());
+					ECS::MeshComponent* meshComponent = static_cast<ECS::MeshComponent*>(entity->AddComponentByName(ECS::MeshComponent::Type_Name));
+					meshComponent->SetMesh(mesh);
+					meshComponent->SetMaterial(mesh->GetMaterialAsset());
+				}
 			}
 			return root_entity.Get();
 		}
@@ -92,9 +107,9 @@ namespace Insight::Runtime
 	void ModelAsset::OnUnload()
 	{
 		// Unload all our memory meshes.
-		for (Mesh* mesh : m_meshes)
+		for (Ref<Mesh>& mesh : m_meshes)
 		{
-			::Delete(mesh);
+			mesh.Reset();
 		}
 		m_meshes.clear();
 

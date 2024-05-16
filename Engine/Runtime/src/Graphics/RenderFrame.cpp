@@ -7,6 +7,8 @@
 
 #include "ECS/Components/TransformComponent.h"
 #include "ECS/Components/MeshComponent.h"
+#include "ECS/Components/SkinnedMeshComponent.h"
+#include "ECS/Components/AnimationClipComponent.h"
 #include "ECS/Components/PointLightComponent.h"
 
 #include "Maths/Utils.h"
@@ -130,15 +132,25 @@ namespace Insight
 
                 ECS::TransformComponent* transformComponent = entity->GetComponent<ECS::TransformComponent>();
 
-                if (entity->HasComponent<ECS::MeshComponent>())
+                if (entity->HasComponent<ECS::MeshComponent>() || entity->HasComponent<ECS::SkinnedMeshComponent>())
                 {
                     ECS::MeshComponent* meshComponent = entity->GetComponent<ECS::MeshComponent>();
-                    if (meshComponent->IsEnabled())
+                    ECS::SkinnedMeshComponent* skinnedMeshComponent = entity->GetComponent<ECS::SkinnedMeshComponent>();
+
+                    if ((meshComponent && meshComponent->IsEnabled())
+                        || (skinnedMeshComponent && skinnedMeshComponent->IsEnabled()))
                     {
-                        Runtime::Mesh* mesh = meshComponent->GetMesh();
-                        if (!mesh)
+                        if ((meshComponent && !meshComponent->GetMesh())
+                            ||(skinnedMeshComponent && !skinnedMeshComponent->GetMesh()))
                         {
                             continue;
+                        }
+                        Ref<Runtime::Mesh> mesh = meshComponent ? meshComponent->GetMesh() : skinnedMeshComponent->GetMesh();
+
+                        Ref<Runtime::MaterialAsset> material = meshComponent ? meshComponent->GetMaterial() : skinnedMeshComponent->GetMaterial();
+                        if (!material)
+                        {
+                            //continue;
                         }
 
                         RenderMesh renderMesh;
@@ -160,15 +172,15 @@ namespace Insight
                             //continue;
                         }
 
-                        //Runtime::Material* material = meshComponent->GetMaterial();
-                        Ref<Runtime::MaterialAsset> material = meshComponent->GetMaterial();
-                        if (!material)
-                        {
-                            //continue;
-                        }
-
-                        renderMesh.SetMesh(mesh);
+                        renderMesh.SetMesh(mesh.Ptr());
                         renderMesh.SetMaterial(material);
+
+                        renderMesh.SkinnedMesh = skinnedMeshComponent && skinnedMeshComponent->GetSkeleton();
+                        if (renderMesh.SkinnedMesh && entity->HasComponent<ECS::AnimationClipComponent>())
+                        {
+                            ECS::AnimationClipComponent* animationClipComponent = entity->GetComponent<ECS::AnimationClipComponent>();
+                            renderMesh.BoneTransforms = animationClipComponent->GetAnimator().GetBoneTransforms();
+                        }
 
                         u64 meshIndex = renderWorld.Meshes.size();
                         renderWorld.Meshes.push_back(std::move(renderMesh));

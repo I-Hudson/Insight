@@ -44,6 +44,9 @@ namespace Insight
         std::vector<Runtime::MeshLOD> MeshLods;
         RenderMaterial Material;
 
+        bool SkinnedMesh = false;
+        std::vector<Maths::Matrix4> BoneTransforms;
+
         const Runtime::MeshLOD& GetLOD(u32 lodIndex) const;
 
         void SetMesh(Runtime::Mesh* mesh);

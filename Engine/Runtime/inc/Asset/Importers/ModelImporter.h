@@ -112,7 +112,7 @@ namespace Insight
             void ParseMeshData(const aiScene* aiScene, const aiNode* aiNode, const aiMesh* aiMesh, MeshData& meshData, ModelAsset* modelAsset) const;
             Ref<MaterialAsset> ProcessMaterial(const aiScene* aiScene, const aiNode* aiNode, const aiMaterial* aiMaterial, ModelAsset* modelAsset) const;
 
-            void ExtractSkeleton(const aiScene* aiScene, const aiNode* aiNode, ModelAsset* modelAsset) const;
+            void ExtractSkeleton(const aiScene* aiScene, const aiNode* aiNode, Maths::Matrix4 parentTransform, ModelAsset* modelAsset) const;
             const aiNode* FindRootBone(const aiScene* aiScene, const aiNode* node, ModelAsset* modelAsset) const;
             void BuildBoneHierarchy(const aiScene* aiScene, const aiNode* bone, Maths::Matrix4 transform, SkeletonBone* parentBone, ModelAsset* modelAsset)  const;
 

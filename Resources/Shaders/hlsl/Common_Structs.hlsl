@@ -6,7 +6,7 @@ struct GeoVertexInput
 	float3 Colour : COLOR0;
 	float2 UV : TEXCOORD0;
 
-	float4 BoneIds : TEXCOORD1;
+	uint4 BoneIds : TEXCOORD1;
 	float4 BoneWeights : TEXCOORD2;
 };
 

@@ -69,12 +69,12 @@ namespace Insight
         AnimationClip::~AnimationClip()
         { }
 
-        const AnimationBoneTrack& AnimationClip::GetBoneTrack(const u32 boneId) const
+        const AnimationBoneTrack* AnimationClip::GetBoneTrack(const u32 boneId) const
         {
             if (auto iter = m_boneIdToBoneTrack.find(boneId);
                 iter != m_boneIdToBoneTrack.end())
             {
-                return m_boneTracks[iter->second];
+                return &m_boneTracks[iter->second];
             }
 
             for (size_t boneIdx = 0; boneIdx < m_boneTracks.size(); ++boneIdx)
@@ -82,11 +82,11 @@ namespace Insight
                 const AnimationBoneTrack& boneTrack = m_boneTracks[boneIdx];
                 if (boneTrack.BoneId == boneId)
                 {
-                    return boneTrack;
+                    return &boneTrack;
                 }
             }
 
-            FAIL_ASSERT();
+            return nullptr;
         }
 
         double AnimationClip::GetDuration() const
