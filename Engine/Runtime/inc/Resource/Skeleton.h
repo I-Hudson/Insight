@@ -24,6 +24,9 @@ namespace Insight
             Maths::Matrix4 Offset = Maths::Matrix4::Identity;
             std::string Name = "";
             u32 Id = -1;
+
+            u32 ParentBoneId = -1;
+            std::vector<u32> ChildrenBoneIds;
         };
 
         /// @brief Class to store information about a skeleton and its bones.
@@ -35,6 +38,8 @@ namespace Insight
 
             bool HasBone(const std::string_view boneName) const;
 
+            const SkeletonBone& GetRootBone() const;
+
             const std::vector<SkeletonBone>& GetBones() const;
             const SkeletonBone& GetBone(const u32 idx) const;
             const SkeletonBone& GetBone(const std::string_view boneName) const;
@@ -42,6 +47,12 @@ namespace Insight
             u32 GetNumberOfBones() const;
 
         private:
+            bool HasBone(const u32 boneId) const;
+            void AddBone(const SkeletonBone& bone);
+            SkeletonBone& GetBone(const std::string_view boneName);
+
+        private:
+            u32 m_rootBoneIdx = -1;
             std::vector<SkeletonBone> m_bones;
             SkeletonBone m_inValidBone;
 

@@ -20,6 +20,27 @@ VertexOutput VSMain(const GeoVertexInput input)
 	vsOut.Pos = float4(input.Pos, 1);
 	vsOut.Colour = float4(input.Colour, 1.0);
 
+	if (bpo_SkinnedMesh == 1)
+	{
+		for(int boneIdx = 0 ; boneIdx < 4 ; ++boneIdx)
+    	{
+			const int boneId = input.BoneIds[boneIdx];
+        	if(boneId == -1)
+			{
+            	continue;
+			}
+
+        	if(boneId >= s_MAX_BONE_COUNT) 
+        	{
+            	vsOut.Pos = float4(input.Pos,1.0f);
+            	break;
+        	}
+        	float4 localPosition = mul(bpo_BoneMatrices[boneId], float4(input.Pos, 1));
+        	vsOut.Pos += mul(localPosition, input.BoneWeights[boneIdx]);
+        	float4 localNormal = mul(bpo_BoneMatrices[boneId], float4(input.Normal, 0));
+   		}
+	}
+
 	vsOut.WorldPos = mul(bpo_Transform, vsOut.Pos);
 	vsOut.Pos = mul(bf_Camera_Proj_View, vsOut.WorldPos);
 	

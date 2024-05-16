@@ -274,7 +274,7 @@ namespace Insight
 
 				const u32 First_index = static_cast<u32>(Indices.size());
 				const u32 Index_count = static_cast<u32>(resultIndexCount);
-				LODs.push_back(MeshData::LOD(lodIdx, 0, LOD0_VertexCount, First_index, Index_count));
+				LODs.push_back(MeshData::LOD(lodIdx, 0, static_cast<u32>(LOD0_VertexCount), First_index, Index_count));
 
 				std::move(result_lod.begin(), result_lod.end(), std::back_inserter(Indices));
 			}
@@ -332,6 +332,7 @@ namespace Insight
 
 				//| aiProcess_RemoveRedundantMaterials	/// Searches for redundant/unreferenced materials and removes them
 				| aiProcess_JoinIdenticalVertices		/// Triangulates all faces of all meshes
+				| aiProcess_PopulateArmatureData
 				//| aiProcess_FindDegenerates			/// Convert degenerate primitives to proper lines or points.
 				//| aiProcess_FindInvalidData			/// This step searches all meshes for invalid data, such as zeroed normal vectors or invalid UV coords and removes / fixes them
 				//| aiProcess_FindInstances				/// This step searches for duplicate meshes and replaces them with references to the first mesh
@@ -352,6 +353,11 @@ namespace Insight
 			modelAsset->SetName(scene->mName.C_Str());
 
 #if EXP_MODEL_LOADING
+			ExtractSkeleton(scene, scene->mRootNode, modelAsset.Ptr());
+
+			const aiNode* rootBone = FindRootBone(scene, scene->mRootNode, modelAsset.Ptr());
+			BuildBoneHierarchy(scene, rootBone, Maths::Matrix4::Identity, nullptr, modelAsset.Ptr());
+
 			ProcessNode(scene, scene->mRootNode, modelAsset.Ptr());
 			ProcessAnimations(scene, modelAsset.Ptr());
 #else
@@ -453,7 +459,7 @@ namespace Insight
 			modelAsset->m_meshes.push_back(mesh);
 
 			MeshData meshData = { };
-			ParseMeshData(aiScene, aiMesh, meshData, modelAsset);
+			ParseMeshData(aiScene, aiNode, aiMesh, meshData, modelAsset);
 
 			mesh->m_mesh_name = aiMesh->mName.C_Str();
 			mesh->m_transform_offset = AssimpToInsightMatrix4(aiNode->mTransformation);
@@ -526,7 +532,7 @@ namespace Insight
 			}
 		}
 
-		void ModelImporter::ParseMeshData(const aiScene* aiScene, const aiMesh* aiMesh, MeshData& meshData, ModelAsset* modelAsset) const
+		void ModelImporter::ParseMeshData(const aiScene* aiScene, const aiNode* aiNode, const aiMesh* aiMesh, MeshData& meshData, ModelAsset* modelAsset) const
 		{
 			IS_PROFILE_FUNCTION();
 
@@ -605,7 +611,7 @@ namespace Insight
 				}
 			}
 
-			ExtractBoneWeights(aiScene, aiMesh, &meshData, modelAsset);
+			ExtractBoneWeights(aiScene, aiNode, aiMesh, &meshData, modelAsset);
 
 			meshData.LODs.push_back(
 				MeshData::LOD(
@@ -659,8 +665,99 @@ namespace Insight
 			return material;
 		}
 
-		void ModelImporter::ExtractBoneWeights(const aiScene* aiScene, const aiMesh* aiMesh, MeshData* meshData, ModelAsset* modelAsset) const
+		void ModelImporter::ExtractSkeleton(const aiScene* aiScene, const aiNode* aiNode, ModelAsset* modelAsset) const
 		{
+			for (size_t meshIdx = 0; meshIdx < aiNode->mNumMeshes; ++meshIdx)
+			{
+				const aiMesh* aiMesh = aiScene->mMeshes[meshIdx];
+				
+				if (aiMesh->HasBones() && !modelAsset->GetSkeleton(0))
+				{
+					modelAsset->m_skeletons.push_back(Ref<Skeleton>(::New<Skeleton>()));
+				}
+
+				Ref<Skeleton> skeleton = aiMesh->HasBones() ? modelAsset->GetSkeleton(0) : nullptr;
+
+				for (size_t boneIdx = 0; boneIdx < aiMesh->mNumBones; ++boneIdx)
+				{
+					const aiBone* aiBone = aiMesh->mBones[boneIdx];
+					std::string boneName = aiBone->mName.C_Str();
+					SkeletonBone newBone(skeleton->GetNumberOfBones(), boneName, AssimpToInsightMatrix4(aiBone->mOffsetMatrix));
+					skeleton->AddBone(newBone);
+				}
+			}
+
+			for (size_t i = 0; i < aiNode->mNumChildren; ++i)
+			{
+				ExtractSkeleton(aiScene, aiNode->mChildren[i], modelAsset);
+			}
+		}
+
+		const aiNode* ModelImporter::FindRootBone(const aiScene* aiScene, const aiNode* node, ModelAsset* modelAsset) const
+		{
+			Ref<Skeleton> skeleton = modelAsset->m_skeletons.size() > 0 ? modelAsset->GetSkeleton(0) : nullptr;
+
+			if (skeleton && skeleton->HasBone(node->mName.C_Str()))
+			{
+				const aiNode* currentNode = node;
+				const aiNode* parentNode = node->mParent;
+				while (skeleton && skeleton->HasBone(parentNode->mName.C_Str()))
+				{
+					currentNode = parentNode;
+					parentNode = parentNode->mParent;
+				}
+
+				skeleton->m_rootBoneIdx = skeleton->GetBone(currentNode->mName.C_Str()).Id;
+				ASSERT(skeleton->m_rootBoneIdx < -1u);
+				return currentNode;
+			}
+
+			for (size_t i = 0; i < node->mNumChildren; ++i)
+			{
+				const aiNode* rootNode = FindRootBone(aiScene, node->mChildren[i], modelAsset);
+				if (rootNode != nullptr)
+				{
+					return rootNode;
+				}
+			}
+
+			return nullptr;
+		}
+
+		void ModelImporter::BuildBoneHierarchy(const aiScene* aiScene, const aiNode* bone, Maths::Matrix4 transform, SkeletonBone* parentBone, ModelAsset* modelAsset) const
+		{
+			Ref<Skeleton> skeleton = modelAsset->m_skeletons.size() > 0 ? modelAsset->GetSkeleton(0) : nullptr;
+
+			if (skeleton)
+			{
+				SkeletonBone& skeletonBone = skeleton->GetBone(bone->mName.C_Str());
+				if (skeletonBone)
+				{
+					skeletonBone.Offset = transform * skeletonBone.Offset;
+					transform = Maths::Matrix4::Identity;
+
+					if (parentBone)
+					{
+						parentBone->ChildrenBoneIds.push_back(skeletonBone.Id);
+						skeletonBone.ParentBoneId = parentBone->Id;
+					}
+				}
+				else
+				{
+					transform = transform * AssimpToInsightMatrix4(bone->mTransformation);
+				}
+
+				for (size_t i = 0; i < bone->mNumChildren; ++i)
+				{
+					BuildBoneHierarchy(aiScene, bone->mChildren[i], transform, skeletonBone.IsValid() ? &skeletonBone : parentBone, modelAsset);
+				}
+			}
+		}
+
+		void ModelImporter::ExtractBoneWeights(const aiScene* aiScene, const aiNode* aiNode, const aiMesh* aiMesh, MeshData* meshData, ModelAsset* modelAsset) const
+		{
+			IS_PROFILE_FUNCTION();
+
 			if (aiMesh->HasBones() && !modelAsset->GetSkeleton(0))
 			{
 				modelAsset->m_skeletons.push_back(Ref<Skeleton>(::New<Skeleton>()));
@@ -677,8 +774,9 @@ namespace Insight
 
 				if (!skeletonBone.IsValid())
 				{
-					SkeletonBone newBone(skeleton->GetNumberOfBones() + 1, boneName, AssimpToInsightMatrix4(aiBone->mOffsetMatrix));
-					skeleton->m_bones.push_back(newBone);
+					FAIL_ASSERT_MSG("[ModelImporter::ExtractBoneWeights] All skeleton/bone data should have already been found.");
+					SkeletonBone newBone(skeleton->GetNumberOfBones(), boneName, AssimpToInsightMatrix4(aiBone->mOffsetMatrix));
+					skeleton->AddBone(newBone);
 					boneId = newBone.Id;
 				}
 				else
@@ -703,6 +801,8 @@ namespace Insight
 
 		void ModelImporter::SetVertexBoneData(Graphics::Vertex& vertex, const u32 boneId, const float boneWeight) const
 		{
+			IS_PROFILE_FUNCTION();
+
 			for (int i = 0; i < Graphics::Vertex::MAX_BONE_COUNT; ++i)
 			{
 				if (vertex.BoneIds[i] < 0)
@@ -716,6 +816,8 @@ namespace Insight
 
 		void ModelImporter::ProcessAnimations(const aiScene* aiScene, ModelAsset* modelAsset) const
 		{
+			IS_PROFILE_FUNCTION();
+
 			if (!aiScene->HasAnimations())
 			{
 				return;
@@ -727,6 +829,7 @@ namespace Insight
 			for (size_t animIdx = 0; animIdx < aiScene->mNumAnimations; ++animIdx)
 			{
 				Ref<AnimationClip> animationClip = Ref<AnimationClip>(::New<AnimationClip>());
+				animationClip->m_skeleton = skeleton;
 				modelAsset->m_animationClips.push_back(animationClip);
 
 				const aiAnimation* aiAnimation = aiScene->mAnimations[animIdx];
@@ -742,35 +845,43 @@ namespace Insight
 					std::vector<AnimationBoneTrack::RotationKeyFrame> rotations;
 					std::vector<AnimationBoneTrack::ScaleKeyFrame> scales;
 
-					std::unordered_set<float> timestamps;
+					positions.reserve(aiChannelAnim->mNumPositionKeys);
+					rotations.reserve(aiChannelAnim->mNumRotationKeys);
+					scales.reserve(aiChannelAnim->mNumScalingKeys);
 
 					for (size_t posIdx = 0; posIdx < aiChannelAnim->mNumPositionKeys; ++posIdx)
 					{
 						const aiVectorKey aiPosition = aiChannelAnim->mPositionKeys[posIdx];
-						positions.push_back({ AssimpToInsightVector3(aiPosition.mValue), aiPosition.mTime });
+						positions.push_back(AnimationBoneTrack::PositionKeyFrame(AssimpToInsightVector3(aiPosition.mValue), aiPosition.mTime));
 					}
 
 					for (size_t rotIdx = 0; rotIdx < aiChannelAnim->mNumRotationKeys; ++rotIdx)
 					{
 						const aiQuatKey aiRotation = aiChannelAnim->mRotationKeys[rotIdx];
-						rotations.push_back({ AssimpToInsightQuaternion(aiRotation.mValue), aiRotation.mTime });
+						rotations.push_back(AnimationBoneTrack::RotationKeyFrame(AssimpToInsightQuaternion(aiRotation.mValue), aiRotation.mTime));
 					}
 
 					for (size_t scaleIdx = 0; scaleIdx < aiChannelAnim->mNumScalingKeys; ++scaleIdx)
 					{
 						const aiVectorKey aiScale = aiChannelAnim->mScalingKeys[scaleIdx];
-						scales.push_back({ AssimpToInsightVector3(aiScale.mValue), aiScale.mTime });
+						scales.push_back(AnimationBoneTrack::ScaleKeyFrame(AssimpToInsightVector3(aiScale.mValue), aiScale.mTime));
 					}
 
 					const SkeletonBone& bone = skeleton->GetBone(aiChannelAnim->mNodeName.C_Str());
 					if (bone)
 					{
 						AnimationBoneTrack boneTrack(bone.Id, aiChannelAnim->mNodeName.C_Str(), positions, rotations, scales);
-						animationClip->m_boneTracks.push_back(boneTrack);
+						animationClip->AddBoneTrack(boneTrack);
 					}
 					else
 					{
 						FAIL_ASSERT();
+
+						SkeletonBone newBone(skeleton->GetNumberOfBones() + 1, aiChannelAnim->mNodeName.C_Str(), Maths::Matrix4::Identity);
+						skeleton->AddBone(newBone);
+
+						AnimationBoneTrack boneTrack(newBone.Id, aiChannelAnim->mNodeName.C_Str(), positions, rotations, scales);
+						animationClip->AddBoneTrack(boneTrack);
 					}
 				}
 			}

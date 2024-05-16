@@ -2,6 +2,7 @@
 
 #include "Graphics/Defines.h"
 
+#include "Core/TypeAlias.h"
 #include "Maths/Vector2.h"
 #include "Maths/Vector3.h"
 
@@ -56,7 +57,7 @@ namespace Insight
 			float Colour[3];
 			float UV[2];
 
-			float BoneIds[MAX_BONE_COUNT];
+			u32 BoneIds[MAX_BONE_COUNT];
 			float BoneWeights[MAX_BONE_COUNT];
 
 			constexpr int GetStride() { return sizeof(Vertex); }

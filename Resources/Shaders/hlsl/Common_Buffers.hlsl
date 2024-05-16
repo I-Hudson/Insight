@@ -39,4 +39,11 @@ cbuffer BufferPerObject : register(b0, PerObjectUniform)
     float4x4 bpo_Previous_Transform;
 
     float4 bpo_Textures_Set;
+    int bpo_SkinnedMesh;
+}
+
+#define s_MAX_BONE_COUNT 72
+cbuffer BufferPerObjectBoneMatrices : register(b2, PerObjectUniform)
+{
+    float4x4 bpo_BoneMatrices[s_MAX_BONE_COUNT];
 }

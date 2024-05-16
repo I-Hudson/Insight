@@ -109,17 +109,17 @@ namespace Insight::Runtime
 		}
 		m_materials.clear();
 
-		for (Ref<Skeleton>& skeleton : m_skeletons)
-		{
-			skeleton.Reset();
-		}
-		m_skeletons.clear();
-
 		for (Ref<AnimationClip>& animationClip : m_animationClips)
 		{
 			animationClip.Reset();
 		}
 		m_animationClips.clear();
+
+		for (Ref<Skeleton>& skeleton : m_skeletons)
+		{
+			skeleton.Reset();
+		}
+		m_skeletons.clear();
 
 		Renderer::FreeVertexBuffer(m_vertex_buffer);
 		Renderer::FreeIndexBuffer(m_index_buffer);

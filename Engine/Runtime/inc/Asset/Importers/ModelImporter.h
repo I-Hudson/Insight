@@ -32,6 +32,8 @@ namespace Insight
     namespace Runtime
     {
         class Mesh;
+        class Skeleton;
+        struct SkeletonBone;
 
         struct MeshData
         {
@@ -107,10 +109,14 @@ namespace Insight
 #if EXP_MODEL_LOADING
             void ProcessNode(const aiScene* aiScene, const aiNode* aiNode, ModelAsset* modelAsset) const;
             void ProcessMesh(const aiScene* aiScene, const aiNode* aiNode, const aiMesh* aiMesh, ModelAsset* modelAsset) const;
-            void ParseMeshData(const aiScene* aiScene, const aiMesh* aiMesh, MeshData& meshData, ModelAsset* modelAsset) const;
+            void ParseMeshData(const aiScene* aiScene, const aiNode* aiNode, const aiMesh* aiMesh, MeshData& meshData, ModelAsset* modelAsset) const;
             Ref<MaterialAsset> ProcessMaterial(const aiScene* aiScene, const aiNode* aiNode, const aiMaterial* aiMaterial, ModelAsset* modelAsset) const;
 
-            void ExtractBoneWeights(const aiScene* aiScene, const aiMesh* aiMesh, MeshData* meshData, ModelAsset* modelAsset) const;
+            void ExtractSkeleton(const aiScene* aiScene, const aiNode* aiNode, ModelAsset* modelAsset) const;
+            const aiNode* FindRootBone(const aiScene* aiScene, const aiNode* node, ModelAsset* modelAsset) const;
+            void BuildBoneHierarchy(const aiScene* aiScene, const aiNode* bone, Maths::Matrix4 transform, SkeletonBone* parentBone, ModelAsset* modelAsset)  const;
+
+            void ExtractBoneWeights(const aiScene* aiScene, const aiNode* aiNode, const aiMesh* aiMesh, MeshData* meshData, ModelAsset* modelAsset) const;
             void SetVertexBoneData(Graphics::Vertex& vertex, const u32 boneId, const float boneWeight) const;
 
             void ProcessAnimations(const aiScene* aiScene, ModelAsset* modelAsset) const;

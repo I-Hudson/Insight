@@ -31,7 +31,7 @@ namespace Insight
 					const Ref<Runtime::ModelAsset> model = Runtime::AssetRegistry::Instance().LoadAsset(assetGuid).As<Runtime::ModelAsset>();
 					if (model)
 					{
-						for (size_t meshIdx = 0; meshIdx < model->GetMeshCount(); ++meshIdx)
+						for (u32 meshIdx = 0; meshIdx < model->GetMeshCount(); ++meshIdx)
 						{
 							Runtime::Mesh* assetResourceMesh = model->GetMeshByIndex(meshIdx);
 							if (assetResourceMesh->GetName() == meshName)
@@ -75,7 +75,7 @@ namespace Insight
 					const Ref<Runtime::ModelAsset> model = Runtime::AssetRegistry::Instance().LoadAsset(assetGuid).As<Runtime::ModelAsset>();
 					if (model)
 					{
-						for (size_t materialIdx = 0; materialIdx < model->GetMaterialCount(); ++materialIdx)
+						for (u32 materialIdx = 0; materialIdx < model->GetMaterialCount(); ++materialIdx)
 						{
 							Ref<Runtime::MaterialAsset> assetResourceMaterial = model->GetMaterialByIndex(materialIdx);
 							if (assetResourceMaterial->GetName() == mateiralName)

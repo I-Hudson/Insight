@@ -89,10 +89,10 @@ namespace Insight
 			std::string m_title;
 			static std::unordered_map<GLFWwindow*, WindowInputs> m_windowInputs;
 
-			Maths::Vector2 m_fullScreenSize = {0,0};
-			Maths::Vector2 m_fullScreenPosition = {0,0};
-			Maths::Vector2 m_windowedSize = { 0,0 };
-			Maths::Vector2 m_windowedPosition = { 0,0 };
+			Maths::Vector2 m_fullScreenSize = Maths::Vector2(0, 0);
+			Maths::Vector2 m_fullScreenPosition = Maths::Vector2(0, 0);
+			Maths::Vector2 m_windowedSize = Maths::Vector2(0, 0);
+			Maths::Vector2 m_windowedPosition = Maths::Vector2(0, 0);
 
 			GLFWwindow* m_glfwWindow = nullptr;
 			Input::InputSystem* m_inputSystem = nullptr;
