@@ -47,7 +47,7 @@ namespace Insight
 
 				for (size_t boneIdx = 0; boneIdx < MAX_BONE_COUNT; ++boneIdx)
 				{
-					BoneIds[boneIdx] = -1; 
+					BoneIds[boneIdx] = -1.0f; 
 					BoneWeights[boneIdx] = 0.0f;
 				}
 			}
@@ -57,7 +57,7 @@ namespace Insight
 			float Colour[3];
 			float UV[2];
 
-			u32 BoneIds[MAX_BONE_COUNT];
+			float BoneIds[MAX_BONE_COUNT];
 			float BoneWeights[MAX_BONE_COUNT];
 
 			constexpr int GetStride() { return sizeof(Vertex); }

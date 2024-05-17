@@ -24,15 +24,15 @@ VertexOutput VSMain(const GeoVertexInput input)
 	{
 		for(int boneIdx = 0 ; boneIdx < 4 ; ++boneIdx)
     	{
-			const int boneId = input.BoneIds[boneIdx];
-        	if(boneId == -1)
+			const float boneId = input.BoneIds[boneIdx];
+        	if(boneId < 0)
 			{
             	continue;
 			}
 
         	if(boneId >= s_MAX_BONE_COUNT) 
         	{
-            	vsOut.Pos = float4(input.Pos,1.0f);
+            	vsOut.Pos = float4(input.Pos, 1.0f);
             	break;
         	}
         	float4 localPosition = mul(bpo_BoneMatrices[boneId], float4(input.Pos, 1));

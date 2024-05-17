@@ -51,6 +51,11 @@ namespace Insight
             return m_bones[m_rootBoneIdx];
         }
 
+        const SkeletonNode& Skeleton::GetRootNode() const
+        {
+            return m_skeletonNodes[0];
+        }
+
         const std::vector<SkeletonBone>& Skeleton::GetBones() const
         {
             return m_bones;
@@ -110,6 +115,18 @@ namespace Insight
                 }
             }
             return m_inValidBone;
+        }
+
+        SkeletonNode* Skeleton::GetNode(std::string_view name)
+        {
+            for (size_t i = 0; i < m_skeletonNodes.size(); i++)
+            {
+                if (m_skeletonNodes[i].Name == name) 
+                {
+                    return &m_skeletonNodes[i];
+                }
+            }
+            return nullptr;
         }
     }
 }

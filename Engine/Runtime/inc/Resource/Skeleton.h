@@ -31,6 +31,17 @@ namespace Insight
             std::vector<u32> ChildrenBoneIds;
         };
 
+        struct SkeletonNode
+        {
+            std::string Name;
+            Maths::Matrix4 Transforms;
+            std::string ParentName;
+            std::vector<std::string> ChildrenNames;
+            
+            u32 BoneId;
+            std::string BoneName;
+        };
+
         /// @brief Class to store information about a skeleton and its bones.
         class IS_RUNTIME Skeleton : public Core::RefCount
         {
@@ -41,22 +52,28 @@ namespace Insight
             bool HasBone(const std::string_view boneName) const;
 
             const SkeletonBone& GetRootBone() const;
+            const SkeletonNode& GetRootNode() const;
 
             const std::vector<SkeletonBone>& GetBones() const;
             const SkeletonBone& GetBone(const u32 idx) const;
             const SkeletonBone& GetBone(const std::string_view boneName) const;
 
             u32 GetNumberOfBones() const;
-
+        
+            SkeletonNode* GetNode(std::string_view name);
+            SkeletonBone& GetBone(const std::string_view boneName);
         private:
             bool HasBone(const u32 boneId) const;
             void AddBone(const SkeletonBone& bone);
-            SkeletonBone& GetBone(const std::string_view boneName);
+
 
         private:
-            u32 m_rootBoneIdx = -1;
-            std::vector<SkeletonBone> m_bones;
             SkeletonBone m_inValidBone;
+            Maths::Matrix4 m_globalInverseTransforms = Maths::Matrix4::Identity;
+            std::vector<SkeletonBone> m_bones;
+            u32 m_rootBoneIdx = -1;
+
+            std::vector<SkeletonNode> m_skeletonNodes;
 
             friend ModelImporter;
         };

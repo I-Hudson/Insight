@@ -42,9 +42,9 @@ namespace Insight
         {
             if (m_skelton && m_animationClip)
             {
-                m_currentAnimationTime += m_animationClip->GetTickPerSecond() * static_cast<double>(deltaTime);
+                //m_currentAnimationTime += m_animationClip->GetTickPerSecond() * static_cast<double>(deltaTime);
                 m_currentAnimationTime = fmod(m_currentAnimationTime, m_animationClip->GetDuration());
-                CalculateBoneTransform(m_skelton->GetRootBone().Id, Maths::Matrix4::Identity);
+                CalculateBoneTransform(m_skelton->GetRootNode().Name, Maths::Matrix4::Identity);
             }
         }
 
@@ -58,6 +58,11 @@ namespace Insight
             const SkeletonBone& bone = m_skelton->GetBone(boneId);
             ASSERT(bone);
 
+            if (bone.Name == "mixamorig:LeftHand")
+            {
+                //FAIL_ASSERT();
+            }
+
             const Maths::Matrix4 bonePositionMatrix = InterpolatePosition(boneId);
             const Maths::Matrix4 boneRotationMatrix = InterpolateRotation(boneId);
             const Maths::Matrix4 boneScaleMatrix = InterpolateScale(boneId);
@@ -65,13 +70,43 @@ namespace Insight
             const Maths::Matrix4 boneTransform = bonePositionMatrix * boneRotationMatrix * boneScaleMatrix;
             const Maths::Matrix4 globalTransform = parentTransform * boneTransform;
 
-            const Maths::Matrix4 boneOffsetTransform = globalTransform * bone.ParentTransform * bone.Offset;
+            const Maths::Matrix4 boneOffsetTransform = globalTransform * bone.Offset;
             m_boneMatrices[boneId] = boneOffsetTransform;
 
             for (size_t childBoneIdx = 0; childBoneIdx < bone.ChildrenBoneIds.size(); ++childBoneIdx)
             {
                 const u32 childBoneId = bone.ChildrenBoneIds[childBoneIdx];
                 CalculateBoneTransform(childBoneId, globalTransform);
+            }
+        }
+
+        void Animator::CalculateBoneTransform(std::string_view nodeName, const Maths::Matrix4 parentTransform)
+        {
+            SkeletonNode* node = m_skelton->GetNode(nodeName);
+            const SkeletonBone& bone = m_skelton->GetBone(nodeName);
+
+            Maths::Matrix4 nodeTransform = node->Transforms;
+            if (bone)
+            {
+                const Maths::Matrix4 bonePositionMatrix = InterpolatePosition(bone.Id);
+                const Maths::Matrix4 boneRotationMatrix = InterpolateRotation(bone.Id);
+                const Maths::Matrix4 boneScaleMatrix = InterpolateScale(bone.Id);
+
+                const Maths::Matrix4 boneTransform = bonePositionMatrix * boneRotationMatrix * boneScaleMatrix;
+                nodeTransform = boneTransform;
+            }
+
+            const Maths::Matrix4 globalTransform = parentTransform * nodeTransform;
+
+            if (bone)
+            {
+                const Maths::Matrix4 boneOffsetTransform = globalTransform * bone.Offset;
+                m_boneMatrices[bone.Id] = boneOffsetTransform;
+            }
+
+            for (size_t childBoneIdx = 0; childBoneIdx < node->ChildrenNames.size(); ++childBoneIdx)
+            {
+                CalculateBoneTransform(node->ChildrenNames[childBoneIdx], globalTransform);
             }
         }
 

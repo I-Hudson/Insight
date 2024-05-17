@@ -19,9 +19,6 @@ namespace Insight
         {
             struct PositionKeyFrame
             {
-                PositionKeyFrame(Maths::Vector3 position)
-                    : Position(std::move(position))
-                { }
                 PositionKeyFrame(Maths::Vector3 position, double timeStamp)
                     : Position(std::move(position)), TimeStamp(timeStamp)
                 { }
@@ -31,9 +28,6 @@ namespace Insight
             };
             struct RotationKeyFrame
             {
-                RotationKeyFrame(Maths::Quaternion rotation)
-                    : Rotation(std::move(rotation))
-                { }
                 RotationKeyFrame(Maths::Quaternion rotation, double timeStamp)
                     : Rotation(std::move(rotation)), TimeStamp(timeStamp)
                 { }
@@ -43,9 +37,6 @@ namespace Insight
             };
             struct ScaleKeyFrame
             {
-                ScaleKeyFrame(Maths::Vector3 scale)
-                    : Scale(std::move(scale))
-                { }
                 ScaleKeyFrame(Maths::Vector3 scale, double timeStamp)
                     : Scale(std::move(scale)), TimeStamp(timeStamp)
                 { }

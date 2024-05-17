@@ -28,6 +28,7 @@ namespace Insight
 
         private:
             void CalculateBoneTransform(const u32 boneId, const Maths::Matrix4 parentTransform);
+            void CalculateBoneTransform(std::string_view nodeName, const Maths::Matrix4 parentTransform);
 
             /// @brief Gets normalized value for Lerp & Slerp
             /// @param lastTimeStamp 
