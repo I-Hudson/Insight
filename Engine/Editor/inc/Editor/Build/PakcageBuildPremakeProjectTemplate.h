@@ -71,7 +71,7 @@ namespace Insight::Editor
         "%{IncludeDirs.imgui}",
         "%{IncludeDirs.implot}",
         "%{IncludeDirs.xxHash}",
-        "%{IncludeDirs.glm}",
+        --"%{IncludeDirs.glm}",
         "%{IncludeDirs.glfw}",
         "%{IncludeDirs.stb_image}",
         "%{IncludeDirs.splash}",
@@ -172,7 +172,7 @@ namespace Insight::Editor
     links
     {
         "GLFW.lib",
-        "glm.lib",
+        --"glm.lib",
         "imgui.lib",
         "zip.lib",
 

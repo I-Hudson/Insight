@@ -108,7 +108,7 @@ namespace InsightReflectTool
                     TAB_N(indent); file << "#endif" << NEW_LINE;
 
                     TAB_N(indent); file << "ECS::Project::"<< ComponentRegister::c_RegisterAllComponents << "(); " << NEW_LINE;
-                    TAB_N(indent);  file << "IS_INFO(\"Project DLL module initialised\");" << NEW_LINE;
+                    TAB_N(indent);  file << "IS_LOG_INFO(\"Project DLL module initialised\");" << NEW_LINE;
                 }, 1);
 
             Utils::WriteSourceFunctionDefinition(file, "void", ProjectModule::c_Uninitialise, { }, [&](std::fstream& file)
@@ -121,7 +121,7 @@ namespace InsightReflectTool
                     TAB_N(indent); file << "#endif" << NEW_LINE;
 
                     TAB_N(indent); file << "ECS::Project::" << ComponentRegister::c_UnregisterAllComponents << "();" << NEW_LINE;
-                    TAB_N(indent); file << "IS_INFO(\"Project DLL module uninitialised\");" << NEW_LINE;
+                    TAB_N(indent); file << "IS_LOG_INFO(\"Project DLL module uninitialised\");" << NEW_LINE;
                 }, 1);
 
             Utils::WriteSourceFunctionDefinition(file, "std::vector<std::string>", ProjectModule::c_GetEditorWindowNames, { }, [&](std::fstream& file)

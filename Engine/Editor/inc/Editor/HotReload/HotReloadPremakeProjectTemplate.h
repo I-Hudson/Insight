@@ -49,7 +49,7 @@ namespace Insight::Editor
         "%{IncludeDirs.InsightEditor}",
 
         "%{IncludeDirs.glfw}",
-        "%{IncludeDirs.glm}",
+        --"%{IncludeDirs.glm}",
         "%{IncludeDirs.spdlog}",
         "%{IncludeDirs.imgui}",
         "%{IncludeDirs.imgui_string}",
@@ -82,7 +82,7 @@ namespace Insight::Editor
         "Insight_Editor" .. output_project_subfix .. ".lib",
 
         "imgui.lib",
-        "glm.lib",
+        --"glm.lib",
     }
 
     if (profileTool == "pix") then
