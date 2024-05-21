@@ -289,6 +289,7 @@ namespace Insight
 					".obj",
 					".fbx",
 					".gltf",
+					".dae",
 				})
 		{
 		}
@@ -303,12 +304,11 @@ namespace Insight
 			IS_PROFILE_FUNCTION();
 
 			MaterialCache.clear();
-
 			Assimp::Importer importer;
 			// Remove points and lines.
-			//importer.SetPropertyInteger(AI_CONFIG_PP_SBP_REMOVE, aiPrimitiveType_LINE | aiPrimitiveType_POINT);
+			importer.SetPropertyInteger(AI_CONFIG_PP_SBP_REMOVE, aiPrimitiveType_LINE | aiPrimitiveType_POINT);
 			// Remove cameras and lights
-			//importer.SetPropertyInteger(AI_CONFIG_PP_RVC_FLAGS, aiComponent_CAMERAS | aiComponent_LIGHTS);
+			importer.SetPropertyInteger(AI_CONFIG_PP_RVC_FLAGS, aiComponent_CAMERAS | aiComponent_LIGHTS);
 			//importer.SetPropertyBool(AI_CONFIG_IMPORT_FBX_PRESERVE_PIVOTS, false);
 
 			CustomAssimpIOSystem ioSystem;
@@ -319,17 +319,17 @@ namespace Insight
 				// Validate and clean up
 				//aiProcess_ValidateDataStructure			/// Validates the imported scene data structure. This makes sure that all indices are valid, all animations and bones are linked correctly, all material references are correct
 				 aiProcess_Triangulate					/// Triangulates all faces of all meshes
-				//| aiProcess_SortByPType					/// Splits meshes with more than one primitive type in homogeneous sub-meshes.
+				| aiProcess_SortByPType					/// Splits meshes with more than one primitive type in homogeneous sub-meshes.
 
-				//| aiProcess_MakeLeftHanded				/// DirectX style.
-				//| aiProcess_FlipUVs						/// DirectX style.
-				//| aiProcess_FlipWindingOrder			/// DirectX style.
+				| aiProcess_MakeLeftHanded				/// DirectX style.
+				| aiProcess_FlipUVs						/// DirectX style.
+				| aiProcess_FlipWindingOrder			/// DirectX style.
 
-				//| aiProcess_CalcTangentSpace			/// Calculates the tangents and bitangents for the imported meshes.
-				//| aiProcess_GenSmoothNormals			/// Ignored if the mesh already has normal.
-				//| aiProcess_GenUVCoords					/// Converts non-UV mappings (such as spherical or cylindrical mapping) to proper texture coordinate channels.
+				| aiProcess_CalcTangentSpace			/// Calculates the tangents and bitangents for the imported meshes.
+				| aiProcess_GenSmoothNormals			/// Ignored if the mesh already has normal.
+				| aiProcess_GenUVCoords					/// Converts non-UV mappings (such as spherical or cylindrical mapping) to proper texture coordinate channels.
 				
-				//| aiProcess_GenBoundingBoxes			//
+				| aiProcess_GenBoundingBoxes			//
 
 				//| aiProcess_RemoveRedundantMaterials	/// Searches for redundant/unreferenced materials and removes them
 				//| aiProcess_JoinIdenticalVertices		/// Triangulates all faces of all meshes
@@ -694,7 +694,7 @@ namespace Insight
 			material->SetProperty(MaterialAssetProperty::Colour_B, colour.b);
 			material->SetProperty(MaterialAssetProperty::Colour_A, colour.a);
 
-			material->SetProperty(MaterialAssetProperty::Opacity, opacity);
+			//material->SetProperty(MaterialAssetProperty::Opacity, opacity);
 
 			MaterialCache[aiMaterial] = material;
 			return material;
@@ -726,7 +726,7 @@ namespace Insight
 
 			if (!hasBones)
 			{
-				parentTransform = AssimpToInsightMatrix4(aiNode->mTransformation) * parentTransform;
+				parentTransform = parentTransform * AssimpToInsightMatrix4(aiNode->mTransformation);
 			}
 
 			for (size_t i = 0; i < aiNode->mNumChildren; ++i)

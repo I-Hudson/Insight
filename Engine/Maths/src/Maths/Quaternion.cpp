@@ -47,6 +47,24 @@ namespace Insight
             return data[index];
         }
 
+        Quaternion& Quaternion::Normalise()
+        {
+            const float length = Length();
+            if (length <= 0.0f)
+            {
+                *this = Quaternion(1, 0, 0, 0);
+                return *this;
+            }
+            const float oneOver = 1.0f / length;
+            *this = Quaternion(w * oneOver, x * oneOver, y * oneOver, z * oneOver);
+            return *this;
+        }
+
+        float Quaternion::Length() const
+        {
+            return std::sqrtf(Dot(*this));
+        }
+
         Quaternion Quaternion::Inversed() const
         {
             return Conjugate(*this) / Dot(*this);

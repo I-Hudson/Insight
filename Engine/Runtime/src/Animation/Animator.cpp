@@ -58,11 +58,6 @@ namespace Insight
             const SkeletonBone& bone = m_skelton->GetBone(boneId);
             ASSERT(bone);
 
-            if (bone.Name == "mixamorig:LeftHand")
-            {
-                //FAIL_ASSERT();
-            }
-
             const Maths::Matrix4 bonePositionMatrix = InterpolatePosition(boneId);
             const Maths::Matrix4 boneRotationMatrix = InterpolateRotation(boneId);
             const Maths::Matrix4 boneScaleMatrix = InterpolateScale(boneId);
@@ -163,7 +158,7 @@ namespace Insight
             }
             else if (boneTrack->Rotations.size() == 1)
             {
-                return Maths::Matrix4(boneTrack->Rotations[0].Rotation);
+                return Maths::Matrix4(boneTrack->Rotations[0].Rotation.Normalised());
             }
 
             const u32 p0Index = boneTrack->GetRotationKeyFrameIndex(m_currentAnimationTime);
@@ -175,7 +170,7 @@ namespace Insight
             const float scaleFactor = GetScaleFactor(p0KeyFrame.TimeStamp, p1KeyFrame.TimeStamp);
             const Maths::Quaternion finalRotation = p0KeyFrame.Rotation.Slerp(p1KeyFrame.Rotation, scaleFactor);
 
-            return Maths::Matrix4(finalRotation);
+            return Maths::Matrix4(finalRotation.Normalised());
         }
 
         Maths::Matrix4 Animator::InterpolateScale(const u32 boneId) const

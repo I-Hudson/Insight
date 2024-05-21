@@ -22,6 +22,7 @@ namespace Insight
         class IS_MATHS Quaternion
         {
         public:
+            Quaternion() = default;
             Quaternion(const Quaternion& quaternion) = default;
             Quaternion(const Maths::Float3& eulerAngles);
             Quaternion(const float eulerX, const float eulerY, const float eulerZ);
@@ -31,7 +32,13 @@ namespace Insight
             float& operator[](const int index);
             const float& operator[](const int index) const;
 
+            Quaternion& Normalise();
+            Quaternion Normalised() const { return Quaternion(*this).Normalise(); }
+
+            float Length() const;
+
             Quaternion Inversed() const;
+
             float Dot(const Quaternion& q) const;
             Quaternion Slerp(const Quaternion& q, const float time) const;
 
