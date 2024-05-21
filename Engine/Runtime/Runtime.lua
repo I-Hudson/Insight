@@ -76,9 +76,12 @@ project "Insight_Runtime"
         "inc/**.h", 
         "inc/**.inl", 
         "src/**.cpp",
+        "src/**.c",
         "src/**.inl",
 
         "inc/**.cpp", 
+
+        "**.natvis",
 
         "../Core/inc/Memory/NewDeleteOverload.h", 
         "../Core/src/Memory/NewDeleteOverload.cpp",

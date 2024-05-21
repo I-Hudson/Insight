@@ -16,11 +16,10 @@
 #include <assimp/postprocess.h>
 
 #include <assimp/mesh.h>
-#include <assimp/DefaultIOSystem.h>
+//#include <assimp/DefaultIOSystem.h>
 #include <assimp/IOStream.hpp>
 
 #include <meshoptimizer.h>
-
 #include <unordered_set>
 
 #define SINGLE_MESH 0
@@ -120,39 +119,39 @@ namespace Insight
 		//=============================================
 		// CustomAssimpIOSystem
 		//=============================================
-		class CustomAssimpIOSystem : public Assimp::DefaultIOSystem
-		{
-			/*
-				This must use the C++ new and delete and not Insight's own New and Delete
-				as some loaders like gtlf uses shared_ptrs. Because of this if we use our own New
-				then we never call our own Delete so Insight doesn't know that a pointer has been deleted.
-			*/
-		public:
-			virtual bool Exists(const char* pFile) const override
-			{
-				return AssetRegistry::Instance().GetAssetInfo(pFile) != nullptr;
-			}
-
-			virtual char getOsSeparator() const override
-			{
-				return '\\';
-			}
-
-			virtual Assimp::IOStream* Open(const char* pFile,
-				const char* pMode = "rb") override
-			{
-				const AssetInfo* assetInfo = AssetRegistry::Instance().GetAssetInfo(pFile);
-				Assimp::IOStream* stream = new CustomAssimpIOStrean(pFile, assetInfo);
-				Core::MemoryTracker::Instance().NameAllocation(stream, assetInfo->GetFullFilePath().c_str());
-				return stream;
-			}
-
-			virtual void Close(Assimp::IOStream* pFile) override
-			{
-				delete pFile;
-			}
-
-		};
+		//class CustomAssimpIOSystem : public Assimp::DefaultIOSystem
+		//{
+		//	/*
+		//		This must use the C++ new and delete and not Insight's own New and Delete
+		//		as some loaders like gtlf uses shared_ptrs. Because of this if we use our own New
+		//		then we never call our own Delete so Insight doesn't know that a pointer has been deleted.
+		//	*/
+		//public:
+		//	virtual bool Exists(const char* pFile) const override
+			//{
+			//	return AssetRegistry::Instance().GetAssetInfo(pFile) != nullptr;
+			//}
+		//
+		//	virtual char getOsSeparator() const override
+			//{
+			//	return '\\';
+			//}
+		//
+		//	virtual Assimp::IOStream* Open(const char* pFile,
+		//		const char* pMode = "rb") override
+			//{
+			//	const AssetInfo* assetInfo = AssetRegistry::Instance().GetAssetInfo(pFile);
+			//	Assimp::IOStream* stream = new CustomAssimpIOStrean(pFile, assetInfo);
+			//	Core::MemoryTracker::Instance().NameAllocation(stream, assetInfo->GetFullFilePath().c_str());
+			//	return stream;
+			//}
+		//
+		//	virtual void Close(Assimp::IOStream* pFile) override
+			//{
+			//	delete pFile;
+			//}
+		//
+		//};
 
 		//=============================================
 		// MeshData
@@ -304,6 +303,21 @@ namespace Insight
 			IS_PROFILE_FUNCTION();
 
 			MaterialCache.clear();
+
+			Ref<ModelAsset> modelAsset = asset.As<ModelAsset>();
+			modelAsset.Ptr()->m_assetState = AssetState::Loading;
+			//modelAsset->SetName(scene->mName.C_Str());
+
+#if ENABLED_UFBX
+			std::vector<Byte> modelData = AssetRegistry::Instance().LoadAssetData(assetInfo->GetFullFilePath());
+			const ufbx_load_opts loadOptions = {};
+			ufbx_error fbxError = {};
+			const ufbx_scene* scene = ufbx_load_memory(modelData.data(), modelData.size(), &loadOptions, &fbxError);
+			if (scene)
+			{
+				ProcessNodeUfbx(scene, scene->root_node, modelAsset.Ptr());
+			}
+#elif EXP_MODEL_LOADING
 			Assimp::Importer importer;
 			// Remove points and lines.
 			importer.SetPropertyInteger(AI_CONFIG_PP_SBP_REMOVE, aiPrimitiveType_LINE | aiPrimitiveType_POINT);
@@ -311,25 +325,25 @@ namespace Insight
 			importer.SetPropertyInteger(AI_CONFIG_PP_RVC_FLAGS, aiComponent_CAMERAS | aiComponent_LIGHTS);
 			//importer.SetPropertyBool(AI_CONFIG_IMPORT_FBX_PRESERVE_PIVOTS, false);
 
-			CustomAssimpIOSystem ioSystem;
-			importer.SetIOHandler(&ioSystem);
+			//CustomAssimpIOSystem ioSystem;
+			//importer.SetIOHandler(&ioSystem);
 
 			const uint32_t importerFlags =
 				// Switch to engine conventions
 				// Validate and clean up
-				//aiProcess_ValidateDataStructure			/// Validates the imported scene data structure. This makes sure that all indices are valid, all animations and bones are linked correctly, all material references are correct
-				 aiProcess_Triangulate					/// Triangulates all faces of all meshes
-				| aiProcess_SortByPType					/// Splits meshes with more than one primitive type in homogeneous sub-meshes.
+				// aiProcess_ValidateDataStructure			/// Validates the imported scene data structure. This makes sure that all indices are valid, all animations and bones are linked correctly, all material references are correct
+				aiProcess_Triangulate					/// Triangulates all faces of all meshes
+				//| aiProcess_SortByPType					/// Splits meshes with more than one primitive type in homogeneous sub-meshes.
 
-				| aiProcess_MakeLeftHanded				/// DirectX style.
-				| aiProcess_FlipUVs						/// DirectX style.
-				| aiProcess_FlipWindingOrder			/// DirectX style.
+				//| aiProcess_MakeLeftHanded				/// DirectX style.
+				//| aiProcess_FlipUVs						/// DirectX style.
+				//| aiProcess_FlipWindingOrder			/// DirectX style.
 
-				| aiProcess_CalcTangentSpace			/// Calculates the tangents and bitangents for the imported meshes.
-				| aiProcess_GenSmoothNormals			/// Ignored if the mesh already has normal.
-				| aiProcess_GenUVCoords					/// Converts non-UV mappings (such as spherical or cylindrical mapping) to proper texture coordinate channels.
+				//| aiProcess_CalcTangentSpace			/// Calculates the tangents and bitangents for the imported meshes.
+				//| aiProcess_GenSmoothNormals			/// Ignored if the mesh already has normal.
+				//| aiProcess_GenUVCoords					/// Converts non-UV mappings (such as spherical or cylindrical mapping) to proper texture coordinate channels.
 				
-				| aiProcess_GenBoundingBoxes			//
+				//| aiProcess_GenBoundingBoxes			//
 
 				//| aiProcess_RemoveRedundantMaterials	/// Searches for redundant/unreferenced materials and removes them
 				//| aiProcess_JoinIdenticalVertices		/// Triangulates all faces of all meshes
@@ -347,13 +361,6 @@ namespace Insight
 				IS_LOG_CORE_ERROR("[ModelImporter::Import] Assimp model load: {0}", importer.GetErrorString());
 				return;
 			}
-
-
-			Ref<ModelAsset> modelAsset = asset.As<ModelAsset>();
-			modelAsset.Ptr()->m_assetState = AssetState::Loading;
-			modelAsset->SetName(scene->mName.C_Str());
-
-#if EXP_MODEL_LOADING
 			ExtractSkeleton(scene, scene->mRootNode, Maths::Matrix4::Identity, modelAsset.Ptr());
 
 			if (Ref<Skeleton> skeleton = modelAsset->GetSkeleton(0))
@@ -445,7 +452,106 @@ namespace Insight
 			modelAsset.Ptr()->m_assetState = AssetState::Loaded;
 		}
 
-#if EXP_MODEL_LOADING
+#if ENABLED_UFBX
+		void ModelImporter::ProcessNodeUfbx(const ufbx_scene* fbxScene, const ufbx_node* fbxNode, ModelAsset* modelAsset) const
+		{
+			if (fbxNode->mesh)
+			{
+				ProcessMeshUfbx(fbxScene, fbxNode, fbxNode->mesh, modelAsset);
+			}
+
+			for (size_t i = 0; i < fbxNode->children.count; ++i)
+			{
+				ProcessNodeUfbx(fbxScene, fbxNode->children[i], modelAsset);
+			}
+		}
+
+		void ModelImporter::ProcessMeshUfbx(const ufbx_scene* fbxScene, const ufbx_node* fbxNode, const ufbx_mesh* fbxMesh, ModelAsset* modelAsset) const
+		{
+			MeshData meshData;
+			ParseMeshDataUfbx(fbxScene, fbxNode, fbxMesh, meshData, modelAsset);
+			ProcessMesh(meshData, modelAsset);
+
+			if (fbxNode->materials.count > 0)
+			{
+				Ref<MaterialAsset> mateiral = ProcessMaterialUfbx(fbxScene, fbxNode, *fbxNode->materials.data, fbxNode->materials.count, modelAsset);
+				modelAsset->m_materials.push_back(mateiral);
+				modelAsset->m_meshes.back()->SetMaterial(mateiral);
+			}
+		}
+
+		void ModelImporter::ParseMeshDataUfbx(const ufbx_scene* fbxScene, const ufbx_node* fbxNode, const ufbx_mesh* fbxMesh, MeshData& meshData, ModelAsset* modelAsset) const
+		{
+			std::vector<uint32_t> tri_indices;
+			tri_indices.resize(fbxMesh->max_face_triangles * 3);
+
+			for (size_t matPartIdx = 0; matPartIdx < fbxMesh->material_parts.count; ++matPartIdx)
+			{
+				const ufbx_mesh_part& partList = fbxMesh->material_parts[matPartIdx];
+				for (size_t faceIdx = 0; faceIdx < partList.face_indices.count; ++faceIdx)
+				{
+					const ufbx_face face = fbxMesh->faces[faceIdx];
+
+					// Triangulate the face into `tri_indices[]`.
+					uint32_t num_tris = ufbx_triangulate_face(tri_indices.data(), tri_indices.size(), fbxMesh, face);
+
+					// Iterate over each triangle corner contiguously.
+					for (size_t vertexIdx = 0; vertexIdx < num_tris * 3; ++vertexIdx)
+					{
+						uint32_t index = tri_indices[vertexIdx];
+
+						Graphics::Vertex v;
+						ufbx_vec3 position = fbxMesh->vertex_position.exists ? fbxMesh->vertex_position[index] : ufbx_vec3();
+						ufbx_vec3 normal = fbxMesh->vertex_normal.exists ? fbxMesh->vertex_normal[index] : ufbx_vec3();
+						ufbx_vec4 colour = fbxMesh->vertex_color.exists ? fbxMesh->vertex_color[index] : ufbx_vec4({ (rand() % 100 + 1) * 0.01f, (rand() % 100 + 1) * 0.01f, (rand() % 100 + 1) * 0.01f, 1.0f });
+						ufbx_vec2 uv = fbxMesh->vertex_uv.exists ? fbxMesh->vertex_uv[index] : ufbx_vec2();
+
+						meshData.Vertices.push_back(
+							Graphics::Vertex(
+								Maths::Vector3(position.x, position.y, position.z),
+								Maths::Vector3(normal.x, normal.y, normal.z),
+								Maths::Vector3(colour.x, colour.y, colour.z),
+								Maths::Vector2(uv.x, uv.y)));
+					}
+				}
+				ASSERT(meshData.Vertices.size() == partList.num_triangles * 3);
+
+				// Generate the index buffer.
+				ufbx_vertex_stream streams[1] = {
+					{ meshData.Vertices.data(), meshData.Vertices.size(), sizeof(Graphics::Vertex) },
+				};
+				meshData.Indices.resize(partList.num_triangles * 3);
+
+				// This call will deduplicate vertices, modifying the arrays passed in `streams[]`,
+				// indices are written in `indices[]` and the number of unique vertices is returned.
+				size_t num_vertices = ufbx_generate_indices(streams, 1, meshData.Indices.data(), meshData.Indices.size(), nullptr, nullptr);
+
+				// Trim to only unique vertices.
+				meshData.Vertices.resize(num_vertices);
+			}
+
+			meshData.LODs.push_back(
+			MeshData::LOD(
+				0,
+				0,
+				static_cast<u32>(meshData.Vertices.size()),
+				0,
+				static_cast<u32>(meshData.Indices.size())));
+		}
+
+		Ref<MaterialAsset> ModelImporter::ProcessMaterialUfbx(const ufbx_scene* fbxScene, const ufbx_node* fbxNode, const ufbx_material* materialsData, const u32 materialsCount, ModelAsset* modelAsset) const
+		{
+			const ufbx_material& fbxMaterial = *materialsData;
+
+			const std::string diffuseTexturePath = fbxMaterial.fbx.diffuse_color.texture->absolute_filename.data;
+			Ref<TextureAsset> diffuseTexture = AssetRegistry::Instance().LoadAsset(diffuseTexturePath).As<TextureAsset>();
+
+			Ref<MaterialAsset> material = ::New<MaterialAsset>(modelAsset->GetAssetInfo());
+			material->SetTexture(TextureAssetTypes::Diffuse, diffuseTexture);
+
+			return material;
+		}
+#elif EXP_MODEL_LOADING
 		void ModelImporter::ProcessNode(const aiScene* assimpScene, const aiNode* assimpNode, ModelAsset* modelAsset) const
 		{
 			if (modelAsset->GetSkeleton(0))
@@ -493,9 +599,9 @@ namespace Insight
 			mesh->m_mesh_name = aiMesh->mName.C_Str();
 			mesh->m_transform_offset = AssimpToInsightMatrix4(aiNode->mTransformation);
 			//mesh->m_boundingBox = Graphics::BoundingBox(meshData.Vertices.data(), static_cast<u32>(meshData.Vertices.size()));
-			mesh->m_boundingBox = Graphics::BoundingBox(
-				Maths::Vector3(aiMesh->mAABB.mMin.x, aiMesh->mAABB.mMin.y, aiMesh->mAABB.mMin.z),
-				Maths::Vector3(aiMesh->mAABB.mMax.x, aiMesh->mAABB.mMax.y, aiMesh->mAABB.mMax.z));
+			//mesh->m_boundingBox = Graphics::BoundingBox(
+			//	Maths::Vector3(aiMesh->mAABB.mMin.x, aiMesh->mAABB.mMin.y, aiMesh->mAABB.mMin.z),
+			//	Maths::Vector3(aiMesh->mAABB.mMax.x, aiMesh->mAABB.mMax.y, aiMesh->mAABB.mMax.z));
 
 			if (!meshData.Vertices.empty() && !meshData.Indices.empty())
 			{
@@ -666,15 +772,17 @@ namespace Insight
 			{
 				return iter->second;
 			}
-
 			ASSERT_MSG(aiMaterial, "[ModelImporter::ProcessMaterial] AssimpMaterial from MeshNode was nullptr. This shouldn't happen.");
-			const std::string materialname = aiMaterial->GetName().C_Str();
+			
+			Ref<MaterialAsset> material = ::New<MaterialAsset>(modelAsset->GetAssetInfo());
+			return material;
 
+			const std::string materialname;// aiMaterial->GetName().C_Str();
 			const std::string_view Directory = modelAsset->GetAssetInfo()->FilePath;
-			const std::string diffuseTexturePath = GetTexturePath(aiMaterial, Directory, aiTextureType_BASE_COLOR, aiTextureType_DIFFUSE);
+			const std::string diffuseTexturePath = GetTexturePath(aiMaterial, Directory, aiTextureType_DIFFUSE, aiTextureType_DIFFUSE);
 			Ref<TextureAsset> diffuseTexture = AssetRegistry::Instance().LoadAsset(diffuseTexturePath).As<TextureAsset>();
 
-			const std::string normalTexturePath = GetTexturePath(aiMaterial, Directory, aiTextureType_NORMAL_CAMERA, aiTextureType_NORMALS);
+			const std::string normalTexturePath = GetTexturePath(aiMaterial, Directory, aiTextureType_NORMALS, aiTextureType_NORMALS);
 			Ref<TextureAsset> normalTexture = AssetRegistry::Instance().LoadAsset(normalTexturePath).As<TextureAsset>();
 
 			aiColor4D colour(1.0f);
@@ -683,7 +791,6 @@ namespace Insight
 			float opacity(1.0f);
 			aiGetMaterialFloat(aiMaterial, AI_MATKEY_OPACITY, &opacity);
 
-			Ref<MaterialAsset> material = ::New<MaterialAsset>(modelAsset->GetAssetInfo());
 			material->SetName(materialname);
 
 			material->SetTexture(TextureAssetTypes::Diffuse, diffuseTexture);
@@ -1095,7 +1202,6 @@ namespace Insight
 					meshLod.Vertex_buffer->SetName(vertexBufferName);
 					meshLod.Index_buffer->SetName(indexBufferName);
 				}
-
 			}
 		}
 
@@ -1233,7 +1339,72 @@ namespace Insight
 			return material;
 		}
 #endif
+		void ModelImporter::ProcessMesh(MeshData& meshData, ModelAsset* modelAsset) const
+		{
+			Mesh* mesh = ::New<Mesh>();
+			modelAsset->m_meshes.push_back(mesh);
 
+			mesh->m_mesh_name = meshData.Name;
+			mesh->m_transform_offset = meshData.TransformOffset;
+			//mesh->m_boundingBox = Graphics::BoundingBox(meshData.Vertices.data(), static_cast<u32>(meshData.Vertices.size()));
+			//mesh->m_boundingBox = Graphics::BoundingBox(
+			//	Maths::Vector3(aiMesh->mAABB.mMin.x, aiMesh->mAABB.mMin.y, aiMesh->mAABB.mMin.z),
+			//	Maths::Vector3(aiMesh->mAABB.mMax.x, aiMesh->mAABB.mMax.y, aiMesh->mAABB.mMax.z));
+
+			if (!meshData.Vertices.empty() && !meshData.Indices.empty())
+			{
+				//meshData.Optimise();
+				//meshData.GenerateLODs();
+
+				ASSERT(mesh);
+
+				if (!meshData.RHI_VertexBuffer)
+				{
+					meshData.RHI_VertexBuffer = Renderer::CreateVertexBuffer(meshData.Vertices.size() * sizeof(Graphics::Vertex), sizeof(Graphics::Vertex));
+					// TODO: Look into why when using the Sponza model and QueueUpload if the editor camera is in certain positions then the mesh disappears.
+					//meshData.RHI_VertexBuffer->QueueUpload(meshData.Vertices.data(), meshData.RHI_VertexBuffer->GetSize());
+					meshData.RHI_VertexBuffer->Upload(meshData.Vertices.data(), meshData.RHI_VertexBuffer->GetSize());
+				}
+				else
+				{
+					// We already have a buffer, just upload out data.
+					FAIL_ASSERT();
+				}
+
+				if (!meshData.RHI_IndexBuffer)
+				{
+					meshData.RHI_IndexBuffer = Renderer::CreateIndexBuffer(meshData.Indices.size() * sizeof(u32));
+					//meshData.RHI_IndexBuffer->QueueUpload(meshData.Indices.data(), meshData.RHI_IndexBuffer->GetSize());
+					meshData.RHI_IndexBuffer->Upload(meshData.Indices.data(), meshData.RHI_IndexBuffer->GetSize());
+				}
+				else
+				{
+					// We already have a buffer, just upload out data.
+					FAIL_ASSERT();
+				}
+
+				mesh->m_lods.resize(meshData.LODs.size());
+				for (size_t lodIdx = 0; lodIdx < meshData.LODs.size(); ++lodIdx)
+				{
+					MeshData::LOD meshDataLod = meshData.LODs[lodIdx];
+					MeshLOD& meshLod = mesh->m_lods[lodIdx];
+					meshLod.LOD_index = static_cast<u32>(lodIdx);
+
+					meshLod.Vertex_offset = static_cast<u32>(meshDataLod.Vertex_offset);
+					meshLod.Vertex_count = static_cast<u32>(meshDataLod.Vertex_count);
+					meshLod.First_index = static_cast<u32>(meshDataLod.First_index);
+					meshLod.Index_count = static_cast<u32>(meshDataLod.Index_count);
+
+					meshLod.Vertex_buffer = meshData.RHI_VertexBuffer;
+					meshLod.Index_buffer = meshData.RHI_IndexBuffer;
+
+					const std::string vertexBufferName = mesh->m_mesh_name + "_Veretx";
+					const std::string indexBufferName = mesh->m_mesh_name + "_Index";
+					meshLod.Vertex_buffer->SetName(vertexBufferName);
+					meshLod.Index_buffer->SetName(indexBufferName);
+				}
+			}
+		}
 
 		std::string ModelImporter::GetTexturePath(const aiMaterial* aiMaterial, const std::string_view directory, const aiTextureType textureTypePBR, const aiTextureType textureTypeLegacy) const
 		{
@@ -1249,7 +1420,7 @@ namespace Insight
 
 			if (textureType == aiTextureType_NONE)
 			{
-				IS_LOG_CORE_ERROR("[ModelImporter::GetTexturePath] Unable to find PRB/Legacy textures for material '{}'.", aiMaterial->GetName().C_Str());
+				//IS_LOG_CORE_ERROR("[ModelImporter::GetTexturePath] Unable to find PRB/Legacy textures for material '{}'.", aiMaterial->GetName().C_Str());
 				return std::string();
 			}
 

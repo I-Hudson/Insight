@@ -262,7 +262,6 @@ namespace Insight
 
 		Vector3 Vector3::Lerp(const Vector3& vec, const float time) const
 		{
-			assert(time >= 0.0f && time <= 1.0f);
 			return Vector3(*this * (1 - time) + (vec * time));
 		}
 

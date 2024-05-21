@@ -11,9 +11,11 @@
 
 #include <assimp/matrix4x4.h>
 #include <assimp/quaternion.h>
+#include <FBX/ufbx.h>
 
 #include <vector>
 
+#define ENABLED_UFBX 1
 #define EXP_MODEL_LOADING 1
 
 struct aiNode;
@@ -65,6 +67,7 @@ namespace Insight
             Graphics::RHI_Buffer* RHI_MonolithIndexBuffer = nullptr;
 
             Maths::Matrix4 TransformOffset;
+            std::string Name;
         };
 
         struct MeshNode
@@ -106,7 +109,12 @@ namespace Insight
             virtual void Import(Ref<Asset>& asset, const AssetInfo* assetInfo, const std::string_view path) const override;
 
         private:
-#if EXP_MODEL_LOADING
+#if ENABLED_UFBX
+            void ProcessNodeUfbx(const ufbx_scene* fbxScene, const ufbx_node* fbxNode, ModelAsset* modelAsset) const;
+            void ProcessMeshUfbx(const ufbx_scene* fbxScene, const ufbx_node* fbxNode, const ufbx_mesh* fbxMesh, ModelAsset* modelAsset) const;
+            void ParseMeshDataUfbx(const ufbx_scene* fbxScene, const ufbx_node* fbxNode, const ufbx_mesh* fbxMesh, MeshData& meshData, ModelAsset* modelAsset) const;
+            Ref<MaterialAsset> ProcessMaterialUfbx(const ufbx_scene* fbxScene, const ufbx_node* fbxNode, const ufbx_material* materialsData, const u32 materialsCount, ModelAsset* modelAsset) const;
+#elif EXP_MODEL_LOADING
             void ProcessNode(const aiScene* aiScene, const aiNode* aiNode, ModelAsset* modelAsset) const;
             void ProcessMesh(const aiScene* aiScene, const aiNode* aiNode, const aiMesh* aiMesh, ModelAsset* modelAsset) const;
             void ParseMeshData(const aiScene* aiScene, const aiNode* aiNode, const aiMesh* aiMesh, MeshData& meshData, ModelAsset* modelAsset) const;
@@ -128,6 +136,7 @@ namespace Insight
             Ref<MaterialAsset> ProcessMaterial(MeshNode* meshNode) const;
 #endif
             
+            void ProcessMesh(MeshData& meshData, ModelAsset* modelAsset) const;
 
             /// @brief Returns the texture path from the model directory.
             /// @param aiMaterial 

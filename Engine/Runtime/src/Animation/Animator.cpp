@@ -42,7 +42,7 @@ namespace Insight
         {
             if (m_skelton && m_animationClip)
             {
-                //m_currentAnimationTime += m_animationClip->GetTickPerSecond() * static_cast<double>(deltaTime);
+                m_currentAnimationTime += m_animationClip->GetTickPerSecond() * static_cast<double>(deltaTime);
                 m_currentAnimationTime = fmod(m_currentAnimationTime, m_animationClip->GetDuration());
                 CalculateBoneTransform(m_skelton->GetRootNode().Name, Maths::Matrix4::Identity);
             }
