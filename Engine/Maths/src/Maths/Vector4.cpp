@@ -90,7 +90,7 @@ namespace Insight
 			x = other.x;
 			y = other.y;
 			z = other.z;
-			w = w;
+			this->w = w;
 #endif
 		}
 		Vector4::Vector4(Float3&& other)

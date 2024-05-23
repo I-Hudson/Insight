@@ -6,6 +6,8 @@
 
 #include "Maths/Matrix4.h"
 
+#include <map>
+
 namespace Insight
 {
     namespace Runtime
@@ -22,8 +24,8 @@ namespace Insight
             bool IsValid() const;
 
             /// @brief This isn't actual it's parents transform, just a transform which needs to be applied before the offset is.
-            Maths::Matrix4 ParentTransform = Maths::Matrix4::Identity;
-            Maths::Matrix4 Offset = Maths::Matrix4::Identity;
+            Maths::Matrix4 ParentTransform;
+            Maths::Matrix4 Offset;
             std::string Name = "";
             u32 Id = -1;
 
@@ -66,11 +68,11 @@ namespace Insight
             bool HasBone(const u32 boneId) const;
             void AddBone(const SkeletonBone& bone);
 
-
         private:
             SkeletonBone m_inValidBone;
             Maths::Matrix4 m_globalInverseTransforms = Maths::Matrix4::Identity;
             std::vector<SkeletonBone> m_bones;
+            std::map<std::string, SkeletonBone> m_boneMaps;
             u32 m_rootBoneIdx = -1;
 
             std::vector<SkeletonNode> m_skeletonNodes;

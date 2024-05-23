@@ -27,7 +27,13 @@ namespace Insight
 			const static uint32_t MAX_BONE_COUNT = 4;
 
 			Vertex()
-			{ }
+			{
+				for (size_t boneIdx = 0; boneIdx < MAX_BONE_COUNT; ++boneIdx)
+				{
+					BoneIds[boneIdx] = -1;
+					BoneWeights[boneIdx] = 0.0f;
+				}
+			}
 			Vertex(Maths::Vector3 pos, Maths::Vector3 nor, Maths::Vector3 colour, Maths::Vector2 uv)
 			{
 				Position[0] = pos[0];
@@ -47,7 +53,7 @@ namespace Insight
 
 				for (size_t boneIdx = 0; boneIdx < MAX_BONE_COUNT; ++boneIdx)
 				{
-					BoneIds[boneIdx] = -1.0f; 
+					BoneIds[boneIdx] = -1; 
 					BoneWeights[boneIdx] = 0.0f;
 				}
 			}
@@ -57,7 +63,7 @@ namespace Insight
 			float Colour[3];
 			float UV[2];
 
-			float BoneIds[MAX_BONE_COUNT];
+			int BoneIds[MAX_BONE_COUNT];
 			float BoneWeights[MAX_BONE_COUNT];
 
 			constexpr int GetStride() { return sizeof(Vertex); }

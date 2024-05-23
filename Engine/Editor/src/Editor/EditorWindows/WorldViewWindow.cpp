@@ -505,7 +505,6 @@ namespace Insight
                 [this](WorldGBufferData& data, Graphics::RenderGraph& render_graph, Graphics::RHI_CommandList* cmdList)
                 {
                     IS_PROFILE_SCOPE("EditorWorldGBuffer pass execute");
-
                     Graphics::PipelineStateObject pso = render_graph.GetPipelineStateObject("EditorWorldGBuffer");
                     cmdList->BindPipeline(pso, nullptr);
                     cmdList->BeginRenderpass(render_graph.GetRenderpassDescription("EditorWorldGBuffer"));
@@ -695,7 +694,7 @@ namespace Insight
                             object.SkinnedMesh = mesh.SkinnedMesh;
                             if (object.SkinnedMesh)
                             {
-                                const u32 c_Max_Bone_Matrices = 72;
+                                const u32 c_Max_Bone_Matrices = 101;
                                 struct SkinnedBonesMatrices
                                 {
                                     Maths::Matrix4 BoneMatrices[c_Max_Bone_Matrices];

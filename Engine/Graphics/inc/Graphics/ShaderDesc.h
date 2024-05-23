@@ -90,8 +90,8 @@ namespace Insight
 					ShaderInputLayout(2, PixelFormat::R32G32B32_Float, 24, "COLOR0"),
 					ShaderInputLayout(3, PixelFormat::R32G32_Float, 36, "TEXCOORD0"),
 
-					ShaderInputLayout(4, PixelFormat::R32G32B32A32_Float, 44, "POSITION1"),
-					ShaderInputLayout(5, PixelFormat::R32G32B32A32_Float, 60, "POSITION2"),
+					ShaderInputLayout(4, PixelFormat::R32G32B32A32_SInt, 44, "BLENDINDICES"),
+					ShaderInputLayout(5, PixelFormat::R32G32B32A32_Float, 60, "BLENDWEIGHT"),
 				};
 				return DefaultShaderInputLayout;
 			}

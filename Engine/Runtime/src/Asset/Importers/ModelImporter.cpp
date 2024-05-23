@@ -316,7 +316,9 @@ namespace Insight
 			if (scene)
 			{
 				ProcessNodeUfbx(scene, scene->root_node, modelAsset.Ptr());
+				ProcessAnimations(scene, modelAsset.Ptr());
 			}
+
 #elif EXP_MODEL_LOADING
 			Assimp::Importer importer;
 			// Remove points and lines.
@@ -339,9 +341,9 @@ namespace Insight
 				//| aiProcess_FlipUVs						/// DirectX style.
 				//| aiProcess_FlipWindingOrder			/// DirectX style.
 
-				//| aiProcess_CalcTangentSpace			/// Calculates the tangents and bitangents for the imported meshes.
-				//| aiProcess_GenSmoothNormals			/// Ignored if the mesh already has normal.
-				//| aiProcess_GenUVCoords					/// Converts non-UV mappings (such as spherical or cylindrical mapping) to proper texture coordinate channels.
+				| aiProcess_CalcTangentSpace			/// Calculates the tangents and bitangents for the imported meshes.
+				| aiProcess_GenSmoothNormals			/// Ignored if the mesh already has normal.
+				| aiProcess_GenUVCoords					/// Converts non-UV mappings (such as spherical or cylindrical mapping) to proper texture coordinate channels.
 				
 				//| aiProcess_GenBoundingBoxes			//
 
@@ -361,16 +363,19 @@ namespace Insight
 				IS_LOG_CORE_ERROR("[ModelImporter::Import] Assimp model load: {0}", importer.GetErrorString());
 				return;
 			}
-			ExtractSkeleton(scene, scene->mRootNode, Maths::Matrix4::Identity, modelAsset.Ptr());
+			//ExtractSkeleton(scene, scene->mRootNode, Maths::Matrix4::Identity, modelAsset.Ptr());
 
 			if (Ref<Skeleton> skeleton = modelAsset->GetSkeleton(0))
 			{
-				skeleton->m_globalInverseTransforms = AssimpToInsightMatrix4(scene->mRootNode->mTransformation.Inverse());
+				//skeleton->m_globalInverseTransforms = AssimpToInsightMatrix4(scene->mRootNode->mTransformation.Inverse());
 			}
 
 			const aiNode* rootBone = FindRootBone(scene, scene->mRootNode, modelAsset.Ptr());
-			BuildBoneHierarchy(scene, rootBone, Maths::Matrix4::Identity, nullptr, modelAsset.Ptr());
-			//modelAsset->m_skeletons.push_back(::New<Skeleton>());
+			if (rootBone)
+			{
+				//BuildBoneHierarchy(scene, rootBone, Maths::Matrix4::Identity, nullptr, modelAsset.Ptr());
+			}
+			modelAsset->m_skeletons.push_back(::New<Skeleton>());
 			ProcessNode(scene, scene->mRootNode, modelAsset.Ptr());
 			ProcessAnimations(scene, modelAsset.Ptr());
 #else
@@ -500,7 +505,6 @@ namespace Insight
 					{
 						uint32_t index = tri_indices[vertexIdx];
 
-						Graphics::Vertex v;
 						ufbx_vec3 position = fbxMesh->vertex_position.exists ? fbxMesh->vertex_position[index] : ufbx_vec3();
 						ufbx_vec3 normal = fbxMesh->vertex_normal.exists ? fbxMesh->vertex_normal[index] : ufbx_vec3();
 						ufbx_vec4 colour = fbxMesh->vertex_color.exists ? fbxMesh->vertex_color[index] : ufbx_vec4({ (rand() % 100 + 1) * 0.01f, (rand() % 100 + 1) * 0.01f, (rand() % 100 + 1) * 0.01f, 1.0f });
@@ -512,6 +516,8 @@ namespace Insight
 								Maths::Vector3(normal.x, normal.y, normal.z),
 								Maths::Vector3(colour.x, colour.y, colour.z),
 								Maths::Vector2(uv.x, uv.y)));
+
+						ExtractBoneWeights(fbxScene, fbxNode, fbxMesh, index, &meshData, modelAsset);
 					}
 				}
 				ASSERT(meshData.Vertices.size() == partList.num_triangles * 3);
@@ -551,8 +557,84 @@ namespace Insight
 
 			return material;
 		}
+
+		void ModelImporter::ExtractBoneWeights(const ufbx_scene* fbxScene, const ufbx_node* fbxNode, const ufbx_mesh* fbxMesh, const u32 index, MeshData* meshData, ModelAsset* modelAsset) const
+		{
+			if (fbxMesh->skin_deformers.count == 0)
+			{
+				return;
+			}
+
+			Graphics::Vertex& v = meshData->Vertices.back();
+			// NOTE: This calculation below is the same for each `vertex`, we could
+			// precalculate these up to `mesh->num_vertices`, and just load the results.
+			uint32_t vertex = fbxMesh->vertex_indices[index];
+
+			if (!modelAsset->GetSkeleton(0))
+			{
+				modelAsset->m_skeletons.push_back(Ref<Skeleton>(::New<Skeleton>()));
+			}
+
+			Ref<Skeleton> skeleton = modelAsset->GetSkeleton(0);
+			ufbx_skin_deformer* skin = *fbxMesh->skin_deformers.data;
+			for (size_t clustersIdx = 0; clustersIdx < skin->clusters.count; ++clustersIdx)
+			{
+				const ufbx_skin_cluster* cluster = skin->clusters[clustersIdx];
+				if (cluster->bone_node)
+				{
+					const ufbx_node* boneNode = cluster->bone_node;
+					SkeletonBone bone(boneNode->element_id, boneNode->name.data, UfbxToInsightMatrix4(cluster->geometry_to_bone));
+					skeleton->AddBone(bone);
+				}
+			}
+			
+			ufbx_skin_vertex skin_vertex = skin->vertices[vertex];
+			size_t num_weights = skin_vertex.num_weights;
+			if (num_weights > 4)
+			{
+				num_weights = 4;
+			}
+
+			float total_weight = 0.0f;
+			for (size_t i = 0; i < num_weights; i++)
+			{
+				ufbx_skin_weight skin_weight = skin->weights[skin_vertex.weight_begin + i];
+				v.BoneIds[i] = skin_weight.cluster_index;
+				v.BoneWeights[i] = (float)skin_weight.weight;
+				total_weight += (float)skin_weight.weight;
+			}
+
+			// FBX does not guarantee that skin weights are normalized, and we may even
+			// be dropping some, so we must renormalize them.
+			for (size_t i = 0; i < num_weights; i++) 
+			{
+				v.BoneWeights[i] /= total_weight;
+			}
+		}
+
+		void ModelImporter::ProcessAnimations(const ufbx_scene* fbxScene, ModelAsset* modelAsset) const
+		{
+			for (size_t animStackIdx = 0; animStackIdx < fbxScene->anim_stacks.count; ++animStackIdx)
+			{
+				const ufbx_anim_stack* animStack = fbxScene->anim_stacks[animStackIdx];
+				ufbx_baked_anim* bake = ufbx_bake_anim(fbxScene, animStack->anim, NULL, NULL);
+				ASSERT(bake);
+
+				for (const ufbx_baked_node& bake_node : bake->nodes)
+				{
+					ufbx_node* scene_node = fbxScene->nodes[bake_node.typed_id];
+
+					printf("  node %s:\n", scene_node->name.data);
+					printf("    translation: %zu keys\n", bake_node.translation_keys.count);
+					printf("    rotation: %zu keys\n", bake_node.rotation_keys.count);
+					printf("    scale: %zu keys\n", bake_node.scale_keys.count);
+				}
+
+				ufbx_free_baked_anim(bake);
+			}
+		}
 #elif EXP_MODEL_LOADING
-		void ModelImporter::ProcessNode(const aiScene* assimpScene, const aiNode* assimpNode, ModelAsset* modelAsset) const
+void ModelImporter::ProcessNode(const aiScene* assimpScene, const aiNode* assimpNode, ModelAsset* modelAsset) const
 		{
 			if (modelAsset->GetSkeleton(0))
 			{
@@ -734,8 +816,6 @@ namespace Insight
 					///vertex.UV = Maths::Vector2(0.0f, 0.0f);
 				}
 
-
-
 				//Graphics::VertexOptomised vertexOptomised(vertex);
 				meshData.Vertices.push_back(Graphics::Vertex(position, normal, colour, uv));
 			}
@@ -788,8 +868,8 @@ namespace Insight
 			aiColor4D colour(1.0f);
 			aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_DIFFUSE, &colour);
 
-			float opacity(1.0f);
-			aiGetMaterialFloat(aiMaterial, AI_MATKEY_OPACITY, &opacity);
+			//float opacity(1.0f);
+			//aiGetMaterialFloat(aiMaterial, AI_MATKEY_OPACITY, &opacity);
 
 			material->SetName(materialname);
 
@@ -928,6 +1008,7 @@ namespace Insight
 					skeleton->AddBone(newBone);
 					boneId = newBone.Id;
 
+
 					if (SkeletonNode* skeletonNode = skeleton->GetNode(boneName))
 					{
 						skeletonNode->BoneName = boneName;
@@ -940,6 +1021,17 @@ namespace Insight
 				}
 				ASSERT(boneId != -1);
 				
+				auto weights = aiMesh->mBones[boneIdx]->mWeights;
+				int numWeights = aiMesh->mBones[boneIdx]->mNumWeights;
+
+				for (int weightIndex = 0; weightIndex < numWeights; ++weightIndex)
+				{
+					int vertexId = weights[weightIndex].mVertexId;
+					float weight = weights[weightIndex].mWeight;
+					assert(vertexId <= meshData->Vertices.size());
+					SetVertexBoneData(meshData->Vertices[vertexId], boneId, weight);
+				}
+				/*
 				const aiVertexWeight* aiBonewights = aiBone->mWeights;
 				// clamp the number of weights to evaluate between our max number we allow and the numer on the model.
 				const u32 numWeights = aiBone->mNumWeights;
@@ -951,22 +1043,7 @@ namespace Insight
 
 					SetVertexBoneData(meshData->Vertices[vertexId], boneId, weight);
 				}
-			}
-		}
-
-		void ModelImporter::SetVertexBoneData(Graphics::Vertex& vertex, const u32 boneId, const float boneWeight) const
-		{
-			IS_PROFILE_FUNCTION();
-
-			for (int i = 0; i < Graphics::Vertex::MAX_BONE_COUNT; ++i)
-			{
-				if (vertex.BoneIds[i] < 0.0f)
-				{
-					ASSERT(boneId < 72);
-					vertex.BoneWeights[i] = boneWeight;
-					vertex.BoneIds[i] = boneId;
-					break;
-				}
+				*/
 			}
 		}
 
@@ -979,6 +1056,14 @@ namespace Insight
 				return;
 			}
 
+			AnimationNode rootNode;
+			ReadHierarchyData(rootNode, aiScene->mRootNode);
+			for (size_t animIdx = 0; animIdx < aiScene->mNumAnimations; ++animIdx)
+			{
+				ReadMissingBones(aiScene->mAnimations[animIdx], modelAsset);
+			}
+			modelAsset->m_animationClips[0]->m_rootNode = rootNode;
+			/*
 			Ref<Skeleton> skeleton = modelAsset->GetSkeleton(0);
 			ASSERT(skeleton);
 
@@ -997,7 +1082,7 @@ namespace Insight
 					if (!skeleton->GetBone(boneName))
 					{
 						SkeletonBone newBone(skeleton->GetNumberOfBones(), channel->mNodeName.C_Str(), Maths::Matrix4::Identity);
-						skeleton->AddBone(newBone);
+						//skeleton->AddBone(newBone);
 					}
 				}
 
@@ -1042,16 +1127,85 @@ namespace Insight
 					}
 					else
 					{
-						FAIL_ASSERT();
+						//FAIL_ASSERT();
 
 						SkeletonBone newBone(skeleton->GetNumberOfBones(), aiChannelAnim->mNodeName.C_Str(), Maths::Matrix4::Identity);
 						skeleton->AddBone(newBone);
 
-						AnimationBoneTrack boneTrack(newBone.Id, aiChannelAnim->mNodeName.C_Str(), positions, rotations, scales);
+						AnimationBoneTrack boneTrack(skeleton->GetNumberOfBones(), aiChannelAnim->mNodeName.C_Str(), positions, rotations, scales);
 						animationClip->AddBoneTrack(boneTrack);
 					}
 				}
 			}
+			*/
+		}
+
+		void ModelImporter::ReadHierarchyData(AnimationNode& node, const aiNode* assimpNode) const
+		{
+			node.Name = assimpNode->mName.data;
+			node.Transform = AssimpToInsightMatrix4(assimpNode->mTransformation);
+			node.ChildrenCount = assimpNode->mNumChildren;
+
+			for (int i = 0; i < assimpNode->mNumChildren; i++)
+			{
+				AnimationNode newData;
+				ReadHierarchyData(newData, assimpNode->mChildren[i]);
+				node.Children.push_back(newData);
+			}
+		}
+
+		void ModelImporter::ReadMissingBones(const aiAnimation* aiAnimation, ModelAsset* modelAsset) const
+		{
+			auto boneMap = modelAsset->GetSkeleton(0)->m_boneMaps;
+			auto boneCount = modelAsset->GetSkeleton(0)->GetNumberOfBones();
+
+			Ref<AnimationClip> animationClip = Ref<AnimationClip>(::New<AnimationClip>());
+			modelAsset->m_animationClips.push_back(animationClip);
+
+			animationClip->m_duration = aiAnimation->mDuration;
+			animationClip->m_ticksPerSecond = aiAnimation->mTicksPerSecond;
+
+			for (size_t animChannelIdx = 0; animChannelIdx < aiAnimation->mNumChannels; ++animChannelIdx)
+			{
+				const aiNodeAnim* aiChannelAnim = aiAnimation->mChannels[animChannelIdx];
+				std::string boneName = aiChannelAnim->mNodeName.data;
+
+				std::vector<AnimationBoneTrack::PositionKeyFrame> positions;
+				std::vector<AnimationBoneTrack::RotationKeyFrame> rotations;
+				std::vector<AnimationBoneTrack::ScaleKeyFrame> scales;
+
+				positions.reserve(aiChannelAnim->mNumPositionKeys);
+				rotations.reserve(aiChannelAnim->mNumRotationKeys);
+				scales.reserve(aiChannelAnim->mNumScalingKeys);
+
+				for (size_t posIdx = 0; posIdx < aiChannelAnim->mNumPositionKeys; ++posIdx)
+				{
+					const aiVectorKey aiPosition = aiChannelAnim->mPositionKeys[posIdx];
+					positions.push_back(AnimationBoneTrack::PositionKeyFrame(AssimpToInsightVector3(aiPosition.mValue), aiPosition.mTime));
+				}
+
+				for (size_t rotIdx = 0; rotIdx < aiChannelAnim->mNumRotationKeys; ++rotIdx)
+				{
+					const aiQuatKey aiRotation = aiChannelAnim->mRotationKeys[rotIdx];
+					rotations.push_back(AnimationBoneTrack::RotationKeyFrame(AssimpToInsightQuaternion(aiRotation.mValue), aiRotation.mTime));
+				}
+
+				for (size_t scaleIdx = 0; scaleIdx < aiChannelAnim->mNumScalingKeys; ++scaleIdx)
+				{
+					const aiVectorKey aiScale = aiChannelAnim->mScalingKeys[scaleIdx];
+					scales.push_back(AnimationBoneTrack::ScaleKeyFrame(AssimpToInsightVector3(aiScale.mValue), aiScale.mTime));
+				}
+
+				if (boneMap.find(boneName) == boneMap.end())
+				{
+					boneMap[boneName].Id = boneCount;
+					++boneCount;
+
+				}
+				AnimationBoneTrack boneTrack(boneMap[boneName].Id, aiChannelAnim->mNodeName.C_Str(), positions, rotations, scales);
+				animationClip->AddBoneTrack(boneTrack);
+			}
+			animationClip->m_BoneInfoMap = boneMap;
 		}
 #else
 		MeshNode* ModelImporter::GetMeshHierarchy(const aiScene* aiScene, const aiNode* aiNode, const MeshNode* parentMeshNode, std::vector<MeshNode*>& meshNodes, MeshData* monolithMeshData) const
@@ -1406,6 +1560,22 @@ namespace Insight
 			}
 		}
 
+		void ModelImporter::SetVertexBoneData(Graphics::Vertex& vertex, const u32 boneId, const float boneWeight) const
+		{
+			IS_PROFILE_FUNCTION();
+
+			for (int i = 0; i < Graphics::Vertex::MAX_BONE_COUNT; ++i)
+			{
+				if (vertex.BoneIds[i] == -1)
+				{
+					ASSERT(boneId < 72);
+					vertex.BoneIds[i] = boneId;
+					vertex.BoneWeights[i] = boneWeight;
+					break;
+				}
+			}
+		}
+
 		std::string ModelImporter::GetTexturePath(const aiMaterial* aiMaterial, const std::string_view directory, const aiTextureType textureTypePBR, const aiTextureType textureTypeLegacy) const
 		{
 			aiTextureType textureType = aiTextureType_NONE;
@@ -1435,6 +1605,17 @@ namespace Insight
 			return std::string(directory) + "/" + texturePath.C_Str();
 		}
 
+		Maths::Matrix4 ModelImporter::UfbxToInsightMatrix4(const ufbx_matrix& matrix) const
+		{
+			return Maths::Matrix4
+			(
+				matrix.cols[0].x, matrix.cols[0].y, matrix.cols[0].z, 0.0f,
+				matrix.cols[1].x, matrix.cols[1].y, matrix.cols[1].z, 0.0f,
+				matrix.cols[2].x, matrix.cols[2].y, matrix.cols[2].z, 0.0f,
+				matrix.cols[3].x, matrix.cols[3].y, matrix.cols[3].z, 1.0f
+			);
+		}
+
 		Maths::Vector3 ModelImporter::AssimpToInsightVector3(const aiVector3D& vector) const
 		{
 			return Maths::Vector3(vector.x, vector.y, vector.z);
@@ -1449,6 +1630,7 @@ namespace Insight
 		{
 			constexpr auto flipNegativeZeroFunc = [](const float f)
 				{
+					return f;
 					if (f == 0.0f && std::signbit(f))
 					{
 						return -f;

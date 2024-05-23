@@ -27,9 +27,19 @@ namespace Insight
 			0.0f, 0.0f, 0.0f, 1.0f);
 
 		Matrix4::Matrix4()
-		{
-			*this = Identity;
-		}
+#ifdef IS_MATHS_DIRECTX_MATHS
+			: xmmatrix(DirectX::XMMatrixSet(
+				0.0f, 0.0f, 0.0f, 0.0f
+				, 0.0f, 0.0f, 0.0f, 0.0f
+				, 0.0f, 0.0f, 0.0f, 0.0f
+				, 0.0f, 0.0f, 0.0f, 0.0f))
+#else
+			: m_00(0.0f), m_01(0.0f), m_02(0.0f), m_03(0.0f)
+			, m_10(0.0f), m_11(0.0f), m_12(0.0f), m_13(0.0f)
+			, m_20(0.0f), m_21(0.0f), m_22(0.0f), m_23(0.0f)
+			, m_30(0.0f), m_31(0.0f), m_32(0.0f), m_33(0.0f)
+#endif
+		{ }
 		Matrix4::Matrix4(float m00, float m01, float m02, float m03,
 			float m10, float m11, float m12, float m13,
 			float m20, float m21, float m22, float m23,

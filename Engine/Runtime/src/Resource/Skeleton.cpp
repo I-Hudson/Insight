@@ -1,5 +1,7 @@
 #include "Resource/Skeleton.h"
 
+#include "Core/Logger.h"
+
 namespace Insight
 {
     namespace Runtime
@@ -100,8 +102,15 @@ namespace Insight
 
         void Skeleton::AddBone(const SkeletonBone& bone)
         {
-            ASSERT(!HasBone(bone.Name) && !HasBone(bone.Id));
-            m_bones.push_back(bone);
+            if (!HasBone(bone.Name) && !HasBone(bone.Id))
+            {
+                m_bones.push_back(bone);
+                m_boneMaps[bone.Name] = bone;
+            }
+            else
+            {
+                IS_LOG_CORE_ERROR("[Skeleton::AddBone] Bones needs to unique.");
+            }
         }
 
         SkeletonBone& Skeleton::GetBone(const std::string_view boneName)

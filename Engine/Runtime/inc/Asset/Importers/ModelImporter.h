@@ -3,6 +3,7 @@
 #include "Asset/Importers/IAssetImporter.h"
 
 #include "Asset/Assets/Material.h"
+#include "Resource/AnimationClip.h"
 
 #include "Graphics/Vertex.h"
 
@@ -15,13 +16,14 @@
 
 #include <vector>
 
-#define ENABLED_UFBX 1
+#define ENABLED_UFBX 0
 #define EXP_MODEL_LOADING 1
 
 struct aiNode;
 struct aiScene;
 struct aiMesh;
 struct aiMaterial;
+struct aiAnimation;
 enum aiTextureType : int;
 
 namespace Insight
@@ -114,6 +116,10 @@ namespace Insight
             void ProcessMeshUfbx(const ufbx_scene* fbxScene, const ufbx_node* fbxNode, const ufbx_mesh* fbxMesh, ModelAsset* modelAsset) const;
             void ParseMeshDataUfbx(const ufbx_scene* fbxScene, const ufbx_node* fbxNode, const ufbx_mesh* fbxMesh, MeshData& meshData, ModelAsset* modelAsset) const;
             Ref<MaterialAsset> ProcessMaterialUfbx(const ufbx_scene* fbxScene, const ufbx_node* fbxNode, const ufbx_material* materialsData, const u32 materialsCount, ModelAsset* modelAsset) const;
+
+            void ExtractBoneWeights(const ufbx_scene* fbxScene, const ufbx_node* fbxNode, const ufbx_mesh* fbxMesh, const u32 index, MeshData* meshData, ModelAsset* modelAsset) const;
+
+            void ProcessAnimations(const ufbx_scene* fbxScene, ModelAsset* modelAsset) const;
 #elif EXP_MODEL_LOADING
             void ProcessNode(const aiScene* aiScene, const aiNode* aiNode, ModelAsset* modelAsset) const;
             void ProcessMesh(const aiScene* aiScene, const aiNode* aiNode, const aiMesh* aiMesh, ModelAsset* modelAsset) const;
@@ -125,9 +131,10 @@ namespace Insight
             void BuildBoneHierarchy(const aiScene* aiScene, const aiNode* bone, Maths::Matrix4 transform, SkeletonBone* parentBone, ModelAsset* modelAsset)  const;
 
             void ExtractBoneWeights(const aiScene* aiScene, const aiNode* aiNode, const aiMesh* aiMesh, MeshData* meshData, ModelAsset* modelAsset) const;
-            void SetVertexBoneData(Graphics::Vertex& vertex, const u32 boneId, const float boneWeight) const;
 
             void ProcessAnimations(const aiScene* aiScene, ModelAsset* modelAsset) const;
+            void ReadHierarchyData(AnimationNode& node, const aiNode* assimpNode) const;
+            void ReadMissingBones(const aiAnimation* animation, ModelAsset* modelAsset) const;
 #else
             MeshNode* GetMeshHierarchy(const aiScene* aiScene, const aiNode* aiNode, const MeshNode* parentMeshNode, std::vector<MeshNode*>& meshNodes, MeshData* monolithMeshData = nullptr) const;
             void PreallocateVeretxAndIndexBuffers(MeshNode* meshNode) const;
@@ -135,7 +142,7 @@ namespace Insight
             void ProcessMesh(const aiScene* aiScene, const aiMesh* aiMesh, MeshData* meshData, MeshNode* meshNode) const;
             Ref<MaterialAsset> ProcessMaterial(MeshNode* meshNode) const;
 #endif
-            
+            void SetVertexBoneData(Graphics::Vertex& vertex, const u32 boneId, const float boneWeight) const;
             void ProcessMesh(MeshData& meshData, ModelAsset* modelAsset) const;
 
             /// @brief Returns the texture path from the model directory.
@@ -144,6 +151,9 @@ namespace Insight
             /// @param textureTypelegcy 
             /// @return 
             std::string GetTexturePath(const aiMaterial* aiMaterial, const std::string_view directory, const aiTextureType textureTypePBR, const aiTextureType textureTypeLegacy) const;
+
+
+            Maths::Matrix4 UfbxToInsightMatrix4(const ufbx_matrix& matrix) const;
 
             Maths::Vector3 AssimpToInsightVector3(const aiVector3D& vector) const;
             Maths::Quaternion AssimpToInsightQuaternion(const aiQuaternion& quaternion) const;

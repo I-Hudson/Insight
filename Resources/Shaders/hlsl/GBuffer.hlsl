@@ -14,37 +14,54 @@ struct VertexOutput
 	float2 UV 						: TEXCOORD0;
 };
 
+#define IDENTITY_MATRIX float4x4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
+
 VertexOutput VSMain(const GeoVertexInput input)
 {
 	VertexOutput vsOut;
 	vsOut.Pos = float4(input.Pos, 1);
 	vsOut.Colour = float4(input.Colour, 1.0);
 
+/*
+	float4x4 BoneTransform = IDENTITY_MATRIX; 
+	BoneTransform += bpo_BoneMatrices[input.BoneIds[0]] * input.BoneWeights[0];
+    BoneTransform += bpo_BoneMatrices[input.BoneIds[1]] * input.BoneWeights[1];
+    BoneTransform += bpo_BoneMatrices[input.BoneIds[2]] * input.BoneWeights[2];
+    BoneTransform += bpo_BoneMatrices[input.BoneIds[3]] * input.BoneWeights[3];
+
+*/
+	vsOut.WorldNormal[0] = input.BoneIds[0];
+	vsOut.WorldNormal[1] = input.BoneIds[1];
+	vsOut.WorldNormal[2] = input.BoneIds[2];
+	vsOut.WorldNormal[3] = input.BoneIds[3];
+
+	float4 totalPosition = vsOut.Pos;
 	if (bpo_SkinnedMesh == 1)
 	{
-		for(int boneIdx = 0 ; boneIdx < 4 ; ++boneIdx)
+		totalPosition = float4(0,0,0,0);
+		for(int i = 0 ; i < 4 ; ++i)
     	{
-			const float boneId = input.BoneIds[boneIdx];
-        	if(boneId < 0)
+        	if(input.BoneIds[i] == -1)
 			{
             	continue;
 			}
 
-        	if(boneId >= s_MAX_BONE_COUNT) 
+        	if(input.BoneIds[i] >= 100) 
         	{
-            	vsOut.Pos = float4(input.Pos, 1.0f);
+            	totalPosition = float4(input.Pos, 1.0f);
             	break;
         	}
-        	float4 localPosition = mul(bpo_BoneMatrices[boneId], float4(input.Pos, 1));
-        	vsOut.Pos += mul(localPosition, input.BoneWeights[boneIdx]);
-        	float4 localNormal = mul(bpo_BoneMatrices[boneId], float4(input.Normal, 0));
+        	float4 localPosition = mul(bpo_BoneMatrices[input.BoneIds[i]], float4(input.Pos, 1));
+			totalPosition += localPosition * input.BoneWeights[i];
+        	//float4 localNormal = mul(bpo_BoneMatrices[boneId], float4(input.Normal, 0));
    		}
 	}
-
+	//vsOut.Pos = mul(BoneTransform, float4(vsOut.Pos.xyz, 1));
+	vsOut.Pos = totalPosition;
 	vsOut.WorldPos = mul(bpo_Transform, vsOut.Pos);
 	vsOut.Pos = mul(bf_Camera_Proj_View, vsOut.WorldPos);
 	
-	vsOut.WorldNormal = normalize(mul(bpo_Transform, float4(input.Normal.xyz, 0.0)));
+	//vsOut.WorldNormal = normalize(mul(bpo_Transform, float4(input.Normal.xyz, 0.0)));
 	vsOut.UV = GetUVsForAPI(input.UV);
 
 	vsOut.position_ss_current = mul(bf_Camera_View, vsOut.WorldPos);

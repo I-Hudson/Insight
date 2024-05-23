@@ -69,6 +69,19 @@ namespace Insight
         AnimationClip::~AnimationClip()
         { }
 
+        const AnimationBoneTrack* AnimationClip::GetBoneTrack(const std::string_view boneName) const
+        {
+            for (size_t boneIdx = 0; boneIdx < m_boneTracks.size(); ++boneIdx)
+            {
+                const AnimationBoneTrack& boneTrack = m_boneTracks[boneIdx];
+                if (boneTrack.Name == boneName)
+                {
+                    return &boneTrack;
+                }
+            }
+            return nullptr;
+        }
+
         const AnimationBoneTrack* AnimationClip::GetBoneTrack(const u32 boneId) const
         {
             if (auto iter = m_boneIdToBoneTrack.find(boneId);

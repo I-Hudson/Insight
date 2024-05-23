@@ -8,6 +8,8 @@
 #include "Core/ReferencePtr.h"
 #include "Resource/Skeleton.h"
 
+#include <map>
+
 namespace Insight
 {
     namespace Runtime
@@ -60,15 +62,27 @@ namespace Insight
             u32 BoneId = -1;
         };
 
+        struct AnimationNode
+        {
+            std::string Name;
+            Maths::Matrix4 Transform;
+            int ChildrenCount;
+            std::vector<AnimationNode> Children;
+        };
+
         class AnimationClip : public Core::RefCount
         {
         public:
             AnimationClip();
             virtual ~AnimationClip() override;
 
+            const AnimationBoneTrack* GetBoneTrack(const std::string_view boneName) const;
             const AnimationBoneTrack* GetBoneTrack(const u32 boneId) const;
             double GetDuration() const;
             double GetTickPerSecond() const;
+
+            const AnimationNode& GetRootNode() const { return m_rootNode; }
+            const auto& GetBoneIDMap() const { return m_BoneInfoMap; }
 
         private:
             void AddBoneTrack(AnimationBoneTrack animationBoneTrack);
@@ -78,6 +92,9 @@ namespace Insight
             std::vector<AnimationBoneTrack> m_boneTracks;
             // Reference the skeleton this animation is for.
             Ref<Skeleton> m_skeleton;
+            std::map<std::string, SkeletonBone> m_BoneInfoMap;
+
+            AnimationNode m_rootNode;
 
             double m_duration = 0.0f;
             double m_ticksPerSecond = 0;

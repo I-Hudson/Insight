@@ -1,4 +1,9 @@
 #include "Animation/Animator.h"
+#include <fstream>
+#include <iomanip>
+
+#include <glm/glm.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 namespace Insight
 {
@@ -19,7 +24,7 @@ namespace Insight
             if (m_skelton != skeleton)
             {
                 m_skelton = skeleton;
-                m_boneMatrices.resize(m_skelton->GetNumberOfBones(), Maths::Matrix4::Identity);
+                m_boneMatrices.resize(101, Maths::Matrix4::Identity);
                 Reset();
             }
         }
@@ -42,9 +47,10 @@ namespace Insight
         {
             if (m_skelton && m_animationClip)
             {
-                m_currentAnimationTime += m_animationClip->GetTickPerSecond() * static_cast<double>(deltaTime);
+
+                //m_currentAnimationTime += m_animationClip->GetTickPerSecond() * static_cast<double>(deltaTime);
                 m_currentAnimationTime = fmod(m_currentAnimationTime, m_animationClip->GetDuration());
-                CalculateBoneTransform(m_skelton->GetRootNode().Name, Maths::Matrix4::Identity);
+                CalculateBoneTransform(&m_animationClip->GetRootNode(), Maths::Matrix4::Identity);
             }
         }
 
@@ -75,17 +81,17 @@ namespace Insight
             }
         }
 
-        void Animator::CalculateBoneTransform(std::string_view nodeName, const Maths::Matrix4 parentTransform)
+        void Animator::CalculateBoneTransform(const AnimationNode* node, const Maths::Matrix4 parentTransform)
         {
-            SkeletonNode* node = m_skelton->GetNode(nodeName);
-            const SkeletonBone& bone = m_skelton->GetBone(nodeName);
+            const AnimationBoneTrack* bone = m_animationClip->GetBoneTrack(node->Name);
 
-            Maths::Matrix4 nodeTransform = node->Transforms;
+            Maths::Matrix4 nodeTransform = node->Transform;
             if (bone)
             {
-                const Maths::Matrix4 bonePositionMatrix = InterpolatePosition(bone.Id);
-                const Maths::Matrix4 boneRotationMatrix = InterpolateRotation(bone.Id);
-                const Maths::Matrix4 boneScaleMatrix = InterpolateScale(bone.Id);
+                const Maths::Matrix4 bonePositionMatrix = InterpolatePosition(bone->BoneId);
+                const Maths::Matrix4 boneRotationMatrix = InterpolateRotation(bone->BoneId);
+                const Maths::Matrix4 boneScaleMatrix = InterpolateScale(bone->BoneId);
+
 
                 const Maths::Matrix4 boneTransform = bonePositionMatrix * boneRotationMatrix * boneScaleMatrix;
                 nodeTransform = boneTransform;
@@ -93,15 +99,24 @@ namespace Insight
 
             const Maths::Matrix4 globalTransform = parentTransform * nodeTransform;
 
+            auto boneInfoMap = m_animationClip->GetBoneIDMap();
+            if (boneInfoMap.find(node->Name) != boneInfoMap.end())
+            {
+                int index = boneInfoMap[node->Name].Id;
+                Maths::Matrix4 offset = boneInfoMap[node->Name].Offset;
+                m_boneMatrices[index] = globalTransform * offset;
+            }
+
+            /*
             if (bone)
             {
                 const Maths::Matrix4 boneOffsetTransform = globalTransform * bone.Offset;
                 m_boneMatrices[bone.Id] = boneOffsetTransform;
             }
-
-            for (size_t childBoneIdx = 0; childBoneIdx < node->ChildrenNames.size(); ++childBoneIdx)
+            */
+            for (size_t childBoneIdx = 0; childBoneIdx < node->ChildrenCount; ++childBoneIdx)
             {
-                CalculateBoneTransform(node->ChildrenNames[childBoneIdx], globalTransform);
+                CalculateBoneTransform(&node->Children[childBoneIdx], globalTransform);
             }
         }
 
@@ -146,6 +161,37 @@ namespace Insight
 
         Maths::Matrix4 Animator::InterpolateRotation(const u32 boneId) const
         {
+            /*
+            if (!m_animationClip)
+            {
+                return Maths::Matrix4::Identity;
+            }
+
+            const AnimationBoneTrack* boneTrack = m_animationClip->GetBoneTrack(boneId);
+            if (!boneTrack)
+            {
+                return Maths::Matrix4::Identity;
+            }
+            else if (boneTrack->Rotations.size() == 1)
+            {
+                auto rotation = glm::normalize(glm::quat(boneTrack->Rotations[0].Rotation.w, boneTrack->Rotations[0].Rotation.x, boneTrack->Rotations[0].Rotation.y, boneTrack->Rotations[0].Rotation.z));
+                return glm::toMat4(rotation);
+            }
+
+            const u32 p0Index = boneTrack->GetRotationKeyFrameIndex(m_currentAnimationTime);
+            const u32 p1Index = p0Index + 1;
+
+            const AnimationBoneTrack::RotationKeyFrame& p0KeyFrame = boneTrack->Rotations[p0Index];
+            const AnimationBoneTrack::RotationKeyFrame& p1KeyFrame = boneTrack->Rotations[p1Index];
+
+            const float scaleFactor = GetScaleFactor(p0KeyFrame.TimeStamp, p1KeyFrame.TimeStamp);
+
+            glm::quat finalRotation = glm::slerp(glm::quat(p0KeyFrame.Rotation.w, p0KeyFrame.Rotation.x, p0KeyFrame.Rotation.y, p0KeyFrame.Rotation.z),
+                glm::quat(p1KeyFrame.Rotation.w, p1KeyFrame.Rotation.x, p1KeyFrame.Rotation.y, p1KeyFrame.Rotation.z)
+                , scaleFactor);
+            finalRotation = glm::normalize(finalRotation);
+            return glm::toMat4(finalRotation);
+            */
             if (!m_animationClip)
             {
                 return Maths::Matrix4::Identity;

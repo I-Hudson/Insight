@@ -6,14 +6,14 @@ struct GeoVertexInput
 	float3 Colour : COLOR0;
 	float2 UV : TEXCOORD0;
 
-	float4 BoneIds : POSITION1;
-	float4 BoneWeights : POSITION2;
+	int4 BoneIds : BLENDINDICES;
+	float4 BoneWeights : BLENDWEIGHT;
 };
 
 struct GeoPixelInput
 {
 	float3 Position : SV_POSITION;
-	float3 Normal : NORMAL0;
+	float4 Normal : NORMAL0;
 	float3 Colour : COLOR0;
 	float2 UV : TEXCOORD0;
 };
