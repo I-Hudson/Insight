@@ -28,8 +28,9 @@ namespace Insight
 
         private:
             void CalculateBoneTransform(const u32 boneId, const Maths::Matrix4 parentTransform);
+#if ANIMATION_NODE_TRANSFORMS
             void CalculateBoneTransform(const AnimationNode* node, const Maths::Matrix4 parentTransform);
-
+#endif
             /// @brief Gets normalized value for Lerp & Slerp
             /// @param lastTimeStamp 
             /// @param nextTimeStamp 
@@ -42,6 +43,7 @@ namespace Insight
 
             /// @brief Reset our animation time as either the skeleton or animation clip has changed.
             void Reset();
+            void SetBindPose();
 
         private:
             Ref<Skeleton> m_skelton;

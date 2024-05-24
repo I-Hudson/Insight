@@ -43,6 +43,7 @@ project "Insight_Runtime"
     {
         "IS_EXPORT_RUNTIME_DLL",
         "IS_AUDIO_MINIAUDIO_ENABLE",
+        "ANIMATION_NODE_TRANSFORMS=0",
     }
     
     includedirs

@@ -12,11 +12,8 @@
 
 #include <assimp/matrix4x4.h>
 #include <assimp/quaternion.h>
-#include <FBX/ufbx.h>
-
 #include <vector>
 
-#define ENABLED_UFBX 0
 #define EXP_MODEL_LOADING 1
 
 struct aiNode;
@@ -120,6 +117,8 @@ namespace Insight
             void ExtractBoneWeights(const ufbx_scene* fbxScene, const ufbx_node* fbxNode, const ufbx_mesh* fbxMesh, const u32 index, MeshData* meshData, ModelAsset* modelAsset) const;
 
             void ProcessAnimations(const ufbx_scene* fbxScene, ModelAsset* modelAsset) const;
+
+            Maths::Matrix4 UfbxToInsightMatrix4(const ufbx_matrix& matrix) const;
 #elif EXP_MODEL_LOADING
             void ProcessNode(const aiScene* aiScene, const aiNode* aiNode, ModelAsset* modelAsset) const;
             void ProcessMesh(const aiScene* aiScene, const aiNode* aiNode, const aiMesh* aiMesh, ModelAsset* modelAsset) const;
@@ -133,8 +132,10 @@ namespace Insight
             void ExtractBoneWeights(const aiScene* aiScene, const aiNode* aiNode, const aiMesh* aiMesh, MeshData* meshData, ModelAsset* modelAsset) const;
 
             void ProcessAnimations(const aiScene* aiScene, ModelAsset* modelAsset) const;
+#if ANIMATION_NODE_TRANSFORMS
             void ReadHierarchyData(AnimationNode& node, const aiNode* assimpNode) const;
             void ReadMissingBones(const aiAnimation* animation, ModelAsset* modelAsset) const;
+#endif
 #else
             MeshNode* GetMeshHierarchy(const aiScene* aiScene, const aiNode* aiNode, const MeshNode* parentMeshNode, std::vector<MeshNode*>& meshNodes, MeshData* monolithMeshData = nullptr) const;
             void PreallocateVeretxAndIndexBuffers(MeshNode* meshNode) const;
@@ -151,9 +152,6 @@ namespace Insight
             /// @param textureTypelegcy 
             /// @return 
             std::string GetTexturePath(const aiMaterial* aiMaterial, const std::string_view directory, const aiTextureType textureTypePBR, const aiTextureType textureTypeLegacy) const;
-
-
-            Maths::Matrix4 UfbxToInsightMatrix4(const ufbx_matrix& matrix) const;
 
             Maths::Vector3 AssimpToInsightVector3(const aiVector3D& vector) const;
             Maths::Quaternion AssimpToInsightQuaternion(const aiQuaternion& quaternion) const;

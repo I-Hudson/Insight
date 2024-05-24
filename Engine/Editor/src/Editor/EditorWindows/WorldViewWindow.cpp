@@ -552,12 +552,11 @@ namespace Insight
                             object.SkinnedMesh = mesh.SkinnedMesh;
                             if (object.SkinnedMesh)
                             {
-                                const u32 c_Max_Bone_Matrices = 72;
                                 struct SkinnedBonesMatrices
                                 {
-                                    Maths::Matrix4 BoneMatrices[c_Max_Bone_Matrices];
+                                    Maths::Matrix4 BoneMatrices[Runtime::Skeleton::c_MaxBoneCount];
                                 };
-                                ASSERT(mesh.BoneTransforms.size() <= c_Max_Bone_Matrices);
+                                ASSERT(mesh.BoneTransforms.size() <= Runtime::Skeleton::c_MaxBoneCount);
 
                                 SkinnedBonesMatrices skinnedBonesMatrices;
                                 if (mesh.BoneTransforms.size() > 0)
@@ -694,12 +693,11 @@ namespace Insight
                             object.SkinnedMesh = mesh.SkinnedMesh;
                             if (object.SkinnedMesh)
                             {
-                                const u32 c_Max_Bone_Matrices = 101;
                                 struct SkinnedBonesMatrices
                                 {
-                                    Maths::Matrix4 BoneMatrices[c_Max_Bone_Matrices];
+                                    Maths::Matrix4 BoneMatrices[Runtime::Skeleton::c_MaxBoneCount];
                                 };
-                                ASSERT(mesh.BoneTransforms.size() <= c_Max_Bone_Matrices);
+                                ASSERT(mesh.BoneTransforms.size() <= Runtime::Skeleton::c_MaxBoneCount);
 
                                 SkinnedBonesMatrices skinnedBonesMatrices;
                                 if (mesh.BoneTransforms.size() > 0)

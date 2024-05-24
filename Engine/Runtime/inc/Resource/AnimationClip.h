@@ -62,6 +62,7 @@ namespace Insight
             u32 BoneId = -1;
         };
 
+#if ANIMATION_NODE_TRANSFORMS
         struct AnimationNode
         {
             std::string Name;
@@ -69,7 +70,7 @@ namespace Insight
             int ChildrenCount;
             std::vector<AnimationNode> Children;
         };
-
+#endif
         class AnimationClip : public Core::RefCount
         {
         public:
@@ -81,9 +82,10 @@ namespace Insight
             double GetDuration() const;
             double GetTickPerSecond() const;
 
+#if ANIMATION_NODE_TRANSFORMS
             const AnimationNode& GetRootNode() const { return m_rootNode; }
             const auto& GetBoneIDMap() const { return m_BoneInfoMap; }
-
+#endif
         private:
             void AddBoneTrack(AnimationBoneTrack animationBoneTrack);
 
@@ -92,9 +94,12 @@ namespace Insight
             std::vector<AnimationBoneTrack> m_boneTracks;
             // Reference the skeleton this animation is for.
             Ref<Skeleton> m_skeleton;
-            std::map<std::string, SkeletonBone> m_BoneInfoMap;
 
+#if ANIMATION_NODE_TRANSFORMS
+            std::map<std::string, SkeletonBone> m_BoneInfoMap;
             AnimationNode m_rootNode;
+#endif
+
 
             double m_duration = 0.0f;
             double m_ticksPerSecond = 0;

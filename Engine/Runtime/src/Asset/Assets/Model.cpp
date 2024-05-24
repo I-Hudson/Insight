@@ -87,6 +87,7 @@ namespace Insight::Runtime
 
 				ECS::AnimationClipComponent* animationClipComponent = static_cast<ECS::AnimationClipComponent*>(root_entity->AddComponentByName(ECS::AnimationClipComponent::Type_Name));
 				animationClipComponent->SetAnimationClip(m_animationClips[0]);
+				animationClipComponent->SetSkeleton(GetSkeleton(0));
 			}
 			else
 			{

@@ -48,6 +48,8 @@ namespace Insight
         class IS_RUNTIME Skeleton : public Core::RefCount
         {
         public:
+            const static u32 c_MaxBoneCount = 72;
+
             Skeleton();
             virtual ~Skeleton() override;
 
@@ -61,7 +63,8 @@ namespace Insight
             const SkeletonBone& GetBone(const std::string_view boneName) const;
 
             u32 GetNumberOfBones() const;
-        
+            const Maths::Matrix4& GetGlobalInverseTransform() const;
+
             SkeletonNode* GetNode(std::string_view name);
             SkeletonBone& GetBone(const std::string_view boneName);
         private:

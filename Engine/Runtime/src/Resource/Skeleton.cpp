@@ -87,6 +87,11 @@ namespace Insight
             return static_cast<u32>(m_bones.size());
         }
 
+        const Maths::Matrix4& Skeleton::GetGlobalInverseTransform() const
+        {
+            return m_globalInverseTransforms;
+        }
+
         bool Skeleton::HasBone(const u32 boneId) const
         {
             for (size_t boneIdx = 0; boneIdx < m_bones.size(); ++boneIdx)
@@ -102,6 +107,7 @@ namespace Insight
 
         void Skeleton::AddBone(const SkeletonBone& bone)
         {
+            ASSERT(GetNumberOfBones() < c_MaxBoneCount);
             if (!HasBone(bone.Name) && !HasBone(bone.Id))
             {
                 m_bones.push_back(bone);

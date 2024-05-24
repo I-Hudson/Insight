@@ -337,9 +337,9 @@ namespace Insight
 				aiProcess_Triangulate					/// Triangulates all faces of all meshes
 				//| aiProcess_SortByPType					/// Splits meshes with more than one primitive type in homogeneous sub-meshes.
 
-				//| aiProcess_MakeLeftHanded				/// DirectX style.
-				//| aiProcess_FlipUVs						/// DirectX style.
-				//| aiProcess_FlipWindingOrder			/// DirectX style.
+				| aiProcess_MakeLeftHanded				/// DirectX style.
+				| aiProcess_FlipUVs						/// DirectX style.
+				| aiProcess_FlipWindingOrder			/// DirectX style.
 
 				| aiProcess_CalcTangentSpace			/// Calculates the tangents and bitangents for the imported meshes.
 				| aiProcess_GenSmoothNormals			/// Ignored if the mesh already has normal.
@@ -348,7 +348,7 @@ namespace Insight
 				//| aiProcess_GenBoundingBoxes			//
 
 				//| aiProcess_RemoveRedundantMaterials	/// Searches for redundant/unreferenced materials and removes them
-				//| aiProcess_JoinIdenticalVertices		/// Triangulates all faces of all meshes
+				| aiProcess_JoinIdenticalVertices		/// Triangulates all faces of all meshes
 				//| aiProcess_PopulateArmatureData
 				//| aiProcess_FindDegenerates			/// Convert degenerate primitives to proper lines or points.
 				//| aiProcess_FindInvalidData			/// This step searches all meshes for invalid data, such as zeroed normal vectors or invalid UV coords and removes / fixes them
@@ -360,22 +360,22 @@ namespace Insight
 
 			if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 			{
-				IS_LOG_CORE_ERROR("[ModelImporter::Import] Assimp model load: {0}", importer.GetErrorString());
+				IS_LOG_CORE_ERROR("[ModelImporter::Import] Assimp model '{}' load: {}", path.data(), importer.GetErrorString());
 				return;
 			}
-			//ExtractSkeleton(scene, scene->mRootNode, Maths::Matrix4::Identity, modelAsset.Ptr());
-
-			if (Ref<Skeleton> skeleton = modelAsset->GetSkeleton(0))
-			{
-				//skeleton->m_globalInverseTransforms = AssimpToInsightMatrix4(scene->mRootNode->mTransformation.Inverse());
-			}
+			ExtractSkeleton(scene, scene->mRootNode, Maths::Matrix4::Identity, modelAsset.Ptr());
 
 			const aiNode* rootBone = FindRootBone(scene, scene->mRootNode, modelAsset.Ptr());
 			if (rootBone)
 			{
-				//BuildBoneHierarchy(scene, rootBone, Maths::Matrix4::Identity, nullptr, modelAsset.Ptr());
+				BuildBoneHierarchy(scene, rootBone, Maths::Matrix4::Identity, nullptr, modelAsset.Ptr());
 			}
-			modelAsset->m_skeletons.push_back(::New<Skeleton>());
+
+			if (Ref<Skeleton> skeleton = modelAsset->GetSkeleton(0))
+			{
+				//skeleton->m_globalInverseTransforms = AssimpToInsightMatrix4(scene->mRootNode->mTransformation).Inversed();
+			}
+
 			ProcessNode(scene, scene->mRootNode, modelAsset.Ptr());
 			ProcessAnimations(scene, modelAsset.Ptr());
 #else
@@ -456,7 +456,6 @@ namespace Insight
 			MaterialCache.clear();
 			modelAsset.Ptr()->m_assetState = AssetState::Loaded;
 		}
-
 #if ENABLED_UFBX
 		void ModelImporter::ProcessNodeUfbx(const ufbx_scene* fbxScene, const ufbx_node* fbxNode, ModelAsset* modelAsset) const
 		{
@@ -633,8 +632,19 @@ namespace Insight
 				ufbx_free_baked_anim(bake);
 			}
 		}
+
+		Maths::Matrix4 ModelImporter::UfbxToInsightMatrix4(const ufbx_matrix& matrix) const
+		{
+			return Maths::Matrix4
+			(
+				matrix.cols[0].x, matrix.cols[0].y, matrix.cols[0].z, 0.0f,
+				matrix.cols[1].x, matrix.cols[1].y, matrix.cols[1].z, 0.0f,
+				matrix.cols[2].x, matrix.cols[2].y, matrix.cols[2].z, 0.0f,
+				matrix.cols[3].x, matrix.cols[3].y, matrix.cols[3].z, 1.0f
+			);
+		}
 #elif EXP_MODEL_LOADING
-void ModelImporter::ProcessNode(const aiScene* assimpScene, const aiNode* assimpNode, ModelAsset* modelAsset) const
+		void ModelImporter::ProcessNode(const aiScene* assimpScene, const aiNode* assimpNode, ModelAsset* modelAsset) const
 		{
 			if (modelAsset->GetSkeleton(0))
 			{
@@ -680,10 +690,10 @@ void ModelImporter::ProcessNode(const aiScene* assimpScene, const aiNode* assimp
 
 			mesh->m_mesh_name = aiMesh->mName.C_Str();
 			mesh->m_transform_offset = AssimpToInsightMatrix4(aiNode->mTransformation);
-			//mesh->m_boundingBox = Graphics::BoundingBox(meshData.Vertices.data(), static_cast<u32>(meshData.Vertices.size()));
-			//mesh->m_boundingBox = Graphics::BoundingBox(
-			//	Maths::Vector3(aiMesh->mAABB.mMin.x, aiMesh->mAABB.mMin.y, aiMesh->mAABB.mMin.z),
-			//	Maths::Vector3(aiMesh->mAABB.mMax.x, aiMesh->mAABB.mMax.y, aiMesh->mAABB.mMax.z));
+			mesh->m_boundingBox = Graphics::BoundingBox(meshData.Vertices.data(), static_cast<u32>(meshData.Vertices.size()));
+			mesh->m_boundingBox = Graphics::BoundingBox(
+				Maths::Vector3(aiMesh->mAABB.mMin.x, aiMesh->mAABB.mMin.y, aiMesh->mAABB.mMin.z),
+				Maths::Vector3(aiMesh->mAABB.mMax.x, aiMesh->mAABB.mMax.y, aiMesh->mAABB.mMax.z));
 
 			if (!meshData.Vertices.empty() && !meshData.Indices.empty())
 			{
@@ -906,8 +916,9 @@ void ModelImporter::ProcessNode(const aiScene* assimpScene, const aiNode* assimp
 					hasBones = true;
 					const aiBone* aiBone = aiMesh->mBones[boneIdx];
 					std::string boneName = aiBone->mName.C_Str();
-					SkeletonBone newBone(skeleton->GetNumberOfBones(), boneName, AssimpToInsightMatrix4(aiBone->mOffsetMatrix));
+					SkeletonBone newBone(skeleton->GetNumberOfBones(), boneName, parentTransform * AssimpToInsightMatrix4(aiBone->mOffsetMatrix));
 					skeleton->AddBone(newBone);
+					parentTransform = Maths::Matrix4::Identity;
 				}
 			}
 
@@ -963,6 +974,7 @@ void ModelImporter::ProcessNode(const aiScene* assimpScene, const aiNode* assimp
 				if (skeletonBone)
 				{
 					skeletonBone.ParentTransform = transform;
+					//skeletonBone.Offset = transform * skeletonBone.Offset;
 					transform = Maths::Matrix4::Identity;
 
 					if (parentBone)
@@ -1055,7 +1067,7 @@ void ModelImporter::ProcessNode(const aiScene* assimpScene, const aiNode* assimp
 			{
 				return;
 			}
-
+#if ANIMATION_NODE_TRANSFORMS
 			AnimationNode rootNode;
 			ReadHierarchyData(rootNode, aiScene->mRootNode);
 			for (size_t animIdx = 0; animIdx < aiScene->mNumAnimations; ++animIdx)
@@ -1063,7 +1075,7 @@ void ModelImporter::ProcessNode(const aiScene* assimpScene, const aiNode* assimp
 				ReadMissingBones(aiScene->mAnimations[animIdx], modelAsset);
 			}
 			modelAsset->m_animationClips[0]->m_rootNode = rootNode;
-			/*
+#else
 			Ref<Skeleton> skeleton = modelAsset->GetSkeleton(0);
 			ASSERT(skeleton);
 
@@ -1127,7 +1139,7 @@ void ModelImporter::ProcessNode(const aiScene* assimpScene, const aiNode* assimp
 					}
 					else
 					{
-						//FAIL_ASSERT();
+						FAIL_ASSERT();
 
 						SkeletonBone newBone(skeleton->GetNumberOfBones(), aiChannelAnim->mNodeName.C_Str(), Maths::Matrix4::Identity);
 						skeleton->AddBone(newBone);
@@ -1137,9 +1149,10 @@ void ModelImporter::ProcessNode(const aiScene* assimpScene, const aiNode* assimp
 					}
 				}
 			}
-			*/
+#endif
 		}
 
+#if ANIMATION_NODE_TRANSFORMS
 		void ModelImporter::ReadHierarchyData(AnimationNode& node, const aiNode* assimpNode) const
 		{
 			node.Name = assimpNode->mName.data;
@@ -1207,6 +1220,7 @@ void ModelImporter::ProcessNode(const aiScene* assimpScene, const aiNode* assimp
 			}
 			animationClip->m_BoneInfoMap = boneMap;
 		}
+#endif
 #else
 		MeshNode* ModelImporter::GetMeshHierarchy(const aiScene* aiScene, const aiNode* aiNode, const MeshNode* parentMeshNode, std::vector<MeshNode*>& meshNodes, MeshData* monolithMeshData) const
 		{
@@ -1566,7 +1580,7 @@ void ModelImporter::ProcessNode(const aiScene* assimpScene, const aiNode* assimp
 
 			for (int i = 0; i < Graphics::Vertex::MAX_BONE_COUNT; ++i)
 			{
-				if (vertex.BoneIds[i] == -1)
+				if (vertex.BoneWeights[i] == 0.0f)
 				{
 					ASSERT(boneId < 72);
 					vertex.BoneIds[i] = boneId;
@@ -1605,17 +1619,6 @@ void ModelImporter::ProcessNode(const aiScene* assimpScene, const aiNode* assimp
 			return std::string(directory) + "/" + texturePath.C_Str();
 		}
 
-		Maths::Matrix4 ModelImporter::UfbxToInsightMatrix4(const ufbx_matrix& matrix) const
-		{
-			return Maths::Matrix4
-			(
-				matrix.cols[0].x, matrix.cols[0].y, matrix.cols[0].z, 0.0f,
-				matrix.cols[1].x, matrix.cols[1].y, matrix.cols[1].z, 0.0f,
-				matrix.cols[2].x, matrix.cols[2].y, matrix.cols[2].z, 0.0f,
-				matrix.cols[3].x, matrix.cols[3].y, matrix.cols[3].z, 1.0f
-			);
-		}
-
 		Maths::Vector3 ModelImporter::AssimpToInsightVector3(const aiVector3D& vector) const
 		{
 			return Maths::Vector3(vector.x, vector.y, vector.z);
@@ -1630,7 +1633,6 @@ void ModelImporter::ProcessNode(const aiScene* assimpScene, const aiNode* assimp
 		{
 			constexpr auto flipNegativeZeroFunc = [](const float f)
 				{
-					return f;
 					if (f == 0.0f && std::signbit(f))
 					{
 						return -f;

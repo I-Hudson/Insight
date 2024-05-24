@@ -28,6 +28,9 @@ namespace Insight
             void SetAnimationClip(Ref<Runtime::AnimationClip> animationClip);
             Ref<Runtime::AnimationClip> GetAnimationClip() const;
 
+            void SetSkeleton(Ref<Runtime::Skeleton> skeleton);
+            Ref<Runtime::Skeleton> GetSkeleton() const;
+
             Runtime::Animator& GetAnimator();
             const Runtime::Animator& GetAnimator() const;
 
@@ -36,6 +39,8 @@ namespace Insight
         private:
             Runtime::Animator m_animator;
             Ref<Runtime::AnimationClip> m_animationClip;
+            Ref<Runtime::Skeleton> m_skeleton;
+
             REFLECT_PROPERTY(EditorVisible)
             float m_playbackScale = 1.0f;
         };

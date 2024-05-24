@@ -23,6 +23,20 @@ namespace Insight
             return m_animationClip;
         }
 
+        void AnimationClipComponent::SetSkeleton(Ref<Runtime::Skeleton> skeleton)
+        {
+            if (m_skeleton != skeleton)
+            {
+                m_skeleton = skeleton;
+                m_animator.SetSkelton(m_skeleton);
+            }
+        }
+
+        Ref<Runtime::Skeleton> AnimationClipComponent::GetSkeleton() const
+        {
+            return m_skeleton;
+        }
+
         Runtime::Animator& AnimationClipComponent::GetAnimator()
         {
             return m_animator;
@@ -37,12 +51,6 @@ namespace Insight
         {
             const ECS::Entity* owner = GetOwnerEntity();
             ASSERT(owner);
-            const SkinnedMeshComponent* skinnedMeshComponent = owner->GetComponent<SkinnedMeshComponent>();
-            if (!skinnedMeshComponent)
-            {
-                return;
-            }
-            m_animator.SetSkelton(skinnedMeshComponent->GetSkeleton());
             m_animator.Update(delta_time * m_playbackScale);
         }
     }
