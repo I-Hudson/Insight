@@ -22,7 +22,7 @@ function fileExists(file)
     return result
  end
 
-project "Insight_Runtime"  
+project "Insight_Physics"  
     configurations { "Debug", "Release" } 
     location "./"
     
@@ -34,42 +34,23 @@ project "Insight_Runtime"
     dependson 
     { 
         "Insight_Core",
-        "Insight_Maths",
-        "Insight_Graphics",
-        "Insight_Input",
     }
 
     defines
     {
-        "IS_EXPORT_RUNTIME_DLL",
-        "IS_AUDIO_MINIAUDIO_ENABLE",
-        "ANIMATION_NODE_TRANSFORMS=0",
+        "IS_EXPORT_PHYSICS_DLL",
+        "IS_PHYSICS_JOLT",
+        "IS_PHYSICS_PHYSX",
     }
     
     includedirs
     {
         "inc",
         "%{IncludeDirs.InsightCore}",
-        "%{IncludeDirs.InsightMaths}",
-        "%{IncludeDirs.InsightPhysics}",
-        "%{IncludeDirs.InsightGraphics}",
-        "%{IncludeDirs.InsightInput}",
-
-        "%{IncludeDirs.spdlog}",
-        "%{IncludeDirs.glm}",
-        "%{IncludeDirs.imgui}",
-        "%{IncludeDirs.glfw}",
-        "%{IncludeDirs.stb_image}",
-        "%{IncludeDirs.splash}",
-        "%{IncludeDirs.qoi}",
-        "%{IncludeDirs.zip}",
-        "%{IncludeDirs.miniaudio}",
         
-        "%{IncludeDirs.assimp}",
-        "%{IncludeDirs.assimp}/../build/include",
-        "%{IncludeDirs.meshoptimizer}",
-        "%{IncludeDirs.simplygon}",
-        "%{IncludeDirs.reflect}",
+        "%{IncludeDirs.spdlog}",
+        "%{IncludeDirs.imgui}",
+        "%{IncludeDirs.JoltPhysics}",
     }
 
     files 
@@ -80,37 +61,18 @@ project "Insight_Runtime"
         "src/**.cpp",
         "src/**.c",
         "src/**.inl",
-
         "inc/**.cpp", 
 
         "**.natvis",
-
-        "../Core/inc/Memory/NewDeleteOverload.h", 
-        "../Core/src/Memory/NewDeleteOverload.cpp",
-
-        "../../vendor/stb/stb_image.h",
-        "../../vendor/stb/stb_image_write.h",
+        "../../vendor/JoltPhysics/Jolt/Jolt.natvis",
     }
 
     links
     {
         "Insight_Core" .. output_project_subfix .. ".lib",
-        "Insight_Maths" .. output_project_subfix .. ".lib",
-        "Insight_Physics" .. output_project_subfix .. ".lib",
-        "Insight_Graphics" .. output_project_subfix .. ".lib",
-        "Insight_Input" .. output_project_subfix .. ".lib",
-        
-        "glm.lib",
         "imgui.lib",
-        "zip.lib",
-        "meshoptimizer.lib",
+        "Jolt.lib",
     }
-    if (profileTool == "pix") then
-        links
-        {
-            "WinPixEventRuntime.lib"
-        }
-    end
     
     libdirs
     {
@@ -132,52 +94,26 @@ project "Insight_Runtime"
             "{COPY} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".pdb\" \"%{wks.location}deps/".. outputdir..  "/pdb/\"\n",
         }
 
-    filter "platforms:Win64"
-        local NVIDIATextureToolsPath="C:/Program Files/NVIDIA Corporation/NVIDIA Texture Tools"      
-        if isdir(NVIDIATextureToolsPath) == true then
-            defines
-            {
-                "NVIDIA_Texture_Tools",
-            }
-            includedirs
-            {
-                NVIDIATextureToolsPath .. "/include",
-            }
-            links
-            {
-                "nvtt30205.lib",
-            }
-            prebuildcommands
-            {
-                "{COPY} \"" .. NVIDIATextureToolsPath .. "/lib/x64-v142/nvtt30205.lib\" \"%{wks.location}deps/".. outputdir..  "/lib/\"\n",
-                "{COPY} \"" .. NVIDIATextureToolsPath .. "/nvtt30205.dll\" \"%{wks.location}deps/".. outputdir..  "/dll/\"\n",
-            }
-        end    
-
     filter "configurations:Debug or configurations:Testing"
         defines { "DEBUG" }  
         symbols "On" 
-        links
-        {
-            "assimpd.lib",
-            "Splashd.lib",
-            "Reflectd.lib",
-        }
         libdirs
         {
             "%{wks.location}/deps/lib/debug",
+        }
+        prebuildcommands
+        {
+            "{COPY} \"%{wks.location}vendor/JoltPhysics/Build/VS2022_CL/Debug/Jolt.lib\" \"%{wks.location}deps/".. outputdir..  "/lib/\"\n",
         }
 
     filter "configurations:Release"  
         defines { "NDEBUG" }    
         optimize "On" 
-        links
-        {
-            "assimp.lib",
-            "Splash.lib",
-            "Reflect.lib",
-        }
         libdirs
         {
             "%{wks.location}/deps/lib/release",
+        }
+        prebuildcommands
+        {
+            "{COPY} \"%{wks.location}vendor/JoltPhysics/Build/VS2022_CL/Release/Jolt.lib\" \"%{wks.location}deps/".. outputdir..  "/lib/\"\n",
         }
