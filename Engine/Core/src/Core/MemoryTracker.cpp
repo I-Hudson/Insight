@@ -246,6 +246,7 @@ namespace Insight
             lock.unlock();
 
 #ifdef IS_MEMORY_TRACKING
+#undef MEMORY_TRACK_CALLSTACK
             /// TOOD: Think of a better way to have this supported. Would be nice to have this. Maybe a call stack should only be gotten
             /// if there is a crash? Look at third party options for getting the callstack. Disabled for non debug due to performance.
 #if defined(IS_PLATFORM_WINDOWS) && defined(MEMORY_TRACK_CALLSTACK)

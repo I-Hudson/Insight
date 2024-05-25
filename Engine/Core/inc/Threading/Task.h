@@ -15,9 +15,9 @@ namespace Insight
 		template<typename ResultType>
 		class TaskWithResult;
 
-		using TaskSharedPtr = RPtr<Task>;
-		template<typename ResultType>
-		using TaskWithResultShared = RPtr<TaskWithResult<ResultType>>;
+		//using TaskSharedPtr = RPtr<Task>;
+		//template<typename ResultType>
+		//using TaskWithResultShared = RPtr<TaskWithResult<ResultType>>;
 
 		enum class TaskStates
 		{

@@ -347,8 +347,10 @@ public:
 
 		if (m_refCount && !m_refCount->HasRefs())
 		{
-			DeleteTracked(m_ptr);
-			DeleteTracked(m_refCount);
+			::Delete(m_ptr);
+			m_ptr = nullptr;
+			::Delete(m_refCount);
+			m_refCount = nullptr;
 		}
 	}
 

@@ -70,6 +70,7 @@ namespace Insight
 			m_systemRegistry.RegisterSystem(&m_assetRegistry);
 			m_assetRegistry.Initialise();
 
+			m_systemRegistry.RegisterSystem(&m_animationSystem);
 			m_systemRegistry.RegisterSystem(&m_audioSystem);
 			m_systemRegistry.RegisterSystem(&m_taskSystem);
 			m_systemRegistry.RegisterSystem(&m_eventSystem);
@@ -79,6 +80,7 @@ namespace Insight
 			m_systemRegistry.RegisterSystem(&m_worldSystem);
 			m_systemRegistry.RegisterSystem(&m_projectSystem);
 
+			m_animationSystem.Initialise();
 			m_audioSystem.Initialise();
 			m_taskSystem.Initialise();
 			m_eventSystem.Initialise();
@@ -148,6 +150,11 @@ namespace Insight
 					}
 
 					{
+						IS_PROFILE_SCOPE("AnimationSystem Update");
+						m_animationSystem.Update(delta_time);
+					}
+
+					{
 						IS_PROFILE_SCOPE("InputSsytem Update");
 						m_inputSystem.Update(delta_time);
 					}
@@ -203,6 +210,8 @@ namespace Insight
 
 			m_audioSystem.Shutdown();
 
+			m_animationSystem.Shutdown();
+
 			m_assetRegistry.Shutdown();
 
 			m_graphicsSystem.Shutdown();
@@ -221,6 +230,7 @@ namespace Insight
 			m_systemRegistry.UnregisterSystem(&m_eventSystem);
 			m_systemRegistry.UnregisterSystem(&m_taskSystem);
 			m_systemRegistry.UnregisterSystem(&m_audioSystem);
+			m_systemRegistry.UnregisterSystem(&m_animationSystem);
 			m_systemRegistry.UnregisterSystem(&m_assetRegistry);
 
 			ASSERT(m_systemRegistry.IsEmpty());

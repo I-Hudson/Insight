@@ -10,7 +10,7 @@ namespace Insight
 {
     namespace Runtime
     {
-        class IS_RUNTIME Animator : Core::RefCount
+        class IS_RUNTIME Animator : public Core::RefCount
         {
         public:
             Animator();

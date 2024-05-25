@@ -11,6 +11,7 @@
 #include "Runtime/RuntimeSettings.h"
 
 #include "Asset/AssetRegistry.h"
+#include "Animation/AnimationSystem.h"
 #include "Audio/AudioSystem.h"
 #include "Core/SystemRegistry.h"
 #include "Threading/TaskSystem.h"
@@ -82,6 +83,7 @@ namespace Insight
 			Core::SystemRegistry m_systemRegistry;
 
 			Runtime::AssetRegistry m_assetRegistry;
+			Runtime::AnimationSystem m_animationSystem;
 			Runtime::AudioSystem m_audioSystem;
 			Threading::TaskSystem m_taskSystem;
 			Core::EventSystem m_eventSystem;

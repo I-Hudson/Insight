@@ -21,11 +21,14 @@ namespace Insight
 		void Task::Wait()
 		{
 			std::unique_lock lock(m_mutex);
-			m_cv.wait(lock, [this]()
-				{
-					return m_state == TaskStates::Finished 
-					|| m_state == TaskStates::Canceled;
-				});
+			if (!IsFinished() || !IsCancled())
+			{
+				m_cv.wait(lock, [this]()
+					{
+							return m_state == TaskStates::Finished
+								|| m_state == TaskStates::Canceled;
+					});
+			}
 		}
 
 		void Task::Call()

@@ -6,12 +6,31 @@ namespace Insight
     {
         RefCount::RefCount()
             : m_count(0)
+        { }
+
+        RefCount::RefCount(const RefCount& other) NO_EXPECT
+            : m_count(0)
+        { }
+
+        RefCount::RefCount(RefCount&& other) NO_EXPECT
         {
+            m_count.store(other.GetReferenceCount());
         }
 
         RefCount::~RefCount()
         {
             ASSERT(GetReferenceCount() == 0);
+        }
+
+        RefCount RefCount::operator=(const RefCount& other) const
+        {
+            return *this;
+        }
+
+        RefCount RefCount::operator=(RefCount&& other)
+        {
+            m_count.store(other.GetReferenceCount());
+            return *this;
         }
 
         u32 RefCount::GetReferenceCount() const

@@ -17,7 +17,13 @@ namespace Insight
             static_assert(std::atomic<u32>::is_always_lock_free);
         public:
             RefCount();
+            RefCount(const RefCount& other) NO_EXPECT;
+            RefCount(RefCount&& other) NO_EXPECT;
             ~RefCount();
+
+            RefCount operator=(const RefCount& other) const;
+            RefCount operator=(RefCount&& other);
+
             u32 GetReferenceCount() const;
 
         private:

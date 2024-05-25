@@ -1,5 +1,5 @@
 #include "ECS/Components/AnimationClipComponent.h"
-#include "ECS/Components/SkinnedMeshComponent.h"
+#include "Animation/AnimationSystem.h"
 
 namespace Insight
 {
@@ -15,7 +15,7 @@ namespace Insight
         void AnimationClipComponent::SetAnimationClip(Ref<Runtime::AnimationClip> animationClip)
         {
             m_animationClip = animationClip;
-            m_animator.SetAnimationClip(m_animationClip);
+            GetAnimator()->SetAnimationClip(m_animationClip);
         }
 
         Ref<Runtime::AnimationClip> AnimationClipComponent::GetAnimationClip() const
@@ -28,7 +28,7 @@ namespace Insight
             if (m_skeleton != skeleton)
             {
                 m_skeleton = skeleton;
-                m_animator.SetSkelton(m_skeleton);
+                GetAnimator()->SetSkelton(m_skeleton);
             }
         }
 
@@ -37,21 +37,28 @@ namespace Insight
             return m_skeleton;
         }
 
-        Runtime::Animator& AnimationClipComponent::GetAnimator()
+        Runtime::Animator* AnimationClipComponent::GetAnimator()
         {
-            return m_animator;
+            Runtime::AnimationInstance* animInstance = Runtime::AnimationSystem::Instance().GetAnimationInstance(GetGuid());
+            ASSERT(animInstance);
+            return &animInstance->Animator;
         }
 
-        const Runtime::Animator& AnimationClipComponent::GetAnimator() const
+        const Runtime::Animator* AnimationClipComponent::GetAnimator() const
         {
-            return m_animator;
+            const Runtime::AnimationInstance* animInstance = Runtime::AnimationSystem::Instance().GetAnimationInstance(GetGuid());
+            ASSERT(animInstance);
+            return &animInstance->Animator;
         }
 
-        void AnimationClipComponent::OnUpdate(const float delta_time)
+        void AnimationClipComponent::OnCreate()
         {
-            const ECS::Entity* owner = GetOwnerEntity();
-            ASSERT(owner);
-            m_animator.Update(delta_time * m_playbackScale);
+            Runtime::AnimationSystem::Instance().AddAnimationInstance(GetGuid());
+        }
+
+        void AnimationClipComponent::OnDestroy()
+        {
+            Runtime::AnimationSystem::Instance().RemoveAnimationInstance(GetGuid());
         }
     }
 }

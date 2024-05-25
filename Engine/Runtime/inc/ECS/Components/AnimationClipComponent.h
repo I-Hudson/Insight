@@ -31,13 +31,15 @@ namespace Insight
             void SetSkeleton(Ref<Runtime::Skeleton> skeleton);
             Ref<Runtime::Skeleton> GetSkeleton() const;
 
-            Runtime::Animator& GetAnimator();
-            const Runtime::Animator& GetAnimator() const;
+            Runtime::Animator* GetAnimator();
+            const Runtime::Animator* GetAnimator() const;
 
-            virtual void OnUpdate(const float delta_time) override;
+            /// Component - Begin
+            virtual void OnCreate() override;
+            virtual void OnDestroy() override;
+            /// Component - End
 
         private:
-            Runtime::Animator m_animator;
             Ref<Runtime::AnimationClip> m_animationClip;
             Ref<Runtime::Skeleton> m_skeleton;
 

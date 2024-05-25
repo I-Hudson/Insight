@@ -45,6 +45,7 @@ namespace Insight
 
 			void Spwan(Callback callback, ThreadData threadData);
 			void SetAffinity(size_t i);
+			void SetName(const char* threadName);
 			void SleepFor(u32 milliSeconds);
 			void Join();
 

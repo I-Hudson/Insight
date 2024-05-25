@@ -179,7 +179,7 @@ namespace Insight
                         if (renderMesh.SkinnedMesh && entity->HasComponent<ECS::AnimationClipComponent>())
                         {
                             ECS::AnimationClipComponent* animationClipComponent = entity->GetComponent<ECS::AnimationClipComponent>();
-                            renderMesh.BoneTransforms = animationClipComponent->GetAnimator().GetBoneTransforms();
+                            renderMesh.BoneTransforms = animationClipComponent->GetAnimator()->GetBoneTransforms();
                         }
 
                         u64 meshIndex = renderWorld.Meshes.size();
