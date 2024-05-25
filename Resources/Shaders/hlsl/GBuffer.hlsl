@@ -15,6 +15,17 @@ struct VertexOutput
 };
 
 #define IDENTITY_MATRIX float4x4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
+#define ZERO_MATRIX float4x4(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+
+float4x4 SkinnedBoneMatrix(const int4 boneIds, const float4 boneWeights)
+{
+	float4x4 BoneTransform = ZERO_MATRIX; 
+	BoneTransform += bpo_BoneMatrices[boneIds[0]] * boneWeights[0];
+    BoneTransform += bpo_BoneMatrices[boneIds[1]] * boneWeights[1];
+    BoneTransform += bpo_BoneMatrices[boneIds[2]] * boneWeights[2];
+    BoneTransform += bpo_BoneMatrices[boneIds[3]] * boneWeights[3];
+	return BoneTransform;
+}
 
 VertexOutput VSMain(const GeoVertexInput input)
 {
@@ -22,17 +33,14 @@ VertexOutput VSMain(const GeoVertexInput input)
 	vsOut.Pos = float4(input.Pos, 1);
 	vsOut.Colour = float4(input.Colour, 1.0);
 
-	float4x4 BoneTransform = IDENTITY_MATRIX; 
-	BoneTransform += bpo_BoneMatrices[input.BoneIds[0]] * input.BoneWeights[0];
-    BoneTransform += bpo_BoneMatrices[input.BoneIds[1]] * input.BoneWeights[1];
-    BoneTransform += bpo_BoneMatrices[input.BoneIds[2]] * input.BoneWeights[2];
-    BoneTransform += bpo_BoneMatrices[input.BoneIds[3]] * input.BoneWeights[3];
+	float4x4 BoneTransform = SkinnedBoneMatrix(input.BoneIds, input.BoneWeights);
 
 	vsOut.WorldNormal[0] = input.BoneIds[0];
 	vsOut.WorldNormal[1] = input.BoneIds[1];
 	vsOut.WorldNormal[2] = input.BoneIds[2];
 	vsOut.WorldNormal[3] = input.BoneIds[3];
 
+/*
 	float4 totalPosition = float4(input.Pos, 1.0);
 	if (bpo_SkinnedMesh == 1)
 	{
@@ -54,9 +62,9 @@ VertexOutput VSMain(const GeoVertexInput input)
         	float4 localNormal = mul(bpo_BoneMatrices[input.BoneIds[i]], float4(input.Normal, 0));
    		}
 	}
-
-	//vsOut.Pos = mul(BoneTransform, float4(vsOut.Pos.xyz, 1));
 	vsOut.Pos = totalPosition;
+	*/
+	vsOut.Pos = mul(BoneTransform, float4(vsOut.Pos.xyz, 1));
 	vsOut.WorldPos = mul(bpo_Transform, vsOut.Pos);
 	vsOut.Pos = mul(bf_Camera_Proj_View, vsOut.WorldPos);
 	

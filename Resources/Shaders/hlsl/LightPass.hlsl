@@ -96,5 +96,5 @@ float4 PSMain(VertexOutput input) : SV_TARGET
             }
         }
     }
-	return float4(currentAlbedo, 1.0f);
+	return float4(ambientAlbedo + currentAlbedo, 1.0f);
 }

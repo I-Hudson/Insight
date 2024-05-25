@@ -194,8 +194,6 @@ namespace Insight
 			IDxcIncludeHandler* pIncludeHandler;
 			ASSERT(SUCCEEDED(DXUtils->CreateDefaultIncludeHandler(&pIncludeHandler)));
 
-
-
 			DxcBuffer Source;
 			Source.Ptr = shaderData.data();
 			Source.Size = shaderData.size();
@@ -222,10 +220,19 @@ namespace Insight
 			arguments.push_back(c_Include_Directory);
 			arguments.push_back(wResourcePath.c_str());
 
-			arguments.push_back(DXC_ARG_DEBUG);
-			arguments.push_back(DXC_ARG_SKIP_OPTIMIZATIONS);
+			const bool argDebugData = true;
+			const bool argSkipOptimisations = false;
+			if (argDebugData)
+			{
+				arguments.push_back(DXC_ARG_DEBUG);
+			}
+			if (argSkipOptimisations)
+			{
+				arguments.push_back(DXC_ARG_SKIP_OPTIMIZATIONS);
+			}
+			//arguments.push_back(DXC_ARG_DEBUG_NAME_FOR_BINARY);
 
-			//arguments.push_back(L"-Qstrip_debug");
+			arguments.push_back(L"-Qstrip_debug");
 			//arguments.push_back(L"-Qstrip_reflect");
 
 			arguments.push_back(L"-Wnull-character");
@@ -294,10 +301,6 @@ namespace Insight
 			}
 			pErrors->Release();
 
-			// Get compilation result
-			IDxcBlob* code;
-			ShaderCompileResults->GetResult(&code);
-
 			// Write shader to disk.
 			std::ofstream shaderDisk;
 
@@ -306,32 +309,61 @@ namespace Insight
 
 			std::string_view shaderToDiskView = name.substr(startShaderFile, offsetShaderFile);
 
-			std::string shaderCSOFolderPath = EnginePaths::GetExecutablePath() + "/Shader_CSO/";
+			std::string shaderCSOFolderPath = EnginePaths::GetExecutablePath() + "/Shader/CSO/";
+			std::string shaderPDBFolderPath = EnginePaths::GetExecutablePath() + "/Shader/PDB/";
+			std::string shaderReflectFolderPath = EnginePaths::GetExecutablePath() + "/Shader/Reflect/";
 			FileSystem::CreateFolder(shaderCSOFolderPath);
+			FileSystem::CreateFolder(shaderPDBFolderPath);
+			FileSystem::CreateFolder(shaderReflectFolderPath);
 
-			std::string shaderToDisk = shaderCSOFolderPath + name + "_" + StageToFuncName(stage) + "_" + StageToProfileTarget(stage) + ".cso";
-			shaderDisk.open(shaderToDisk.c_str());
-			if (shaderDisk.is_open())
+			if (argDebugData)
 			{
-				shaderDisk.write((const char*)code->GetBufferPointer(), code->GetBufferSize());
-				shaderDisk.close();
+				ComPtr<IDxcBlob> pDebugData;
+				ComPtr<IDxcBlobUtf16> pDebugDataPath;
+				ShaderCompileResults->GetOutput(DXC_OUT_PDB, IID_PPV_ARGS(pDebugData.GetAddressOf()), pDebugDataPath.GetAddressOf());
+				std::string debugPath = shaderPDBFolderPath + Platform::StringFromWString(pDebugDataPath->GetStringPointer());
+
+				shaderDisk.open(debugPath.c_str(), std::ios::trunc);
+				if (shaderDisk.is_open())
+				{
+					shaderDisk.write((const char*)pDebugData->GetBufferPointer(), pDebugData->GetBufferSize());
+					shaderDisk.close();
+				}
+
+				debugPath = shaderPDBFolderPath + name + "_" + StageToFuncName(stage) + "_" + StageToProfileTarget(stage) + ".pdb";
+				shaderDisk.open(debugPath.c_str(), std::ios::trunc);
+				if (shaderDisk.is_open())
+				{
+					shaderDisk.write((const char*)pDebugData->GetBufferPointer(), pDebugData->GetBufferSize());
+					shaderDisk.close();
+				}
+
+				//ComPtr<IDxcBlob> pReflectData;
+				//ShaderReflectionResults->GetOutput(DXC_OUT_REFLECTION, IID_PPV_ARGS(pReflectData.GetAddressOf()), nullptr);
+
+				//const std::string reflectPath = shaderReflectFolderPath + name + "_" + StageToFuncName(stage) + "_" + StageToProfileTarget(stage);
+				//shaderDisk.open(reflectPath.c_str(), std::ios::trunc);
+				//if (shaderDisk.is_open())
+				//{
+				//	shaderDisk.write((const char*)pReflectData->GetBufferPointer(), pReflectData->GetBufferSize());
+				//	shaderDisk.close();
+				//}
 			}
 
-			ComPtr<IDxcBlob> pDebugData;
-			ComPtr<IDxcBlobUtf16> pDebugDataPath;
-			ShaderCompileResults->GetOutput(DXC_OUT_PDB, IID_PPV_ARGS(pDebugData.GetAddressOf()), pDebugDataPath.GetAddressOf());
-			std::string debugPath = shaderCSOFolderPath + Platform::StringFromWString(pDebugDataPath->GetStringPointer());
+			// Get compilation result
+			IDxcBlob* shaderCompiledCode;
+			ShaderCompileResults->GetResult(&shaderCompiledCode);
 
-			shaderDisk.open(debugPath.c_str());
+			std::string shaderToDisk = shaderCSOFolderPath + name + "_" + StageToFuncName(stage) + "_" + StageToProfileTarget(stage) + ".cso";
+			shaderDisk.open(shaderToDisk.c_str(), std::ios::trunc);
 			if (shaderDisk.is_open())
 			{
-				shaderDisk.write((const char*)pDebugData->GetBufferPointer(), pDebugData->GetBufferSize());
+				shaderDisk.write((const char*)shaderCompiledCode->GetBufferPointer(), shaderCompiledCode->GetBufferSize());
 				shaderDisk.close();
 			}
 
 			pIncludeHandler->Release();
-
-			return code;
+			return shaderCompiledCode;
 		}
 
 		void ShaderCompiler::GetDescriptorSets(ShaderStageFlagBits stage, std::vector<DescriptorSet>& descriptor_sets, PushConstant& push_constant)
