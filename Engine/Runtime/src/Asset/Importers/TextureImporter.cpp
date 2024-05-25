@@ -36,7 +36,16 @@ namespace Insight
             IS_PROFILE_FUNCTION();
 
             std::vector<Byte> textureData = AssetRegistry::Instance().LoadAssetData(path);
-            if (textureData.empty())
+            ImportFromMemory(asset, textureData.data(), textureData.size());
+
+            Ref<TextureAsset> texture = asset.As<TextureAsset>();
+            texture->m_isMemoryAsset = false;
+        }
+
+        void TextureImporter::ImportFromMemory(Ref<Asset> asset, const void* data, const u64 dataSize) const
+        {
+            std::string_view path = asset->GetAssetInfo()->FilePath;
+            if (data == nullptr || dataSize == 0)
             {
                 IS_LOG_CORE_ERROR("[TextureImporter::Import] Texture data from path '{}' was empty.", path);
                 return;
@@ -111,7 +120,7 @@ namespace Insight
             bool nvttLoadFromMemory = false;
             {
                 IS_PROFILE_SCOPE("nvtt - loadFromMemory");
-                nvttLoadFromMemory = image.loadFromMemory(textureData.data(), static_cast<int>(textureData.size()));
+                nvttLoadFromMemory = image.loadFromMemory(data, dataSize);
             }
             // Then, we set up compression options using nvtt::CompressionOptions:
             nvtt::CompressionOptions compressionOptions;
@@ -150,7 +159,7 @@ namespace Insight
             if (textureBuffer == nullptr)
             {
                 IS_PROFILE_SCOPE("stbi_load_from_memory");
-                textureBuffer = stbi_load_from_memory(textureData.data(), static_cast<int>(textureData.size()), &width, &height, &channels, STBI_rgb_alpha);
+                textureBuffer = stbi_load_from_memory((const stbi_uc*)data, dataSize, &width, &height, &channels, STBI_rgb_alpha);
                 textureSize = width * height * 4;
                 imageLoader = ImageLoader::stbi;
             }
@@ -160,7 +169,7 @@ namespace Insight
                 qoi_desc qoiDesc;
                 {
                     IS_PROFILE_SCOPE("qoi_decode");
-                    textureBuffer = qoi_decode(textureData.data(), static_cast<int>(textureData.size()), &qoiDesc, 4);
+                    textureBuffer = qoi_decode(data, dataSize, &qoiDesc, 4);
                 }
                 width = qoiDesc.width;
                 height = qoiDesc.height;
@@ -197,20 +206,21 @@ namespace Insight
             texture->m_channels = 4;
             texture->m_pixelFormat = pixelFormat;
             texture->m_assetState = AssetState::Loaded;
+            texture->m_isMemoryAsset = true;
             texture->SetTextureData(textureBuffer, textureSize);
 
             switch (imageLoader)
             {
-                case ImageLoader::stbi:
-                {
-                    stbi_image_free(textureBuffer);
-                    break;
-                }
-                case ImageLoader::qoi:
-                {
-                    free(textureBuffer);
-                    break;
-                }
+            case ImageLoader::stbi:
+            {
+                stbi_image_free(textureBuffer);
+                break;
+            }
+            case ImageLoader::qoi:
+            {
+                free(textureBuffer);
+                break;
+            }
             }
         }
     }

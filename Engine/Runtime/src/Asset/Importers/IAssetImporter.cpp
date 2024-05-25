@@ -26,6 +26,16 @@ namespace Insight
                 {
                     return true;
                 }
+
+                if (importerFileExtension.front() == '.')
+                {
+                    importerFileExtension = importerFileExtension.substr(1);
+                }
+                
+                if (inFileExtension == importerFileExtension)
+                {
+                    return true;
+                }
             }
             return false;
         }

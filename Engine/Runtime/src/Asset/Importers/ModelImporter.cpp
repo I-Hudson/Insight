@@ -1,4 +1,5 @@
 #include "Asset/Importers/ModelImporter.h"
+#include "Asset/Importers/TextureImporter.h"
 #include "Asset/AssetRegistry.h"
 #include "Asset/Assets/Model.h"
 #include "Asset/Assets/Texture.h"
@@ -865,36 +866,58 @@ namespace Insight
 			ASSERT_MSG(aiMaterial, "[ModelImporter::ProcessMaterial] AssimpMaterial from MeshNode was nullptr. This shouldn't happen.");
 			
 			Ref<MaterialAsset> material = ::New<MaterialAsset>(modelAsset->GetAssetInfo());
-			return material;
 
 			const std::string materialname;// aiMaterial->GetName().C_Str();
 			const std::string_view Directory = modelAsset->GetAssetInfo()->FilePath;
-			const std::string diffuseTexturePath = GetTexturePath(aiMaterial, Directory, aiTextureType_DIFFUSE, aiTextureType_DIFFUSE);
-			Ref<TextureAsset> diffuseTexture = AssetRegistry::Instance().LoadAsset(diffuseTexturePath).As<TextureAsset>();
 
-			const std::string normalTexturePath = GetTexturePath(aiMaterial, Directory, aiTextureType_NORMALS, aiTextureType_NORMALS);
-			Ref<TextureAsset> normalTexture = AssetRegistry::Instance().LoadAsset(normalTexturePath).As<TextureAsset>();
+			material->SetTexture(TextureAssetTypes::Diffuse, LoadTexture(aiScene, aiMaterial, aiTextureType_BASE_COLOR, aiTextureType_DIFFUSE, modelAsset));
+			material->SetTexture(TextureAssetTypes::Normal, LoadTexture(aiScene, aiMaterial, aiTextureType_NORMAL_CAMERA, aiTextureType_NORMALS, modelAsset));
 
 			aiColor4D colour(1.0f);
 			aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_DIFFUSE, &colour);
 
-			//float opacity(1.0f);
-			//aiGetMaterialFloat(aiMaterial, AI_MATKEY_OPACITY, &opacity);
+			float opacity(1.0f);
+			aiGetMaterialFloat(aiMaterial, AI_MATKEY_OPACITY, &opacity);
 
 			material->SetName(materialname);
-
-			material->SetTexture(TextureAssetTypes::Diffuse, diffuseTexture);
-			material->SetTexture(TextureAssetTypes::Normal, normalTexture);
 
 			material->SetProperty(MaterialAssetProperty::Colour_R, colour.r);
 			material->SetProperty(MaterialAssetProperty::Colour_G, colour.g);
 			material->SetProperty(MaterialAssetProperty::Colour_B, colour.b);
 			material->SetProperty(MaterialAssetProperty::Colour_A, colour.a);
 
-			//material->SetProperty(MaterialAssetProperty::Opacity, opacity);
+			material->SetProperty(MaterialAssetProperty::Opacity, opacity);
 
 			MaterialCache[aiMaterial] = material;
 			return material;
+		}
+
+		Ref<TextureAsset> ModelImporter::LoadTexture(const aiScene* assimpScene, const aiMaterial* assimpMaterial, const aiTextureType PBRType, const aiTextureType legacyType, ModelAsset* modelAsset) const
+		{
+			const std::string texturePath = GetTexturePath(assimpMaterial, modelAsset->GetAssetInfo()->FilePath, PBRType, legacyType);
+			Ref<TextureAsset> texture;
+
+			const aiTexture* embededTexture = assimpScene->GetEmbeddedTexture(texturePath.c_str());
+			if (embededTexture != nullptr)
+			{
+				texture = ::New<TextureAsset>(modelAsset->GetAssetInfo());
+
+				const bool isCompressed = embededTexture->mHeight == 0;
+				const u64 dataSize = isCompressed ? embededTexture->mWidth : embededTexture->mWidth * embededTexture-> mHeight;
+
+				TextureImporter textureImporter;
+				if (!textureImporter.IsValidImporterForFileExtension(embededTexture->achFormatHint))
+				{
+					IS_LOG_CORE_ERROR("[ModelImporter::LoadTexture] Unable to load texture format '{}', path '{}'.", embededTexture->achFormatHint, texturePath);
+					return nullptr;
+				}
+				textureImporter.ImportFromMemory(texture, embededTexture->pcData, dataSize);
+			}
+			else
+			{
+				texture = AssetRegistry::Instance().LoadAsset(texturePath).As<TextureAsset>();
+			}
+			return texture.As<TextureAsset>();
 		}
 
 		void ModelImporter::ExtractSkeleton(const aiScene* aiScene, const aiNode* aiNode, Maths::Matrix4 parentTransform, ModelAsset* modelAsset) const
