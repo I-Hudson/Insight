@@ -901,10 +901,10 @@ namespace Insight
 			if (embededTexture != nullptr)
 			{
 				texture = ::New<TextureAsset>(modelAsset->GetAssetInfo());
-
+			
 				const bool isCompressed = embededTexture->mHeight == 0;
 				const u64 dataSize = isCompressed ? embededTexture->mWidth : embededTexture->mWidth * embededTexture-> mHeight;
-
+			
 				TextureImporter textureImporter;
 				if (!textureImporter.IsValidImporterForFileExtension(embededTexture->achFormatHint))
 				{
@@ -912,6 +912,7 @@ namespace Insight
 					return nullptr;
 				}
 				textureImporter.ImportFromMemory(texture, embededTexture->pcData, dataSize);
+				modelAsset->m_embeddedTextures.push_back(texture);
 			}
 			else
 			{

@@ -33,17 +33,15 @@ VertexOutput VSMain(const GeoVertexInput input)
 	vsOut.Pos = float4(input.Pos, 1);
 	vsOut.Colour = float4(input.Colour, 1.0);
 
-	float4x4 BoneTransform = SkinnedBoneMatrix(input.BoneIds, input.BoneWeights);
-
 	vsOut.WorldNormal[0] = input.BoneIds[0];
 	vsOut.WorldNormal[1] = input.BoneIds[1];
 	vsOut.WorldNormal[2] = input.BoneIds[2];
 	vsOut.WorldNormal[3] = input.BoneIds[3];
 
-/*
-	float4 totalPosition = float4(input.Pos, 1.0);
 	if (bpo_SkinnedMesh == 1)
 	{
+/*
+	float4 totalPosition = float4(input.Pos, 1.0);
 		totalPosition = float4(0,0,0,0);
 		for(int i = 0 ; i < 4 ; ++i)
     	{
@@ -61,10 +59,11 @@ VertexOutput VSMain(const GeoVertexInput input)
 			totalPosition += localPosition * input.BoneWeights[i];
         	float4 localNormal = mul(bpo_BoneMatrices[input.BoneIds[i]], float4(input.Normal, 0));
    		}
-	}
 	vsOut.Pos = totalPosition;
 	*/
-	vsOut.Pos = mul(BoneTransform, float4(vsOut.Pos.xyz, 1));
+		float4x4 BoneTransform = SkinnedBoneMatrix(input.BoneIds, input.BoneWeights);
+		vsOut.Pos = mul(BoneTransform, float4(vsOut.Pos.xyz, 1));
+	}
 	vsOut.WorldPos = mul(bpo_Transform, vsOut.Pos);
 	vsOut.Pos = mul(bf_Camera_Proj_View, vsOut.WorldPos);
 	

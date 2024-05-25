@@ -125,6 +125,18 @@ namespace Insight::Runtime
 		}
 		m_materials.clear();
 
+		for (Ref<TextureAsset>& texture : m_embeddedTextures)
+		{
+			texture->OnUnload();
+
+			if (texture->GetReferenceCount() > 1)
+			{
+				IS_LOG_CORE_WARN("[ModelAsset::OnUnload] Embedded Texture '{}', is reference elsewhere. Will not be deleted here.", texture->GetName());
+			}
+		}
+		m_embeddedTextures.clear();
+		
+
 		for (Ref<AnimationClip>& animationClip : m_animationClips)
 		{
 			animationClip.Reset();

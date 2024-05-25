@@ -14,10 +14,11 @@ namespace Insight
         class RHI_Texture;
     }
 
-    class TextureImporter;
-
     namespace Runtime
     {
+        class TextureImporter;
+        class ModelAsset;
+
         enum class TextureAssetTypes : u8
         {
             Diffuse,
@@ -58,6 +59,7 @@ namespace Insight
             Graphics::RHI_Texture* m_rhiTexture = nullptr;
 
             friend class TextureImporter;
+            friend class ModelAsset;
         };
     }
 }

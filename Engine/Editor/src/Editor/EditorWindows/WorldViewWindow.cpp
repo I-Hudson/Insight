@@ -529,7 +529,7 @@ namespace Insight
                             const bool isVisable = mainCameraFrustm.IsVisible(Maths::Vector3(mesh.Transform[3]), mesh.BoudingBox.GetRadius());
                             if (!isVisable)
                             {
-                                continue;
+                                //continue;
                             }
 
                             Graphics::BufferPerObject object = {};
@@ -685,8 +685,8 @@ namespace Insight
                                 Graphics::RHI_Texture* diffuseTexture = renderMaterial.Textures[(u64)Runtime::TextureAssetTypes::Diffuse];
                                 if (diffuseTexture)
                                 {
-                                    //cmdList->SetTexture(3, 0, diffuseTexture);
-                                    //object.Textures_Set[0] = 1;
+                                    cmdList->SetTexture(3, 0, diffuseTexture);
+                                    object.Textures_Set[0] = 1;
                                 }
                             }
 

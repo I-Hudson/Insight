@@ -52,6 +52,7 @@ namespace Insight
         private:
             std::vector<Ref<Mesh>> m_meshes;
             std::vector<Ref<MaterialAsset>> m_materials;
+            std::vector<Ref<TextureAsset>> m_embeddedTextures;
 
             std::vector<Ref<Skeleton>> m_skeletons;
             std::vector<Ref<AnimationClip>> m_animationClips;

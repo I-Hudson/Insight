@@ -9,14 +9,10 @@ namespace Insight
     {
         TextureAsset::TextureAsset(const AssetInfo* assetInfo)
             : Asset(assetInfo)
-        {
-
-        }
+        { }
 
         TextureAsset::~TextureAsset()
-        {
-
-        }
+        { }
 
         u32 TextureAsset::GetWidth() const
         {
