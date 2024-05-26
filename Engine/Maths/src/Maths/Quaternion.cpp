@@ -8,6 +8,8 @@ namespace Insight
 {
     namespace Maths
     {
+        const Quaternion Quaternion::Identity = Quaternion(1, 0, 0, 0);
+
         Quaternion::Quaternion(const Maths::Float3& eulerAngles)
         {
             const float f = 0.5f;
@@ -103,6 +105,11 @@ namespace Insight
                 float angle = std::acos(cosTheta);
                 return (sin((1.0f - time) * angle) * *this + std::sin(time * angle) * z) / sin(angle);
             }
+        }
+
+        Quaternion Quaternion::operator=(const Quaternion& q)
+        {
+            return Quaternion(q);
         }
 
 

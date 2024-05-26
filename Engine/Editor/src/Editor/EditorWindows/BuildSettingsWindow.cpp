@@ -1,9 +1,12 @@
 #include "Editor/EditorWindows/BuildSettingsWindow.h"
 #include "Editor/PackageBuild.h"
+#include "Editor/Build/BuildSystem.h"
 
 #include "Platforms/Platform.h"
-#include "Editor/Build/BuildSystem.h"
+#include "Core/Profiler.h"
+
 #include "Runtime/Engine.h"
+
 #include <imgui.h>
 
 namespace Insight

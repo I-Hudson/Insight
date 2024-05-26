@@ -2,7 +2,7 @@
 
 #include "Core/Logger.h"
 #include "Core/CommandLineArgs.h"
-
+#include "Core/Profiler.h"
 #include "Serialisation/Archive.h"
 
 #include "Input/InputSystem.h"

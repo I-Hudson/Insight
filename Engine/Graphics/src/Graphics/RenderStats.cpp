@@ -5,6 +5,8 @@
 
 #include <imgui.h>
 
+#include <sstream>
+
 std::string FormatU64ToCommaString(u64 value)
 {
     if constexpr (false)

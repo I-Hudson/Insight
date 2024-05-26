@@ -115,7 +115,6 @@ namespace Insight
 
 			Physics::PhysicsWorld::Initialise();
 
-
 			OnPostInit();
 
 			return true;

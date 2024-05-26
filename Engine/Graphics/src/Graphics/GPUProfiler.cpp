@@ -1,6 +1,8 @@
 #include "Graphics/GPUProfiler.h"
 #include "Graphics/RenderContext.h"
 
+#include "Core/Profiler.h"
+
 #include <imgui.h>
 
 namespace Insight

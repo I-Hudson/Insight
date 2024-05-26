@@ -4,6 +4,7 @@
 #endif
 #include "Core/Memory.h"
 #include "Core/Logger.h"
+#include "Core/Profiler.h"
 #include "FileSystem/FileSystem.h"
 
 #include <string>

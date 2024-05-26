@@ -6,6 +6,8 @@
 #include "Input/InputDevices/InputDevice_KeyboardMouse.h"
 #include "Input/InputDevices/InputDeivce_Controller.h"
 
+#include "Core/Profiler.h"
+
 namespace Insight
 {
 	namespace Editor

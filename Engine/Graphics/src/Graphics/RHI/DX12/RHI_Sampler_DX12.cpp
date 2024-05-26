@@ -5,6 +5,8 @@
 
 #include "Graphics/RHI/DX12/DX12Utils.h"
 
+#include "Core/Profiler.h"
+
 namespace Insight
 {
 	namespace Graphics

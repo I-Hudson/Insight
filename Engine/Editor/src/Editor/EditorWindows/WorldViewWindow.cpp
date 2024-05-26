@@ -19,6 +19,7 @@
 #include "Maths/Utils.h"
 
 #include "Core/Logger.h"
+#include "Core/Profiler.h"
 
 #include <imgui.h>
 #include <ImGuizmo.h>

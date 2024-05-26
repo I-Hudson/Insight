@@ -6,15 +6,9 @@
 #include "Core/Singleton.h"
 #include "Core/Timer.h"
 
-#include "Core/Collections/DoubleBufferVector.h"
-#include "Core/Profiler.h"
-
 #include <string>
-#include <sstream>
 
 #include <locale>
-#include <iostream>
-#include <iomanip>
 
 class comma_numpunct : public std::numpunct<char>
 {

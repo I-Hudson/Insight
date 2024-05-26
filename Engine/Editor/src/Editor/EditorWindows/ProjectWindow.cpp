@@ -2,9 +2,10 @@
 #include "Editor/EditorWindows/EditorWindowManager.h"
 
 #include "Runtime/ProjectSystem.h"
-#include "Core/Defines.h"
-
 #include "Runtime/Engine.h"
+
+#include "Core/Defines.h"
+#include "Core/Profiler.h"
 
 #include <imgui.h>
 #include <misc/cpp/imgui_stdlib.h>

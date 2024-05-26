@@ -5,6 +5,8 @@
 
 #include "Graphics/RHI/Vulkan/VulkanUtils.h"
 
+#include "Core/Profiler.h"
+
 namespace Insight
 {
 	namespace Graphics

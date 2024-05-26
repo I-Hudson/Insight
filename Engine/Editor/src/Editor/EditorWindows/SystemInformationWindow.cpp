@@ -3,6 +3,8 @@
 #include "Platforms/Platform.h"
 #include "Runtime/Engine.h"
 
+#include "Core/Profiler.h"
+
 #include <imgui.h>
 
 #include <string>

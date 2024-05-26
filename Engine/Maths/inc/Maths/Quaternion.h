@@ -42,7 +42,8 @@ namespace Insight
             float Dot(const Quaternion& q) const;
             Quaternion Slerp(const Quaternion& q, const float time) const;
 
-            Quaternion& operator=(const Quaternion& q) = default;
+            Quaternion operator=(const Quaternion& q);
+
             Quaternion& operator +=(const Quaternion& q);
             Quaternion& operator -=(const Quaternion& q);
             Quaternion& operator *=(const Quaternion& q);
@@ -71,6 +72,8 @@ namespace Insight
 
             IS_MATHS friend bool operator==(const Quaternion& q1, const Quaternion& q2);
             IS_MATHS friend bool operator!=(const Quaternion& q1, const Quaternion& q2);
+
+            static const Quaternion Identity;
 
         private:
             Quaternion Conjugate(const Quaternion& q) const;

@@ -1,6 +1,8 @@
 #include "Editor/EditorWindows/EditorWindowManager.h"
 #include "Editor/EditorWindows/IEditorWindow.h"
 
+#include "Core/Profiler.h"
+
 #include "EditorWindows.gen.h"
 
 namespace Insight
