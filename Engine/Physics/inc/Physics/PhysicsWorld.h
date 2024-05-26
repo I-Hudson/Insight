@@ -1,40 +1,41 @@
 #pragma once
 
 #include "Physics/Defines.h"
-
-// The Jolt headers don't include Jolt.h. Always include Jolt.h before including any other Jolt header.
-// You can use Jolt.h in your precompiled header to speed up compilation.
-#include <Jolt/Jolt.h>
-
-// Jolt includes
-#include <Jolt/RegisterTypes.h>
-#include <Jolt/Core/Factory.h>
-#include <Jolt/Core/TempAllocator.h>
-#include <Jolt/Core/JobSystemThreadPool.h>
-#include <Jolt/Physics/PhysicsSettings.h>
-#include <Jolt/Physics/PhysicsSystem.h>
-#include <Jolt/Physics/Collision/Shape/BoxShape.h>
-#include <Jolt/Physics/Collision/Shape/SphereShape.h>
-#include <Jolt/Physics/Body/BodyCreationSettings.h>
-#include <Jolt/Physics/Body/BodyActivationListener.h>
+#include "Physics/IPhysicsWorld.h"
 
 namespace Insight
 {
     namespace Physics
     {
+        /// @brief Static interface for physics APU calls.
         class IS_PHYSICS PhysicsWorld
         {
         public:
             PhysicsWorld();
             ~PhysicsWorld();
 
-            void Update(const float deltaTime);
+            static void Initialise();
+            static void Shutdown();
+
+            static void Update(const float deltaTime);
+
+            static void StartRecord();
+            static void EndRecord();
+
+            /// @brief Add a new body to the world.
+            /// @return 
+            static BodyId Addbody();
+            /// @brief Destroy the body from the physics world. This body must be recreated to use again.
+            /// @param bodyId 
+            static void DestoryBody(const BodyId bodyId);
+
+            static void ActivateBody(const BodyId body);
+            /// @brief Deactivate a body from the physics world, this can be re activated.
+            /// @param bodyId 
+            static void DeactivateBody(const BodyId bodyId);
 
         private:
-            JPH::PhysicsSystem m_physicsSystem;
-            JPH::JobSystemThreadPool m_jobSystem;
-            JPH::TempAllocatorMalloc m_tempAllocatorMalloc;
-            std::vector<JPH::BodyID> m_bodyIds;
+            inline static IPhysicsWorld* s_PhsyicsWorld;
         };
     }
 }

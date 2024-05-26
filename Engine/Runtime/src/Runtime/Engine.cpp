@@ -23,6 +23,8 @@
 
 #include "Serialisation/Archive.h"
 
+#include "Physics/PhysicsWorld.h"
+
 #include "imgui.h"
 
 namespace Insight
@@ -111,6 +113,9 @@ namespace Insight
 
 			ImGui::GetIO().ConfigInputTrickleEventQueue = false;
 
+			Physics::PhysicsWorld::Initialise();
+
+
 			OnPostInit();
 
 			return true;
@@ -162,6 +167,11 @@ namespace Insight
 					OnUpdate();
 
 					{
+						IS_PROFILE_SCOPE("PhysicsWorld Update");
+						Physics::PhysicsWorld::Update(delta_time);
+					}
+
+					{
 						IS_PROFILE_SCOPE("EarlyUpdate");
 						m_worldSystem.EarlyUpdate();
 					}
@@ -197,6 +207,8 @@ namespace Insight
 
 			Graphics::RenderContext::Instance().WaitForRenderThread();
 			Graphics::RenderContext::Instance().GpuWaitForIdle();
+
+			Physics::PhysicsWorld::Shutdown();
 
 			OnDestroy();
 

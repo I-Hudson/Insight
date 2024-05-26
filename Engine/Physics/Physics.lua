@@ -39,8 +39,6 @@ project "Insight_Physics"
     defines
     {
         "IS_EXPORT_PHYSICS_DLL",
-        "IS_PHYSICS_JOLT",
-        "IS_PHYSICS_PHYSX",
     }
     
     includedirs

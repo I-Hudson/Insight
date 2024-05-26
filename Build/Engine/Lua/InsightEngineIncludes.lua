@@ -7,6 +7,7 @@ local InsightEngineIncludes = { }
 function InsightEngineIncludes.AddIncludes(includeMap, prefix)
     includeMap["InsightCore"] = prefix .. "Engine/Core/inc"
     includeMap["InsightMaths"] = prefix .. "Engine/Maths/inc"
+    includeMap["InsightPhysics"] = prefix .. "Engine/Physics/inc"
     includeMap["InsightGraphics"] = prefix .. "Engine/Graphics/inc"
     includeMap["InsightInput"] = prefix .. "Engine/Input/inc"
     includeMap["InsightRuntime"] = prefix .. "Engine/Runtime/inc"

@@ -35,6 +35,7 @@ project "Insight_Runtime"
     { 
         "Insight_Core",
         "Insight_Maths",
+        "Insight_Physics",
         "Insight_Graphics",
         "Insight_Input",
     }
@@ -64,6 +65,7 @@ project "Insight_Runtime"
         "%{IncludeDirs.qoi}",
         "%{IncludeDirs.zip}",
         "%{IncludeDirs.miniaudio}",
+        "%{IncludeDirs.JoltPhysics}",
         
         "%{IncludeDirs.assimp}",
         "%{IncludeDirs.assimp}/../build/include",
