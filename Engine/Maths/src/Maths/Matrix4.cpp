@@ -1182,6 +1182,28 @@ namespace test
 			CHECK(Equals(scale.y, glmScale.y, 0.0001f));
 			CHECK(Equals(scale.z, glmScale.z, 0.0001f));
 			CHECK(scale.w == 0.0f);
+
+#ifdef IS_MATHS_DIRECTX_MATHS
+			DirectX::XMVECTOR dxRotation;
+			DirectX::XMVECTOR dxPosition;
+			DirectX::XMVECTOR dxScale;
+			DirectX::XMMatrixDecompose(&dxScale, &dxRotation, &dxPosition, lootAtMatrix.xmmatrix);
+
+			CHECK(Equals(position.x, dxPosition.m128_f32[0], 0.0001f));
+			CHECK(Equals(position.y, dxPosition.m128_f32[1], 0.0001f));
+			CHECK(Equals(position.z, dxPosition.m128_f32[2], 0.0001f));
+			CHECK(position.w == 0.0f);
+
+			CHECK(Equals(rotation.w, dxRotation.m128_f32[3], 0.0001f));
+			CHECK(Equals(rotation.x, dxRotation.m128_f32[0], 0.0001f));
+			CHECK(Equals(rotation.y, dxRotation.m128_f32[1], 0.0001f));
+			CHECK(Equals(rotation.z, dxRotation.m128_f32[2], 0.0001f));
+
+			CHECK(Equals(scale.x, dxScale.m128_f32[0], 0.0001f));
+			CHECK(Equals(scale.y, dxScale.m128_f32[1], 0.0001f));
+			CHECK(Equals(scale.z, dxScale.m128_f32[2], 0.0001f));
+			CHECK(scale.w == 0.0f);
+#endif
 		}
 
 		TEST_CASE("operator[]")

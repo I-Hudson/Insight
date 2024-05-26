@@ -24,10 +24,12 @@ namespace Insight
         public:
             Quaternion() = default;
             Quaternion(const Quaternion& quaternion) = default;
-            Quaternion(const Maths::Float3& eulerAngles);
-            Quaternion(const float eulerX, const float eulerY, const float eulerZ);
+            Quaternion(const Maths::Float3& eulerAnglesRad);
+            Quaternion(const float eulerXRad, const float eulerYRad, const float eulerZRad);
             Quaternion(const float w, const float x, const float y, const float z);
             ~Quaternion();
+
+            static Quaternion FromEulerDegress(const float eulerX, const float eulerY, const float eulerZ);
 
             float& operator[](const int index);
             const float& operator[](const int index) const;
@@ -36,6 +38,13 @@ namespace Insight
             Quaternion Normalised() const { return Quaternion(*this).Normalise(); }
 
             float Length() const;
+
+            /// @brief Return euler angles in radians.
+            /// @return Vector3
+            Vector3 ToEuler() const;
+            /// @brief Return euler angles in degrees.
+            /// @return Vector3
+            Vector3 ToEulerDeg() const;
 
             Quaternion Inversed() const;
 

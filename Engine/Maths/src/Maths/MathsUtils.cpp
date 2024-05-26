@@ -10,6 +10,8 @@ namespace Insight
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
 			return MathsLibrary::DirectXMath;
+#elif defined(IS_MATHS_GLM)
+            return MathsLibrary::GLM;
 #else
 			return MathsLibrary::Insight;
 #endif

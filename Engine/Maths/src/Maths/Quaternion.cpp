@@ -1,7 +1,10 @@
 #include "Maths/Quaternion.h"
+#include "Maths/Vector2.h"
 #include "Maths/Utils.h"
+#include "Maths/MathsUtils.h"
 
 #include <cmath>
+#include <algorithm>
 #include <limits>
 
 namespace Insight
@@ -10,22 +13,22 @@ namespace Insight
     {
         const Quaternion Quaternion::Identity = Quaternion(1, 0, 0, 0);
 
-        Quaternion::Quaternion(const Maths::Float3& eulerAngles)
+        Quaternion::Quaternion(const Maths::Float3& eulerAnglesRad)
         {
             const float f = 0.5f;
-            Maths::Vector3 c = Maths::Vector3(std::cos(eulerAngles.x * f), std::cos(eulerAngles.y * f), std::cos(eulerAngles.z * f));
-            Maths::Vector3 s = Maths::Vector3(std::sin(eulerAngles.x * f), std::sin(eulerAngles.y * f), std::sin(eulerAngles.z * f));
+            Maths::Vector3 c = Maths::Vector3(std::cos(eulerAnglesRad.x * f), std::cos(eulerAnglesRad.y * f), std::cos(eulerAnglesRad.z * f));
+            Maths::Vector3 s = Maths::Vector3(std::sin(eulerAnglesRad.x * f), std::sin(eulerAnglesRad.y * f), std::sin(eulerAnglesRad.z * f));
 
             this->w = c.x * c.y * c.z + s.x * s.y * s.z;
             this->x = s.x * c.y * c.z - c.x * s.y * s.z;
             this->y = c.x * s.y * c.z + s.x * c.y * s.z;
             this->z = c.x * c.y * s.z - s.x * s.y * c.z;
         }
-        Quaternion::Quaternion(const float eulerX, const float eulerY, const float eulerZ)
+        Quaternion::Quaternion(const float eulerXRad, const float eulerYRad, const float eulerZRad)
         {
             const float f = 0.5f;
-            Maths::Vector3 c = Maths::Vector3(std::cos(eulerX * f), std::cos(eulerY * f), std::cos(eulerZ * f));
-            Maths::Vector3 s = Maths::Vector3(std::sin(eulerX * f), std::sin(eulerY * f), std::sin(eulerZ * f));
+            Maths::Vector3 c = Maths::Vector3(std::cos(eulerXRad * f), std::cos(eulerYRad * f), std::cos(eulerZRad * f));
+            Maths::Vector3 s = Maths::Vector3(std::sin(eulerXRad * f), std::sin(eulerYRad * f), std::sin(eulerZRad * f));
 
             this->w = c.x * c.y * c.z + s.x * s.y * s.z;
             this->x = s.x * c.y * c.z - c.x * s.y * s.z;
@@ -37,6 +40,11 @@ namespace Insight
         { }
         Quaternion::~Quaternion()
         { }
+
+        Quaternion Quaternion::FromEulerDegress(const float eulerX, const float eulerY, const float eulerZ)
+        {
+            return Quaternion(DegreesToRadians(eulerX), DegreesToRadians(eulerY), DegreesToRadians(eulerZ));
+        }
 
         float& Quaternion::operator[](const int index)
         {
@@ -65,6 +73,53 @@ namespace Insight
         float Quaternion::Length() const
         {
             return std::sqrtf(Dot(*this));
+        }
+
+        Vector3 Quaternion::ToEuler() const
+        {
+            Vector3 euler = Vector3::Zero;
+
+            // pitch
+            {
+                const double rY = 2.0 * (y * z + w * x);
+                const double rX = w * w - x * x - y * y + z * z;
+                if (Vector2(rX, y).Equal(Vector2::Zero, EPSILON)) //avoid atan2(0,0) - handle singularity - Matiis
+                {
+                    euler[0] = std::atan2(rX, w);
+                }
+                else
+                {
+                    euler[0] = std::atan2(rY, rX);
+                }
+            }
+
+            // yaw (y-axis rotation)
+            {
+                double rY = -2.0 * (x * z - w * y);
+                rY = std::min(std::max(rY, -1.0), 1.0);
+                euler[1] = std::asin(rY);
+            }
+
+            // roll
+            {
+                const double rY = 2.0 * (x * y + w * z);
+                const double rX = w * w + x * x - y * y - z * z;
+                if (Vector2(rX, rY).Equal(Vector2::Zero, EPSILON)) //avoid atan2(0,0) - handle singularity - Matiis
+                {
+                    euler[2] = 0.0f;
+                }
+                else
+                {
+                    euler[2] = std::atan2(rY, rX);
+                }
+            }
+            return euler;
+        }
+
+        Vector3 Quaternion::ToEulerDeg() const
+        {
+            Vector3 euler = ToEuler();
+            return Vector3(RadiansToDegrees(euler.x), RadiansToDegrees(euler.y), RadiansToDegrees(euler.z));
         }
 
         Quaternion Quaternion::Inversed() const
@@ -290,6 +345,55 @@ namespace test
 			CHECK(eulerQVec.z == glmEulerQ.z);
 			CHECK(eulerQVec == eulerQ);
 		}
+
+        TEST_CASE("Euler")
+        {
+            const float w1 = 0.0f;
+            const float x1 = 0.0f;
+            const float y1 = 0.0f;
+            const float z1 = 0.0f;
+            Quaternion q(w1, x1, y1, z1);
+
+            CHECK(q.w == w1);
+            CHECK(q.x == x1);
+            CHECK(q.y == y1);
+            CHECK(q.z == z1);
+
+            constexpr float eulerXDeg = 90.0f;
+            constexpr float eulerYDeg = 245.0f;
+            constexpr float eulerZDeg = -35.0f;
+
+            constexpr float eulerX = DegreesToRadians(eulerXDeg);
+            constexpr float eulerY = DegreesToRadians(eulerYDeg);
+            constexpr float eulerZ = DegreesToRadians(eulerZDeg);
+            Quaternion eulerQVec(Vector3(eulerX, eulerY, eulerZ));
+            Quaternion eulerQ(eulerX, eulerY, eulerZ);
+            glm::quat glmEulerQ(glm::vec3(eulerX, eulerY, eulerZ));
+
+            CHECK(eulerQVec.w == glmEulerQ.w);
+            CHECK(eulerQVec.x == glmEulerQ.x);
+            CHECK(eulerQVec.y == glmEulerQ.y);
+            CHECK(eulerQVec.z == glmEulerQ.z);
+            CHECK(eulerQVec == eulerQ);
+
+            eulerQ = Quaternion::FromEulerDegress(eulerXDeg, eulerYDeg, eulerZDeg);
+            glmEulerQ = glm::vec3(eulerX, eulerY, eulerZ);
+
+            Vector3 eulerAngles = eulerQ.ToEuler();
+            glm::vec3 glmQuatToEuler = glm::eulerAngles(glmEulerQ);
+
+            CHECK(Equals(eulerAngles.x, glmQuatToEuler.x, 0.0001f));
+            CHECK(Equals(eulerAngles.y, glmQuatToEuler.y, 0.0001f));
+            CHECK(Equals(eulerAngles.z, glmQuatToEuler.z, 0.0001f));
+
+            glm::vec3 glmEulerDeg = glm::degrees(glmQuatToEuler);
+
+            Vector3 eulerDeg = eulerQ.ToEulerDeg();
+
+            CHECK(Equals(eulerDeg.x, glmEulerDeg.x, 0.0001f));
+            CHECK(Equals(eulerDeg.y, glmEulerDeg.y, 0.0001f));
+            CHECK(Equals(eulerDeg.z, glmEulerDeg.z, 0.0001f));
+        }
 
 
 		TEST_CASE("Addition")

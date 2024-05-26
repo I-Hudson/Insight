@@ -35,7 +35,8 @@ namespace Insight
         enum class MathsLibrary
         {
             Insight,
-            DirectXMath
+            DirectXMath,
+            GLM
         };
 
         /// @brief Return an enum value of type 'MathsLibrary' with the enabled maths library in use. 
