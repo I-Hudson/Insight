@@ -8,6 +8,7 @@
 #if defined(IS_MATHS_GLM) || defined(IS_TESTING)
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
+#include<glm/gtx/matrix_decompose.hpp>
 #endif
 
 namespace Insight
@@ -84,6 +85,7 @@ namespace Insight
 			, m_30(other.m_30), m_31(other.m_31), m_32(other.m_32), m_33(other.m_33)
 #endif
 		{ }
+
 		Matrix4::Matrix4(Matrix4&& other)
 #ifdef IS_MATHS_DIRECTX_MATHS
 			: xmmatrix(other.xmmatrix)
@@ -271,6 +273,207 @@ namespace Insight
 			return *this;
 		}
 
+		void Matrix4::Decompose(Vector4& position, Quaternion& rotation, Vector4& scale) const
+		{
+
+#ifdef IS_MATHS_DIRECTX_MATHS
+			DirectX::XMVECTOR quat;
+			DirectX::XMMatrixDecompose(&scale.xmvector, &quat, &position.xmvector, xmmatrix);
+			rotation = Quaternion(quat.m128_f32[3], quat.m128_f32[0], quat.m128_f32[1], quat.m128_f32[2]);
+			position[3] = 0.0f;
+			scale[3] = 0.0f;
+#elif defined(IS_MATHS_GLM)
+			glm::vec3 glmScale;
+			glm::quat glmQuat;
+			glm::vec3 glmPosition;
+
+			glm::decompose(mat4, glmScale, glmQuat, glmPosition);
+
+			scale.vec4 = glm::vec4(glmScale, 0.0f);
+			rotation.quat = Quaternion(glmQuat.w, glmQuat.x, glmQuat.y, glmQuat.z);
+			position.vec4 = glm::vec4(glmPosition, 0.0f);
+#else
+			position = v3;
+			position[3] = 0.0f;
+
+			Vector4* ppvBasis[3];
+			Matrix4 matTemp;
+			ppvBasis[0] = &matTemp[0];
+			ppvBasis[1] = &matTemp[1];
+			ppvBasis[2] = &matTemp[2];
+
+			scale[0] = ppvBasis[0][0].Length();
+			scale[1] = ppvBasis[1][1].Length();
+			scale[2] = ppvBasis[2][2].Length();
+			scale[3] = 0.0f;
+
+#pragma region 
+#define XM3RANKDECOMPOSE(a, b, c, x, y, z)\
+if((x) < (y))                   \
+{                               \
+    if((y) < (z))               \
+    {                           \
+        (a) = 2;                \
+        (b) = 1;                \
+        (c) = 0;                \
+    }                           \
+    else                        \
+    {                           \
+        (a) = 1;                \
+                                \
+        if((x) < (z))           \
+        {                       \
+            (b) = 2;            \
+            (c) = 0;            \
+        }                       \
+        else                    \
+        {                       \
+            (b) = 0;            \
+            (c) = 2;            \
+        }                       \
+    }                           \
+}                               \
+else                            \
+{                               \
+    if((x) < (z))               \
+    {                           \
+        (a) = 2;                \
+        (b) = 0;                \
+        (c) = 1;                \
+    }                           \
+    else                        \
+    {                           \
+        (a) = 0;                \
+                                \
+        if((y) < (z))           \
+        {                       \
+            (b) = 2;            \
+            (c) = 1;            \
+        }                       \
+        else                    \
+        {                       \
+            (b) = 1;            \
+            (c) = 2;            \
+        }                       \
+    }                           \
+}
+#define XM3_DECOMP_EPSILON 0.0001f
+#pragma endregion
+
+			uint64_t a, b, c;
+			XM3RANKDECOMPOSE(a, b, c, scale[0], scale[1], scale[2]);
+
+			static const Vector4 pvCanonicalBasis[3] = 
+			{
+				Vector4(1,0,0,0),
+				Vector4(0,1,0,0),
+				Vector4(0,0,1,0)
+			};
+
+			if (scale[a] < XM3_DECOMP_EPSILON)
+			{
+				ppvBasis[a][0] = pvCanonicalBasis[a][0];
+			}
+			ppvBasis[a][0] = ppvBasis[a][0].Normalised();
+
+			if (scale[b] < XM3_DECOMP_EPSILON)
+			{
+				size_t aa, bb, cc;
+				float fAbsX, fAbsY, fAbsZ;
+
+				fAbsX = fabsf(ppvBasis[a][0].x);
+				fAbsY = fabsf(ppvBasis[a][0].y);
+				fAbsZ = fabsf(ppvBasis[a][0].z);
+
+				XM3RANKDECOMPOSE(aa, bb, cc, fAbsX, fAbsY, fAbsZ);
+
+				ppvBasis[b][0] = ppvBasis[a][0].Cross(pvCanonicalBasis[cc][0]);
+			}
+
+			ppvBasis[b][0] = ppvBasis[b][0].Normalised();
+
+			if (scale[c] < XM3_DECOMP_EPSILON)
+			{
+				ppvBasis[c][0] = ppvBasis[a][0].Cross(ppvBasis[b][0]);
+			}
+
+			ppvBasis[c][0] = ppvBasis[c][0].Normalised();
+
+			float fDet = matTemp.GetDeterminant();
+
+			// use Kramer's rule to check for handedness of coordinate system
+			if (fDet < 0.0f)
+			{
+				// switch coordinate system by negating the scale and inverting the basis vector on the x-axis
+				scale[a] = -scale[a];
+				ppvBasis[a][0] = -ppvBasis[a][0];
+
+				fDet = -fDet;
+			}
+			scale[3] = 0.0f;
+
+			fDet -= 1.0f;
+			fDet *= fDet;
+
+			if (XM3_DECOMP_EPSILON < fDet)
+			{
+				// Non-SRT matrix encountered
+				return;
+			}
+
+			// generate the quaternion from the matrix
+			float r22 = (*this)[2][2];
+			if (r22 <= 0.f)  // x^2 + y^2 >= z^2 + w^2
+			{
+				float dif10 = (*this)[1][1] - (*this)[0][0];
+				float omr22 = 1.f - r22;
+				if (dif10 <= 0.f)  // x^2 >= y^2
+				{
+					float fourXSqr = omr22 - dif10;
+					float inv4x = 0.5f / sqrtf(fourXSqr);
+					rotation[0] = fourXSqr * inv4x;
+					rotation[1] = ((*this)[0][1] + (*this)[1][0]) * inv4x;
+					rotation[2] = ((*this)[0][2] + (*this)[2][0]) * inv4x;
+					rotation[3] = ((*this)[1][2] - (*this)[2][1]) * inv4x;
+				}
+				else  // y^2 >= x^2
+				{
+					float fourYSqr = omr22 + dif10;
+					float inv4y = 0.5f / sqrtf(fourYSqr);
+					rotation[0] = ((*this)[0][1] + (*this)[1][0]) * inv4y;
+					rotation[1] = fourYSqr * inv4y;
+					rotation[2] = ((*this)[1][2] + (*this)[2][1]) * inv4y;
+					rotation[3] = ((*this)[2][0] - (*this)[0][2]) * inv4y;
+				}
+			}
+			else  // z^2 + w^2 >= x^2 + y^2
+			{
+				float sum10 = (*this)[1][1] + (*this)[0][0];
+				float opr22 = 1.f + r22;
+				if (sum10 <= 0.f)  // z^2 >= w^2
+				{
+					float fourZSqr = opr22 - sum10;
+					float inv4z = 0.5f / sqrtf(fourZSqr);
+					rotation[0] = ((*this)[0][2] + (*this)[2][0]) * inv4z;
+					rotation[1] = ((*this)[1][2] + (*this)[2][1]) * inv4z;
+					rotation[2] = fourZSqr * inv4z;
+					rotation[3] = ((*this)[0][1] - (*this)[1][0]) * inv4z;
+				}
+				else  // w^2 >= z^2
+				{
+					float fourWSqr = opr22 + sum10;
+					float inv4w = 0.5f / sqrtf(fourWSqr);
+					rotation[0] = ((*this)[1][2] - (*this)[2][1]) * inv4w;
+					rotation[1] = ((*this)[2][0] - (*this)[0][2]) * inv4w;
+					rotation[2] = ((*this)[0][1] - (*this)[1][0]) * inv4w;
+					rotation[3] = fourWSqr * inv4w;
+				}
+			}
+#undef XM3_DECOMP_EPSILON
+#undef XM3RANKDECOMPOSE
+#endif
+		}
+
 		Matrix4 Matrix4::CreatePerspective(const float fovy, const float aspect, const float zNear, const float zFar)
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
@@ -385,7 +588,7 @@ namespace Insight
 			return !Equal(other, errorRange);
 		}
 
-		Matrix4 Matrix4::operator=(const Matrix4& other)
+		Matrix4& Matrix4::operator=(const Matrix4& other)
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
 			xmmatrix = other.xmmatrix;
@@ -498,12 +701,12 @@ namespace Insight
 #endif
 		}
 
-		Matrix4 Matrix4::operator*=(const Matrix4& other)
+		Matrix4& Matrix4::operator*=(const Matrix4& other)
 		{
 			*this = Matrix4(*this) * other;
 			return *this;
 		}
-		Matrix4 Matrix4::operator*=(const Vector4& other)
+		Matrix4& Matrix4::operator*=(const Vector4& other)
 		{
 			v0 *= other;
 			v1 *= other;
@@ -512,12 +715,12 @@ namespace Insight
 			return *this;
 		}
 
-		Matrix4 Matrix4::operator/=(const Matrix4& other)
+		Matrix4& Matrix4::operator/=(const Matrix4& other)
 		{
 			*this = Matrix4(*this) / other;
 			return *this;
 		}
-		Matrix4 Matrix4::operator/=(const Vector4& other)
+		Matrix4& Matrix4::operator/=(const Vector4& other)
 		{
 			v0 /= other;
 			v1 /= other;
@@ -526,7 +729,7 @@ namespace Insight
 			return *this;
 		}
 
-		Matrix4 Matrix4::operator-=(const Matrix4& other)
+		Matrix4& Matrix4::operator-=(const Matrix4& other)
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
 			//return Vector4(DirectX::XMVector4Transform(other.xmvector, xmmatrix));
@@ -537,7 +740,7 @@ namespace Insight
 #endif
 			return *this;
 		}
-		Matrix4 Matrix4::operator-=(const Vector4& other)
+		Matrix4& Matrix4::operator-=(const Vector4& other)
 		{
 			v0 -= other;
 			v1 -= other;
@@ -546,7 +749,7 @@ namespace Insight
 			return *this;
 		}
 
-		Matrix4 Matrix4::operator+=(const Matrix4& other)
+		Matrix4& Matrix4::operator+=(const Matrix4& other)
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
 			//xmmatrix = Vector4(DirectX::XMVector4Transform(other.xmvector, xmmatrix));
@@ -557,7 +760,7 @@ namespace Insight
 #endif
 			return *this;
 		}
-		Matrix4 Matrix4::operator+=(const Vector4& other)
+		Matrix4& Matrix4::operator+=(const Vector4& other)
 		{
 			v0 += other;
 			v1 += other;
@@ -565,6 +768,13 @@ namespace Insight
 			v3 += other;
 			return *this;
 		}
+
+		float Matrix4::GetDeterminant() const
+		{
+			return (*this)[0][0] * (*this)[1][1] * (*this)[2][2] + (*this)[0][1] * (*this)[1][2] * (*this)[2][0] + (*this)[0][2] * (*this)[1][0] * (*this)[2][1] -
+				(*this)[0][2] * (*this)[1][1] * (*this)[2][0] - (*this)[0][1] * (*this)[1][0] * (*this)[2][2] - (*this)[0][0] * (*this)[1][2] * (*this)[2][1];
+		}
+
 
 		const float* Matrix4::Data() const
 		{
@@ -930,11 +1140,48 @@ namespace test
 		{
 			glm::vec3 glmEyeVector(25, 25, 25);
 			glm::vec3 glmCenterVector(3, -45, -2);
-			glm::vec3 glmUpVector(3, -45, -2);
+			glm::vec3 glmUpVector(0, 1.0f, 0);
 
 			Matrix4 lootAtMatrix = Matrix4::LookAt(glmEyeVector, glmCenterVector, glmUpVector);
 			glm::mat4 glmLootAtMatrix = glm::lookAt(glmEyeVector, glmCenterVector, glmUpVector);
 			CHECK(lootAtMatrix == glmLootAtMatrix);
+		}
+
+		TEST_CASE("Decompose")
+		{
+			glm::vec3 glmEyeVector(25, 25, 25);
+			glm::vec3 glmCenterVector(3, -45, -2);
+			glm::vec3 glmUpVector(0, 1.0f, 0);
+
+			Matrix4 lootAtMatrix = Matrix4::LookAt(glmEyeVector, glmCenterVector, glmUpVector);
+			glm::mat4 glmLootAtMatrix = glm::lookAt(glmEyeVector, glmCenterVector, glmUpVector);
+
+			Vector4 position;
+			Quaternion rotation;
+			Vector4 scale;
+			lootAtMatrix.Decompose(position, rotation, scale);
+
+			glm::vec3 glmPosition;
+			glm::quat glmRotation;
+			glm::vec3 glmScale;
+			glm::vec3 glmSkew;
+			glm::vec4 glmPerspective;
+			glm::decompose(glmLootAtMatrix, glmScale, glmRotation, glmPosition, glmSkew, glmPerspective);
+
+			CHECK(Equals(position.x, glmPosition.x, 0.0001f));
+			CHECK(Equals(position.y, glmPosition.y, 0.0001f));
+			CHECK(Equals(position.z, glmPosition.z, 0.0001f));
+			CHECK(position.w == 0.0f);
+
+			CHECK(Equals(rotation.w, glmRotation.w, 0.0001f));
+			CHECK(Equals(rotation.x, glmRotation.x, 0.0001f));
+			CHECK(Equals(rotation.y, glmRotation.y, 0.0001f));
+			CHECK(Equals(rotation.z, glmRotation.z, 0.0001f));
+
+			CHECK(Equals(scale.x, glmScale.x, 0.0001f));
+			CHECK(Equals(scale.y, glmScale.y, 0.0001f));
+			CHECK(Equals(scale.z, glmScale.z, 0.0001f));
+			CHECK(scale.w == 0.0f);
 		}
 
 		TEST_CASE("operator[]")

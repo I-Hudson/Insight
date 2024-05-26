@@ -107,9 +107,13 @@ namespace Insight
             }
         }
 
-        Quaternion Quaternion::operator=(const Quaternion& q)
+        Quaternion& Quaternion::operator=(const Quaternion& q)
         {
-            return Quaternion(q);
+            w = q.w;
+            x = q.x;
+            y = q.y;
+            z = q.z;
+            return *this;
         }
 
 

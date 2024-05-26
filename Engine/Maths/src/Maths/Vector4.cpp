@@ -269,6 +269,20 @@ namespace Insight
 			return Vector4(1.0f / x, 1.0f / y, 1.0f / z, 1.0f / w);
 		}
 
+		Vector4 Vector4::Cross(const Vector4 vec) const
+		{
+#ifdef IS_MATHS_DIRECTX_MATHS
+			return Vector4(DirectX::XMVector3Cross(xmvector, vec.xmvector));
+#elif defined(IS_MATHS_GLM)
+			return glm::cross(vec3, vec.vec3);
+#else
+			const float rX = (y * vec.z) - (z * vec.y);
+			const float rY = (z * vec.x) - (x * vec.z);
+			const float rZ = (x * vec.y) - (y * vec.x);
+			return Vector4(rX, rY, rZ, 0.0f);
+#endif
+		}
+
 		Vector4 Vector4::operator-() const
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
@@ -280,7 +294,7 @@ namespace Insight
 #endif
 		}
 
-		Vector4 Vector4::operator=(float scalar)
+		Vector4& Vector4::operator=(float scalar)
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
 			xmvector = DirectX::XMVectorReplicate(scalar);
@@ -294,7 +308,7 @@ namespace Insight
 #endif
 			return *this;
 		}
-		Vector4 Vector4::operator=(const Vector4& other)
+		Vector4& Vector4::operator=(const Vector4& other)
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
 			xmvector = other.xmvector;
@@ -393,45 +407,45 @@ namespace Insight
 #endif
 		}
 
-		Vector4 Vector4::operator*=(float scalar)
+		Vector4& Vector4::operator*=(float scalar)
 		{
 			*this = Vector4(*this) * scalar;
 			return *this;
 		}
-		Vector4 Vector4::operator*=(const Vector4& other)
+		Vector4& Vector4::operator*=(const Vector4& other)
 		{
 			*this = Vector4(*this) * other;
 			return *this;
 		}
 
-		Vector4 Vector4::operator/=(float scalar)
+		Vector4& Vector4::operator/=(float scalar)
 		{
 			*this = Vector4(*this) / scalar;
 			return *this;
 		}
-		Vector4 Vector4::operator/=(const Vector4& other)
+		Vector4& Vector4::operator/=(const Vector4& other)
 		{
 			*this = Vector4(*this) / other;
 			return *this;
 		}
 
-		Vector4 Vector4::operator+=(float scalar)
+		Vector4& Vector4::operator+=(float scalar)
 		{
 			*this = Vector4(*this) + scalar;
 			return *this;
 		}
-		Vector4 Vector4::operator+=(const Vector4& other)
+		Vector4& Vector4::operator+=(const Vector4& other)
 		{
 			*this = Vector4(*this) + other;
 			return *this;
 		}
 
-		Vector4 Vector4::operator-=(float scalar)
+		Vector4& Vector4::operator-=(float scalar)
 		{
 			*this = Vector4(*this) - scalar;
 			return *this;
 		}
-		Vector4 Vector4::operator-=(const Vector4& other)
+		Vector4& Vector4::operator-=(const Vector4& other)
 		{
 			*this = Vector4(*this) - other;
 			return *this;
@@ -442,8 +456,6 @@ namespace Insight
 #ifdef IS_TESTING
 #include <glm/glm.hpp>
 #include <glm/gtx/norm.hpp>
-#include "Maths/SimpleMath.h"
-#include "Maths/SimpleMath.inl"
 #include "doctest.h"
 namespace test
 {

@@ -235,7 +235,7 @@ namespace Insight
 			return !(Equal(other, errorRange));
 		}
 
-		Matrix3 Matrix3::operator=(const Matrix3& other)
+		Matrix3& Matrix3::operator=(const Matrix3& other)
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
 			xmmatrix = other.xmmatrix;
@@ -326,53 +326,53 @@ namespace Insight
 				v2 + other.v2);
 		}
 
-		Matrix3 Matrix3::operator*=(const Vector3& other)
+		Matrix3& Matrix3::operator*=(const Vector3& other)
 		{
 			(*this)[0] *= other;
 			(*this)[1] *= other;
 			(*this)[2] *= other;
 			return *this;
 		}
-		Matrix3 Matrix3::operator*=(const Matrix3& other)
+		Matrix3& Matrix3::operator*=(const Matrix3& other)
 		{
 			*this = Matrix3(*this) * other;
 			return *this;
 		}
 
-		Matrix3 Matrix3::operator/=(const Vector3& other)
+		Matrix3& Matrix3::operator/=(const Vector3& other)
 		{
 			(*this)[0] /= other;
 			(*this)[1] /= other;
 			(*this)[2] /= other;
 			return *this;
 		}
-		Matrix3 Matrix3::operator/=(const Matrix3& other)
+		Matrix3& Matrix3::operator/=(const Matrix3& other)
 		{
 			*this = Matrix3(*this) / other;
 			return *this;
 		}
 
-		Matrix3 Matrix3::operator-=(const Vector3& other)
+		Matrix3& Matrix3::operator-=(const Vector3& other)
 		{
 			(*this)[0] -= other;
 			(*this)[1] -= other;
 			(*this)[2] -= other;
 			return *this;
 		}
-		Matrix3 Matrix3::operator-=(const Matrix3& other)
+		Matrix3& Matrix3::operator-=(const Matrix3& other)
 		{
 			*this = Matrix3(*this) - other;
 			return *this;
 		}
 
-		Matrix3 Matrix3::operator+=(const Vector3& other)
+		Matrix3& Matrix3::operator+=(const Vector3& other)
 		{
 			(*this)[0] += other;
 			(*this)[1] += other;
 			(*this)[2] += other;
 			return *this;
 		}
-		Matrix3 Matrix3::operator+=(const Matrix3& other)
+		Matrix3& Matrix3::operator+=(const Matrix3& other)
 		{
 			*this = Matrix3(*this) + other;
 			return *this;

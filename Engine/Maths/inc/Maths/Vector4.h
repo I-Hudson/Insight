@@ -60,11 +60,12 @@ namespace Insight
 			bool NotEqual(const Vector4& other, const float errorRange) const;
 
 			Vector4 Reciprocal() const;
+			Vector4 Cross(const Vector4 vec) const;
 
 			Vector4 operator-() const;
 
-			Vector4 operator=(float scalar);
-			Vector4 operator=(const Vector4& other);
+			Vector4& operator=(float scalar);
+			Vector4& operator=(const Vector4& other);
 
 			Vector4 operator*(float scalar) const;
 			Vector4 operator*(const Vector4& other) const;
@@ -78,17 +79,17 @@ namespace Insight
 			Vector4 operator-(float scalar) const;
 			Vector4 operator-(const Vector4& other) const;
 
-			Vector4 operator*=(float scalar);
-			Vector4 operator*=(const Vector4& other);
+			Vector4& operator*=(float scalar);
+			Vector4& operator*=(const Vector4& other);
 							 
-			Vector4 operator/=(float scalar);
-			Vector4 operator/=(const Vector4& other);
+			Vector4& operator/=(float scalar);
+			Vector4& operator/=(const Vector4& other);
 							 
-			Vector4 operator+=(float scalar);
-			Vector4 operator+=(const Vector4& other);
+			Vector4& operator+=(float scalar);
+			Vector4& operator+=(const Vector4& other);
 							 
-			Vector4 operator-=(float scalar);
-			Vector4 operator-=(const Vector4& other);
+			Vector4& operator-=(float scalar);
+			Vector4& operator-=(const Vector4& other);
 
 			const float* Data() const { return &x; }
 

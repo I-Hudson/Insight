@@ -70,6 +70,8 @@ namespace Insight
 			Matrix4 Scale(const Vector4& vector);
 			Matrix4 Scaled(const Vector4& vector) const { return Matrix4(*this).Scale(vector); }
 
+			void Decompose(Vector4& position, Quaternion& rotation, Vector4& scale) const;
+
 			static Matrix4 CreatePerspective(const float fovy, const float aspect, const float zNear, const float zFar);
 			static Matrix4 CreateOrthographic(const float left, const float right, const float bottom, const float top);
 			static Matrix4 CreateOrthographic(const float left, const float right, const float bottom, const float top, const float zNear, const float zFar);
@@ -84,7 +86,7 @@ namespace Insight
 			bool Equal(const Matrix4& other, const float errorRange) const;
 			bool NotEqual(const Matrix4& other, const float errorRange) const;
 
-			Matrix4 operator=(const Matrix4& other);
+			Matrix4& operator=(const Matrix4& other);
 
 			Matrix4 operator*(const Matrix4& other) const;
 			Vector4 operator*(const Vector4& other) const;
@@ -96,29 +98,34 @@ namespace Insight
 
 			Matrix4 operator+(const Matrix4& other) const;
 
-			Matrix4 operator*=(const Matrix4& other);
+			Matrix4& operator*=(const Matrix4& other);
 			/// @brief Multiple each row of the matrix by the vector as a scaler.
 			/// @param other 
 			/// @return Matrix4
-			Matrix4 operator*=(const Vector4& other);
+			Matrix4& operator*=(const Vector4& other);
 
-			Matrix4 operator/=(const Matrix4& other);
+			Matrix4& operator/=(const Matrix4& other);
 			/// @brief Divide each row of the matrix by the vector as a scaler.
 			/// @param other 
 			/// @return Matrix4
-			Matrix4 operator/=(const Vector4& other);
+			Matrix4& operator/=(const Vector4& other);
 
-			Matrix4 operator-=(const Matrix4& other);
+			Matrix4& operator-=(const Matrix4& other);
 			/// @brief Subtract each row of the matrix by the vector as a scaler.
 			/// @param other 
 			/// @return Matrix4
-			Matrix4 operator-=(const Vector4& other);
+			Matrix4& operator-=(const Vector4& other);
 
-			Matrix4 operator+=(const Matrix4& other);
+			Matrix4& operator+=(const Matrix4& other);
 			/// @brief Add each row of the matrix by the vector as a scaler.
 			/// @param other 
 			/// @return Matrix4
-			Matrix4 operator+=(const Vector4& other);
+			Matrix4& operator+=(const Vector4& other);
+
+		private:
+			float GetDeterminant() const;
+
+		public:
 
 			const float* Data() const;
 

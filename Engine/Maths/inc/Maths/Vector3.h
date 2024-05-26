@@ -67,8 +67,8 @@ namespace Insight
 
 			Vector3 operator-() const;
 
-			Vector3 operator=(float scalar);
-			Vector3 operator=(const Vector3& other);
+			Vector3& operator=(float scalar);
+			Vector3& operator=(const Vector3& other);
 
 			Vector3 operator*(float scalar) const;
 			Vector3 operator*(const Vector3& other) const;
@@ -86,17 +86,17 @@ namespace Insight
 			IS_MATHS friend Vector3 operator-(const Vector3& vec, float scalar);
 			IS_MATHS friend Vector3 operator-(const Vector3& vec, const Vector3& vec1);
 
-			Vector3 operator*=(float scalar);
-			Vector3 operator*=(const Vector3& other);
+			Vector3& operator*=(float scalar);
+			Vector3& operator*=(const Vector3& other);
 
-			Vector3 operator/=(float scalar);
-			Vector3 operator/=(const Vector3& other);
+			Vector3& operator/=(float scalar);
+			Vector3& operator/=(const Vector3& other);
 
-			Vector3 operator+=(float scalar);
-			Vector3 operator+=(const Vector3& other);
+			Vector3& operator+=(float scalar);
+			Vector3& operator+=(const Vector3& other);
 
-			Vector3 operator-=(float scalar);
-			Vector3 operator-=(const Vector3& other);
+			Vector3& operator-=(float scalar);
+			Vector3& operator-=(const Vector3& other);
 
 			const float* Data() const { return &x; }
 

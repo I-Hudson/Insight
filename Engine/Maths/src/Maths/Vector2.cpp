@@ -213,7 +213,7 @@ namespace Insight
 #endif
 		}
 
-		Vector2 Vector2::operator=(float value)
+		Vector2& Vector2::operator=(float value)
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
 			xmvector = DirectX::XMVectorReplicate(value);
@@ -225,7 +225,7 @@ namespace Insight
 #endif
 			return *this;
 		}
-		Vector2 Vector2::operator=(const Vector2& other)
+		Vector2& Vector2::operator=(const Vector2& other)
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
 			xmvector = other.xmvector;
@@ -322,45 +322,45 @@ namespace Insight
 #endif
 		}
 
-		Vector2 Vector2::operator*=(float scalar)
+		Vector2& Vector2::operator*=(float scalar)
 		{
 			*this = Vector2(*this) * scalar;
 			return *this;
 		}
-		Vector2 Vector2::operator*=(const Vector2& other)
+		Vector2& Vector2::operator*=(const Vector2& other)
 		{
 			*this = Vector2(*this) * other;
 			return *this;
 		}
 
-		Vector2 Vector2::operator/=(float scalar)
+		Vector2& Vector2::operator/=(float scalar)
 		{
 			*this = Vector2(*this) / scalar;
 			return *this;
 		}
-		Vector2 Vector2::operator/=(const Vector2& other)
+		Vector2& Vector2::operator/=(const Vector2& other)
 		{
 			*this = Vector2(*this) / other;
 			return *this;
 		}
 
-		Vector2 Vector2::operator+=(float scalar)
+		Vector2& Vector2::operator+=(float scalar)
 		{
 			*this = Vector2(*this) + scalar;
 			return *this;
 		}
-		Vector2 Vector2::operator+=(const Vector2& other)
+		Vector2& Vector2::operator+=(const Vector2& other)
 		{
 			*this = Vector2(*this) + other;
 			return *this;
 		}
 
-		Vector2 Vector2::operator-=(float scalar)
+		Vector2& Vector2::operator-=(float scalar)
 		{
 			*this = Vector2(*this) - scalar;
 			return *this;
 		}
-		Vector2 Vector2::operator-=(const Vector2& other)
+		Vector2& Vector2::operator-=(const Vector2& other)
 		{
 			*this = Vector2(*this) - other;
 			return *this;

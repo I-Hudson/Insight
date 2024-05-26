@@ -62,7 +62,7 @@ namespace Insight
 			bool Equal(const Matrix2& other, const float errorRange) const;
 			bool NotEqual(const Matrix2& other, const float errorRange) const;
 
-			Matrix2 operator=(const Matrix2& other);
+			Matrix2& operator=(const Matrix2& other);
 
 			Vector2 operator*(const Vector2& other);
 			Matrix2 operator*(const Matrix2& other);
@@ -74,17 +74,17 @@ namespace Insight
 
 			Matrix2 operator+(const Matrix2& other);
 
-			Matrix2 operator*=(const Vector2& other);
-			Matrix2 operator*=(const Matrix2& other);
+			Matrix2& operator*=(const Vector2& other);
+			Matrix2& operator*=(const Matrix2& other);
 
-			Matrix2 operator/=(const Vector2& other);
-			Matrix2 operator/=(const Matrix2& other);
+			Matrix2& operator/=(const Vector2& other);
+			Matrix2& operator/=(const Matrix2& other);
 
-			Matrix2 operator-=(const Vector2& other);
-			Matrix2 operator-=(const Matrix2& other);
+			Matrix2& operator-=(const Vector2& other);
+			Matrix2& operator-=(const Matrix2& other);
 
-			Matrix2 operator+=(const Vector2& other);
-			Matrix2 operator+=(const Matrix2& other);
+			Matrix2& operator+=(const Vector2& other);
+			Matrix2& operator+=(const Matrix2& other);
 
 			const float* Data() const;
 
