@@ -7,6 +7,8 @@ namespace Insight
 {
     namespace Physics
     {
+        class BodyCreationSettings;
+
         /// @brief Static interface for physics APU calls.
         class IS_PHYSICS PhysicsWorld
         {
@@ -24,15 +26,15 @@ namespace Insight
 
             /// @brief Add a new body to the world.
             /// @return 
-            static BodyId Addbody();
+            static BodyId CreateBody(const BodyCreationSettings& bodyCreationSettings);
             /// @brief Destroy the body from the physics world. This body must be recreated to use again.
             /// @param bodyId 
             static void DestoryBody(const BodyId bodyId);
 
-            static void ActivateBody(const BodyId body);
+            static void AddBody(const BodyId body);
             /// @brief Deactivate a body from the physics world, this can be re activated.
             /// @param bodyId 
-            static void DeactivateBody(const BodyId bodyId);
+            static void RemoveBody(const BodyId bodyId);
 
         private:
             inline static IPhysicsWorld* s_PhsyicsWorld;

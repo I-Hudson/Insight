@@ -26,6 +26,7 @@ namespace Insight
 #elif defined(IS_PHYSICS_JOLT)
 			s_PhsyicsWorld = ::New<Jolt::PhysicsWorld_Jolt>();
 #endif
+			s_PhsyicsWorld->Initialise();
 		}
 
 		void PhysicsWorld::Shutdown()
@@ -49,9 +50,9 @@ namespace Insight
 			s_PhsyicsWorld->EndRecord();
 		}
 
-		BodyId PhysicsWorld::Addbody()
+		BodyId PhysicsWorld::CreateBody(const BodyCreationSettings& bodyCreationSettings)
 		{
-			return s_PhsyicsWorld->Addbody();
+			return s_PhsyicsWorld->CreateBody(bodyCreationSettings);
 		}
 
 		void PhysicsWorld::DestoryBody(const BodyId bodyId)
@@ -59,15 +60,15 @@ namespace Insight
 			s_PhsyicsWorld->DestoryBody(bodyId);
 		}
 
-		void PhysicsWorld::ActivateBody(const BodyId body)
+		void PhysicsWorld::AddBody(const BodyId body)
 		{
-			s_PhsyicsWorld->ActivateBody(body);
+			s_PhsyicsWorld->AddBody(body);
 
 		}
 
-		void PhysicsWorld::DeactivateBody(const BodyId bodyId)
+		void PhysicsWorld::RemoveBody(const BodyId bodyId)
 		{
-			s_PhsyicsWorld->DeactivateBody(bodyId);
+			s_PhsyicsWorld->RemoveBody(bodyId);
 		}
     }
 }

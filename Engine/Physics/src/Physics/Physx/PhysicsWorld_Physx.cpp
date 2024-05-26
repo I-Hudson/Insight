@@ -29,7 +29,7 @@ namespace Insight::Physics::Physx
     {
     }
 
-    BodyId PhysicsWorld_Physx::Addbody()
+    BodyId PhysicsWorld_Physx::CreateBody()
     {
         return BodyId();
     }
@@ -38,11 +38,11 @@ namespace Insight::Physics::Physx
     {
     }
 
-    void PhysicsWorld_Physx::ActivateBody(const BodyId body)
+    void PhysicsWorld_Physx::AddBody(const BodyId body)
     {
     }
 
-    void PhysicsWorld_Physx::DeactivateBody(const BodyId bodyId)
+    void PhysicsWorld_Physx::RemoveBody(const BodyId bodyId)
     {
     }
 }

@@ -5,8 +5,12 @@
 
 #include "Physics/Jolt/ObjectLayerFilters_Jolt.h"
 #include "Physics/Jolt/Listeners_Jolt.h"
+#include "Physics/MotionType.h"
 
 #include "Core/Asserts.h"
+#include "Maths/Vector3.h"
+#include "Maths/Vector4.h"
+#include "Maths/Quaternion.h"
 
 // The Jolt headers don't include Jolt.h. Always include Jolt.h before including any other Jolt header.
 // You can use Jolt.h in your precompiled header to speed up compilation.
@@ -25,6 +29,7 @@
 #include <Jolt/Renderer/DebugRendererRecorder.h>
 
 #include <fstream>
+#include <mutex>
 
 namespace Insight::Physics::Jolt
 {
@@ -77,15 +82,24 @@ namespace Insight::Physics::Jolt
 
         /// @brief Add a new body to the world.
         /// @return 
-        virtual BodyId Addbody() override;
+        virtual BodyId CreateBody(const BodyCreationSettings& bodyCreationSettings) override;
         /// @brief Destroy the body from the physics world. This body must be recreated to use again.
         /// @param bodyId 
         virtual void DestoryBody(const BodyId bodyId) override;
 
-        virtual void ActivateBody(const BodyId body) override;
+        virtual void AddBody(const BodyId bodyId) override;
         /// @brief Deactivate a body from the physics world, this can be re activated.
         /// @param bodyId 
-        virtual void DeactivateBody(const BodyId bodyId) override;
+        virtual void RemoveBody(const BodyId bodyId) override;
+
+    private:
+        bool HasBody(const BodyId bodyId) const;
+
+        JPH::EMotionType MotionTypeToJolt(const MotionType motionType) const;
+
+        JPH::Quat QuaterianToJolt(const Maths::Quaternion& quat) const;
+        JPH::Vec3 Vector3ToJolt(const Maths::Vector3& vec) const;
+        JPH::Vec4 Vector4ToJolt(const Maths::Vector4& vec) const;
 
     private:
         inline static JPH::PhysicsSystem m_physicsSystem;
@@ -106,6 +120,8 @@ namespace Insight::Physics::Jolt
         inline static ContactListener m_contactListener;
         inline static BodyActivationListener m_bodyActivationListener;
 
+        std::unordered_map<BodyId, JPH::Body*> m_bodies;
+        mutable std::mutex m_bodiesMutex;
         //std::vector<void> m_bodiesToAdd;
         //std::vector<void> m_bodiesToRemove;
 

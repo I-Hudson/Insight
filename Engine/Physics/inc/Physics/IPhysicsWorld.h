@@ -5,6 +5,7 @@
 namespace Insight::Physics
 {
     using BodyId = u32;
+    class BodyCreationSettings;
 
     class IPhysicsWorld
     {
@@ -19,11 +20,11 @@ namespace Insight::Physics
         virtual void StartRecord() = 0;
         virtual void EndRecord() = 0;
 
-        virtual BodyId Addbody() = 0;
+        virtual BodyId CreateBody(const BodyCreationSettings& bodyCreationSettings) = 0;
         virtual void DestoryBody(const BodyId bodyId) = 0;
 
-        virtual void ActivateBody(const BodyId body) = 0;
-        virtual void DeactivateBody(const BodyId bodyId) = 0;
+        virtual void AddBody(const BodyId bodyId) = 0;
+        virtual void RemoveBody(const BodyId bodyId) = 0;
 
     };
 }

@@ -36,6 +36,7 @@ project "Insight_Physics"
     dependson 
     { 
         "Insight_Core",
+        "Insight_Maths",
     }
 
     defines
@@ -64,9 +65,11 @@ project "Insight_Physics"
     {
         "inc",
         "%{IncludeDirs.InsightCore}",
+        "%{IncludeDirs.InsightMaths}",
         
         "%{IncludeDirs.spdlog}",
         "%{IncludeDirs.imgui}",
+        "%{IncludeDirs.reflect}",
         "%{IncludeDirs.JoltPhysics}",
         "%{IncludeDirs.Physx}",
     }
@@ -88,6 +91,7 @@ project "Insight_Physics"
     links
     {
         "Insight_Core" .. output_project_subfix .. ".lib",
+        "Insight_Maths" .. output_project_subfix .. ".lib",
         "imgui.lib",
     }
     if enabledJolt == true then

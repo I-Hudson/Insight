@@ -1,6 +1,7 @@
 #pragma once
 #ifdef IS_PHYSICS_JOLT
 #include "Core/TypeAlias.h"
+#include "Physics/ObjectLayers.h"
 
 #include <Jolt/Jolt.h>
 #include <Jolt/Physics/Collision/ObjectLayer.h>
@@ -8,17 +9,6 @@
 
 namespace Insight::Physics
 {
-	// Layer that objects can be in, determines which other objects it can collide with
-	// Typically you at least want to have 1 layer for moving bodies and 1 layer for static bodies, but you can have more
-	// layers if you want. E.g. you could have a layer for high detail collision (which is not used by the physics simulation
-	// but only if you do collision testing).
-	namespace Layers
-	{
-		static constexpr JPH::ObjectLayer NON_MOVING = 0;
-		static constexpr JPH::ObjectLayer MOVING = 1;
-		static constexpr JPH::ObjectLayer NUM_LAYERS = 2;
-	};
-
     class ObjectLayerPairFilter : public JPH::ObjectLayerPairFilter
     {
     public:
@@ -26,9 +16,9 @@ namespace Insight::Physics
 		{
 			switch (inObject1)
 			{
-			case Layers::NON_MOVING:
-				return inObject2 == Layers::MOVING; // Non moving only collides with moving
-			case Layers::MOVING:
+			case ObjectLayers::NON_MOVING:
+				return inObject2 == ObjectLayers::MOVING; // Non moving only collides with moving
+			case ObjectLayers::MOVING:
 				return true; // Moving collides with everything
 			default:
 				JPH_ASSERT(false);
@@ -58,8 +48,8 @@ namespace Insight::Physics
 		BPLayerInterface()
 		{
 			// Create a mapping table from object to broad phase layer
-			m_objectToBroadPhase[Layers::NON_MOVING] = BroadPhaseLayers::NON_MOVING;
-			m_objectToBroadPhase[Layers::MOVING] = BroadPhaseLayers::MOVING;
+			m_objectToBroadPhase[ObjectLayers::NON_MOVING] = BroadPhaseLayers::NON_MOVING;
+			m_objectToBroadPhase[ObjectLayers::MOVING] = BroadPhaseLayers::MOVING;
 		}
 
 		virtual u32 GetNumBroadPhaseLayers() const override
@@ -69,7 +59,7 @@ namespace Insight::Physics
 
 		virtual JPH::BroadPhaseLayer GetBroadPhaseLayer(JPH::ObjectLayer inLayer) const override
 		{
-			JPH_ASSERT(inLayer < Layers::NUM_LAYERS);
+			JPH_ASSERT(inLayer < ObjectLayers::NUM_LAYERS);
 			return m_objectToBroadPhase[inLayer];
 		}
 
@@ -86,7 +76,7 @@ namespace Insight::Physics
 #endif // JPH_EXTERNAL_PROFILE || JPH_PROFILE_ENABLED
 
 	private:
-		JPH::BroadPhaseLayer m_objectToBroadPhase[Layers::NUM_LAYERS];
+		JPH::BroadPhaseLayer m_objectToBroadPhase[ObjectLayers::NUM_LAYERS];
 	};
 
 	/// Class that determines if an object layer can collide with a broadphase layer
@@ -97,9 +87,9 @@ namespace Insight::Physics
 		{
 			switch (inLayer1)
 			{
-			case Layers::NON_MOVING:
+			case ObjectLayers::NON_MOVING:
 				return inLayer2 == BroadPhaseLayers::MOVING;
-			case Layers::MOVING:
+			case ObjectLayers::MOVING:
 				return true;
 			default:
 				JPH_ASSERT(false);

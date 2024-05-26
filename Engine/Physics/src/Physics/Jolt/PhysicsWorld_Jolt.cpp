@@ -1,8 +1,11 @@
 #ifdef IS_PHYSICS_JOLT
 #include "Physics/Jolt/PhysicsWorld_Jolt.h"
+#include "Physics/BodyCreationSettings.h"
 
 #include "Core/Memory.h"
 #include "Core/Profiler.h"
+
+#include <Jolt/Physics/Collision/Shape/BoxShape.h>
 
 #include <iostream>
 #include <iomanip>
@@ -145,6 +148,14 @@ namespace Insight::Physics::Jolt
 		// (note that if we had used CreateBody then we could have set the velocity straight on the body before adding it to the physics system)
 		//body_interface.SetLinearVelocity(sphere_id, JPH::Vec3(0.0f, -5.0f, 0.0f));
 
+		BoxShapeSettings boxShapeSettings(Maths::Vector3(100.0f, 1.0f, 100.0f));
+		BodyCreationSettings bodyCreateSettings(&boxShapeSettings, Maths::Vector3(0), Maths::Quaternion::Identity, MotionType::Static, ObjectLayers::NON_MOVING);
+		CreateBody(bodyCreateSettings);
+
+		boxShapeSettings = BoxShapeSettings(Maths::Vector3(5.0f, 1.0f, 5.0f));
+		bodyCreateSettings = BodyCreationSettings(&boxShapeSettings, Maths::Vector3(0.0f, 20.0f, 0.0f), Maths::Quaternion::Identity, MotionType::Dynamic, ObjectLayers::MOVING);
+		CreateBody(bodyCreateSettings);
+
 		StartRecord();
     }
 
@@ -155,8 +166,19 @@ namespace Insight::Physics::Jolt
 		// Remove the sphere from the physics system. Note that the sphere itself keeps all of its state and can be re-added at any time.
 		// Destroy the sphere. After this the sphere ID is no longer valid.
 		// Remove and destroy the floor
-		body_interface.RemoveBodies(m_bodyIds.data(), m_bodyIds.size());
-		body_interface.DestroyBodies(m_bodyIds.data(), m_bodyIds.size());
+		std::unique_lock bodiesLock(m_bodiesMutex);
+		if (m_bodies.size())
+		{
+			std::vector<JPH::BodyID> bodiesToRemoveAndDestroy;
+			for (const auto& [bodyId, body] : m_bodies)
+			{
+				bodiesToRemoveAndDestroy.push_back(JPH::BodyID(bodyId));
+			}
+			body_interface.RemoveBodies(bodiesToRemoveAndDestroy.data(), static_cast<int>(bodiesToRemoveAndDestroy.size()));
+			body_interface.DestroyBodies(bodiesToRemoveAndDestroy.data(), static_cast<int>(bodiesToRemoveAndDestroy.size()));
+			m_bodies.clear();
+		}
+		bodiesLock.unlock();
 
 		// Unregisters all types with the factory and cleans up the default material
 		JPH::UnregisterTypes();
@@ -238,21 +260,98 @@ namespace Insight::Physics::Jolt
 #endif
 	}
 
-	BodyId PhysicsWorld_Jolt::Addbody()
+	BodyId PhysicsWorld_Jolt::CreateBody(const BodyCreationSettings& bodyCreationSettings)
 	{
-		return BodyId();
+		JPH::ShapeSettings* nullShapeSettings = nullptr;
+		JPH::BodyCreationSettings settings(nullShapeSettings,
+			Vector3ToJolt(bodyCreationSettings.m_position), 
+			QuaterianToJolt(bodyCreationSettings.m_rotation),
+			MotionTypeToJolt(bodyCreationSettings.m_motionType),
+			bodyCreationSettings.m_objectLayer);
+
+		switch (bodyCreationSettings.m_shapeSettings->ShapeSubType)
+		{
+		case ShapeSubTypes::Box:
+		{
+			const BoxShapeSettings* boxShapeSettings = static_cast<const BoxShapeSettings*>(bodyCreationSettings.m_shapeSettings);
+			JPH::BoxShapeSettings joltBoxShapeSettings(Vector3ToJolt(boxShapeSettings->mHalfExtent), boxShapeSettings->mConvexRadius, nullptr);
+			settings.SetShape(joltBoxShapeSettings.Create().Get());
+			break;
+		}
+		default:
+		{
+			FAIL_ASSERT();
+			break;
+		}
+		}
+
+		JPH::Body* body = m_physicsSystem.GetBodyInterface().CreateBody(settings);
+		
+		const BodyId bodyId = body->GetID().GetIndexAndSequenceNumber();
+		{
+			std::lock_guard l(m_bodiesMutex);
+			m_bodies[bodyId] = body;
+		}
+
+		AddBody(bodyId);
+
+		return bodyId;
 	}
 
 	void PhysicsWorld_Jolt::DestoryBody(const BodyId bodyId)
 	{
+		ASSERT(HasBody(bodyId));
+		{
+			std::lock_guard l(m_bodiesMutex);
+			m_bodies.erase(bodyId);
+		}
+		RemoveBody(bodyId);
+		m_physicsSystem.GetBodyInterface().DestroyBody(JPH::BodyID(bodyId));
 	}
 
-	void PhysicsWorld_Jolt::ActivateBody(const BodyId body)
+	void PhysicsWorld_Jolt::AddBody(const BodyId bodyId)
 	{
+		ASSERT(HasBody(bodyId));
+		m_physicsSystem.GetBodyInterface().AddBody(JPH::BodyID(bodyId), JPH::EActivation::Activate);
 	}
 
-	void PhysicsWorld_Jolt::DeactivateBody(const BodyId bodyId)
+	void PhysicsWorld_Jolt::RemoveBody(const BodyId bodyId)
 	{
+		ASSERT(HasBody(bodyId));
+		m_physicsSystem.GetBodyInterface().RemoveBody(JPH::BodyID(bodyId));
+	}
+
+	bool PhysicsWorld_Jolt::HasBody(const BodyId bodyId) const
+	{
+		std::lock_guard l(m_bodiesMutex);
+		return m_bodies.find(bodyId) != m_bodies.end();
+	}
+
+	JPH::EMotionType PhysicsWorld_Jolt::MotionTypeToJolt(const MotionType motionType) const
+	{
+		switch (motionType)
+		{
+		case MotionType::Static: return JPH::EMotionType::Static;
+		case MotionType::Dynamic: return JPH::EMotionType::Dynamic;
+		case MotionType::Kinematic: return JPH::EMotionType::Kinematic;
+		}
+		FAIL_ASSERT();
+		return JPH::EMotionType();
+	}
+
+	JPH::Quat PhysicsWorld_Jolt::QuaterianToJolt(const Maths::Quaternion& quat) const
+	{
+		return JPH::Quat(quat.x, quat.y, quat.z, quat.w);
+	}
+
+	JPH::Vec3 PhysicsWorld_Jolt::Vector3ToJolt(const Maths::Vector3& vec) const
+	{
+		return JPH::Vec3(vec.x, vec.y, vec.z);
+	}
+
+	JPH::Vec4 PhysicsWorld_Jolt::Vector4ToJolt(const Maths::Vector4& vec) const
+	{
+		return JPH::Vec4(vec.x, vec.y, vec.z, vec.w);
 	}
 }
 JPH_SUPPRESS_WARNING_POP

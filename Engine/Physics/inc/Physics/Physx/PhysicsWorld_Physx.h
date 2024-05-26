@@ -20,15 +20,15 @@ namespace Insight::Physics::Physx
 
         /// @brief Add a new body to the world.
         /// @return 
-        virtual BodyId Addbody() override;
+        virtual BodyId CreateBody() override;
         /// @brief Destroy the body from the physics world. This body must be recreated to use again.
         /// @param bodyId 
         virtual void DestoryBody(const BodyId bodyId) override;
 
-        virtual void ActivateBody(const BodyId body) override;
+        virtual void AddBody(const BodyId body) override;
         /// @brief Deactivate a body from the physics world, this can be re activated.
         /// @param bodyId 
-        virtual void DeactivateBody(const BodyId bodyId) override;
+        virtual void RemoveBoduy(const BodyId bodyId) override;
     };
 }
 #endif
