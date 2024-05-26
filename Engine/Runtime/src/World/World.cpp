@@ -164,6 +164,11 @@ namespace Insight
 			return m_entityManager.GetAllEntities();
 		}
 
+		u32 World::GetEntityCount() const
+		{
+			return m_entityManager.GetEntityCount();
+		}
+
 		ECS::Entity* World::GetEntityByGUID(const Core::GUID& guid) const
 		{
 			return m_entityManager.GetEntityByGUID(guid);

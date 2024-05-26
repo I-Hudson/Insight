@@ -326,6 +326,12 @@ namespace Insight
 			return entities;
 		}
 
+		u32 EntityManager::GetEntityCount() const
+		{
+			std::lock_guard lock(m_lock);
+			return static_cast<u32>(m_entities.size());
+		}
+
 		ECS::Entity* EntityManager::GetEntityByGUID(const Core::GUID& guid) const
 		{
 			std::lock_guard lock(m_lock);

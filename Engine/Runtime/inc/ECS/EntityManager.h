@@ -76,6 +76,7 @@ namespace Insight
 			Ptr<Entity> GetEntityByName(std::string_view entity_name) const;
 			std::vector<Ptr<ECS::Entity>> GetAllEntitiesWithComponentByName(std::string_view component_type) const;
 			std::vector<Ptr<ECS::Entity>> GetAllEntities() const;
+			u32 GetEntityCount() const;
 			ECS::Entity* GetEntityByGUID(const Core::GUID& guid) const;
 
 			IS_SERIALISABLE_H(EntityManager);

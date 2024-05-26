@@ -73,7 +73,9 @@ namespace Insight
 						continue;
 					}
 
-					if (ImGui::CollapsingHeader(world->GetWorldName().data()))
+					std::string header(world->GetWorldName().data());
+					header += " (Entities: " + std::to_string(world->GetEntityCount()) + ")";
+					if (ImGui::CollapsingHeader(header.c_str()))
 					{
 						bool worldPlay = world->GetWorldState() == Runtime::WorldStates::Running;
 						ImGui::Checkbox("Play World", &worldPlay);

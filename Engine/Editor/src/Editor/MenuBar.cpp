@@ -18,6 +18,10 @@
 
 #include "Core/Profiler.h"
 
+#include "Maths/Vector3.h"
+#include "Asset/Assets/Model.h"
+#include "ECS/Components/TransformComponent.h"
+
 #include <imgui.h>
 
 namespace Insight
@@ -95,6 +99,23 @@ namespace Insight
                         HotReloadSystem::Instance().Reload();
                     }
                     ImGui::EndMenu();
+                }
+                if (ImGui::MenuItem("Benchmark"))
+                {
+                    Ref<Runtime::ModelAsset> model = Runtime::AssetRegistry::Instance().LoadAsset("dancing_stormtrooper/gltf/scene.gltf").As<Runtime::ModelAsset>();
+                    const float space = 2;
+                    const i64 gridSize = 10;
+                    for (size_t z = 0; z < gridSize; ++z)
+                    {
+                        for (size_t x = 0; x < gridSize; ++x)
+                        {
+                            const float xPos = (0.0f - (gridSize * 0.5f)) + (space * x);
+                            const float zPos = (0.0f - (gridSize * 0.5f)) + (space * z);
+                            Maths::Vector3 position(xPos, 0.0f, zPos);
+                            ECS::Entity* e = model->CreateEntityHierarchy();
+                            e->GetComponent<ECS::TransformComponent>()->SetPosition(position);
+                        }
+                    }
                 }
                 DrawProfileMenu();
                 ImGui::EndMainMenuBar();

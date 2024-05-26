@@ -83,6 +83,9 @@ namespace Insight
 			/// @brief Return all entities within the world. Including root and their children recursive.
 			/// @return 
 			std::vector<Ptr<ECS::Entity>> GetAllEntitiesFlatten() const;
+			/// @brief Return the total number of entities within the world.
+			/// @return u32
+			u32 GetEntityCount() const;
 
 			ECS::Entity* GetEntityByGUID(const Core::GUID& guid) const;
 			
