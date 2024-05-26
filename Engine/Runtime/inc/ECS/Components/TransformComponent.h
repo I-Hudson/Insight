@@ -34,6 +34,8 @@ namespace Insight
 			/// @return 
 			Maths::Matrix4 GetPreviousTransform() const { return m_previous_transform; }
 
+			Maths::Quaternion GetRotation() const;
+
 			/// @brief Set the Transform.
 			/// @param transform 
 			void SetTransform(Maths::Matrix4 transform) { m_transform = transform; }

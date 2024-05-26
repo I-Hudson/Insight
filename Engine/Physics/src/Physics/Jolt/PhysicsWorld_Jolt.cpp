@@ -150,11 +150,11 @@ namespace Insight::Physics::Jolt
 
 		BoxShapeSettings boxShapeSettings(Maths::Vector3(100.0f, 1.0f, 100.0f));
 		BodyCreationSettings bodyCreateSettings(&boxShapeSettings, Maths::Vector3(0), Maths::Quaternion::Identity, MotionType::Static, ObjectLayers::NON_MOVING);
-		CreateBody(bodyCreateSettings);
+		//CreateBody(bodyCreateSettings);
 
 		boxShapeSettings = BoxShapeSettings(Maths::Vector3(5.0f, 1.0f, 5.0f));
 		bodyCreateSettings = BodyCreationSettings(&boxShapeSettings, Maths::Vector3(0.0f, 20.0f, 0.0f), Maths::Quaternion::Identity, MotionType::Dynamic, ObjectLayers::MOVING);
-		CreateBody(bodyCreateSettings);
+		//CreateBody(bodyCreateSettings);
 
 		StartRecord();
     }
@@ -301,12 +301,12 @@ namespace Insight::Physics::Jolt
 	void PhysicsWorld_Jolt::DestoryBody(const BodyId bodyId)
 	{
 		ASSERT(HasBody(bodyId));
+		RemoveBody(bodyId);
+		m_physicsSystem.GetBodyInterface().DestroyBody(JPH::BodyID(bodyId));
 		{
 			std::lock_guard l(m_bodiesMutex);
 			m_bodies.erase(bodyId);
 		}
-		RemoveBody(bodyId);
-		m_physicsSystem.GetBodyInterface().DestroyBody(JPH::BodyID(bodyId));
 	}
 
 	void PhysicsWorld_Jolt::AddBody(const BodyId bodyId)

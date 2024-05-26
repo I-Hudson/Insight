@@ -1,10 +1,10 @@
 #pragma once
 
 #include "Core/TypeAlias.h"
+#include "Physics/BodyId.h"
 
 namespace Insight::Physics
 {
-    using BodyId = u32;
     class BodyCreationSettings;
 
     class IPhysicsWorld

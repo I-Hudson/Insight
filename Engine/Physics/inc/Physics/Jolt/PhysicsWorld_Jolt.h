@@ -102,33 +102,31 @@ namespace Insight::Physics::Jolt
         JPH::Vec4 Vector4ToJolt(const Maths::Vector4& vec) const;
 
     private:
-        inline static JPH::PhysicsSystem m_physicsSystem;
-        inline static JPH::JobSystemThreadPool m_jobSystem;
-        inline static JPH::TempAllocatorMalloc m_tempAllocatorMalloc;
-        inline static std::vector<JPH::BodyID> m_bodyIds;
+        JPH::PhysicsSystem m_physicsSystem;
+        JPH::JobSystemThreadPool m_jobSystem;
+        JPH::TempAllocatorMalloc m_tempAllocatorMalloc;
+        std::vector<JPH::BodyID> m_bodyIds;
 
         // Create class that filters object vs object layers
         // Note: As this is an interface, PhysicsSystem will take a reference to this so this instance needs to stay alive!
-        inline static ObjectLayerPairFilter m_objectLayerPairFilter;
+        ObjectLayerPairFilter m_objectLayerPairFilter;
         // Create class that filters object vs broadphase layers
         // Note: As this is an interface, PhysicsSystem will take a reference to this so this instance needs to stay alive!
-        inline static ObjectVsBroadPhaseLayerFilter m_objectVsBroadPhaseLayerFilter;
+        ObjectVsBroadPhaseLayerFilter m_objectVsBroadPhaseLayerFilter;
         // Create mapping table from object layer to broadphase layer
         // Note: As this is an interface, PhysicsSystem will take a reference to this so this instance needs to stay alive!
-        inline static BPLayerInterface m_BPLayerInterface;
+        BPLayerInterface m_BPLayerInterface;
 
-        inline static ContactListener m_contactListener;
-        inline static BodyActivationListener m_bodyActivationListener;
+        ContactListener m_contactListener;
+        BodyActivationListener m_bodyActivationListener;
 
         std::unordered_map<BodyId, JPH::Body*> m_bodies;
         mutable std::mutex m_bodiesMutex;
-        //std::vector<void> m_bodiesToAdd;
-        //std::vector<void> m_bodiesToRemove;
 
 #ifdef JPH_DEBUG_RENDERER
-        inline static bool m_isRecording = false;
-        inline static PhysicsStreamOut_Jolt m_recorderStreamOut;
-        inline static JPH::DebugRendererRecorder* m_debugRendererRecorder;
+        bool m_isRecording = false;
+        PhysicsStreamOut_Jolt m_recorderStreamOut;
+        JPH::DebugRendererRecorder* m_debugRendererRecorder = nullptr;
 #endif
     };
 }

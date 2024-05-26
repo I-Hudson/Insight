@@ -40,6 +40,15 @@ namespace Insight
 			return GetTransform()[3];
 		}
 
+		Maths::Quaternion TransformComponent::GetRotation() const
+		{
+			Maths::Vector4 position;
+			Maths::Quaternion rotation;
+			Maths::Vector4 scale;
+			m_transform.Decompose(position, rotation, scale);
+			return rotation;
+		}
+
 		void TransformComponent::OnUpdate(const float delta_time)
 		{
 			m_previous_transform = m_transform;

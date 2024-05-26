@@ -16,6 +16,7 @@ project "Insight_Editor"
     {
         "Insight_Core",
         "Insight_Maths",
+        "Insight_Physics",
         "Insight_Input",
         "Insight_Graphics",
         "Insight_Runtime",
@@ -32,6 +33,7 @@ project "Insight_Editor"
         "inc",
         "%{IncludeDirs.InsightCore}",
         "%{IncludeDirs.InsightMaths}",
+        "%{IncludeDirs.InsightPhysics}",
         "%{IncludeDirs.InsightInput}",
         "%{IncludeDirs.InsightGraphics}",
         "%{IncludeDirs.InsightRuntime}",
@@ -78,6 +80,7 @@ project "Insight_Editor"
     {
         "Insight_Core" .. output_project_subfix .. ".lib",
         "Insight_Maths" .. output_project_subfix .. ".lib",
+        "Insight_Physics" .. output_project_subfix .. ".lib",
         "Insight_Input" .. output_project_subfix .. ".lib",
         "Insight_Graphics" .. output_project_subfix .. ".lib",
         "Insight_Runtime" .. output_project_subfix .. ".lib",

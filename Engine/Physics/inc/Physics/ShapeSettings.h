@@ -1,4 +1,5 @@
 #pragma once
+#include "Physics/Defines.h"
 #include "Core/Defines.h"
 #include "Core/TypeAlias.h"
 
@@ -101,7 +102,7 @@ namespace Insight::Physics
     };
 
     /// Class that constructs a BoxShape
-    class BoxShapeSettings final : public ConvexShapeSettings
+    class IS_PHYSICS BoxShapeSettings final : public ConvexShapeSettings
     {
     public:
         /// Default constructor for deserialization

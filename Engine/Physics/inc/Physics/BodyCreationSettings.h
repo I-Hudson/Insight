@@ -1,4 +1,5 @@
 #pragma once
+#include "Physics/Defines.h"
 
 #include "Physics/MotionType.h"
 #include "Physics/ObjectLayers.h"
@@ -10,7 +11,7 @@
 namespace Insight::Physics
 {
     /// @brief Setting for the creation of a rigid body.
-    class BodyCreationSettings
+    class IS_PHYSICS BodyCreationSettings
     {
     public:
         BodyCreationSettings() = default;
