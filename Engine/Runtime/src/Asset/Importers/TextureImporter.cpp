@@ -11,8 +11,10 @@
 #define STB_IMAGE_STATIC
 #include <stb_image.h>
 
-#define QOI_IMPLEMENTATION
+//#define QOI_IMPLEMENTATION
+#ifdef QOI_IMPLEMENTATION
 #include <qoi.h>
+#endif
 
 #ifdef NVIDIA_Texture_Tools
 #include <nvtt/nvtt.h>
@@ -165,6 +167,7 @@ namespace Insight
             }
             else if (textureBuffer == nullptr)
             {
+#ifdef QOI_IMPLEMENTATION
                 imageLoader = ImageLoader::qoi;
                 qoi_desc qoiDesc;
                 {
@@ -176,6 +179,7 @@ namespace Insight
                 channels = static_cast<int>(qoiDesc.channels);
                 textureSize = width * height * 4;
                 imageLoader = ImageLoader::qoi;
+#endif
             }
 
 #if 0

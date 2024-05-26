@@ -37,6 +37,7 @@ VendorIncludes["zip"] = "vendor/zip/src"
 VendorIncludes["efsw"] = "vendor/efsw/include"
 VendorIncludes["miniaudio"] = "vendor/miniaudio"
 VendorIncludes["JoltPhysics"] = "vendor/JoltPhysics"
+VendorIncludes["Physx"] = "vendor/physx/include"
 
 -- Shorthand form is less typing and doesn't use a local variable
 function InsightVendorIncludes.AddIncludes(includeTable, prefix)

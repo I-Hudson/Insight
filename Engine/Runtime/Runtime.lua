@@ -65,7 +65,6 @@ project "Insight_Runtime"
         "%{IncludeDirs.qoi}",
         "%{IncludeDirs.zip}",
         "%{IncludeDirs.miniaudio}",
-        "%{IncludeDirs.JoltPhysics}",
         
         "%{IncludeDirs.assimp}",
         "%{IncludeDirs.assimp}/../build/include",

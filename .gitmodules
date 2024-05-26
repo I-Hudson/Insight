@@ -76,3 +76,6 @@
 [submodule "vendor/JoltPhysics"]
 	path = vendor/JoltPhysics
 	url = https://github.com/jrouwe/JoltPhysics.git
+[submodule "vendor/PhysX"]
+	path = vendor/PhysX
+	url = https://github.com/NVIDIA-Omniverse/PhysX.git

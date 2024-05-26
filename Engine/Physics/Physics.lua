@@ -1,4 +1,6 @@
 local local_post_build_commands = post_build_commands
+local enabledPhysx=false
+local enabledJolt=true
 
 --- Check if a file or directory exists in this path
 function fileExists(file)
@@ -39,8 +41,25 @@ project "Insight_Physics"
     defines
     {
         "IS_EXPORT_PHYSICS_DLL",
-    }
     
+    }
+    if enabledJolt == true then
+        defines
+        {
+            "IS_PHYSICS_JOLT",
+            "JPH_DEBUG_RENDERER",
+            "JPH_FLOATING_POINT_EXCEPTIONS_ENABLED",
+            "JPH_PROFILE_ENABLED",
+            "JPH_OBJECT_STREAM",
+        }
+    end
+    if enabledPhysx == true then
+        defines
+        {
+            "IS_PHYSICS_PHYSX",
+        }
+    end
+
     includedirs
     {
         "inc",
@@ -49,6 +68,7 @@ project "Insight_Physics"
         "%{IncludeDirs.spdlog}",
         "%{IncludeDirs.imgui}",
         "%{IncludeDirs.JoltPhysics}",
+        "%{IncludeDirs.Physx}",
     }
 
     files 
@@ -69,8 +89,21 @@ project "Insight_Physics"
     {
         "Insight_Core" .. output_project_subfix .. ".lib",
         "imgui.lib",
-        "Jolt.lib",
     }
+    if enabledJolt == true then
+        links
+        {
+            "Jolt.lib",
+        }
+    end
+    if enabledPhysx == true then
+        links
+        {
+            "PhysXCommon_64.lib",
+            "PhysX_64.lib",
+            "PhysXFoundation_64.lib",
+        }
+    end
     
     libdirs
     {
@@ -99,10 +132,24 @@ project "Insight_Physics"
         {
             "%{wks.location}/deps/lib/debug",
         }
-        prebuildcommands
-        {
-            "{COPY} \"%{wks.location}vendor/JoltPhysics/Build/VS2022_CL/Debug/Jolt.lib\" \"%{wks.location}deps/".. outputdir..  "/lib/\"\n",
-        }
+        if enabledJolt == true then
+            prebuildcommands
+            {
+                "{COPY} \"%{wks.location}vendor/JoltPhysics/Build/VS2022_CL/Debug/Jolt.lib\" \"%{wks.location}deps/".. outputdir..  "/lib/\"\n",
+            }
+        end
+        if enabledPhysx == true then
+            prebuildcommands
+            {
+                "{COPY} \"%{wks.location}vendor/PhysX/physx/bin/win.x86_64.vc143.md/checked/PhysXCommon_64.lib\" \"%{wks.location}deps/".. outputdir..  "/lib/\"\n",
+                "{COPY} \"%{wks.location}vendor/PhysX/physx/bin/win.x86_64.vc143.md/checked/PhysX_64.lib\" \"%{wks.location}deps/".. outputdir..  "/lib/\"\n",
+                "{COPY} \"%{wks.location}vendor/PhysX/physx/bin/win.x86_64.vc143.md/checked/PhysXFoundation_64.lib\" \"%{wks.location}deps/".. outputdir..  "/lib/\"\n",
+    
+                "{COPY} \"%{wks.location}vendor/PhysX/physx/bin/win.x86_64.vc143.md/checked/PhysXCommon_64.dll\" \"%{wks.location}deps/".. outputdir..  "/dll/\"\n",
+                "{COPY} \"%{wks.location}vendor/PhysX/physx/bin/win.x86_64.vc143.md/checked/PhysX_64.dll\" \"%{wks.location}deps/".. outputdir..  "/dll/\"\n",
+                "{COPY} \"%{wks.location}vendor/PhysX/physx/bin/win.x86_64.vc143.md/checked/PhysXFoundation_64.dll\" \"%{wks.location}deps/".. outputdir..  "/dll/\"\n",
+            }
+        end
 
     filter "configurations:Release"  
         defines { "NDEBUG" }    
@@ -111,7 +158,23 @@ project "Insight_Physics"
         {
             "%{wks.location}/deps/lib/release",
         }
-        prebuildcommands
-        {
-            "{COPY} \"%{wks.location}vendor/JoltPhysics/Build/VS2022_CL/Release/Jolt.lib\" \"%{wks.location}deps/".. outputdir..  "/lib/\"\n",
-        }
+        
+        if enabledJolt == true then
+            prebuildcommands
+            {
+                "{COPY} \"%{wks.location}vendor/JoltPhysics/Build/VS2022_CL/Release/Jolt.lib\" \"%{wks.location}deps/".. outputdir..  "/lib/\"\n",
+            }
+        end
+
+        if enabledPhysx == true then
+            prebuildcommands
+            {
+                "{COPY} \"%{wks.location}vendor/PhysX/physx/bin/win.x86_64.vc143.md/release/PhysXCommon_64.lib\" \"%{wks.location}deps/".. outputdir..  "/lib/\"\n",
+                "{COPY} \"%{wks.location}vendor/PhysX/physx/bin/win.x86_64.vc143.md/release/PhysX_64.lib\" \"%{wks.location}deps/".. outputdir..  "/lib/\"\n",
+                "{COPY} \"%{wks.location}vendor/PhysX/physx/bin/win.x86_64.vc143.md/release/PhysXFoundation_64.lib\" \"%{wks.location}deps/".. outputdir..  "/lib/\"\n",
+    
+                "{COPY} \"%{wks.location}vendor/PhysX/physx/bin/win.x86_64.vc143.md/release/PhysXCommon_64.dll\" \"%{wks.location}deps/".. outputdir..  "/dll/\"\n",
+                "{COPY} \"%{wks.location}vendor/PhysX/physx/bin/win.x86_64.vc143.md/release/PhysX_64.dll\" \"%{wks.location}deps/".. outputdir..  "/dll/\"\n",
+                "{COPY} \"%{wks.location}vendor/PhysX/physx/bin/win.x86_64.vc143.md/release/PhysXFoundation_64.dll\" \"%{wks.location}deps/".. outputdir..  "/dll/\"\n",
+            }
+        end

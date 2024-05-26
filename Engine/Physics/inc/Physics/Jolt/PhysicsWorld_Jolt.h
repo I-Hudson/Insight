@@ -1,4 +1,5 @@
 #pragma once
+#ifdef IS_PHYSICS_JOLT
 
 #include "Physics/IPhysicsWorld.h"
 
@@ -115,3 +116,4 @@ namespace Insight::Physics::Jolt
 #endif
     };
 }
+#endif

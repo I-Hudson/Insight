@@ -1,7 +1,7 @@
 #include "Physics/PhysicsWorld.h"
 
 #ifdef IS_PHYSICS_PHYSX
-#include "Physics/Jolt/PhysicsWorld_Physx.h"
+//#include "Physics/Jolt/PhysicsWorld_Physx.h"
 #endif
 #ifdef IS_PHYSICS_JOLT
 #include "Physics/Jolt/PhysicsWorld_Jolt.h"
@@ -22,9 +22,8 @@ namespace Insight
 		void PhysicsWorld::Initialise()
 		{
 #ifdef IS_PHYSICS_PHYSX
-			s_PhsyicsWorld = ::New<Jolt::PhysicsWorld_Physx>();
-#endif
-#ifdef IS_PHYSICS_JOLT
+			//s_PhsyicsWorld = ::New<Jolt::PhysicsWorld_Physx>();
+#elif defined(IS_PHYSICS_JOLT)
 			s_PhsyicsWorld = ::New<Jolt::PhysicsWorld_Jolt>();
 #endif
 		}

@@ -1,5 +1,5 @@
 #pragma once
-
+#ifdef IS_PHYSICS_JOLT
 #include "Core/TypeAlias.h"
 
 #include <Jolt/Jolt.h>
@@ -108,3 +108,4 @@ namespace Insight::Physics
 		}
 	};
 }
+#endif

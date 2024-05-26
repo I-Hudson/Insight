@@ -1,3 +1,4 @@
+#ifdef IS_PHYSICS_JOLT
 #include "Physics/Jolt/PhysicsWorld_Jolt.h"
 
 #include "Core/Memory.h"
@@ -255,3 +256,4 @@ namespace Insight::Physics::Jolt
 	}
 }
 JPH_SUPPRESS_WARNING_POP
+#endif

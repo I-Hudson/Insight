@@ -1,5 +1,5 @@
 #pragma once
-
+#ifdef IS_PHYSICS_JOLT
 #include <Jolt/Jolt.h>
 #include <Jolt/Physics/Collision/ContactListener.h>
 #include <Jolt/Physics/Body/BodyActivationListener.h>
@@ -26,3 +26,4 @@ namespace Insight::Physics
 		virtual void OnBodyDeactivated(const JPH::BodyID& inBodyID, JPH::uint64 inBodyUserData) override;
 	};
 }
+#endif

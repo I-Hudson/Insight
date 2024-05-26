@@ -1,3 +1,4 @@
+#ifdef IS_PHYSICS_JOLT
 #include "Physics/Jolt/Listeners_Jolt.h"
 
 #include <iostream>
@@ -43,3 +44,4 @@ namespace Insight::Physics
 		std::cout << "A body went to sleep" << std::endl;
 	}
 }
+#endif
