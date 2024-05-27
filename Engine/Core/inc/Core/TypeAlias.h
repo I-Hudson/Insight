@@ -30,6 +30,12 @@ constexpr int log2_32(u32 value);
 constexpr int log2(u64 value) { return log2_32((u32)value); }
 #endif
 
+template<typename T>
+constexpr T IntDivideRoundUp(const T a, const T b)
+{
+    return (a + b - 1) / b;
+}
+
 template <class Seed, class T>
 constexpr void HashCombine(Seed& seed, const T& v)
 {

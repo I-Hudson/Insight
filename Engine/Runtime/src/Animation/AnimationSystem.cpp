@@ -3,12 +3,14 @@
 
 #include "Core/Profiler.h"
 #include "Threading/TaskSystem.h"
+#include <execution>
 
 namespace Insight
 {
     namespace Runtime
     {
 #define ANIMATION_THREADING 1
+#define PARALLEL_FOR 1
 
         AnimationSystem::AnimationSystem()
         {
@@ -30,6 +32,13 @@ namespace Insight
             }
 
             std::lock_guard lock(m_animationsLock);
+
+#if PARALLEL_FOR
+            Threading::ParallelFor<AnimationInstance>(16, m_animations, [deltaTime](AnimationInstance& instance)
+            {
+                instance.Animator.Update(deltaTime);
+            });
+#else
 #if ANIMATION_THREADING
             std::vector<std::shared_ptr<Threading::Task>> aniationTasks;
 #endif
@@ -53,6 +62,7 @@ namespace Insight
                 std::shared_ptr<Threading::Task>& task = aniationTasks[taskIdx];
                 task->Wait();
             }
+#endif
 #endif
         }
 
