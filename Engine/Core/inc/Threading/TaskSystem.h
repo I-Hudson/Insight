@@ -64,7 +64,7 @@ namespace Insight
 		};
 
 		template<typename T>
-		void ParallelFor(u32 workGroupSize, std::vector<T>& vec, std::function<void(T&)> func)
+		void ParallelFor(const u32 workGroupSize, std::vector<T>& vec, std::function<void(T&)> func)
 		{
 			const u32 vecSize = static_cast<u32>(vec.size());
 			if (vecSize == 0)
@@ -72,39 +72,82 @@ namespace Insight
 				return;
 			}
 
-			const u32 neededThreadNum = IntDivideRoundUp(vecSize, workGroupSize); // This includes the caller thread.
-			const u32 availableThreadNum = TaskSystem::Instance().GetThreadCount() + 1; // This includes the caller thread.
-			const u32 threadsNum = std::min(neededThreadNum, availableThreadNum);
+			// Store all the start indexes to be completed.
+			std::queue<u32> startIdxs;
+			std::mutex startIdxsMutex;
 
-			if (neededThreadNum > availableThreadNum)
+			const u32 taskNum = IntDivideRoundUp(vecSize, workGroupSize);
+			for (size_t taskIdx = 1; taskIdx < taskNum; ++taskIdx)
 			{
-				workGroupSize = IntDivideRoundUp(vecSize, threadsNum); // Always round up so there is no left over work.
+				startIdxs.push(workGroupSize * taskIdx);
 			}
+			// Don't add index 0 as the caller thread will handle this range (0->workGroupSize). This should mean that the caller thread
+			// "always" has some of the most amount of work to do so we aren't wasting a lot of time just waiting.
+			// The caller thread should have some of the highest amount of work to do other wise it will be waiting for worker threads. 
+			// Really we want the worker threads to have less work so they can finish early and then move onto other work which has been queued.
+			//startIdxs.push(0);
 
 			std::vector<std::shared_ptr<Task>> tasks;
-			tasks.reserve(threadsNum - 1);
+			tasks.reserve(taskNum);
 
-			for (size_t threadIdx = 1; threadIdx < threadsNum; ++threadIdx)
+			// Minus 1, as one of the worker threads will be the caller thread. The caller thread shouldn't be just waiting for work from other threads
+			// it should also be helping.
+			const u32 workerThreads = std::min(IntDivideRoundUp(vecSize, workGroupSize), TaskSystem::Instance().GetThreadCount()) - 1;
+			if (workerThreads > 0)
 			{
-				const u32 startIdx = workGroupSize * threadIdx;
-				const u32 endIdx = std::min(startIdx + workGroupSize, vecSize);
-				// Kick off all our tasks. These will run on objects vec[0] + workGroupSize.
-				tasks.push_back(TaskSystem::Instance().CreateTask([startIdx, endIdx, &vec, &func]()
-					{
-						IS_PROFILE_SCOPE("ParallelFor");
-						ZoneTextF("ParallelFor (%d)", endIdx - startIdx);
-						for (size_t i = startIdx; i < endIdx; ++i)
+				for (size_t threadIdx = 0; threadIdx < workerThreads; ++threadIdx)
+				{
+					// Kick off all our tasks. These will run on objects vec[0] + workGroupSize.
+					tasks.push_back(TaskSystem::Instance().CreateTask([&]()
 						{
-							func(vec[i]);
-						}
-					}));
+							while (true)
+							{
+								u32 startIdx = 0;
+								{
+									std::lock_guard l(startIdxsMutex);
+									if (startIdxs.empty())
+									{
+										break;
+									}
+									startIdx = startIdxs.front();
+									startIdxs.pop();
+								}
+								const u32 endIdx = std::min(startIdx + workGroupSize, vecSize);
+								IS_PROFILE_SCOPE("ParallelFor");
+								ZoneTextF("ParallelFor (%d)", endIdx - startIdx);
+
+								for (size_t i = startIdx; i < endIdx; ++i)
+								{
+									func(vec[i]);
+								}
+							}
+						}));
+				}
 			}
 
+			// Make sure the caller thread always does the items from 0->workGroupSize so it "should" have a "full"
+			// load of work.
+			bool completedIndexZero = false;
+			while (true)
 			{
+				u32 startIdx = 0;
+				if (completedIndexZero)
+				{
+					std::lock_guard l(startIdxsMutex);
+					if (startIdxs.empty())
+					{
+						break;
+					}
+					startIdx = startIdxs.front();
+					startIdxs.pop();
+				}
+
+				completedIndexZero = true;
+				const u32 endIdx = std::min(startIdx + workGroupSize, vecSize);
 				IS_PROFILE_SCOPE("ParallelFor");
-				ZoneTextF("ParallelFor (%d)", workGroupSize);
-				// The caller thread works on 0->workGroupSize
-				for (size_t i = 0; i < workGroupSize; ++i)
+				ZoneTextF("ParallelFor (%d)", endIdx - startIdx);
+
+				for (size_t i = startIdx; i < endIdx; ++i)
 				{
 					func(vec[i]);
 				}
