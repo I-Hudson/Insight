@@ -133,7 +133,7 @@ namespace Insight
             if (itr == m_allocations.end())
             {
                 lock.unlock();
-                MemoryTrackedAlloc memoryTrackedAlloc(ptr, size, category, type, GetCallStack());
+                MemoryTrackedAlloc memoryTrackedAlloc(ptr, size, category, type, { });
 
                 lock.lock();
                 m_allocations[ptr] = memoryTrackedAlloc;
@@ -237,6 +237,9 @@ namespace Insight
                 callStack[i][0] = '\0';
             }
 
+#ifndef MEMORY_TRACK_CALLSTACK
+            return callStack;
+#else
             std::unique_lock lock(m_lock);
             if (!m_isReady)
             {
@@ -244,6 +247,7 @@ namespace Insight
                 return callStack;
             }
             lock.unlock();
+#endif
 
 #ifdef IS_MEMORY_TRACKING
             /// TOOD: Think of a better way to have this supported. Would be nice to have this. Maybe a call stack should only be gotten

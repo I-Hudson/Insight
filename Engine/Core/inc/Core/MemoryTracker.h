@@ -207,7 +207,6 @@ namespace Insight
 			/// @return u64
 			u64 GetTotalAllocatedInBytes() const;
 
-		private:
 			std::array<char[c_CallstackStringSize], c_CallStackCount> GetCallStack();
 
 		private:
