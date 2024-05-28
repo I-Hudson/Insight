@@ -35,9 +35,9 @@ namespace Insight
 #elif defined(IS_MATHS_GLM)
 			vec3 = glm::vec3(x, y, z);
 #else
-			this.x = x; 
-			this.y = y;
-			this.z = z;
+			this->x = x;
+			this->y = y;
+			this->z = z;
 #endif
 		}
 		
@@ -171,7 +171,7 @@ namespace Insight
 #endif
 		}
 
-		void Vector3::Normalise()
+		Vector3& Vector3::Normalise()
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
 			 xmvector = DirectX::XMVector3Normalize(xmvector);
@@ -186,6 +186,7 @@ namespace Insight
 				y *= length_inverted;
 				z *= length_inverted;
 			}
+			return *this;
 #endif
 		}
 		Vector3 Vector3::Normalised() const
@@ -416,7 +417,7 @@ namespace Insight
 #elif defined(IS_MATHS_GLM)
 			return Vector3(vec.vec3 - vec1.vec3);
 #else
-			return Vector3(vec.x - otvvec1ec1her.x, vec.y - vec1.y, vec.z - vec1.z);
+			return Vector3(vec.x - vec1.x, vec.y - vec1.y, vec.z - vec1.z);
 #endif
 		}
 

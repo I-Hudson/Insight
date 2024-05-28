@@ -174,7 +174,7 @@ namespace Insight
 #endif
 		}
 
-		void Vector4::Normalise()
+		Vector4& Vector4::Normalise()
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
 			xmvector = DirectX::XMVector4Normalize(xmvector);
@@ -190,6 +190,7 @@ namespace Insight
 				z *= length_inverted;
 				w *= length_inverted;
 			}
+			return *this;
 #endif
 		}
 		Vector4 Vector4::Normalised() const

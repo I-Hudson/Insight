@@ -37,8 +37,8 @@ namespace Insight
 #elif defined(IS_MATHS_GLM)
 			vec2 = glm::vec2(x, y);
 #else
-			this.x = x;
-			this.y = y;
+			this->x = x;
+			this->y = y;
 #endif
 		}
 		Vector2::Vector2(const float value)
@@ -121,7 +121,7 @@ namespace Insight
 #endif
 		}
 
-		void Vector2::Normalise()
+		Vector2& Vector2::Normalise()
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
 			xmvector = DirectX::XMVector2Normalize(xmvector);
@@ -135,6 +135,7 @@ namespace Insight
 				x *= length_inverted;
 				y *= length_inverted;
 			}
+			return *this;
 #endif
 		}
 		Vector2 Vector2::Normalised() const

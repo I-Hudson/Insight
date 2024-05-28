@@ -22,7 +22,7 @@ namespace Insight
 	namespace Maths
 	{
 
-		/// @brief Four by Four matrix (4 by 4). Row majoir.
+		/// @brief Four by Four matrix (4 by 4). Row major.
 		REFLECT_CLASS(REFLECT_LOOKUP_ONLY);
 		class IS_MATHS Matrix4
 		{
@@ -53,21 +53,21 @@ namespace Insight
 
 			/// @brief Inverse this matrix and return a copy (Modifies this matrix).
 			/// @return Matrix4
-			Matrix4 Inverse();
+			Matrix4& Inverse();
 			/// @brief Return the inverse of this matrix.
 			/// @return Matrix4
 			Matrix4 Inversed() const { return Matrix4(*this).Inverse(); }
 			/// @brief Transpose this matrix and return a copy (Modifies this matrix).
 			/// @return Matrix4
-			Matrix4 Transpose();
+			Matrix4& Transpose();
 			/// @brief Return the Transpose of this matrix.
 			/// @return Matrix4
 			Matrix4 Transposed() const { return Matrix4(*this).Transpose(); }
 
-			Matrix4 Translate(const Vector4 vector);
+			Matrix4& Translate(const Vector4 vector);
 			Matrix4 Translated(const Vector4 vector) const { return Matrix4(*this).Translate(vector); }
 
-			Matrix4 Scale(const Vector4& vector);
+			Matrix4& Scale(const Vector4& vector);
 			Matrix4 Scaled(const Vector4& vector) const { return Matrix4(*this).Scale(vector); }
 
 			void Decompose(Vector4& position, Quaternion& rotation, Vector4& scale) const;

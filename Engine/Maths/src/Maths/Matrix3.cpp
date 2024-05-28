@@ -140,7 +140,7 @@ namespace Insight
 		Matrix3::~Matrix3()
 		{ }
 
-		Matrix3 Matrix3::Inverse()
+		Matrix3& Matrix3::Inverse()
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
 			DirectX::XMVECTOR determinant;
@@ -177,7 +177,7 @@ namespace Insight
 #endif
 			return *this;
 		}
-		Matrix3 Matrix3::Transpose()
+		Matrix3& Matrix3::Transpose()
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
 			xmmatrix = DirectX::XMMatrixTranspose(xmmatrix);

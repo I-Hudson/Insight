@@ -48,7 +48,7 @@ namespace Insight
 			float Length() const;
 			float LengthSquared() const;
 
-			void Normalise();
+			Vector3& Normalise();
 			Vector3 Normalised() const;
 
 			float Dot(const Vector3& other) const;

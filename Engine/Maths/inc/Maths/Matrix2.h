@@ -40,13 +40,13 @@ namespace Insight
 
 			/// @brief Inverse this matrix and return a copy (Modifies this matrix).
 			/// @return Matrix2
-			Matrix2 Inverse();
+			Matrix2& Inverse();
 			/// @brief Return the inverse of this matrix.
 			/// @return Matrix2
 			Matrix2 Inversed() const;
 			/// @brief Transpose this matrix and return a copy (Modifies this matrix).
 			/// @return Matrix2
-			Matrix2 Transpose();
+			Matrix2& Transpose();
 			/// @brief Return the Transpose of this matrix.
 			/// @return Matrix2
 			Matrix2 Transposed() const;
@@ -64,15 +64,15 @@ namespace Insight
 
 			Matrix2& operator=(const Matrix2& other);
 
-			Vector2 operator*(const Vector2& other);
-			Matrix2 operator*(const Matrix2& other);
+			Vector2 operator*(const Vector2& other) const;
+			Matrix2 operator*(const Matrix2& other) const;
 
-			Vector2 operator/(const Vector2& other);
-			Matrix2 operator/(const Matrix2& other);
+			Vector2 operator/(const Vector2& other) const;
+			Matrix2 operator/(const Matrix2& other) const;
 
-			Matrix2 operator-(const Matrix2& other);
+			Matrix2 operator-(const Matrix2& other) const;
 
-			Matrix2 operator+(const Matrix2& other);
+			Matrix2 operator+(const Matrix2& other) const;
 
 			Matrix2& operator*=(const Vector2& other);
 			Matrix2& operator*=(const Matrix2& other);

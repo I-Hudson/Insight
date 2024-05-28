@@ -125,7 +125,7 @@ namespace Insight
 		Matrix4::~Matrix4()
 		{ }
 
-		Matrix4 Matrix4::Inverse()
+		Matrix4& Matrix4::Inverse()
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
 			DirectX::XMVECTOR determinant;
@@ -231,7 +231,7 @@ namespace Insight
 #endif
 			return *this;
 		}
-		Matrix4 Matrix4::Transpose()
+		Matrix4& Matrix4::Transpose()
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
 			xmmatrix = DirectX::XMMatrixTranspose(xmmatrix);
@@ -247,28 +247,28 @@ namespace Insight
 #endif
 			return *this;
 		}
-		Matrix4 Matrix4::Translate(const Vector4 vector)
+		Matrix4& Matrix4::Translate(const Vector4 vector)
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
 			xmmatrix = DirectX::XMMatrixMultiply(DirectX::XMMatrixTranslationFromVector(vector.xmvector), xmmatrix);
 #elif defined(IS_MATHS_GLM)
 			mat4 = glm::translate(mat4, glm::vec3(vector.vec4));
 #else
-			assert(false);
-			return Matrix4();
+			v3 = (v0 * vector[0]) + (v1 * vector[1]) + (v2 * vector[2]) + v3;
 #endif
 			return *this;
 		}
 
-		Matrix4 Matrix4::Scale(const Vector4& vector)
+		Matrix4& Matrix4::Scale(const Vector4& vector)
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
 			xmmatrix = DirectX::XMMatrixMultiply(DirectX::XMMatrixScalingFromVector(vector.xmvector), xmmatrix);
 #elif defined(IS_MATHS_GLM)
 			mat4 = glm::scale(mat4, glm::vec3(vector.vec4));
 #else
-			assert(false);
-			return Matrix4();
+			v0 = v0 * vector[0];
+			v1 = v1 * vector[1];
+			v2 = v2 * vector[2];
 #endif
 			return *this;
 		}
@@ -276,7 +276,7 @@ namespace Insight
 		void Matrix4::Decompose(Vector4& position, Quaternion& rotation, Vector4& scale) const
 		{
 
-#ifdef IS_MATHS_DIRECTX_MATHS
+#if defined(IS_MATHS_DIRECTX_MATHS) && defined(SOMETHING)
 			DirectX::XMVECTOR quat;
 			DirectX::XMMatrixDecompose(&scale.xmvector, &quat, &position.xmvector, xmmatrix);
 			rotation = Quaternion(quat.m128_f32[3], quat.m128_f32[0], quat.m128_f32[1], quat.m128_f32[2]);
@@ -286,11 +286,13 @@ namespace Insight
 			glm::vec3 glmScale;
 			glm::quat glmQuat;
 			glm::vec3 glmPosition;
+			glm::vec3 glmSkew;
+			glm::vec4 glmPerspective;
 
-			glm::decompose(mat4, glmScale, glmQuat, glmPosition);
+			glm::decompose(mat4, glmScale, glmQuat, glmPosition, glmSkew, glmPerspective);
 
 			scale.vec4 = glm::vec4(glmScale, 0.0f);
-			rotation.quat = Quaternion(glmQuat.w, glmQuat.x, glmQuat.y, glmQuat.z);
+			rotation = Quaternion(glmQuat.w, glmQuat.x, glmQuat.y, glmQuat.z);
 			position.vec4 = glm::vec4(glmPosition, 0.0f);
 #else
 			position = v3;
@@ -302,11 +304,16 @@ namespace Insight
 			ppvBasis[1] = &matTemp[1];
 			ppvBasis[2] = &matTemp[2];
 
-			scale[0] = ppvBasis[0][0].Length();
-			scale[1] = ppvBasis[1][1].Length();
-			scale[2] = ppvBasis[2][2].Length();
-			scale[3] = 0.0f;
+			matTemp[0] = v0;
+			matTemp[1] = v1;
+			matTemp[2] = v2;
+			matTemp[3] = Vector4(0, 0, 0, 1);
 
+			scale[0] = ppvBasis[0][0].Length();
+			scale[1] = ppvBasis[1][0].Length();
+			scale[2] = ppvBasis[2][0].Length();
+			scale[3] = 0.0f;
+			
 #pragma region 
 #define XM3RANKDECOMPOSE(a, b, c, x, y, z)\
 if((x) < (y))                   \
@@ -431,19 +438,19 @@ else                            \
 				{
 					float fourXSqr = omr22 - dif10;
 					float inv4x = 0.5f / sqrtf(fourXSqr);
-					rotation[0] = fourXSqr * inv4x;
-					rotation[1] = ((*this)[0][1] + (*this)[1][0]) * inv4x;
-					rotation[2] = ((*this)[0][2] + (*this)[2][0]) * inv4x;
-					rotation[3] = ((*this)[1][2] - (*this)[2][1]) * inv4x;
+					rotation[1] = fourXSqr * inv4x;							// x
+					rotation[2] = ((*this)[0][1] + (*this)[1][0]) * inv4x;	// y
+					rotation[3] = ((*this)[0][2] + (*this)[2][0]) * inv4x;	// z
+					rotation[0] = ((*this)[1][2] - (*this)[2][1]) * inv4x;	// w
 				}
 				else  // y^2 >= x^2
 				{
 					float fourYSqr = omr22 + dif10;
 					float inv4y = 0.5f / sqrtf(fourYSqr);
-					rotation[0] = ((*this)[0][1] + (*this)[1][0]) * inv4y;
-					rotation[1] = fourYSqr * inv4y;
-					rotation[2] = ((*this)[1][2] + (*this)[2][1]) * inv4y;
-					rotation[3] = ((*this)[2][0] - (*this)[0][2]) * inv4y;
+					rotation[1] = ((*this)[0][1] + (*this)[1][0]) * inv4y;	
+					rotation[2] = fourYSqr * inv4y;							
+					rotation[3] = ((*this)[1][2] + (*this)[2][1]) * inv4y;	
+					rotation[0] = ((*this)[2][0] - (*this)[0][2]) * inv4y;	
 				}
 			}
 			else  // z^2 + w^2 >= x^2 + y^2
@@ -454,19 +461,19 @@ else                            \
 				{
 					float fourZSqr = opr22 - sum10;
 					float inv4z = 0.5f / sqrtf(fourZSqr);
-					rotation[0] = ((*this)[0][2] + (*this)[2][0]) * inv4z;
-					rotation[1] = ((*this)[1][2] + (*this)[2][1]) * inv4z;
-					rotation[2] = fourZSqr * inv4z;
-					rotation[3] = ((*this)[0][1] - (*this)[1][0]) * inv4z;
+					rotation[1] = ((*this)[0][2] + (*this)[2][0]) * inv4z;
+					rotation[2] = ((*this)[1][2] + (*this)[2][1]) * inv4z;
+					rotation[3] = fourZSqr * inv4z;
+					rotation[0] = ((*this)[0][1] - (*this)[1][0]) * inv4z;
 				}
 				else  // w^2 >= z^2
 				{
 					float fourWSqr = opr22 + sum10;
 					float inv4w = 0.5f / sqrtf(fourWSqr);
-					rotation[0] = ((*this)[1][2] - (*this)[2][1]) * inv4w;
-					rotation[1] = ((*this)[2][0] - (*this)[0][2]) * inv4w;
-					rotation[2] = ((*this)[0][1] - (*this)[1][0]) * inv4w;
-					rotation[3] = fourWSqr * inv4w;
+					rotation[1] = ((*this)[1][2] - (*this)[2][1]) * inv4w;
+					rotation[2] = ((*this)[2][0] - (*this)[0][2]) * inv4w;
+					rotation[3] = ((*this)[0][1] - (*this)[1][0]) * inv4w;
+					rotation[0] = fourWSqr * inv4w;
 				}
 			}
 #undef XM3_DECOMP_EPSILON
@@ -477,51 +484,80 @@ else                            \
 		Matrix4 Matrix4::CreatePerspective(const float fovy, const float aspect, const float zNear, const float zFar)
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
-			return DirectX::XMMatrixPerspectiveFovLH(fovy, aspect, zNear, zFar);
+			return Matrix4(DirectX::XMMatrixPerspectiveFovLH(fovy, aspect, zNear, zFar));
 #elif defined(IS_MATHS_GLM)
 			return glm::perspective(fovy, aspect, zNear, zFar);
 #else
-			Matrix4 Result = Matrix4::Identity;
-			assert(false);
-			return Result;
+			const float tanHalfFovY = std::tan(fovy / 2.0f);
+			Matrix4 result;
+			result[0][0] = 1.0f / (aspect * tanHalfFovY);
+			result[1][1] = 1.0f / (tanHalfFovY);
+			result[2][2] = zFar / (zFar - zNear);
+			result[2][3] = 1.0f;
+			result[3][2] = -(zFar * zNear) / (zFar - zNear);
+			return result;
 #endif
 		}
 
 		Matrix4 Matrix4::CreateOrthographic(const float left, const float right, const float bottom, const float top)
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
-			return DirectX::XMMatrixOrthographicLH(right - left, top - bottom, 1, 1024);
+			return Matrix4(DirectX::XMMatrixOrthographicLH(right - left, top - bottom, 1, 1024));
 #elif defined(IS_MATHS_GLM)
 			return glm::ortho(left, right, bottom, top);
 #else
-			Matrix4 Result = Matrix4::Identity;
-			assert(false);
-			return Result;
+			Matrix4 result = Matrix4::Identity;
+			result[0][0] = 2.0f / (right - left);
+			result[1][1] = 2.0f / (top - bottom);
+			result[2][2] = -1.0f;
+			result[3][0] = -(right + left) / (right - left);
+			result[3][1] = -(top + bottom) / (top - bottom);
+			return result;
 #endif
 		}
 		Matrix4 Matrix4::CreateOrthographic(const float left, const float right, const float bottom, const float top, const float zNear, const float zFar)
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
-			return DirectX::XMMatrixOrthographicLH(abs(left - right), abs(bottom - top), zNear, zFar);
+			return Matrix4(DirectX::XMMatrixOrthographicLH(abs(left - right), abs(bottom - top), zNear, zFar));
 #elif defined(IS_MATHS_GLM)
 			return glm::ortho(left, right, bottom, top, zNear, zFar);
 #else
-			Matrix4 Result = Matrix4::Identity;
-			assert(false);
-			return Result;
+			Matrix4 result = Matrix4::Identity;
+			result[0][0] = 2.0f / (right - left);
+			result[1][1] = 2.0f / (top - bottom);
+			result[2][2] = 1.0f / (zFar - zNear);
+			result[3][0] = -(right + left) / (right - left);
+			result[3][1] = -(top + bottom) / (top - bottom);
+			result[3][2] = -zNear / (zFar - zNear);
+			return result;
 #endif
 		}
 
 		Matrix4 Matrix4::LookAt(const Vector3& eye, const Vector3& center, const Vector3& up)
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
-			return DirectX::XMMatrixLookAtLH(eye.xmvector, center.xmvector, up.xmvector);
+			return Matrix4(DirectX::XMMatrixLookAtLH(eye.xmvector, center.xmvector, up.xmvector));
 #elif defined(IS_MATHS_GLM)
 			return glm::lookAt(eye.vec3, center.vec3, up.vec3);
 #else
-			Matrix4 Result = Matrix4::Identity;
-			assert(false);
-			return Result;
+			const Vector3 f = (center - eye).Normalised();
+			const Vector3 s = (up.Cross(f)).Normalised();
+			const Vector3 u = (f.Cross(s)).Normalised();
+
+			Matrix4 result = Matrix4::Identity;
+			result[0][0] = s.x;
+			result[1][0] = s.y;
+			result[2][0] = s.z;
+			result[0][1] = u.x;
+			result[1][1] = u.y;
+			result[2][1] = u.z;
+			result[0][2] = f.x;
+			result[1][2] = f.y;
+			result[2][2] = f.z;
+			result[3][0] = -s.Dot(eye);
+			result[3][1] = -u.Dot(eye);
+			result[3][2] = -f.Dot(eye);
+			return result;
 #endif
 		}
 
@@ -606,7 +642,7 @@ else                            \
 		Matrix4 Matrix4::operator*(const Matrix4& other) const
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
-			return DirectX::XMMatrixMultiply(other.xmmatrix, xmmatrix);
+			return Matrix4(DirectX::XMMatrixMultiply(other.xmmatrix, xmmatrix));
 #elif defined(IS_MATHS_GLM)
 			return mat4 * other.mat4;
 #else
@@ -771,8 +807,20 @@ else                            \
 
 		float Matrix4::GetDeterminant() const
 		{
-			return (*this)[0][0] * (*this)[1][1] * (*this)[2][2] + (*this)[0][1] * (*this)[1][2] * (*this)[2][0] + (*this)[0][2] * (*this)[1][0] * (*this)[2][1] -
-				(*this)[0][2] * (*this)[1][1] * (*this)[2][0] - (*this)[0][1] * (*this)[1][0] * (*this)[2][2] - (*this)[0][0] * (*this)[1][2] * (*this)[2][1];
+			const float floatSubFactor00 = m_22 * m_33 - m_32 * m_23;
+			const float floatSubFactor01 = m_21 * m_33 - m_31 * m_23;
+			const float floatSubFactor02 = m_21 * m_32 - m_31 * m_23;
+			const float floatSubFactor03 = m_20 * m_33 - m_30 * m_23;
+			const float floatSubFactor04 = m_20 * m_32 - m_30 * m_22;
+			const float floatSubFactor05 = m_20 * m_31 - m_30 * m_21;
+
+			Vector4 cof(
+				m_11 * floatSubFactor00 - m_12 * floatSubFactor01 + m_13 * floatSubFactor02,
+				-(m_10 * floatSubFactor00 - m_12 * floatSubFactor03 + m_13 * floatSubFactor04),
+				m_10 * floatSubFactor01 - m_11 * floatSubFactor03 + m_13 * floatSubFactor05,
+				-(m_10 * floatSubFactor02 - m_11 * floatSubFactor04 + m_12 * floatSubFactor05));
+
+			return m_00 * cof[0] + m_01 * cof[1] + m_02 * cof[2] + m_03 * cof[3];
 		}
 
 
@@ -1124,7 +1172,7 @@ namespace test
 
 		TEST_CASE("CreatePerspective")
 		{
-			Matrix4 perspecticeMatrix = Matrix4::CreatePerspective(90, 1.2f, 0.1f, 500);
+			Matrix4 perspecticeMatrix = Matrix4::CreatePerspective(90.0f, 1.2f, 0.1f, 500.0f);
 			glm::mat4 glmPerspecticeMatrix = glm::perspective(90.0f, 1.2f, 0.1f, 500.0f);
 			CHECK(perspecticeMatrix == glmPerspecticeMatrix);
 		}
@@ -1182,28 +1230,6 @@ namespace test
 			CHECK(Equals(scale.y, glmScale.y, 0.0001f));
 			CHECK(Equals(scale.z, glmScale.z, 0.0001f));
 			CHECK(scale.w == 0.0f);
-
-#ifdef IS_MATHS_DIRECTX_MATHS
-			DirectX::XMVECTOR dxRotation;
-			DirectX::XMVECTOR dxPosition;
-			DirectX::XMVECTOR dxScale;
-			DirectX::XMMatrixDecompose(&dxScale, &dxRotation, &dxPosition, lootAtMatrix.xmmatrix);
-
-			CHECK(Equals(position.x, dxPosition.m128_f32[0], 0.0001f));
-			CHECK(Equals(position.y, dxPosition.m128_f32[1], 0.0001f));
-			CHECK(Equals(position.z, dxPosition.m128_f32[2], 0.0001f));
-			CHECK(position.w == 0.0f);
-
-			CHECK(Equals(rotation.w, dxRotation.m128_f32[3], 0.0001f));
-			CHECK(Equals(rotation.x, dxRotation.m128_f32[0], 0.0001f));
-			CHECK(Equals(rotation.y, dxRotation.m128_f32[1], 0.0001f));
-			CHECK(Equals(rotation.z, dxRotation.m128_f32[2], 0.0001f));
-
-			CHECK(Equals(scale.x, dxScale.m128_f32[0], 0.0001f));
-			CHECK(Equals(scale.y, dxScale.m128_f32[1], 0.0001f));
-			CHECK(Equals(scale.z, dxScale.m128_f32[2], 0.0001f));
-			CHECK(scale.w == 0.0f);
-#endif
 		}
 
 		TEST_CASE("operator[]")

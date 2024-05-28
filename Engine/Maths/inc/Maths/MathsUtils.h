@@ -7,11 +7,11 @@
  *
  */
 
+#include "Maths/Defines.h"
+
 #ifdef IS_MATHS_DIRECTX_MATHS
 #include <DirectXMath.h>
 #endif
-
-#include "Maths/Matrix4.h"
 
 #include <cmath>
 #include <limits>
@@ -48,11 +48,8 @@ namespace Insight
         template <class T>
         constexpr bool Equals(T lhs, T rhs, T error = std::numeric_limits<T>::epsilon()) { return (std::abs(lhs - rhs) <= error); }
 
-        IS_MATHS Matrix4 CreatePerspectiveLH(float fov, float aspect, float near, float far);
-        IS_MATHS Matrix4 CreatePerspectiveRH(float fov, float aspect, float near, float far);
-
-        IS_MATHS Matrix4 AxisAngleMatrix(Vector4 vec, float angle);
-        IS_MATHS Matrix4 Matrix4RotationNormal(Vector4 normalAxis, float Angle);
+        //IS_MATHS Matrix4 AxisAngleMatrix(Vector4 vec, float angle);
+        //IS_MATHS Matrix4 Matrix4RotationNormal(Vector4 normalAxis, float Angle);
 
         void ScalerSinCos(float* pSin, float* pCos, float  Value);
 	}

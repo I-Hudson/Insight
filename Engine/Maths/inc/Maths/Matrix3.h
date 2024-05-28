@@ -46,13 +46,13 @@ namespace Insight
 
 			/// @brief Inverse this matrix and return a copy (Modifies this matrix).
 			/// @return Matrix3
-			Matrix3 Inverse();
+			Matrix3& Inverse();
 			/// @brief Return the inverse of this matrix.
 			/// @return Matrix3
 			Matrix3 Inversed() const { return Matrix3(*this).Inverse(); }
 			/// @brief Transpose this matrix and return a copy (Modifies this matrix).
 			/// @return Matrix3
-			Matrix3 Transpose();
+			Matrix3& Transpose();
 			/// @brief Return the Transpose of this matrix.
 			/// @return Matrix3
 			Matrix3 Transposed() const { return Matrix3(*this).Transpose(); }

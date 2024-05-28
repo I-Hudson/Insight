@@ -111,7 +111,7 @@ namespace Insight
 		Matrix2::~Matrix2()
 		{ }
 
-		Matrix2 Matrix2::Inverse()
+		Matrix2& Matrix2::Inverse()
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
 			DirectX::XMVECTOR determinant;
@@ -134,7 +134,7 @@ namespace Insight
 			return Matrix2(*this).Inverse();
 		}
 
-		Matrix2 Matrix2::Transpose()
+		Matrix2& Matrix2::Transpose()
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
 			xmmatrix = DirectX::XMMatrixTranspose(xmmatrix);
@@ -226,7 +226,7 @@ namespace Insight
 			return *this;
 		}
 
-		Vector2 Matrix2::operator*(const Vector2& other)
+		Vector2 Matrix2::operator*(const Vector2& other) const
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
 			return Vector2(DirectX::XMVector2Transform(other.xmvector, xmmatrix));
@@ -242,7 +242,7 @@ namespace Insight
 			return result;
 #endif
 		}
-		Matrix2 Matrix2::operator*(const Matrix2& other)
+		Matrix2 Matrix2::operator*(const Matrix2& other) const
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
 			return Matrix2(DirectX::XMMatrixMultiply(other.xmmatrix, xmmatrix));
@@ -265,21 +265,21 @@ namespace Insight
 #endif
 		}
 
-		Vector2 Matrix2::operator/(const Vector2& other)
+		Vector2 Matrix2::operator/(const Vector2& other) const
 		{
 			return Inversed() * other;
 		}
-		Matrix2 Matrix2::operator/(const Matrix2& other)
+		Matrix2 Matrix2::operator/(const Matrix2& other) const
 		{
 			return *this * other.Inversed();
 		}
 
-		Matrix2 Matrix2::operator-(const Matrix2& other)
+		Matrix2 Matrix2::operator-(const Matrix2& other) const
 		{
 			return Matrix2((*this)[0] - other[0], (*this)[1] - other[1]);
 		}
 
-		Matrix2 Matrix2::operator+(const Matrix2& other)
+		Matrix2 Matrix2::operator+(const Matrix2& other) const
 		{
 			return Matrix2((*this)[0] + other[0], (*this)[1] + other[1]);
 		}
