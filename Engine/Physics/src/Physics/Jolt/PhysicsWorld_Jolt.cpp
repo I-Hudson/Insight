@@ -4,6 +4,7 @@
 
 #include "Core/Memory.h"
 #include "Core/Profiler.h"
+#include "FileSystem/FileSystem.h"
 
 #include <Jolt/Physics/Collision/Shape/BoxShape.h>
 
@@ -156,7 +157,7 @@ namespace Insight::Physics::Jolt
 		bodyCreateSettings = BodyCreationSettings(&boxShapeSettings, Maths::Vector3(0.0f, 20.0f, 0.0f), Maths::Quaternion::Identity, MotionType::Dynamic, ObjectLayers::MOVING);
 		//CreateBody(bodyCreateSettings);
 
-		StartRecord();
+		//StartRecord();
     }
 
 	void PhysicsWorld_Jolt::Shutdown()
@@ -193,6 +194,15 @@ namespace Insight::Physics::Jolt
 	void PhysicsWorld_Jolt::Update(const float deltaTime)
 	{
 		IS_PROFILE_FUNCTION();
+
+		std::unique_lock l(m_bodiesMutex);
+		const bool startRecord = !m_bodies.empty();
+		l.unlock();
+		if (startRecord)
+		{
+			StartRecord();
+		}
+
 
 		// We simulate the physics world in discrete time steps. 60 Hz is a good rate to update the physics system.
 		const float cDeltaTime = 1.0f / 60.0f;
@@ -240,7 +250,9 @@ namespace Insight::Physics::Jolt
 			oss << std::put_time(&tm, "%d-%m-%Y_%H-%M-%S");
 			auto str = oss.str();
 
-			m_recorderStreamOut.OpenFile("Physics_" + str + ".bin");
+			FileSystem::CreateFolder("Physics/");
+			m_recorderStreamOut.OpenFile("Physics/Physics_" + str + ".bin");
+
 			m_debugRendererRecorder = New<JPH::DebugRendererRecorder>(m_recorderStreamOut);
 		}
 #endif
