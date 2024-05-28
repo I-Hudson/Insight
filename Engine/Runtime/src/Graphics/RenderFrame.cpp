@@ -15,6 +15,7 @@
 #include "Maths/Vector3.h"
 
 #include "Core/Profiler.h"
+#include "Threading/TaskSystem.h"
 
 namespace Insight
 {
@@ -48,12 +49,14 @@ namespace Insight
     //=====================================================
     void RenderMesh::SetMesh(Runtime::Mesh* mesh)
     {
+        IS_PROFILE_FUNCTION();
         BoudingBox = mesh->GetBoundingBox();
         MeshLods = mesh->m_lods;
     }
 
     void RenderMesh::SetMaterial(const Ref<Runtime::MaterialAsset> material)
     {
+        IS_PROFILE_FUNCTION();
         Material = {};
         Material.SetMaterial(material);
     }
@@ -122,12 +125,23 @@ namespace Insight
                 }
             }
 
+            std::mutex renderWorldMutex;
+#define PARALLEL_FOR 0
+#if PARALLEL_FOR
+            Threading::ParallelFor<Ptr<ECS::Entity>>(16, entities, [&](Ptr<ECS::Entity>& entity)
+                {
+#else
             for (Ptr<ECS::Entity>& entity : entities)
             {
+#endif
                 IS_PROFILE_SCOPE("Evaluate Single Entity");
                 if (!entity->IsEnabled())
                 {
+#if PARALLEL_FOR
+                    return;
+#else
                     continue;
+#endif
                 }
 
                 ECS::TransformComponent* transformComponent = entity->GetComponent<ECS::TransformComponent>();
@@ -141,9 +155,13 @@ namespace Insight
                         || (skinnedMeshComponent && skinnedMeshComponent->IsEnabled()))
                     {
                         if ((meshComponent && !meshComponent->GetMesh())
-                            ||(skinnedMeshComponent && !skinnedMeshComponent->GetMesh()))
+                            || (skinnedMeshComponent && !skinnedMeshComponent->GetMesh()))
                         {
+#if PARALLEL_FOR
+                            return;
+#else
                             continue;
+#endif
                         }
                         Ref<Runtime::Mesh> mesh = meshComponent ? meshComponent->GetMesh() : skinnedMeshComponent->GetMesh();
 
@@ -154,64 +172,93 @@ namespace Insight
                         }
 
                         RenderMesh renderMesh;
-                        renderMesh.Transform = transformComponent->GetTransform();
-                        renderMesh.PreviousTransform = transformComponent->GetPreviousTransform();
+                        {
+                            IS_PROFILE_SCOPE("Set Transforms");
+                            renderMesh.Transform = transformComponent->GetTransform();
+                            renderMesh.PreviousTransform = transformComponent->GetPreviousTransform();
+                        }
 
                         Graphics::BoundingBox boundingBox = mesh->GetBoundingBox();
-                        bool isVisible = true; 
+                        bool isVisible = true;
                         {
                             IS_PROFILE_SCOPE("Visible check");
                             boundingBox = boundingBox.Transform(renderMesh.Transform);
-                            //isVisible = renderWorld.MainCamera.Camera.IsVisible(boundingBox);
                         }
-                        if (!renderWorld.MainCamera.IsSet || !isVisible)
                         {
-                            // TODO Mid: Setup seperate scene and game worlds and then re-enable this.
-                            // The "EditorWorld" should be it's own world then when play is pressed a runtime world 
-                            // should be created.
-                            //continue;
+                            std::lock_guard l(renderWorldMutex);
+                            //isVisible = renderWorld.MainCamera.Camera.IsVisible(boundingBox);
+                            if (!renderWorld.MainCamera.IsSet || !isVisible)
+                            {
+                                // TODO Mid: Setup seperate scene and game worlds and then re-enable this.
+                                // The "EditorWorld" should be it's own world then when play is pressed a runtime world 
+                                // should be created.
+                                //continue;
+                            }
                         }
 
                         renderMesh.SetMesh(mesh.Ptr());
                         renderMesh.SetMaterial(material);
-
-                        renderMesh.SkinnedMesh = skinnedMeshComponent && skinnedMeshComponent->GetSkeleton();
-                        if (renderMesh.SkinnedMesh && entity->HasComponent<ECS::AnimationClipComponent>())
                         {
-                            ECS::AnimationClipComponent* animationClipComponent = entity->GetComponent<ECS::AnimationClipComponent>();
-                            renderMesh.BoneTransforms = animationClipComponent->GetAnimator()->GetBoneTransforms();
+                            IS_PROFILE_SCOPE("Set SkinnedMesh");
+                            renderMesh.SkinnedMesh = skinnedMeshComponent && skinnedMeshComponent->GetSkeleton();
+                            if (renderMesh.SkinnedMesh)
+                            {
+                                ECS::AnimationClipComponent* animationClipComponent = entity->GetComponent<ECS::AnimationClipComponent>();
+                                if (animationClipComponent)
+                                {
+                                    IS_PROFILE_SCOPE("SetBoneTransforms");
+#if 0
+                                    const u32 skeletonBoneCount = skinnedMeshComponent->GetSkeleton()->GetNumberOfBones();
+                                    {
+                                        IS_PROFILE_SCOPE("resize");
+                                        renderMesh.BoneTransforms.resize(skeletonBoneCount);
+                                    }
+                                    {
+                                        IS_PROFILE_SCOPE("MemCopy");
+                                        Platform::MemCopy(renderMesh.BoneTransforms.data(), animationClipComponent->GetAnimator()->GetBoneTransforms().data(), sizeof(Maths::Matrix4) * skeletonBoneCount);
+                                    }
+#else
+                                    // This should just be a RHI_BufferView instead of copying all this data.
+                                    renderMesh.BoneTransforms = animationClipComponent->GetAnimator()->GetBoneTransforms();
+#endif
+                                }
+                            }
                         }
 
-                        u64 meshIndex = renderWorld.Meshes.size();
-                        renderWorld.Meshes.push_back(std::move(renderMesh));
                         const bool meshIsTransparent = renderMesh.Material.Properties[static_cast<u64>(Runtime::MaterialAssetProperty::Opacity)] < 1.0f;
 
-                        if (auto materialBatchIter = renderWorld.MaterialBatchLookup.find(material->GetGuid());
-                            materialBatchIter != renderWorld.MaterialBatchLookup.end())
                         {
-                            RenderMaterailBatch& batch = renderWorld.MaterialBatch[materialBatchIter->second];
-                            meshIsTransparent ? batch.TransparentMeshIndex.push_back(meshIndex) : batch.OpaqueMeshIndex.push_back(meshIndex);
-                        }
-                        else
-                        {
-                            RenderMaterailBatch batch;
-                            batch.Material.SetMaterial(material);
-                            meshIsTransparent ? batch.TransparentMeshIndex.push_back(meshIndex) : batch.OpaqueMeshIndex.push_back(meshIndex);
+                            std::lock_guard l(renderWorldMutex);
+                            u64 meshIndex = meshIndex = renderWorld.Meshes.size();
+                            renderWorld.Meshes.push_back(std::move(renderMesh));
 
-                            const u64 batchIndex = renderWorld.MaterialBatch.size();
-                            renderWorld.MaterialBatch.push_back(batch);
-                            renderWorld.MaterialBatchLookup[material->GetGuid()] = batchIndex;
-                        }
+                            if (auto materialBatchIter = renderWorld.MaterialBatchLookup.find(material->GetGuid());
+                                materialBatchIter != renderWorld.MaterialBatchLookup.end())
+                            {
+                                RenderMaterailBatch& batch = renderWorld.MaterialBatch[materialBatchIter->second];
+                                meshIsTransparent ? batch.TransparentMeshIndex.push_back(meshIndex) : batch.OpaqueMeshIndex.push_back(meshIndex);
+                            }
+                            else
+                            {
+                                RenderMaterailBatch batch;
+                                batch.Material.SetMaterial(material);
+                                meshIsTransparent ? batch.TransparentMeshIndex.push_back(meshIndex) : batch.OpaqueMeshIndex.push_back(meshIndex);
 
-                        if (meshIsTransparent)
-                        {
-                            IS_PROFILE_SCOPE("TransparentMeshes.push_back");
-                            renderWorld.TransparentMeshIndexs.push_back(meshIndex);
-                        }
-                        else
-                        {
-                            IS_PROFILE_SCOPE("Meshes.push_back");
-                            renderWorld.OpaqueMeshIndexs.push_back(meshIndex);
+                                const u64 batchIndex = renderWorld.MaterialBatch.size();
+                                renderWorld.MaterialBatch.push_back(batch);
+                                renderWorld.MaterialBatchLookup[material->GetGuid()] = batchIndex;
+                            }
+
+                            if (meshIsTransparent)
+                            {
+                                IS_PROFILE_SCOPE("TransparentMeshes.push_back");
+                                renderWorld.TransparentMeshIndexs.push_back(meshIndex);
+                            }
+                            else
+                            {
+                                IS_PROFILE_SCOPE("Meshes.push_back");
+                                renderWorld.OpaqueMeshIndexs.push_back(meshIndex);
+                            }
                         }
                     }
                 }
@@ -234,9 +281,16 @@ namespace Insight
 
                     pointLight.DepthTexture = pointLightComponent->GetShadowMap();
 
-                    renderWorld.PointLights.push_back(std::move(pointLight));
+                    {
+                        std::lock_guard l(renderWorldMutex);
+                        renderWorld.PointLights.push_back(std::move(pointLight));
+                    }
                 }
-            }
+#if PARALLEL_FOR
+                });
+#else
+                }
+#endif
             RenderWorlds.push_back(std::move(renderWorld));
         }
 

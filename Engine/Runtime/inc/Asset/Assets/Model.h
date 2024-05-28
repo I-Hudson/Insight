@@ -40,8 +40,9 @@ namespace Insight
 
             Ref<Skeleton> GetSkeleton(const u32 index) const;
 
+            ECS::Entity* CreateEntityHierarchyStaticMesh() const;
             //--ECS::ICreateEntityHierarchy
-            virtual ECS::Entity* CreateEntityHierarchy() override;
+            virtual ECS::Entity* CreateEntityHierarchy() const override;
             //--ECS::ICreateEntityHierarchy
 
             // BEGIN Asset

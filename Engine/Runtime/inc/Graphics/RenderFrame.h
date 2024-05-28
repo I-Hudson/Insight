@@ -55,6 +55,12 @@ namespace Insight
 
     struct IS_RUNTIME RenderMaterailBatch
     {
+        RenderMaterailBatch()
+        {
+            OpaqueMeshIndex.reserve(1024);
+            TransparentMeshIndex.reserve(1024);
+        }
+
         RenderMaterial Material;
         std::vector<u64> OpaqueMeshIndex;
         std::vector<u64> TransparentMeshIndex;

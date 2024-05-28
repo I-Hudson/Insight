@@ -12,7 +12,7 @@ namespace Insight
 		public:
 			/// @brief Return the top parent entity and create a hierarchy.
 			/// @return Entity*
-			virtual Entity* CreateEntityHierarchy() = 0;
+			virtual Entity* CreateEntityHierarchy() const = 0;
 		};
 	}
 }

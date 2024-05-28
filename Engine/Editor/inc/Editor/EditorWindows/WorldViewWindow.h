@@ -2,6 +2,8 @@
 
 #include "Editor/EditorWindows/IEditorWindow.h"
 
+#include "Core/Collections/DoubleBufferVector.h"
+
 #include "Graphics/RenderFrame.h"
 #include "Renderpass.h"
 
@@ -61,7 +63,7 @@ namespace Insight
             Maths::Vector2 m_taaJitterPrevious = Maths::Vector2(0, 0);
 
             bool m_enableDepthPrepass = false;
-            RenderData m_renderingData;
+            DoubleBufferVector<RenderData> m_renderingData;
         };
     }
 }

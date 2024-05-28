@@ -2,6 +2,7 @@
 
 #include "Core/ISysytem.h"
 #include "Core/Singleton.h"
+#include "Core/Collections/DoubleBufferVector.h"
 #include "Graphics/RenderContext.h"
 #include "Graphics/Window.h"
 #include "Graphics/RenderFrame.h"
@@ -43,7 +44,7 @@ namespace Insight
 			Graphics::RenderContext* m_context = nullptr;
 			Graphics::Window m_window;
 
-			RenderFrame m_renderFrame;
+			DoubleBufferVector<RenderFrame> m_renderFrame;
 			Input::InputSystem* m_inputSystem = nullptr;
 		};
 	}

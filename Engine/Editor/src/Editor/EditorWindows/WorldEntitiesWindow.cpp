@@ -74,7 +74,7 @@ namespace Insight
 					}
 
 					std::string header(world->GetWorldName().data());
-					header += " (Entities: " + std::to_string(world->GetEntityCount()) + ")";
+					header += " (Entities: " + std::to_string(world->GetRootEntityCount()) + ")";
 					if (ImGui::CollapsingHeader(header.c_str()))
 					{
 						bool worldPlay = world->GetWorldState() == Runtime::WorldStates::Running;
@@ -94,6 +94,7 @@ namespace Insight
 			if (worlds.size() > 0)
 			{
 				const Input::InputDevice_KeyboardMouse* inputDevice = Input::InputSystem::Instance().GetKeyboardMouseDevice();
+				ASSERT(inputDevice);
 				if (inputDevice->WasReleased(Input::MouseButtons::Right)
 					&& IsCursorWithinWindow())
 				{
@@ -171,6 +172,8 @@ namespace Insight
 
 		void WorldEntitiesWindow::DrawSingleEntity(ECS::Entity* entity, u32 entityIndex)
 		{
+			IS_PROFILE_FUNCTION();
+
 			if (!entity)
 			{
 				return;

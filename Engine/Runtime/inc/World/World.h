@@ -85,6 +85,7 @@ namespace Insight
 			std::vector<Ptr<ECS::Entity>> GetAllEntitiesFlatten() const;
 			/// @brief Return the total number of entities within the world.
 			/// @return u32
+			u32 GetRootEntityCount() const { return static_cast<u32>(m_root_entities_guids.size()); }
 			u32 GetEntityCount() const;
 
 			ECS::Entity* GetEntityByGUID(const Core::GUID& guid) const;

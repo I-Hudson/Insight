@@ -54,7 +54,7 @@ namespace Insight
 		{
 			IS_PROFILE_FUNCTION();
 
-			m_renderFrame = {};
+			m_renderFrame.Clear();
 
 			if (m_context)
 			{
@@ -80,6 +80,10 @@ namespace Insight
 			const u32 height = Graphics::Window::Instance().GetHeight();
 			Graphics::RenderGraph::Instance().SetOutputResolution(Maths::Vector2(width, height));
 
+			Graphics::RenderGraph::Instance().AddSyncPoint([this]()
+			{
+				m_renderFrame.Swap();
+			});
 			m_context->Render();
 		}
 
@@ -88,13 +92,13 @@ namespace Insight
 			WorldSystem* worldSystem = App::Engine::Instance().GetSystemRegistry().GetSystem<WorldSystem>();
 			if (worldSystem)
 			{
-				m_renderFrame.CreateRenderFrameFromWorldSystem(worldSystem);
+				m_renderFrame.GetPending().CreateRenderFrameFromWorldSystem(worldSystem);
 			}
 		}
 
 		const RenderFrame& GraphicsSystem::GetRenderFrame() const
 		{
-			return m_renderFrame;
+			return m_renderFrame.GetCurrent();
 		}
 
 		void GraphicsSystem::InitialiseRenderContext(Graphics::GraphicsAPI graphicsAPI)

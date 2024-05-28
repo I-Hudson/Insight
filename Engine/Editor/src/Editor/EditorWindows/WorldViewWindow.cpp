@@ -10,6 +10,8 @@
 
 #include "Graphics/GraphicsSystem.h"
 #include "Graphics/RenderGraph/RenderGraph.h"
+#include "Graphics/RenderGraph/RenderGraphBuilder.h"
+
 #include "Graphics/Enums.h"
 #include "Graphics/ShaderDesc.h"
 
@@ -157,42 +159,53 @@ namespace Insight
 
             const ECS::Camera camera = m_editorCameraComponent->GetCamera();
             const Maths::Matrix4 cameraTransform = m_editorCameraComponent->GetViewMatrix();
+            Runtime::GraphicsSystem* graphicsSystem = App::Engine::Instance().GetSystemRegistry().GetSystem<Runtime::GraphicsSystem>();
 
             RenderFrame renderFrame;
             {
                 IS_PROFILE_SCOPE("Copy render frame");
-                renderFrame = App::Engine::Instance().GetSystemRegistry().GetSystem<Runtime::GraphicsSystem>()->GetRenderFrame();
+                renderFrame = graphicsSystem->GetRenderFrame();
             }
             renderFrame.SetCameraForAllWorlds(camera, cameraTransform);
             renderFrame.Sort();
 
-            RenderData renderData =
             {
-                std::move(renderFrame),
-                GetBufferFrame(),
-                GetBufferSamplers()
-            };
-
-            Graphics::RenderGraph::Instance().AddSyncPoint([this, renderData]()
-                {
-                    m_renderingData = renderData;
-                });
-
-            Graphics::RenderGraph::Instance().AddPreRender([this](Graphics::RenderGraph& renderGraph, Graphics::RHI_CommandList* cmdList)
-                {
-                    IS_PROFILE_SCOPE("Upload WorldViewWindow Buffer Frame");
-                    m_renderingData.FrameView = cmdList->UploadUniform(m_renderingData.BufferFrame);
-                });
-
-            LightShadowPass();
-            if (m_enableDepthPrepass)
-            {
-                GBufferDepthPrepass();
+                IS_PROFILE_SCOPE("Set RenderData");
+                m_renderingData.GetPending().RenderFrame = std::move(renderFrame);
+                m_renderingData.GetPending().BufferFrame = GetBufferFrame();
+                m_renderingData.GetPending().BufferSamplers = GetBufferSamplers();
             }
-            GBufferPass();
-            TransparentGBufferPass();
-            LightPass();
-            FSR2Pass();
+
+            {
+                IS_PROFILE_SCOPE("RenderGraph AssSyncPoint");
+                Graphics::RenderGraph::Instance().AddSyncPoint([this]()
+                    {
+                        m_renderingData.Swap();
+                    });
+            }
+
+            {
+                IS_PROFILE_SCOPE("RenderGraph AddPreRender");
+                Graphics::RenderGraph::Instance().AddPreRender([this](Graphics::RenderGraph& renderGraph, Graphics::RHI_CommandList* cmdList)
+                    {
+                            IS_PROFILE_SCOPE("Upload WorldViewWindow Buffer Frame");
+                            m_renderingData.GetCurrent().FrameView = cmdList->UploadUniform(m_renderingData.GetCurrent().BufferFrame);
+                    });
+            }
+
+            {
+                IS_PROFILE_SCOPE("RenderGraph passes");
+
+                LightShadowPass();
+                if (m_enableDepthPrepass)
+                {
+                    GBufferDepthPrepass();
+                }
+                GBufferPass();
+                TransparentGBufferPass();
+                LightPass();
+                FSR2Pass();
+            }
         }
 
         void WorldViewWindow::LightShadowPass()
@@ -200,14 +213,8 @@ namespace Insight
             IS_PROFILE_FUNCTION();
 
             struct WorldTransparentGBufferData
-            {
-                Maths::Vector2 RenderResolution;
-                RenderFrame RenderFrame;
-            };
-
+            { };
             WorldTransparentGBufferData passData;
-            passData.RenderResolution = Maths::Vector2(ImGui::GetWindowSize().x, ImGui::GetWindowSize().y);
-            passData.RenderFrame = App::Engine::Instance().GetSystemRegistry().GetSystem<Runtime::GraphicsSystem>()->GetRenderFrame();
 
             Graphics::RenderGraph::Instance().AddPass<WorldTransparentGBufferData>("EditorWorldLightShadowPass",
                 [](WorldTransparentGBufferData& data, Graphics::RenderGraphBuilder& builder)
@@ -260,14 +267,17 @@ namespace Insight
                     Graphics::PipelineStateObject pso = render_graph.GetPipelineStateObject("EditorWorldLightShadowPass");
                     cmdList->BindPipeline(pso, nullptr);
 
-                    for (size_t worldIdx = 0; worldIdx < data.RenderFrame.RenderWorlds.size(); ++worldIdx)
+                    const RenderFrame& renderFrame = m_renderingData.GetCurrent().RenderFrame;
+                    for (size_t worldIdx = 0; worldIdx < renderFrame.RenderWorlds.size(); ++worldIdx)
                     {
-                        const RenderWorld& renderWorld = data.RenderFrame.RenderWorlds[worldIdx];
+                        const RenderWorld& renderWorld = renderFrame.RenderWorlds[worldIdx];
                         for (size_t pointLightIdx = 0; pointLightIdx < renderWorld.PointLights.size(); ++pointLightIdx)
                         {
                             const RenderPointLight& pointLight = renderWorld.PointLights[pointLightIdx];
                             for (size_t arrayIdx = 0; arrayIdx < 6; ++arrayIdx)
                             {
+                                IS_PROFILE_SCOPE("PointLight Side");
+
                                 Graphics::RenderpassDescription renderpassDescription = render_graph.GetRenderpassDescription("EditorWorldLightShadowPass");
                                 renderpassDescription.DepthStencil = pointLight.DepthTexture;
                                 renderpassDescription.DepthStencilAttachment.Layer_Array_Index = static_cast<u32>(arrayIdx);
@@ -281,14 +291,20 @@ namespace Insight
                                 {
                                     pointLight.Projection * pointLight.View[arrayIdx]
                                 };
-                                cmdList->SetUniform(0, 0, lightBuffer);
+                                {
+                                    IS_PROFILE_SCOPE("SetUniform");
+                                    cmdList->SetUniform(0, 0, lightBuffer);
+                                }
 
                                 for (const u64 meshIndex : renderWorld.OpaqueMeshIndexs)
                                 {
-                                    const RenderMesh& mesh = renderWorld.Meshes.at(meshIndex);
-                                    Graphics::Frustum pointLightFrustum(pointLight.View[arrayIdx], pointLight.Projection, pointLight.Radius);
-
-                                    const bool isVisable = pointLightFrustum.IsVisible(Maths::Vector3(mesh.Transform[3]), mesh.BoudingBox.GetRadius());
+                                    bool isVisable = false; 
+                                    const RenderMesh& mesh = renderWorld.Meshes[meshIndex];
+                                    {
+                                        IS_PROFILE_SCOPE("Frustum Culling");
+                                        Graphics::Frustum pointLightFrustum(pointLight.View[arrayIdx], pointLight.Projection, pointLight.Radius);
+                                        isVisable = pointLightFrustum.IsVisible(Maths::Vector3(mesh.Transform[3]), mesh.BoudingBox.GetRadius());
+                                    }
                                     if (!isVisable)
                                     {
                                         //continue;
@@ -302,8 +318,10 @@ namespace Insight
                                     {
                                         mesh.Transform,
                                     };
-                                    cmdList->SetUniform(1, 0, object);
-
+                                    {
+                                        IS_PROFILE_SCOPE("SetUniform");
+                                        cmdList->SetUniform(1, 0, object);
+                                    }
                                     const Runtime::MeshLOD& renderMeshLod = mesh.GetLOD(0);
                                     cmdList->SetVertexBuffer(renderMeshLod.Vertex_buffer);
                                     cmdList->SetIndexBuffer(renderMeshLod.Index_buffer, Graphics::IndexType::Uint32);
@@ -380,16 +398,17 @@ namespace Insight
 
                 {
                     IS_PROFILE_SCOPE("Set Buffer Frame Uniform");
-                    BindCommonResources(cmdList, m_renderingData);
+                    BindCommonResources(cmdList, m_renderingData.GetCurrent());
                 }
 
-                for (const RenderWorld& world : m_renderingData.RenderFrame.RenderWorlds)
+                const RenderFrame& renderFrame = m_renderingData.GetCurrent().RenderFrame;
+                for (const RenderWorld& world : renderFrame.RenderWorlds)
                 {
 
                     for (const u64 meshIndex : world.OpaqueMeshIndexs)
                     {
                         IS_PROFILE_SCOPE("Draw Entity");
-                        const RenderMesh& mesh = world.Meshes.at(meshIndex);
+                        const RenderMesh& mesh = world.Meshes[meshIndex];
 
                         Graphics::BufferPerObject object = {};
                         object.Transform = mesh.Transform;
@@ -512,16 +531,17 @@ namespace Insight
 
                     {
                         IS_PROFILE_SCOPE("Set Buffer Frame Uniform");
-                        BindCommonResources(cmdList, m_renderingData);
+                        BindCommonResources(cmdList, m_renderingData.GetCurrent());
                     }
 
-                    for (const RenderWorld& world : m_renderingData.RenderFrame.RenderWorlds)
+                    const RenderFrame& renderFrame = m_renderingData.GetCurrent().RenderFrame;
+                    for (const RenderWorld& world : renderFrame.RenderWorlds)
                     {
                         const RenderCamera& mainCamera = world.MainCamera;
                         for (const u64 meshIndex : world.OpaqueMeshIndexs)
                         {
                             IS_PROFILE_SCOPE("Draw Entity");
-                            const RenderMesh& mesh = world.Meshes.at(meshIndex);
+                            const RenderMesh& mesh = world.Meshes[meshIndex];
 
                             const Graphics::Frustum mainCameraFrustm(
                                 mainCamera.Camera.GetViewMatrix(),
@@ -664,15 +684,16 @@ namespace Insight
 
                     {
                         IS_PROFILE_SCOPE("Set Buffer Frame Uniform");
-                        BindCommonResources(cmdList, m_renderingData);
+                        BindCommonResources(cmdList, m_renderingData.GetCurrent());
                     }
 
-                    for (const RenderWorld& world : m_renderingData.RenderFrame.RenderWorlds)
+                    const RenderFrame& renderFrame = m_renderingData.GetCurrent().RenderFrame;
+                    for (const RenderWorld& world : renderFrame.RenderWorlds)
                     {
                         for (const u64 meshIndex : world.TransparentMeshIndexs)
                         {
                             IS_PROFILE_SCOPE("Draw Entity");
-                            const RenderMesh& mesh = world.Meshes.at(meshIndex);
+                            const RenderMesh& mesh = world.Meshes[meshIndex];
 
                             Graphics::BufferPerObject object = {};
                             object.Transform = mesh.Transform;
@@ -730,14 +751,8 @@ namespace Insight
             IS_PROFILE_FUNCTION();
 
             struct WorldTransparentGBufferData
-            {
-                Maths::Vector2 RenderResolution;
-                RenderFrame RenderFrame;
-            };
-
+            { };
             WorldTransparentGBufferData passData;
-            passData.RenderResolution = Maths::Vector2(ImGui::GetWindowSize().x, ImGui::GetWindowSize().y);
-            passData.RenderFrame = App::Engine::Instance().GetSystemRegistry().GetSystem<Runtime::GraphicsSystem>()->GetRenderFrame();
 
             Graphics::RenderGraph::Instance().AddPass<WorldTransparentGBufferData>("EditorWorldLightPass",
                 [](WorldTransparentGBufferData& data, Graphics::RenderGraphBuilder& builder)
@@ -788,14 +803,15 @@ namespace Insight
 
                     {
                         IS_PROFILE_SCOPE("Set Buffer Frame Uniform");
-                        BindCommonResources(cmdList, m_renderingData);
+                        BindCommonResources(cmdList, m_renderingData.GetCurrent());
                     }
 
                     cmdList->SetTexture(6, 0, render_graph.GetRHITexture(render_graph.GetTexture("EditorWorldColourRT")));
                     cmdList->SetTexture(6, 1, render_graph.GetRHITexture(render_graph.GetTexture("EditorWorldDepthStencilRT")));
                     //cmdList->SetTexture(1, 7, render_graph.GetRHITexture(""));
-
-                    for (const RenderWorld& world : data.RenderFrame.RenderWorlds)
+                    
+                    const RenderFrame& renderFrame = m_renderingData.GetCurrent().RenderFrame;
+                    for (const RenderWorld& world : renderFrame.RenderWorlds)
                     {
                         const u32 c_MaxPointLights = 32;
 
@@ -806,22 +822,27 @@ namespace Insight
                         };
 
                         PointLightBuffer pointLightBuffer;
-                        for (size_t i = 0; i < world.PointLights.size(); ++i)
                         {
-                            if (i >= 32)
+                            IS_PROFILE_SCOPE("Set point light data");
+                            for (size_t i = 0; i < world.PointLights.size(); ++i)
                             {
-                                FAIL_ASSERT_MSG("Only 32 point lights are supported.");
-                                break;
-                            }
+                                if (i >= 32)
+                                {
+                                    FAIL_ASSERT_MSG("Only 32 point lights are supported.");
+                                    break;
+                                }
 
-                            pointLightBuffer.PointLights[i] = world.PointLights[i];
-                            cmdList->SetTexture(7, 0 + i, world.PointLights[i].DepthTexture);
+                                pointLightBuffer.PointLights[i] = world.PointLights[i];
+                                cmdList->SetTexture(7, 0 + i, world.PointLights[i].DepthTexture);
+                            }
+                            pointLightBuffer.PointLightSize = world.PointLights.size();
                         }
-                        pointLightBuffer.PointLightSize = world.PointLights.size();
 
                         Graphics::RHI_BufferView spotLightRHIBuffer = cmdList->UploadUniform(pointLightBuffer);
-                        cmdList->SetUniform(6, 0, spotLightRHIBuffer);
-
+                        {
+                            IS_PROFILE_SCOPE("SetUniform");
+                            cmdList->SetUniform(6, 0, spotLightRHIBuffer);
+                        }
                         cmdList->Draw(3, 1, 0, 0);
 
                         break;
