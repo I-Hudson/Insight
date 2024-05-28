@@ -11,7 +11,7 @@
 #include <vector>
 #include <set>
 #include <unordered_set>
-#include <assert.h>
+#include <unordered_map>
 
 namespace Insight
 {

@@ -6,6 +6,8 @@
 
 #include "Animation/Animator.h"
 
+#include <mutex>
+
 namespace Insight
 {
     namespace Runtime

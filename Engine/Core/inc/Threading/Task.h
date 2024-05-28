@@ -5,6 +5,7 @@
 
 #include <atomic>
 #include <memory>
+#include <condition_variable>
 
 namespace Insight
 {

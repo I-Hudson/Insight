@@ -3,6 +3,8 @@
 #include "Core/IObject.h"
 #include "Runtime/Defines.h"
 
+#include <mutex>
+
 namespace Insight
 {
     namespace Runtime

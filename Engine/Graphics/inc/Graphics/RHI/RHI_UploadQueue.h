@@ -12,6 +12,7 @@
 
 #include <vector>
 #include <functional>
+#include <mutex>
 
 namespace Insight
 {

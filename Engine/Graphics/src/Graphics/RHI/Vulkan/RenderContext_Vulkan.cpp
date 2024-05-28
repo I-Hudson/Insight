@@ -4,7 +4,9 @@
 #include "Graphics/RHI/Vulkan/RHI_CommandList_Vulkan.h"
 #include "Graphics/RHI/Vulkan/RHI_Texture_Vulkan.h"
 #include "Graphics/Window.h"
+
 #include "Core/Logger.h"
+#include "Core/MemoryTracker.h"
 
 #include "Core/Profiler.h"
 #include "Platforms/Platform.h"

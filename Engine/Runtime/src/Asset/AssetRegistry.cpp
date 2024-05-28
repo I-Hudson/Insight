@@ -19,7 +19,7 @@
 #include "Core/EnginePaths.h"
 #include "Core/Logger.h"
 #include "Core/Profiler.h"
-#include "Threading/ScopedLock.h"
+#include "Core/MemoryTracker.h"
 
 #include "Algorithm/Vector.h"
 
@@ -53,7 +53,7 @@ namespace Insight::Runtime
         }
 
         {
-            Threading::ScopedLock loadedAssetLock(m_loadedAssetLock);
+            std::lock_guard loadedAssetLock(m_loadedAssetLock);
             for (auto& [path, asset] : m_loadedAssets)
             {
                 ASSERT(asset);
@@ -347,7 +347,7 @@ namespace Insight::Runtime
     {
 #define GET_ASSET_INFO_DIRECT_FROM_ASSET_PACKAGE
 #ifdef GET_ASSET_INFO_DIRECT_FROM_ASSET_PACKAGE
-        Threading::ScopedLock lock(m_assetPackagesLock);
+        std::lock_guard lock(m_assetPackagesLock);
         for (size_t i = 0; i < m_assetPackages.size(); ++i)
         {
             if (m_assetPackages[i] == nullptr)
@@ -374,7 +374,7 @@ namespace Insight::Runtime
     {
 #define GET_ASSET_INFO_DIRECT_FROM_ASSET_PACKAGE
 #ifdef GET_ASSET_INFO_DIRECT_FROM_ASSET_PACKAGE
-        Threading::ScopedLock lock(m_assetPackagesLock);
+        std::lock_guard lock(m_assetPackagesLock);
         for (size_t i = 0; i < m_assetPackages.size(); ++i)
         {
             const AssetInfo* assetInfo = m_assetPackages[i]->GetAsset(guid);
@@ -463,7 +463,7 @@ namespace Insight::Runtime
             return nullptr;
         }
 
-        Threading::ScopedLock lock(m_assetPackagesLock);
+        std::lock_guard lock(m_assetPackagesLock);
         for (IAssetPackage* package : m_assetPackages)
         {
             if (package && package->GetPath() == path)
@@ -476,7 +476,7 @@ namespace Insight::Runtime
 
     IAssetPackage* AssetRegistry::GetAssetPackageFromName(std::string_view name) const
     {
-        Threading::ScopedLock lock(m_assetPackagesLock);
+        std::lock_guard lock(m_assetPackagesLock);
         for (IAssetPackage* package : m_assetPackages)
         {
             if (package && package->GetName() == name)
@@ -489,7 +489,7 @@ namespace Insight::Runtime
 
     std::vector<IAssetPackage*> AssetRegistry::GetAllAssetPackages() const
     {
-        Threading::ScopedLock lock(m_assetPackagesLock);
+        std::lock_guard lock(m_assetPackagesLock);
         return m_assetPackages;
     }
 
@@ -547,7 +547,7 @@ namespace Insight::Runtime
 
     IAssetPackage* AssetRegistry::GetAssetPackageFromAsset(const AssetInfo* assetInfo) const
     {
-        Threading::ScopedLock lock(m_assetPackagesLock);
+        std::lock_guard lock(m_assetPackagesLock);
         for (IAssetPackage* package: m_assetPackages)
         {
             if (package && package->HasAsset(assetInfo))
@@ -638,7 +638,7 @@ namespace Insight::Runtime
         }
         
         {
-            Threading::ScopedLock lock(m_assetPackagesLock);
+            std::lock_guard lock(m_assetPackagesLock);
             m_assetPackages.push_back(newPackage);
         }
         return newPackage;

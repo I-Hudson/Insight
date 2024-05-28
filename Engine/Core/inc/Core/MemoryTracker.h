@@ -2,6 +2,7 @@
 
 #include "Defines.h"
 #include "Core/TypeAlias.h"
+#include "Memory/MemoryAllocCategory.h"
 
 #include <unordered_map>
 #include <array>
@@ -27,35 +28,7 @@ namespace Insight
 			Single
 		};
 
-		enum class MemoryAllocCategory : u8
-		{
-			General,
-			Threading,
-			Maths,
-			Input,
-			Graphics,
-			Resources,
-			ECS,
-			World,
-			Serialiser,
-			Editor,
 
-			Size
-		};
-		constexpr const char* MemoryAllocCategoryToString[] =
-		{
-			"General",
-			"Threading",
-			"Maths",
-			"Input",
-			"Graphics",
-			"Resources",
-			"ECS",
-			"World",
-			"Serialiser",
-			"Editor",
-		};
-		static_assert(ARRAY_COUNT(MemoryAllocCategoryToString) == static_cast<u64>(MemoryAllocCategory::Size));
 
 		/// @brief Copy of STL allocator but doesn't track memory allocations.
 		/// Currently used for the internal map within MemoryTracker as if the map tracks it's own allocations

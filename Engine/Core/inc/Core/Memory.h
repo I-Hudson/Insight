@@ -1,9 +1,9 @@
 #pragma once
 
-#include "MemoryTracker.h"
 #include "Core/Delegate.h"
+#include "Memory/MemoryAllocCategory.h"
 
-#include <new>
+#include <memory>
 #include <atomic>
 #include <type_traits>
 #include <utility>
@@ -14,35 +14,41 @@
 /// Helper macro for making a new pointer with args and tracking.
 #define NewArgsTracked(Type, ...)	::New<Type>(__VA_ARGS__)
 /// /// Helper macro for tracking a exists pointer.
-#define TrackPtr(Ptr)				::Insight::Core::MemoryTracker::Instance().Track(Ptr, sizeof(*Ptr), Insight::Core::MemoryTrackAllocationType::Single)
+#define TrackPtr(Ptr)				Insight::Memory::MemoryTrackPtr(Ptr)
 
 #define DeleteTracked(Ptr)			Delete(Ptr);
 
-#define UntrackPtr(Ptr)				::Insight::Core::MemoryTracker::Instance().UnTrack(Ptr)
+#define UntrackPtr(Ptr)				Insight::Memory::MemoryUnTrack(Ptr)
 
-NO_DISCARD FORCE_INLINE void* NewBytes(u64 bytes, Insight::Core::MemoryAllocCategory memoryAllocCategory)
+namespace Insight::Memory
 {
-	void* ptr = std::malloc(bytes);
-	Insight::Core::MemoryTracker::Instance().Track(ptr, bytes, memoryAllocCategory, Insight::Core::MemoryTrackAllocationType::Array);
-	return ptr;
+	IS_CORE void MemoryTrackPtr(void* ptr, const u64 size);
+
+	template<typename T>
+	void MemoryTrackPtr(T* ptr)
+	{
+		MemoryTrackPtr(ptr, sizeof(T));
+	}
+
+	IS_CORE void MemoryUnTrackPtr(void* ptr);
 }
-NO_DISCARD FORCE_INLINE void* NewBytes(u64 bytes)
-{
-	return NewBytes(bytes, Insight::Core::MemoryAllocCategory::General);
-}
+
+NO_DISCARD FORCE_INLINE IS_CORE void* NewBytes(u64 bytes, Insight::Core::MemoryAllocCategory memoryAllocCategory);
+
+NO_DISCARD FORCE_INLINE IS_CORE void* NewBytes(u64 bytes);
 
 template<typename T, typename... Params>
 NO_DISCARD FORCE_INLINE T* New(Params&&... params)
 {
 	T* ptr = new T(std::forward<Params>(params)...);
-	Insight::Core::MemoryTracker::Instance().Track(ptr, sizeof(T), Insight::Core::MemoryTrackAllocationType::Single);
+	TrackPtr(ptr);
 	return ptr;
 }
 template<typename T, Insight::Core::MemoryAllocCategory MemoryAllocCategory,typename... Params>
 NO_DISCARD FORCE_INLINE T* New(Params&&... params)
 {
 	T* ptr = new T(std::forward<Params>(params)...);
-	Insight::Core::MemoryTracker::Instance().Track(ptr, sizeof(T), MemoryAllocCategory, Insight::Core::MemoryTrackAllocationType::Single);
+	TrackPtr(ptr);
 	return ptr;
 }
 
@@ -63,7 +69,7 @@ FORCE_INLINE void Delete(T*& pointer)
 {
 	if (pointer != nullptr)
 	{
-		Insight::Core::MemoryTracker::Instance().UnTrack(pointer);
+		Insight::Memory::MemoryUnTrackPtr(pointer);
 		delete pointer;
 	}
 	pointer = nullptr;
@@ -73,7 +79,7 @@ FORCE_INLINE void Delete(const T* pointer)
 {
 	if (pointer != nullptr)
 	{
-		Insight::Core::MemoryTracker::Instance().UnTrack(pointer);
+		Insight::Memory::MemoryUnTrackPtr(pointer);
 		delete pointer;
 	}
 }
@@ -83,7 +89,7 @@ FORCE_INLINE void DeleteBytes(T*& pointer)
 {
 	if (pointer != nullptr)
 	{
-		Insight::Core::MemoryTracker::Instance().UnTrack(pointer);
+		Insight::Memory::MemoryUnTrackPtr(pointer);
 		std::free(pointer);
 	}
 	pointer = nullptr;
@@ -102,9 +108,9 @@ FORCE_INLINE void* ReallocBytes(void* bytes, const u64 newSize)
 		::DeleteBytes(memory);
 		return nullptr;
 	}
-	Insight::Core::MemoryTracker::Instance().UnTrack(memory);
+	Insight::Memory::MemoryUnTrackPtr(memory);
 	memory = (u8*)std::realloc(memory, newSize);
-	Insight::Core::MemoryTracker::Instance().Track(memory, newSize, Insight::Core::MemoryTrackAllocationType::Array);
+	Insight::Memory::MemoryTrackPtr(memory, newSize);
 	assert(memory != nullptr);
 	return memory;
 }

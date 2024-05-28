@@ -1,4 +1,30 @@
 #include "Core/Memory.h"
+#include "Core/MemoryTracker.h"
+
+namespace Insight::Memory
+{
+	void MemoryTrackPtr(void* ptr, const u64 size)
+	{
+		::Insight::Core::MemoryTracker::Instance().Track(ptr, size, Insight::Core::MemoryTrackAllocationType::Single);
+	}
+
+	void MemoryUnTrackPtr(void* ptr)
+	{
+		::Insight::Core::MemoryTracker::Instance().UnTrack(ptr);
+	}
+}
+
+void* NewBytes(u64 bytes, Insight::Core::MemoryAllocCategory memoryAllocCategory)
+{
+	void* ptr = std::malloc(bytes);
+	Insight::Core::MemoryTracker::Instance().Track(ptr, bytes, memoryAllocCategory, Insight::Core::MemoryTrackAllocationType::Array);
+	return ptr;
+}
+
+void* NewBytes(u64 bytes)
+{
+	return NewBytes(bytes, Insight::Core::MemoryAllocCategory::General);
+}
 
 #ifdef TEST_ENABLED
 //#define DOCTEST_CONFIG_IMPLEMENTATION_IN_DLL
