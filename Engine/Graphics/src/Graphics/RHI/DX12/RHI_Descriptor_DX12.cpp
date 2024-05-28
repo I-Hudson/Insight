@@ -9,6 +9,7 @@
 #include "Graphics/PixelFormatExtensions.h"
 
 #include "Core/Logger.h"
+#include "Platforms/Platform.h"
 
 namespace Insight
 {

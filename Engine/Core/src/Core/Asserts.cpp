@@ -1,5 +1,6 @@
 #include "Core/Asserts.h"
 #include "Core/MemoryTracker.h"
+#include "Platforms/Platform.h"
 
 #ifdef IS_PLATFORM_WINDOWS
 #include <stdarg.h>

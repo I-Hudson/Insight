@@ -3,13 +3,12 @@
 #include "Core/Memory.h"
 #include "Core/Singleton.h"
 #include "Graphics/RenderGraph/RenderGraphPass.h"
-#include "Graphics/RenderGraph/RenderGraphBuilder.h"
-#include "Graphics/RHI/RHI_Descriptor.h"
 
 #include "Graphics/RenderContext.h"
 
+#include "Core/Profiler.h"
+
 #include <type_traits>
-#include <unordered_map>
 #include <functional>
 #ifdef RENDER_GRAPH_RENDER_THREAD
 #include <ppltasks.h>
@@ -66,6 +65,7 @@ namespace Insight
 			void AddPass(std::string passName, typename RenderGraphPass<TData>::SetupFunc setupFunc
 				, typename RenderGraphPass<TData>::ExecuteFunc executeFunc, TData initalData = { })
 			{
+				IS_PROFILE_FUNCTION();
 				std::lock_guard lock(m_mutex);
 				GetUpdatePasses().emplace_back(
 					MakeUPtr<RenderGraphPass<TData>>(
@@ -83,6 +83,7 @@ namespace Insight
 				, typename RenderGraphPass<TData>::PostFunc postFunc
 				, TData initalData = { })
 			{
+				IS_PROFILE_FUNCTION();
 				std::lock_guard lock(m_mutex);
 				GetUpdatePasses().emplace_back(
 					MakeUPtr<RenderGraphPass<TData>>(

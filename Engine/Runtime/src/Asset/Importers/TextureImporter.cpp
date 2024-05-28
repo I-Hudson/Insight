@@ -6,6 +6,8 @@
 
 #include "Core/Logger.h"
 #include "Core/Profiler.h"
+#include "Platforms/Platform.h"
+
 
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_STATIC

@@ -12,6 +12,7 @@
 
 #include "Core/Logger.h"
 #include "Core/Profiler.h"
+#include "Platforms/Platform.h"
 
 #include "Event/EventSystem.h"
 

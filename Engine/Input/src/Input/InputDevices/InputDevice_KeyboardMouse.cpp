@@ -1,6 +1,7 @@
 #include "Input/InputDevices/InputDevice_KeyboardMouse.h"
 
 #include "Core/Memory.h"
+#include "Platforms/Platform.h"	
 
 namespace Insight
 {

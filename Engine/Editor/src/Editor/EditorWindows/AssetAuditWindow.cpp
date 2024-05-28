@@ -8,6 +8,7 @@
 #include "Serialisation/Serialisers/BinarySerialiser.h"
 
 #include "Core/Profiler.h"
+#include "Platforms/Platform.h"
 
 #include <imgui.h>
 

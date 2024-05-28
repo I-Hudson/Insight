@@ -5,6 +5,7 @@
 #include "Platforms/Platform.h"
 
 #include "Core/Profiler.h"
+#include "Core/Asserts.h"
 
 #include <iostream>
 #include <sstream>

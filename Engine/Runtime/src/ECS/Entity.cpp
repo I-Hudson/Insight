@@ -12,6 +12,7 @@
 #include "World/WorldSystem.h"
 
 #include "Core/Logger.h"
+#include "Core/Profiler.h"
 
 namespace Insight
 {
@@ -382,6 +383,8 @@ namespace Insight
 
 		void Entity::EarlyUpdate()
 		{
+			IS_PROFILE_FUNCTION();
+
 			for (RPtr<Component>& component : m_components)
 			{
 				if (!component->m_on_begin_called)
@@ -395,6 +398,8 @@ namespace Insight
 
 		void Entity::Update(const float delta_time)
 		{
+			IS_PROFILE_FUNCTION();
+
 			for (RPtr<Component>& component : m_components)
 			{
 				component->OnUpdate(delta_time);
@@ -403,6 +408,8 @@ namespace Insight
 
 		void Entity::LateUpdate()
 		{
+			IS_PROFILE_FUNCTION();
+
 			for (RPtr<Component>& component : m_components)
 			{
 				if (!component->m_on_end_called)

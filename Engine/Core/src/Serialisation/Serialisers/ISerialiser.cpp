@@ -5,6 +5,8 @@
 #include "Serialisation/Serialisers/BinarySerialiser.h"
 
 #include "Core/Memory.h"
+#include "Core/Asserts.h"
+
 #include "Platforms/Platform.h"
 
 namespace Insight

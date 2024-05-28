@@ -10,6 +10,7 @@
 #include "Input/InputDevices/InputDevice_KeyboardMouse.h"
 
 #include "Graphics/RenderContext.h"
+#include "Platforms/Platform.h"
 
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"

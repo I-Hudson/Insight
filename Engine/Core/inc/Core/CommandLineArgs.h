@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Core/Defines.h"
-#include "Core/Singleton.h"
 #include "Core/Memory.h"
 
 #include <unordered_map>

@@ -6,6 +6,7 @@
 
 #include "Core/Logger.h"
 #include "Core/Profiler.h"
+#include "Platforms/Platform.h"
 
 namespace Insight
 {

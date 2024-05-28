@@ -1,5 +1,6 @@
 #include "Graphics/RenderGraph/RenderGraph.h"
 #include "Graphics/RenderGraph/RenderGraphPass.h"
+#include "Graphics/RenderGraph/RenderGraphBuilder.h"
 #include "Graphics/RenderContext.h"
 
 #include "Graphics/RenderContext.h"

@@ -246,6 +246,7 @@ namespace Insight
 
 		void EntityManager::EarlyUpdate()
 		{
+			IS_PROFILE_FUNCTION();
 			for (UPtr<Entity>& entity : m_entities)
 			{
 				entity->EarlyUpdate();

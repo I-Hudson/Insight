@@ -10,6 +10,7 @@
 #include "Core/Memory.h"
 #include "Core/Logger.h"
 #include "Core/EnginePaths.h"
+#include "Platforms/Platform.h"
 
 #include "FileSystem/FileSystem.h"
 

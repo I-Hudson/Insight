@@ -4,6 +4,7 @@
 #include "Graphics/RenderContext.h"
 
 #include "Graphics/RenderGraph/RenderGraph.h"
+#include "Graphics/RenderGraph/RenderGraphBuilder.h"
 #include "Graphics/RenderGraphV2/RenderGraphV2.h"
 #include "Graphics/Frustum.h"
 #include "Graphics/Window.h"

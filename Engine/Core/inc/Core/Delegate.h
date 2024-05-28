@@ -2,8 +2,7 @@
 
 #include "Core/Defines.h"
 #include "Core/TypeAlias.h"
-
-#include "Platforms/Platform.h"
+#include "Core/Asserts.h"
 
 #include <vector>
 

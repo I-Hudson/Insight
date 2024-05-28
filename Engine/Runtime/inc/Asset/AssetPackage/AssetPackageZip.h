@@ -3,6 +3,8 @@
 #include "Asset/AssetPackage/IAssetPackage.h"
 #include "Asset/AssetRegistry.h"
 
+#include "Platforms/Platform.h"
+
 #include "FileSystem/FileSystem.h"
 #include <zip.h>
 

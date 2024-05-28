@@ -4,6 +4,7 @@
 #include "Platforms/Platform.h"
 #include "Core/Memory.h"
 #include "Core/Logger.h"
+#include "Core/Asserts.h"
 
 namespace Insight
 {

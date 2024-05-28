@@ -1,6 +1,7 @@
 #include "Graphics/ImGuiPass.h"
 
 #include "Graphics/RenderGraph/RenderGraph.h"
+#include "Graphics/RenderGraph/RenderGraphBuilder.h"
 
 #ifdef RENDERGRAPH_V2_ENABLED
 #include "Graphics/RenderGraphV2/RenderGraphV2.h"

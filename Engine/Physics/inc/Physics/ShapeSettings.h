@@ -77,7 +77,7 @@ namespace Insight::Physics
     /// Maximum amount of barriers to allow
     constexpr int cMaxPhysicsBarriers = 8;
 
-    class ShapeSettings
+    class IS_PHYSICS ShapeSettings
     {
     public:
         ShapeSettings(const ShapeTypes shapeType, const ShapeSubTypes shapeSubType);
@@ -87,7 +87,7 @@ namespace Insight::Physics
     };
 
     /// Class that constructs a ConvexShape (abstract)
-    class ConvexShapeSettings : public ShapeSettings
+    class IS_PHYSICS ConvexShapeSettings : public ShapeSettings
     {
     public:
         /// Constructor

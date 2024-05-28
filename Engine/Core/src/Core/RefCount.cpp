@@ -1,4 +1,5 @@
 #include "Core/RefCount.h"
+#include "Core/Asserts.h"
 
 namespace Insight
 {
