@@ -367,7 +367,7 @@ else                            \
 #define XM3_DECOMP_EPSILON 0.0001f
 #pragma endregion
 
-			uint64_t a, b, c;
+			int a, b, c;
 			XM3RANKDECOMPOSE(a, b, c, scale[0], scale[1], scale[2]);
 
 			static const Vector4 pvCanonicalBasis[3] = 

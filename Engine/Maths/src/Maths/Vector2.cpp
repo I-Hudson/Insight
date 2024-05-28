@@ -135,8 +135,8 @@ namespace Insight
 				x *= length_inverted;
 				y *= length_inverted;
 			}
-			return *this;
 #endif
+			return *this;
 		}
 		Vector2 Vector2::Normalised() const
 		{

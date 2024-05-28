@@ -81,8 +81,8 @@ namespace Insight
 
             // pitch
             {
-                const double rY = 2.0 * (y * z + w * x);
-                const double rX = w * w - x * x - y * y + z * z;
+                const float rY = 2.0f * (y * z + w * x);
+                const float rX = w * w - x * x - y * y + z * z;
                 if (Vector2(rX, y).Equal(Vector2::Zero, EPSILON)) //avoid atan2(0,0) - handle singularity - Matiis
                 {
                     euler[0] = std::atan2(rX, w);
@@ -95,15 +95,15 @@ namespace Insight
 
             // yaw (y-axis rotation)
             {
-                double rY = -2.0 * (x * z - w * y);
-                rY = std::min(std::max(rY, -1.0), 1.0);
+                float rY = -2.0f * (x * z - w * y);
+                rY = std::min(std::max(rY, -1.0f), 1.0f);
                 euler[1] = std::asin(rY);
             }
 
             // roll
             {
-                const double rY = 2.0 * (x * y + w * z);
-                const double rX = w * w + x * x - y * y - z * z;
+                const float rY = 2.0f * (x * y + w * z);
+                const float rX = w * w + x * x - y * y - z * z;
                 if (Vector2(rX, rY).Equal(Vector2::Zero, EPSILON)) //avoid atan2(0,0) - handle singularity - Matiis
                 {
                     euler[2] = 0.0f;

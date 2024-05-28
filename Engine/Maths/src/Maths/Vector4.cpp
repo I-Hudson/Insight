@@ -190,8 +190,8 @@ namespace Insight
 				z *= length_inverted;
 				w *= length_inverted;
 			}
-			return *this;
 #endif
+			return *this;
 		}
 		Vector4 Vector4::Normalised() const
 		{

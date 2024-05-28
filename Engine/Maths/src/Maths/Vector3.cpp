@@ -186,8 +186,8 @@ namespace Insight
 				y *= length_inverted;
 				z *= length_inverted;
 			}
-			return *this;
 #endif
+			return *this;
 		}
 		Vector3 Vector3::Normalised() const
 		{
