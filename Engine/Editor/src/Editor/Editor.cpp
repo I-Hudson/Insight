@@ -46,6 +46,8 @@ namespace Insight
         {
             IS_PROFILE_FUNCTION();
 
+            EditorModule::Initialise(GetSystemRegistry().GetSystem<Core::ImGuiSystem>());
+
             static const std::string splashScreenBackGroundPath = EnginePaths::GetResourcePath() + "/Insight/cover.png";
             splashScreen.Init(860, 420);
             splashScreen.SetBackgroundImage(splashScreenBackGroundPath.c_str());
@@ -134,8 +136,6 @@ namespace Insight
                     m_contentListener.WatchId = m_fileWatcher.addWatch(projectInfo.GetContentPath(), &m_contentListener, true);
                     m_fileWatcher.watch();
                 });
-
-            EditorModule::Initialise(GetSystemRegistry().GetSystem<Core::ImGuiSystem>());
 
             //SetEditorStyle();
 

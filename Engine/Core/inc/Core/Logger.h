@@ -20,8 +20,8 @@ namespace Insight
 			static void Init();
 			static void Destroy();
 
-			FORCE_INLINE static std::shared_ptr<spdlog::logger>& GetCoreFileLogger() { return s_CoreLogger; }
-			FORCE_INLINE static std::shared_ptr<spdlog::logger>& GetClientFileLogger() { return s_ClientLogger; }
+			static std::shared_ptr<spdlog::logger>& GetCoreFileLogger() { return s_CoreLogger; }
+			static std::shared_ptr<spdlog::logger>& GetClientFileLogger() { return s_ClientLogger; }
 
 		private:
 			static std::shared_ptr<spdlog::logger> s_CoreLogger;
@@ -29,6 +29,12 @@ namespace Insight
 		};
 	}
 }
+
+#define SET_SPDLOG_LOGGERS()\
+std::shared_ptr<spdlog::logger> coreLogger = ::Insight::Core::Logger::GetCoreFileLogger();\
+std::shared_ptr<spdlog::logger> clientLogger = ::Insight::Core::Logger::GetClientFileLogger();\
+spdlog::register_logger(coreLogger);\
+spdlog::register_logger(clientLogger);
 
 #pragma warning(push)
 #pragma warning(disable : 4005)

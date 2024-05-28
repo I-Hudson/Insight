@@ -1,7 +1,8 @@
 project "spdlog"
-	kind "SharedLib"
+	kind "StaticLib"
 	language "C++"
     configurations { "Debug", "Release" } 
+	buildoptions "/MDd"
 
     targetdir (outputdir_target .. "/%{prj.name}")
     objdir (outputdir_obj.. "/%{prj.name}")
@@ -27,8 +28,8 @@ project "spdlog"
 		"FMT_EXPORT",
 		"FMT_SHARED",
 		"SPDLOG_COMPILED_LIB",
-		"SPDLOG_SHARED_LIB",
-		"spdlog_EXPORTS",
+		--"SPDLOG_SHARED_LIB",
+		--"spdlog_EXPORTS",
 	}
 	
 	postbuildcommands
@@ -39,12 +40,7 @@ project "spdlog"
     }
 
 	filter "configurations:Debug"
-		defines
-		{ 
-		}
+		buildoptions "/MDd"
 
 	filter "configurations:Release"
 		optimize "Speed"
-		defines
-		{ 
-		}

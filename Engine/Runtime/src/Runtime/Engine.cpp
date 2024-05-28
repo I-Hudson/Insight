@@ -2,8 +2,10 @@
 
 #include "CoreModule.h"
 #include "MathsModule.h"
+#include "PhysicsModule.h"
 #include "GraphicsModule.h"
 #include "InputModule.h"
+#include "RuntimeModule.h"
 
 #include "Runtime/CommandLineDefines.h"
 
@@ -46,8 +48,32 @@ namespace Insight
 		{
 			IS_PROFILE_FUNCTION();
 
-			IS_LOG_CORE_INFO("Runtime Version {}.{}.{}.", 
-				ENGINE_VERSION_MAJOIR, ENGINE_VERSION_MINOR, ENGINE_VERSION_PATCH);
+			// Systems
+			m_systemRegistry.RegisterSystem(&m_assetRegistry);
+
+			m_systemRegistry.RegisterSystem(&m_animationSystem);
+			m_systemRegistry.RegisterSystem(&m_audioSystem);
+			m_systemRegistry.RegisterSystem(&m_taskSystem);
+			m_systemRegistry.RegisterSystem(&m_eventSystem);
+			m_systemRegistry.RegisterSystem(&m_inputSystem);
+			m_systemRegistry.RegisterSystem(&m_graphicsSystem);
+			m_systemRegistry.RegisterSystem(&m_imguiSystem);
+			m_systemRegistry.RegisterSystem(&m_worldSystem);
+			m_systemRegistry.RegisterSystem(&m_projectSystem);
+
+			m_imguiSystem.Initialise();
+			ImGui::SetCurrentContext(m_imguiSystem.GetCurrentContext());
+
+			// Initialise all other "modules" (DLLs)
+			CoreModule::Initialise();
+			MathsModule::Initialise();
+			PhysicsModule::Initialise(&m_imguiSystem);
+			GraphicsModule::Initialise(&m_imguiSystem);
+			InputModule::Initialise(&m_imguiSystem);
+			RuntimeModule::Initialise(&m_imguiSystem);
+
+			IS_LOG_CORE_INFO("Runtime Version {}.{}.{}.",
+			ENGINE_VERSION_MAJOIR, ENGINE_VERSION_MINOR, ENGINE_VERSION_PATCH);
 
 			const std::string cmdLinePath = "./cmdline.txt";
 			Core::CommandLineArgs::ParseCommandLine(argc, argv);
@@ -62,39 +88,18 @@ namespace Insight
 				while (!Platform::IsDebuggerAttached());
 			}
 
+			m_assetRegistry.Initialise();
+
 			m_updateThread = std::this_thread::get_id();
 			Platform::Initialise();
 			EnginePaths::Initialise();
 
 			OnPreInit();
 
-			// Systems
-			m_systemRegistry.RegisterSystem(&m_assetRegistry);
-			m_assetRegistry.Initialise();
-
-			m_systemRegistry.RegisterSystem(&m_animationSystem);
-			m_systemRegistry.RegisterSystem(&m_audioSystem);
-			m_systemRegistry.RegisterSystem(&m_taskSystem);
-			m_systemRegistry.RegisterSystem(&m_eventSystem);
-			m_systemRegistry.RegisterSystem(&m_inputSystem);
-			m_systemRegistry.RegisterSystem(&m_graphicsSystem);
-			m_systemRegistry.RegisterSystem(&m_imguiSystem);
-			m_systemRegistry.RegisterSystem(&m_worldSystem);
-			m_systemRegistry.RegisterSystem(&m_projectSystem);
-
 			m_animationSystem.Initialise();
 			m_audioSystem.Initialise();
 			m_taskSystem.Initialise();
 			m_eventSystem.Initialise();
-
-			m_imguiSystem.Initialise();
-			ImGui::SetCurrentContext(m_imguiSystem.GetCurrentContext());
-
-			// Initialise all other "modules" (DLLs)
-			CoreModule::Initialise();
-			MathsModule::Initialise();
-			GraphicsModule::Initialise(&m_imguiSystem);
-			InputModule::Initialise(&m_imguiSystem);
 
 			m_inputSystem.Initialise();
 			m_graphicsSystem.Initialise(&m_inputSystem);

@@ -108,7 +108,7 @@ workspace "Insight"
         --"RENDERGRAPH_V2_ENABLED",
         --"IS_RESOURCE_HANDLES_ENABLED",
 
-        --"SPDLOG_COMPILED_LIB",
+        "SPDLOG_COMPILED_LIB",
         --"SPDLOG_SHARED_LIB",
     }
 
@@ -214,7 +214,7 @@ workspace "Insight"
             "WinPixEventRuntime.lib",
             "cppwinrt_fast_forwarder.lib",
             "Comctl32.lib",
-            --"spdlog.lib",
+            "spdlog.lib",
         }
 
     filter { "platforms:Win64", "configurations:Debug" or "configurations:Testing" }

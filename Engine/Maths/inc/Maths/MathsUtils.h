@@ -9,12 +9,8 @@
 
 #include "Maths/Defines.h"
 
-#ifdef IS_MATHS_DIRECTX_MATHS
-#include <DirectXMath.h>
-#endif
-
-#include <cmath>
 #include <limits>
+#include <cmath>
 
 namespace Insight
 {
