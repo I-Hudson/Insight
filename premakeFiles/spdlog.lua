@@ -2,7 +2,6 @@ project "spdlog"
 	kind "StaticLib"
 	language "C++"
     configurations { "Debug", "Release" } 
-	buildoptions "/MDd"
 
     targetdir (outputdir_target .. "/%{prj.name}")
     objdir (outputdir_obj.. "/%{prj.name}")
@@ -43,4 +42,5 @@ project "spdlog"
 		buildoptions "/MDd"
 
 	filter "configurations:Release"
+		buildoptions "/MD"
 		optimize "Speed"
