@@ -26,17 +26,15 @@ namespace Insight
 
             /// @brief Add a new body to the world.
             /// @return 
-            static BodyId CreateBody(const BodyCreationSettings& bodyCreationSettings);
+            static Ref<Body> CreateBody(const BodyCreationSettings& bodyCreationSettings);
             /// @brief Destroy the body from the physics world. This body must be recreated to use again.
             /// @param bodyId 
-            static void DestoryBody(const BodyId bodyId);
+            static void DestoryBody(const Ref<Body>& body);
 
-            static void AddBody(const BodyId body);
+            static void AddBody(const Ref<Body>& body);
             /// @brief Deactivate a body from the physics world, this can be re activated.
             /// @param bodyId 
-            static void RemoveBody(const BodyId bodyId);
-
-            static void SetBodyShape(const BodyId& bodyId, IShape* shape);
+            static void RemoveBody(const Ref<Body>& body);
 
         private:
             inline static IPhysicsWorld* s_PhsyicsWorld;

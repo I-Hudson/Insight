@@ -2,6 +2,7 @@
 #ifdef IS_PHYSICS_JOLT
 
 #include "Physics/IPhysicsWorld.h"
+#include "Physics/Body.h"
 
 #include "Physics/Jolt/ObjectLayerFilters_Jolt.h"
 #include "Physics/Jolt/Listeners_Jolt.h"
@@ -82,28 +83,24 @@ namespace Insight::Physics::Jolt
 
         /// @brief Add a new body to the world.
         /// @return 
-        virtual BodyId CreateBody(const BodyCreationSettings& bodyCreationSettings) override;
+        virtual Ref<Body> CreateBody(const BodyCreationSettings& bodyCreationSettings) override;
         /// @brief Destroy the body from the physics world. This body must be recreated to use again.
         /// @param bodyId 
-        virtual void DestoryBody(const BodyId bodyId) override;
+        virtual void DestoryBody(const Ref<Body>& body) override;
 
-        virtual void AddBody(const BodyId bodyId) override;
+        virtual void AddBody(const Ref<Body>& body) override;
         /// @brief Deactivate a body from the physics world, this can be re activated.
         /// @param bodyId 
-        virtual void RemoveBody(const BodyId bodyId) override;
+        virtual void RemoveBody(const Ref<Body>& body) override;
 
-        virtual void SetBodyShape(const BodyId bodyId, IShape* shape) override;
-
+        static JPH::EMotionType MotionTypeToJolt(const MotionType motionType);
+        static JPH::Quat QuaterianToJolt(const Maths::Quaternion& quat);
+        static JPH::Vec3 Vector3ToJolt(const Maths::Vector3& vec);
+        static JPH::Vec4 Vector4ToJolt(const Maths::Vector4& vec);
+        static JPH::Ref<JPH::Shape> ShapeToJolt(const IShape* shape);
 
     private:
-        bool HasBody(const BodyId bodyId) const;
-
-        JPH::EMotionType MotionTypeToJolt(const MotionType motionType) const;
-
-        JPH::Quat QuaterianToJolt(const Maths::Quaternion& quat) const;
-        JPH::Vec3 Vector3ToJolt(const Maths::Vector3& vec) const;
-        JPH::Vec4 Vector4ToJolt(const Maths::Vector4& vec) const;
-        JPH::Ref<JPH::Shape> ShapeToJolt(const IShape* shape) const;
+        bool HasBody(const Ref<Body>& body) const;
 
     private:
         JPH::PhysicsSystem m_physicsSystem;
@@ -124,7 +121,7 @@ namespace Insight::Physics::Jolt
         ContactListener m_contactListener;
         BodyActivationListener m_bodyActivationListener;
 
-        std::unordered_map<BodyId, JPH::Body*> m_bodies;
+        std::unordered_set<Ref<Body>> m_bodies;
         mutable std::mutex m_bodiesMutex;
 
 #ifdef JPH_DEBUG_RENDERER

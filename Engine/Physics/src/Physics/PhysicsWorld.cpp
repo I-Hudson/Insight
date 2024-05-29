@@ -50,30 +50,25 @@ namespace Insight
 			s_PhsyicsWorld->EndRecord();
 		}
 
-		BodyId PhysicsWorld::CreateBody(const BodyCreationSettings& bodyCreationSettings)
+		Ref<Body> PhysicsWorld::CreateBody(const BodyCreationSettings& bodyCreationSettings)
 		{
 			return s_PhsyicsWorld->CreateBody(bodyCreationSettings);
 		}
 
-		void PhysicsWorld::DestoryBody(const BodyId bodyId)
+		void PhysicsWorld::DestoryBody(const Ref<Body>& body)
 		{
-			s_PhsyicsWorld->DestoryBody(bodyId);
+			s_PhsyicsWorld->DestoryBody(body);
 		}
 
-		void PhysicsWorld::AddBody(const BodyId body)
+		void PhysicsWorld::AddBody(const Ref<Body>& body)
 		{
 			s_PhsyicsWorld->AddBody(body);
 
 		}
 
-		void PhysicsWorld::RemoveBody(const BodyId bodyId)
+		void PhysicsWorld::RemoveBody(const Ref<Body>& body)
 		{
-			s_PhsyicsWorld->RemoveBody(bodyId);
-		}
-
-		void PhysicsWorld::SetBodyShape(const BodyId& bodyId, IShape* shape)
-		{
-			s_PhsyicsWorld->SetBodyShape(bodyId, shape);
+			s_PhsyicsWorld->RemoveBody(body);
 		}
     }
 }

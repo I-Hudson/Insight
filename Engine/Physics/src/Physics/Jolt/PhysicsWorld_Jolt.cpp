@@ -172,9 +172,10 @@ namespace Insight::Physics::Jolt
 		if (m_bodies.size())
 		{
 			std::vector<JPH::BodyID> bodiesToRemoveAndDestroy;
-			for (const auto& [bodyId, body] : m_bodies)
+			for (const Ref<Body>& body : m_bodies)
 			{
-				bodiesToRemoveAndDestroy.push_back(bodyId.JoltBodyId);
+				ASSERT(body->GetReferenceCount() == 1);
+				bodiesToRemoveAndDestroy.push_back(body->m_bodyId);
 			}
 			body_interface.RemoveBodies(bodiesToRemoveAndDestroy.data(), static_cast<int>(bodiesToRemoveAndDestroy.size()));
 			body_interface.DestroyBodies(bodiesToRemoveAndDestroy.data(), static_cast<int>(bodiesToRemoveAndDestroy.size()));
@@ -273,7 +274,7 @@ namespace Insight::Physics::Jolt
 #endif
 	}
 
-	BodyId PhysicsWorld_Jolt::CreateBody(const BodyCreationSettings& bodyCreationSettings)
+	Ref<Body> PhysicsWorld_Jolt::CreateBody(const BodyCreationSettings& bodyCreationSettings)
 	{
 		JPH::ShapeSettings* nullShapeSettings = nullptr;
 		JPH::BodyCreationSettings settings(nullShapeSettings,
@@ -286,61 +287,49 @@ namespace Insight::Physics::Jolt
 		ASSERT(joltShape.GetPtr() != nullptr);
 		settings.SetShape(joltShape);
 
-		JPH::Body* body = m_physicsSystem.GetBodyInterface().CreateBody(settings);
+		JPH::Body* joltBody = m_physicsSystem.GetBodyInterface().CreateBody(settings);
 
-		const BodyId& bodyId = body->GetID();
+		Ref<Body> body = ::New<Body>(&m_physicsSystem, joltBody);
 		{
 			std::lock_guard l(m_bodiesMutex);
-			m_bodies[bodyId] = body;
+			m_bodies.insert(body);
 		}
 
-		AddBody(bodyId);
+		AddBody(body);
 
-		return bodyId;
+		return body;
 	}
 
-	void PhysicsWorld_Jolt::DestoryBody(const BodyId bodyId)
+	void PhysicsWorld_Jolt::DestoryBody(const Ref<Body>& body)
 	{
-		ASSERT(HasBody(bodyId));
-		RemoveBody(bodyId);
-		m_physicsSystem.GetBodyInterface().DestroyBody(bodyId.JoltBodyId);
+		ASSERT(HasBody(body));
+		RemoveBody(body);
+		m_physicsSystem.GetBodyInterface().DestroyBody(body->m_bodyId);
 		{
 			std::lock_guard l(m_bodiesMutex);
-			m_bodies.erase(bodyId);
+			m_bodies.erase(body);
 		}
 	}
 
-	void PhysicsWorld_Jolt::AddBody(const BodyId bodyId)
+	void PhysicsWorld_Jolt::AddBody(const Ref<Body>& body)
 	{
-		ASSERT(HasBody(bodyId));
-		m_physicsSystem.GetBodyInterface().AddBody(bodyId.JoltBodyId, JPH::EActivation::Activate);
+		ASSERT(HasBody(body));
+		m_physicsSystem.GetBodyInterface().AddBody(body->m_bodyId, JPH::EActivation::Activate);
 	}
 
-	void PhysicsWorld_Jolt::RemoveBody(const BodyId bodyId)
+	void PhysicsWorld_Jolt::RemoveBody(const Ref<Body>& body)
 	{
-		ASSERT(HasBody(bodyId));
-		m_physicsSystem.GetBodyInterface().RemoveBody(bodyId.JoltBodyId);
+		ASSERT(HasBody(body));
+		m_physicsSystem.GetBodyInterface().RemoveBody(body->m_bodyId);
 	}
 
-	void PhysicsWorld_Jolt::SetBodyShape(const BodyId bodyId, IShape* shape)
-	{
-		if (!shape || !bodyId)
-		{
-			return;
-		}
-
-		JPH::Ref<JPH::Shape> joltShape = ShapeToJolt(shape);
-		ASSERT(joltShape.GetPtr() != nullptr);
-		m_physicsSystem.GetBodyInterface().SetShape(bodyId.JoltBodyId, joltShape, true, JPH::EActivation::Activate);
-	}
-
-	bool PhysicsWorld_Jolt::HasBody(const BodyId bodyId) const
+	bool PhysicsWorld_Jolt::HasBody(const Ref<Body>& body) const
 	{
 		std::lock_guard l(m_bodiesMutex);
-		return m_bodies.find(bodyId) != m_bodies.end();
+		return m_bodies.find(body) != m_bodies.end();
 	}
 
-	JPH::EMotionType PhysicsWorld_Jolt::MotionTypeToJolt(const MotionType motionType) const
+	JPH::EMotionType PhysicsWorld_Jolt::MotionTypeToJolt(const MotionType motionType)
 	{
 		switch (motionType)
 		{
@@ -352,22 +341,22 @@ namespace Insight::Physics::Jolt
 		return JPH::EMotionType();
 	}
 
-	JPH::Quat PhysicsWorld_Jolt::QuaterianToJolt(const Maths::Quaternion& quat) const
+	JPH::Quat PhysicsWorld_Jolt::QuaterianToJolt(const Maths::Quaternion& quat)
 	{
 		return JPH::Quat(quat.x, quat.y, quat.z, quat.w);
 	}
 
-	JPH::Vec3 PhysicsWorld_Jolt::Vector3ToJolt(const Maths::Vector3& vec) const
+	JPH::Vec3 PhysicsWorld_Jolt::Vector3ToJolt(const Maths::Vector3& vec)
 	{
 		return JPH::Vec3(vec.x, vec.y, vec.z);
 	}
 
-	JPH::Vec4 PhysicsWorld_Jolt::Vector4ToJolt(const Maths::Vector4& vec) const
+	JPH::Vec4 PhysicsWorld_Jolt::Vector4ToJolt(const Maths::Vector4& vec)
 	{
 		return JPH::Vec4(vec.x, vec.y, vec.z, vec.w);
 	}
 
-	JPH::Ref<JPH::Shape> PhysicsWorld_Jolt::ShapeToJolt(const IShape* shape) const
+	JPH::Ref<JPH::Shape> PhysicsWorld_Jolt::ShapeToJolt(const IShape* shape)
 	{
 		switch (shape->ShapeSubType)
 		{

@@ -18,9 +18,13 @@ namespace Insight
 
         IS_SERIALISABLE_CPP(PhysicsComponent);
 
-        Physics::BodyId PhysicsComponent::GetPhysicsBodyId() const
+        Physics::Body& PhysicsComponent::GetPhysicsBodyId()
         {
-            return m_physicsBodyId;
+            return *m_physicsBody.Ptr();
+        }
+        const Physics::Body& PhysicsComponent::GetPhysicsBodyId() const
+        {
+            return *m_physicsBody.Ptr();
         }
 
         void PhysicsComponent::OnCreate()
@@ -30,12 +34,12 @@ namespace Insight
 
             Ref<Physics::BoxShape> boxShape = ::New<Physics::BoxShape>(Maths::Vector3(0.5f));
             Physics::BodyCreationSettings bodySettings(boxShape, transform->GetPosition(), transform->GetRotation(), Physics::MotionType::Static, Physics::ObjectLayers::NON_MOVING);
-            m_physicsBodyId = Physics::PhysicsWorld::CreateBody(bodySettings);
+            m_physicsBody = Physics::PhysicsWorld::CreateBody(bodySettings);
         }
 
         void PhysicsComponent::OnDestroy()
         {
-            Physics::PhysicsWorld::DestoryBody(m_physicsBodyId);
+            Physics::PhysicsWorld::DestoryBody(m_physicsBody);
         }
 
     }

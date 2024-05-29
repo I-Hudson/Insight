@@ -2,7 +2,7 @@
 
 #include "Core/TypeAlias.h"
 #include "Core/ReferencePtr.h"
-#include "Physics/BodyId.h"
+#include "Physics/Body.h"
 
 namespace Insight::Physics
 {
@@ -22,12 +22,10 @@ namespace Insight::Physics
         virtual void StartRecord() = 0;
         virtual void EndRecord() = 0;
 
-        virtual BodyId CreateBody(const BodyCreationSettings& bodyCreationSettings) = 0;
-        virtual void DestoryBody(const BodyId bodyId) = 0;
+        virtual Ref<Body> CreateBody(const BodyCreationSettings& bodyCreationSettings) = 0;
+        virtual void DestoryBody(const Ref<Body>& body) = 0;
 
-        virtual void AddBody(const BodyId bodyId) = 0;
-        virtual void RemoveBody(const BodyId bodyId) = 0;
-
-        virtual void SetBodyShape(const BodyId bodyId, IShape* shape) = 0;
+        virtual void AddBody(const Ref<Body>& body) = 0;
+        virtual void RemoveBody(const Ref<Body>& body) = 0;
     };
 }

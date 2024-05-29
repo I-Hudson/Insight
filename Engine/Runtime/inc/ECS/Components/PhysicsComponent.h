@@ -1,7 +1,8 @@
 #pragma once
 
 #include "ECS/Entity.h"
-#include "Physics/BodyId.h"
+#include "Physics/Body.h"
+#include "Core/ReferencePtr.h"
 
 #include "Generated/PhysicsComponent_reflect_generated.h"
 
@@ -20,7 +21,8 @@ namespace Insight
             IS_COMPONENT(PhysicsComponent);
             IS_SERIALISABLE_H(PhysicsComponent);
 
-            Physics::BodyId GetPhysicsBodyId() const;
+            Physics::Body& GetPhysicsBodyId();
+            const Physics::Body& GetPhysicsBodyId() const;
 
             // Component - Begin
 
@@ -30,7 +32,7 @@ namespace Insight
             // Component - End
 
         private:
-            Physics::BodyId m_physicsBodyId;
+            Ref<Physics::Body> m_physicsBody = nullptr;
         };
     }
 }
