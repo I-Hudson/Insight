@@ -4,10 +4,7 @@
 #include "Core/Singleton.h"
 
 #include "Input/InputDevices/IInputDevice.h"
-#include "Input/XInputManager.h"
-#include "Input/WindowsGamingManager.h"
 
-#include <array>
 #include <vector>
 
 namespace Insight
@@ -16,6 +13,8 @@ namespace Insight
 	{
 		class InputDevice_KeyboardMouse;
 		class InputDevice_Controller;
+		class WindowsGamingManager;
+		class XInputManager;
 
 		enum class InputSystemInputManagerTypes
 		{
@@ -59,10 +58,10 @@ namespace Insight
 			InputSystemInputManagerTypes m_inputManagerType;
 #ifdef IS_PLATFORM_WINDOWS
 #ifdef IS_CPP_WINRT
-			WindowsGamingManager m_windowsGamingManager;
+			WindowsGamingManager* m_windowsGamingManager;
 			friend class WindowsGamingManager;
 #endif // #ifdef IS_CPP_WINRT
-			XInputManager m_xinputManager;
+			XInputManager* m_xinputManager;
 			friend class XInputManager;
 #endif // #ifdef IS_PLATFORM_WINDOWS
 		};

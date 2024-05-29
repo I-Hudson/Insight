@@ -134,7 +134,7 @@ namespace Insight
             if (itr == m_allocations.end())
             {
                 lock.unlock();
-                MemoryTrackedAlloc memoryTrackedAlloc(ptr, size, category, type, { });
+                MemoryTrackedAlloc memoryTrackedAlloc(ptr, size, category, type, GetCallStack());
 
                 lock.lock();
                 m_allocations[ptr] = memoryTrackedAlloc;

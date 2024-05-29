@@ -1,4 +1,5 @@
 #include "Platforms/Windows/PlatformWindows.h"
+#include "FileSystem/FileSystem.h"
 
 #ifdef IS_PLATFORM_WINDOWS
 
@@ -328,6 +329,26 @@ namespace Insight
 			std::wstring wstrTo(size_needed, 0);
 			MultiByteToWideChar(CP_UTF8, 0, &string[0], static_cast<int>(string.size()), &wstrTo[0], size_needed);
 			return wstrTo;
+		}
+
+		std::string PlatformWindows::GetExecuteablePath()
+		{
+			char path[MAX_PATH];
+			GetModuleFileNameA(NULL, path, MAX_PATH);
+			std::string sString(path);
+			FileSystem::PathToUnix(sString);
+			sString = sString.substr(0, sString.find_last_of('/'));
+			return sString;
+		}
+
+		std::string PlatformWindows::GetExecuteableName()
+		{
+			char path[MAX_PATH];
+			GetModuleFileNameA(NULL, path, MAX_PATH);
+			std::string sString(path);
+			FileSystem::PathToUnix(sString);
+			sString = sString.substr(sString.find_last_of('/') + 1);
+			return sString;
 		}
 
 		Core::GUID PlatformWindows::CreateGUID()

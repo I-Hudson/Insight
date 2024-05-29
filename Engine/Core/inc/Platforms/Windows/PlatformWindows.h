@@ -40,6 +40,9 @@ namespace Insight
 			static std::wstring WStringFromString(const std::string& string);
 			static std::wstring WStringFromStringView(std::string_view string);
 			
+			static std::string GetExecuteablePath();
+			static std::string GetExecuteableName();
+
 			static Core::GUID CreateGUID();
 			static void AssignGUID(Core::GUID& guid);
 

@@ -14,7 +14,7 @@
 #include "Asset/AssetPackage/AssetPackageZip.h"
 #include "Serialisation/Serialisers/JsonSerialiser.h"
 
-#include <Graphics/Window.h>
+#include "Platforms/Platform.h"
 #include "Editor/Editor.h"
 
 #include <filesystem>
@@ -96,19 +96,9 @@ namespace Insight
             //BuildPackageBuild(outputFolder);
         }
 
-        std::string PackageBuild::GetExecuteablepath()
-        {
-            char path[MAX_PATH];
-            GetModuleFileNameA(NULL, path, MAX_PATH);
-            std::string sString(path);
-            FileSystem::PathToUnix(sString);
-            sString = sString.substr(0, sString.find_last_of('/'));
-            return sString;
-        }
-
         void PackageBuild::BuildSolution()
         {
-            std::string exeFillPath = GetExecuteablepath();
+            std::string exeFillPath = Platform::GetExecuteablePath();
             std::string premakePath = exeFillPath + "/../../../vendor/premake/premake5.exe";
             std::string solutionLuaPath = exeFillPath + GenerateBuildFile();
 
@@ -123,7 +113,7 @@ namespace Insight
 
         void PackageBuild::BuildPackageBuild(std::string_view outputFolder)
         {
-            std::string exeFillPath = GetExecuteablepath();
+            std::string exeFillPath = Platform::GetExecuteablePath();
             std::string buildSolutionBatch = exeFillPath + "/../../../Build/Engine/Build_Solution.bat";
             std::string solution = exeFillPath + "/../../../InsightStandalone.sln";
 

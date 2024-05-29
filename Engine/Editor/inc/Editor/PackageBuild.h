@@ -20,7 +20,6 @@ namespace Insight
             void Build(std::string_view outputFolder, const PackageBuildOptions& options);
 
         private:
-            std::string GetExecuteablepath();
             void BuildSolution();
             void BuildPackageBuild(std::string_view outputFolder);
 
