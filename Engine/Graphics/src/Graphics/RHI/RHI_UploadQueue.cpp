@@ -105,8 +105,8 @@ namespace Insight
 
 						request->Request->Status = DeviceUploadStatus::Uploading;
 						PipelineBarrier barreir;
-						barreir.SrcStage = +PipelineStageFlagBits::TopOfPipe;
-						barreir.DstStage = +PipelineStageFlagBits::Transfer;
+						barreir.SrcStage = static_cast<u32>(PipelineStageFlagBits::TopOfPipe);
+						barreir.DstStage = static_cast<u32>(PipelineStageFlagBits::Transfer);
 
 						ImageBarrier imageBarrier;
 						imageBarrier.SrcAccessFlags = AccessFlagBits::None;
@@ -124,8 +124,8 @@ namespace Insight
 						cmdList->CopyBufferToImage(texture, m_uploadStagingBuffer, m_frameUploadOffset);
 						m_frameUploadOffset += request->SizeInBytes;
 
-						barreir.SrcStage = +PipelineStageFlagBits::Transfer;
-						barreir.DstStage = +PipelineStageFlagBits::FragmentShader;
+						barreir.SrcStage = static_cast<u32>(PipelineStageFlagBits::Transfer);
+						barreir.DstStage = static_cast<u32>(PipelineStageFlagBits::FragmentShader);
 
 						imageBarrier.SrcAccessFlags = AccessFlagBits::TransferWrite;
 						imageBarrier.DstAccessFlags = AccessFlagBits::ShaderRead;

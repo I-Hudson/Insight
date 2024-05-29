@@ -288,9 +288,9 @@ namespace Insight
 			RenderGraph* m_renderGraph;
 			RenderGraphV2* m_renderGraphV2;
 
-			std::array<u8, static_cast<u64>(DeviceExtension::DeviceExtensionCount)> m_deviceExtensions;
-			std::array<u8, static_cast<u64>(DeviceExtension::DeviceExtensionCount)> m_enabledDeviceExtensions;
-			std::array<u8, static_cast<u64>(RenderOptions::NumOfRenderOptions)> m_renderOptions;
+			std::array<u8, static_cast<u64>(DeviceExtension::Size)> m_deviceExtensions;
+			std::array<u8, static_cast<u64>(DeviceExtension::Size)> m_enabledDeviceExtensions;
+			std::array<u8, static_cast<u64>(RenderOptions::Size)> m_renderOptions;
 
 			std::atomic<u32> m_framesInFlightCount = 2;
 			/// @brief The current frame from 0 to c_FrameCount.

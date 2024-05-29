@@ -259,7 +259,7 @@ namespace Insight
             case ImageLayout::StencilAttacment:                 return D3D12_BARRIER_LAYOUT::D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_WRITE;
             case ImageLayout::StencilReadOnly:                  return D3D12_BARRIER_LAYOUT::D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_READ;
             case ImageLayout::PresentSrc:                       return D3D12_BARRIER_LAYOUT::D3D12_BARRIER_LAYOUT_PRESENT;
-            case ImageLayout::Count:
+            case ImageLayout::Size:                             FAIL_ASSERT();
             default:
                 break;
             }
@@ -287,7 +287,7 @@ namespace Insight
             case ImageLayout::StencilAttacment:                 return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_DEPTH_WRITE;
             case ImageLayout::StencilReadOnly:                  return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_DEPTH_READ;
             case ImageLayout::PresentSrc:                       return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON;
-            case ImageLayout::Count:
+            case ImageLayout::Size:                             FAIL_ASSERT();
             default:
                 break;
             }

@@ -168,7 +168,7 @@ namespace Insight
 				memoryBarriers.image = dstVulkan->GetImage();
 				memoryBarriers.subresourceRange = VkImageSubresourceRange{ VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
 
-				PipelineBarrierImage(+PipelineStageFlagBits::TopOfPipe, +PipelineStageFlagBits::Transfer, { memoryBarriers });
+				PipelineBarrierImage(static_cast<u32>(PipelineStageFlagBits::TopOfPipe), static_cast<u32>(PipelineStageFlagBits::Transfer), { memoryBarriers });
 				dst->SetLayout(ImageLayout::TransforDst);
 
 				vkCmdCopyBufferToImage(m_commandList, srcVulkan->GetBuffer(), dstVulkan->GetImage(), memoryBarriers.newLayout, static_cast<u32>(copyRegion.size()), copyRegion.data());
@@ -177,7 +177,7 @@ namespace Insight
 				memoryBarriers.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 				memoryBarriers.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
 				memoryBarriers.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-				PipelineBarrierImage(+PipelineStageFlagBits::Transfer, +PipelineStageFlagBits::FragmentShader, { memoryBarriers });
+				PipelineBarrierImage(static_cast<u32>(PipelineStageFlagBits::Transfer), static_cast<u32>(PipelineStageFlagBits::FragmentShader), { memoryBarriers });
 				dst->SetLayout(ImageLayout::ShaderReadOnly);
 			}
 
@@ -580,11 +580,11 @@ namespace Insight
 
 				if (image_layout == ImageLayout::PresentSrc)
 				{
-					pipeline_barrier.SrcStage = +PipelineStageFlagBits::BottomOfPipe;
+					pipeline_barrier.SrcStage = static_cast<u32>(PipelineStageFlagBits::BottomOfPipe);
 				}
 				else if (image_layout == ImageLayout::Undefined)
 				{
-					pipeline_barrier.SrcStage = +PipelineStageFlagBits::TopOfPipe;
+					pipeline_barrier.SrcStage = static_cast<u32>(PipelineStageFlagBits::TopOfPipe);
 				}
 				else
 				{
@@ -593,7 +593,7 @@ namespace Insight
 
 				if (image_layout == ImageLayout::PresentSrc)
 				{
-					pipeline_barrier.DstStage = +PipelineStageFlagBits::TopOfPipe;
+					pipeline_barrier.DstStage = static_cast<u32>(PipelineStageFlagBits::TopOfPipe);
 				}
 				else
 				{

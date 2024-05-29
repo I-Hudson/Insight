@@ -4,10 +4,12 @@
 
 #include "Graphics/Enums.h"
 #include "Graphics/PixelFormat.h"
+#include "Core/Asserts.h"
+
 #include "VmaUsage.h"
 
 #include <vector>
-#include <assert.h>
+#include <string>
 
 extern VkFormat PixelFormatToVkFormat[static_cast<int>(PixelFormat::MAX)];
 extern PixelFormat VkFormatToPixelFormat[static_cast<int>(PixelFormat::MAX)];
@@ -95,7 +97,7 @@ namespace Insight
 
 		inline void ThrowIfFailed(VkResult errorCode)
 		{
-			assert(errorCode == VK_SUCCESS);///&& VkErrorToString(errorCode).c_str());
+			ASSERT(errorCode == VK_SUCCESS);///&& VkErrorToString(errorCode).c_str());
 		}
 	}
 }

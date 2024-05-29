@@ -501,7 +501,6 @@ namespace Insight
             {
             case Insight::Graphics::DeviceExtension::BindlessDescriptors: return VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME;
             case Insight::Graphics::DeviceExtension::ExclusiveFullScreen: return VK_EXT_FULL_SCREEN_EXCLUSIVE_EXTENSION_NAME;
-            case Insight::Graphics::DeviceExtension::DeviceExtensionCount: return "";
             default:
                 break;
             }
@@ -543,23 +542,23 @@ namespace Insight
         {
             VkPipelineStageFlags result = {};
 
-            if (flags & +PipelineStageFlagBits::TopOfPipe)                       { result |= VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT; }
-            if (flags & +PipelineStageFlagBits::DrawIndirect)                    { result |= VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT; }
-            if (flags & +PipelineStageFlagBits::VertexInput)                     { result |= VK_PIPELINE_STAGE_VERTEX_INPUT_BIT; }
-            if (flags & +PipelineStageFlagBits::VertexShader)                    { result |= VK_PIPELINE_STAGE_VERTEX_SHADER_BIT; }
-            if (flags & +PipelineStageFlagBits::TessesllationControlShader)      { result |= VK_PIPELINE_STAGE_TESSELLATION_CONTROL_SHADER_BIT; }
-            if (flags & +PipelineStageFlagBits::TessesllationEvaluationShader)   { result |= VK_PIPELINE_STAGE_TESSELLATION_EVALUATION_SHADER_BIT; }
-            if (flags & +PipelineStageFlagBits::GeometryShader)                  { result |= VK_PIPELINE_STAGE_GEOMETRY_SHADER_BIT; }
-            if (flags & +PipelineStageFlagBits::FragmentShader)                  { result |= VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT; }
-            if (flags & +PipelineStageFlagBits::EarlyFramgmentShader)            { result |= VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT; }
-            if (flags & +PipelineStageFlagBits::LateFramgmentShader)             { result |= VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT; }
-            if (flags & +PipelineStageFlagBits::ColourAttachmentOutput)          { result |= VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT; }
-            if (flags & +PipelineStageFlagBits::ComputeShader)                   { result |= VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT; }
-            if (flags & +PipelineStageFlagBits::Transfer)                        { result |= VK_PIPELINE_STAGE_TRANSFER_BIT; }
-            if (flags & +PipelineStageFlagBits::BottomOfPipe)                    { result |= VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT; }
-            if (flags & +PipelineStageFlagBits::Host)                            { result |= VK_PIPELINE_STAGE_HOST_BIT; }
-            if (flags & +PipelineStageFlagBits::AllGraphics)                     { result |= VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT; }
-            if (flags & +PipelineStageFlagBits::AllCommands)                     { result |= VK_PIPELINE_STAGE_ALL_COMMANDS_BIT; }
+            if (flags & static_cast<u32>(PipelineStageFlagBits::TopOfPipe))                          { result |= VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT; }
+            if (flags & static_cast<u32>(PipelineStageFlagBits::DrawIndirect))                      { result |= VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT; }
+            if (flags & static_cast<u32>(PipelineStageFlagBits::VertexInput))                       { result |= VK_PIPELINE_STAGE_VERTEX_INPUT_BIT; }
+            if (flags & static_cast<u32>(PipelineStageFlagBits::VertexShader))                      { result |= VK_PIPELINE_STAGE_VERTEX_SHADER_BIT; }
+            if (flags & static_cast<u32>(PipelineStageFlagBits::TessesllationControlShader))        { result |= VK_PIPELINE_STAGE_TESSELLATION_CONTROL_SHADER_BIT; }
+            if (flags & static_cast<u32>(PipelineStageFlagBits::TessesllationEvaluationShader))     { result |= VK_PIPELINE_STAGE_TESSELLATION_EVALUATION_SHADER_BIT; }
+            if (flags & static_cast<u32>(PipelineStageFlagBits::GeometryShader))                    { result |= VK_PIPELINE_STAGE_GEOMETRY_SHADER_BIT; }
+            if (flags & static_cast<u32>(PipelineStageFlagBits::FragmentShader))                    { result |= VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT; }
+            if (flags & static_cast<u32>(PipelineStageFlagBits::EarlyFramgmentShader))              { result |= VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT; }
+            if (flags & static_cast<u32>(PipelineStageFlagBits::LateFramgmentShader))               { result |= VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT; }
+            if (flags & static_cast<u32>(PipelineStageFlagBits::ColourAttachmentOutput))            { result |= VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT; }
+            if (flags & static_cast<u32>(PipelineStageFlagBits::ComputeShader))                     { result |= VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT; }
+            if (flags & static_cast<u32>(PipelineStageFlagBits::Transfer))                          { result |= VK_PIPELINE_STAGE_TRANSFER_BIT; }
+            if (flags & static_cast<u32>(PipelineStageFlagBits::BottomOfPipe))                      { result |= VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT; }
+            if (flags & static_cast<u32>(PipelineStageFlagBits::Host))                              { result |= VK_PIPELINE_STAGE_HOST_BIT; }
+            if (flags & static_cast<u32>(PipelineStageFlagBits::AllGraphics))                       { result |= VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT; }
+            if (flags & static_cast<u32>(PipelineStageFlagBits::AllCommands))                        { result |= VK_PIPELINE_STAGE_ALL_COMMANDS_BIT; }
 
             return result;
         }
@@ -695,7 +694,7 @@ namespace Insight
             default:
                 break;
             }
-            assert(false);
+            FAIL_ASSERT();
             return VK_FILTER_NEAREST;
         }
 
@@ -708,7 +707,7 @@ namespace Insight
             default:
                 break;
             }
-            assert(false);
+            FAIL_ASSERT();
             return VK_SAMPLER_MIPMAP_MODE_NEAREST;
         }
 
@@ -724,7 +723,7 @@ namespace Insight
             default:
                 break;
             }
-            assert(false);
+            FAIL_ASSERT();
             return VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
         }
 
@@ -741,7 +740,7 @@ namespace Insight
             default:
                 break;
             }
-            assert(false);
+            FAIL_ASSERT();
             return VkBorderColor::VK_BORDER_COLOR_INT_OPAQUE_WHITE;
         }
 
@@ -811,7 +810,7 @@ namespace Insight
             default:
                 break;
             }
-            assert(false);
+            FAIL_ASSERT();
             return VK_FRONT_FACE_COUNTER_CLOCKWISE;
         }
 
@@ -833,7 +832,7 @@ namespace Insight
             default:
                 break;
             }
-            assert(false);
+            FAIL_ASSERT();
             return (VkDescriptorType)0;
         }
 
@@ -905,7 +904,7 @@ namespace Insight
             default:
                 break;
             }
-            assert(false);
+            FAIL_ASSERT();
             return VK_INDEX_TYPE_UINT32;
         }
 
@@ -923,7 +922,7 @@ namespace Insight
             default:
                 break;
             }
-            assert(false);
+            FAIL_ASSERT();
             return VK_IMAGE_TYPE_2D;
         }
 
@@ -940,7 +939,7 @@ namespace Insight
             default:
                 break;
             }
-            assert(false);
+            FAIL_ASSERT();
             return VK_IMAGE_VIEW_TYPE_2D;
         }
 
@@ -954,7 +953,7 @@ namespace Insight
             default:
                 break;
             }
-            assert(false);
+            FAIL_ASSERT();
             return VK_DYNAMIC_STATE_VIEWPORT;
         }
 
@@ -1026,7 +1025,7 @@ namespace Insight
             default:
                 break;
             }
-            assert(false);
+            FAIL_ASSERT();
             return ImageLayout::Undefined;
         }
 
@@ -1040,7 +1039,7 @@ namespace Insight
             default:
                 break;
             }
-            assert(false);
+            FAIL_ASSERT();
             return AttachmentLoadOp::Clear;
         }
 

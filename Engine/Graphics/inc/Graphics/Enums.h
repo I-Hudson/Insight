@@ -3,70 +3,13 @@
 #include "Core/TypeAlias.h"
 #include "Core/Defines.h"
 #include "Graphics/PixelFormat.h"
-#include <string>
 
 namespace Insight
 {
 	namespace Graphics
 	{
 		using RGTextureHandle = int;
-
-		template<typename E, E V> 
-		constexpr bool IsValid() 
-		{
-			/// When compiled with clang, `name` will contain a prettified function name,
-			/// including the enum value name for `V` if valid. For example:
-			/// "bool IsValid() [E = Fruit, V = Fruit::BANANA]" for valid enum values, or:
-			/// "bool IsValid() [E = Fruit, V = 10]" for invalid enum values.
-			constexpr const char* name = FUNCTION;
-			int i = strlen(name);
-			/// Find the final space character in the pretty name.
-			for (; i >= 0; --i)
-			{
-				if (name[i] == ' ') 
-				{
-					break;
-				}
-			}
-			/// The character after the final space will indicate if
-			/// it's a valid value or not.
-			char c = name[i + 1];
-			if (c >= '0' && c <= '9') 
-			{
-				return false;
-			}
-			return true;
-		}
-
-		template<typename E> 
-		constexpr int CountValid() 
-		{
-			return 0;
-		}
-
-		template<typename E, E A, E... B> 
-		constexpr int CountValid()
-		{
-			bool is_valid = IsValid<E, A>();
-			return CountValid<E, B...>() + (int)is_valid;
-		}
-
-		template<typename E, int... I> 
-		constexpr int InternalElementCount(std::integer_sequence<int, I...> unused)
-		{
-			return CountValid<E, (E)I...>();
-		}
-
-		template<typename E> 
-		struct ElementCount
-		{
-			static const int value = InternalElementCount<E>(std::make_integer_sequence<int, 100>());
-		};
-
-		template<int Size, typename... Args>
-		struct EnumToStringObject
-		{ };
-
+#if 0
 		template<typename FlagBits>
 		struct Flags
 		{
@@ -122,32 +65,55 @@ namespace Insight
 		{
 			return static_cast<std::underlying_type_t<T>>(e);
 		}
+#endif 
 
 		enum class ResourceType
 		{
 			Buffer,
 			Texture,
 
-			Count
+			Size
 		};
-		std::string ResourceTypeToString(ResourceType type);
+		constexpr const char* ResourceTypeToString[] =
+		{
+			"Buffer",
+			"Texture",
+		};
+		static_assert(ARRAY_COUNT(ResourceTypeToString) == static_cast<u64>(ResourceType::Size));
 
 		enum GPUQueue
 		{
 			GPUQueue_Graphics,
 			GPUQueue_Compute,
 			GPUQueue_Transfer,
+
+			Size
 		};
-		std::string GPUQueueToString(GPUQueue queue);
+		constexpr const char* GPUQueueToString[] =
+		{
+			"GPUQueue_Graphics",
+			"GPUQueue_Compute",
+			"GPUQueue_Transfer",
+		};
+		static_assert(ARRAY_COUNT(GPUQueueToString) == static_cast<u64>(GPUQueue::Size));
 
 		enum class GPUCommandListType
 		{
 			Default,
 			Transient,
 			Compute,
-			Reset
+			Reset,
+
+			Size
 		};
-		std::string GPUCommandListTypeToString(GPUCommandListType type);
+		constexpr const char* GPUCommandListTypeToString[] =
+		{
+			"Default",
+			"Transient",
+			"Compute",
+			"Reset",
+		};
+		static_assert(ARRAY_COUNT(GPUCommandListTypeToString) == static_cast<u64>(GPUCommandListType::Size));
 
 		enum ShaderStageFlagBits
 		{
@@ -159,8 +125,6 @@ namespace Insight
 		};
 		const u32 ShaderStageCount = 5;
 		using ShaderStageFlags = u32;
-		std::string ShaderStageFlagsToString(ShaderStageFlags flags);
-
 
 		enum class PrimitiveTopologyType
 		{
@@ -175,16 +139,40 @@ namespace Insight
 			TriangleListWithAdjacency = 8,
 			TriangleStripWithAdjacency = 9,
 			PatchList = 10,
+
+			Size
 		};
-		std::string PrimitiveTopologyTypeToString(PrimitiveTopologyType type);
+		constexpr const char* PrimitiveTopologyTypeToString[] =
+		{
+			"PointList",
+			"LineList",
+			"LineStrip",
+			"TriangleList",
+			"TriangleStrip",
+			"TriangleFan",
+			"LineListWithAdjacency",
+			"LineStripWithAdjacency",
+			"TriangleListWithAdjacency",
+			"TriangleStripWithAdjacency",
+			"PatchList",
+		};
+		static_assert(ARRAY_COUNT(PrimitiveTopologyTypeToString) == static_cast<u64>(PrimitiveTopologyType::Size));
 
 		enum class PolygonMode
 		{
 			Fill = 0,
 			Line = 1,
 			Point = 2,
+
+			Size
 		};
-		std::string PolygonModeToString(PolygonMode mode);
+		constexpr const char* PolygonModeToString[] =
+		{
+			"Fill",
+			"Line",
+			"Point",
+		};
+		static_assert(ARRAY_COUNT(PolygonModeToString) == static_cast<u64>(PolygonMode::Size));
 
 		enum class CullMode
 		{
@@ -192,15 +180,31 @@ namespace Insight
 			Front = 1,
 			Back = 2,
 			FrontAndBack = 3,
+
+			Size
 		};
-		std::string CullModeToString(CullMode mode);
+		constexpr const char* CullModeToString[] =
+		{
+			"None",
+			"Front",
+			"Back",
+			"FrontAndBack",
+		};
+		static_assert(ARRAY_COUNT(CullModeToString) == static_cast<u64>(CullMode::Size));
 
 		enum class FrontFace
 		{
 			CounterClockwise = 0,
 			Clockwise = 1,
+
+			Size
 		};
-		std::string FrontFaceToString(FrontFace face);
+		constexpr const char* FrontFaceToString[] =
+		{
+			"CounterClockwise",
+			"Clockwise",
+		};
+		static_assert(ARRAY_COUNT(FrontFaceToString) == static_cast<u64>(FrontFace::Size));
 
 		enum ColourComponentFlagBits
 		{
@@ -210,7 +214,6 @@ namespace Insight
 			ColourComponentA = 1 << 3,
 		};
 		using ColourComponentFlags = u32;
-		std::string ColourComponentFlagsToString(ColourComponentFlags flags);
 
 		enum class BlendFactor
 		{
@@ -233,8 +236,32 @@ namespace Insight
 			OneMinusSrc1Colour = 16,
 			Src1Alpha = 17,
 			OneMinusSrc1Alpha = 18,
+
+			Size
 		};
-		std::string BlendFactorToString(BlendFactor factor);
+		constexpr const char* BlendFactorToString[] =
+		{
+			"Zero",
+			"One",
+			"SrcColour",
+			"OneMinusSrcColour",
+			"DstColour",
+			"OneMinusDstColour",
+			"SrcAlpha",
+			"OneMinusSrcAlpha",
+			"DstAlpha",
+			"OneMinusDstAlpha",
+			"ConstantColour",
+			"OneMinusConstantColour",
+			"ConstantAlpha",
+			"OneMinusConstantAlpha",
+			"SrcAplhaSaturate",
+			"Src1Colour",
+			"OneMinusSrc1Colour",
+			"Src1Alpha",
+			"OneMinusSrc1Alpha",
+		};
+		static_assert(ARRAY_COUNT(BlendFactorToString) == static_cast<u64>(BlendFactor::Size));
 
 		enum class BlendOp
 		{
@@ -243,8 +270,18 @@ namespace Insight
 			ReverseSubtract = 2,
 			Min = 3,
 			Max = 4,
+
+			Size
 		};
-		std::string BlendOpToString(BlendOp op);
+		constexpr const char* BlendOpToString[] =
+		{
+			"Add",
+			"Subtract",
+			"ReverseSubtract",
+			"Min",
+			"Max",
+		};
+		static_assert(ARRAY_COUNT(BlendOpToString) == static_cast<u64>(BlendOp::Size));
 
 		enum class CompareOp
 		{
@@ -255,24 +292,52 @@ namespace Insight
 			Greater,
 			NotEqual,
 			GreaterOrEqual,
-			Always
+			Always,
+
+			Size
 		};
-		std::string CompareOpToString(CompareOp op);
+		constexpr const char* CompareOpToString[] =
+		{
+			"Never",
+			"Less",
+			"Equal",
+			"LessOrEqual",
+			"Greater",
+			"NotEqual",
+			"GreaterOrEqual",
+			"Always",
+		};
+		static_assert(ARRAY_COUNT(CompareOpToString) == static_cast<u64>(CompareOp::Size));
 
 		enum class Filter
 		{
 			Nearest,
 			Linear,
 			Point,
+
+			Size
 		};
-		std::string FilterToString(Filter filter);
+		constexpr const char* FilterToString[] =
+		{
+			"Nearest",
+			"Linear",
+			"Point",
+		};
+		static_assert(ARRAY_COUNT(FilterToString) == static_cast<u64>(Filter::Size));
 
 		enum class SamplerMipmapMode
 		{
 			Nearest,
-			Linear
+			Linear,
+
+			Size
 		};
-		std::string SamplerMipmapModeToString(SamplerMipmapMode sampler_mipmap_mode);
+		constexpr const char* SamplerMipmapModeToString[] =
+		{
+			"Nearest",
+			"Linear",
+		};
+		static_assert(ARRAY_COUNT(SamplerMipmapModeToString) == static_cast<u64>(SamplerMipmapMode::Size));
 
 		enum class SamplerAddressMode
 		{
@@ -281,8 +346,18 @@ namespace Insight
 			ClampToEdge,
 			ClampToBoarder,
 			MirrorClampToEdge,
+
+			Size
 		};
-		std::string SamplerAddressModeToString(SamplerAddressMode sampler_address_mode);
+		constexpr const char* SamplerAddressModeToString[] =
+		{
+			"Repeat",
+			"MirroredRepeat",
+			"ClampToEdge",
+			"ClampToBoarder",
+			"MirrorClampToEdge",
+		};
+		static_assert(ARRAY_COUNT(SamplerAddressModeToString) == static_cast<u64>(SamplerAddressMode::Size));
 
 		enum class BorderColour
 		{
@@ -292,8 +367,19 @@ namespace Insight
 			IntOpaqueBlack,
 			FloatOpaqueWhite,
 			IntOpaqueWhite,
+
+			Size
 		};
-		std::string BoarderColourToString(BorderColour boarder_colour);
+		constexpr const char* BorderColourToString[] =
+		{
+			"FloatTransparentBlack",
+			"IntTransparentBlack",
+			"FloatOpaqueBlack",
+			"IntOpaqueBlack",
+			"FloatOpaqueWhite",
+			"IntOpaqueWhite",
+		};
+		static_assert(ARRAY_COUNT(BorderColourToString) == static_cast<u64>(BorderColour::Size));
 
 		enum class AttachmentLoadOp
 		{
@@ -301,16 +387,29 @@ namespace Insight
 			Clear,
 			DontCare,
 
-			Count
+			Size
 		};
-		std::string AttachmentLoadOpToString(AttachmentLoadOp op);
+		constexpr const char* AttachmentLoadOpToString[] =
+		{
+			"Load",
+			"Clear",
+			"DontCare",
+		};
+		static_assert(ARRAY_COUNT(AttachmentLoadOpToString) == static_cast<u64>(AttachmentLoadOp::Size));
 
 		enum class AttachmentStoreOp
 		{
 			Store,
 			DontCare,
+
+			Size
 		};
-		std::string AttacmentStoreOpToString(AttachmentStoreOp op);
+		constexpr const char* AttachmentStoreOpToString[] =
+		{
+			"Store",
+			"DontCare"
+		};
+		static_assert(ARRAY_COUNT(AttachmentStoreOpToString) == static_cast<u64>(AttachmentStoreOp::Size));
 
         //// <summary>
         //// Define the image usage flags which a input within the 
@@ -328,7 +427,6 @@ namespace Insight
             InputAttachment				= 1 << 7
         };
         using ImageUsageFlags = u32;
-        std::string ImageUsageFlagsToString(ImageUsageFlags flags);
 
 		enum class PipelineStageFlagBits : u32
 		{
@@ -351,7 +449,6 @@ namespace Insight
 			AllCommands						= 1 << 16,
 		};
 		using PipelineStageFlags = u32;
-		std::string PipelineStageFlagsToString(PipelineStageFlags flags);
 
 		enum class DescriptorType
 		{
@@ -366,8 +463,25 @@ namespace Insight
 			Storage_Buffer_Dyanmic,
 			Input_Attachment,
 
-			Unknown
+			Unknown,
+			Size
 		};
+		constexpr const char* DescriptorTypeToString[] =
+		{
+			"Sampler",
+			"Sampled_Image",
+			"Storage_Image",
+			"Uniform_Texel_Buffer",
+			"Storage_Texel_Buffer",
+			"Unifom_Buffer",
+			"Storage_Buffer",
+			"Uniform_Buffer_Dynamic",
+			"Storage_Buffer_Dyanmic",
+			"Input_Attachment",
+
+			"Unknown"
+		};
+		static_assert(ARRAY_COUNT(DescriptorTypeToString) == static_cast<u64>(DescriptorType::Size));
 
 		enum AccessFlagBits
 		{
@@ -391,7 +505,6 @@ namespace Insight
 			None							= 1 << 17,
 		};
 		using AccessFlags = u32;
-		std::string AccessFlagBitsToString(AccessFlagBits flags);
 		PipelineStageFlags AccessFlagBitsToPipelineStageFlag(AccessFlags flags);
 
 		enum class ImageLayout
@@ -413,9 +526,30 @@ namespace Insight
 			StencilReadOnly,
 			PresentSrc,
 
-			Count
+			Size
 		};
 		AccessFlags ImageLayoutToAccessMask(ImageLayout layout);
+
+		constexpr const char* ImageLayoutToString[] =
+		{
+			"Undefined",
+			"General",
+			"ColourAttachment",
+			"DepthStencilAttachment",
+			"DepthStencilAttachmentReadOnly",
+			"ShaderReadOnly",
+			"TransforSrc",
+			"TransforDst",
+			"Preinitialised",
+			"DepthReadOnlyStencilAttacment",
+			"DepthAttachmentStencilReadOnly",
+			"DepthAttachmentOnly",
+			"DepthReadOnly",
+			"StencilAttacment",
+			"StencilReadOnly",
+			"PresentSrc"
+		};
+		static_assert(ARRAY_COUNT(ImageLayoutToString) == static_cast<u64>(ImageLayout::Size));
 
 		enum ImageAspectFlagBits
 		{
@@ -424,7 +558,6 @@ namespace Insight
 			Stencil		= 1 << 2,
 		};
 		using ImageAspectFlags = u32;
-		std::string ImageAspectFlagsToString(ImageAspectFlags flags);
 		ImageAspectFlags PixelFormatToAspectFlags(PixelFormat format);
 
 		enum class DescriptorResourceType
@@ -500,8 +633,16 @@ namespace Insight
 		enum class IndexType
 		{
 			Uint16,
-			Uint32
+			Uint32,
+
+			Size
 		};
+		constexpr const char* IndexTypeToString[] =
+		{
+			"Uint16",
+			"Uint32",
+		};
+		static_assert(ARRAY_COUNT(IndexTypeToString) == static_cast<u64>(IndexType::Size));
 
 		///enum GUPBufferFlagBits
 		///{
@@ -525,8 +666,16 @@ namespace Insight
 			Viewport, 
 			Scissor,
 			LineWidth,
+
+			Size
 		};
-		std::string DynamicStateToString(DynamicState dynamic_state);
+		constexpr const char* DynamicStateToString[] =
+		{
+			"Viewport",
+			"Scissor",
+			"LineWidth",
+		};
+		static_assert(ARRAY_COUNT(DynamicStateToString) == static_cast<u64>(DynamicState::Size));
 
 		enum class DeviceExtension : u32
 		{
@@ -535,23 +684,45 @@ namespace Insight
 
 			VulkanDynamicRendering,
 
-			DeviceExtensionCount
+			Size
 		};
+		constexpr const char* DeviceExtensionToString[] =
+		{
+			"BindlessDescriptors",
+			"ExclusiveFullScreen",
+			"VulkanDynamicRendering",
+		};
+		static_assert(ARRAY_COUNT(DeviceExtensionToString) == static_cast<u64>(DeviceExtension::Size));
 
 		enum class RenderOptions
 		{
 			ReverseZ,
 
-			NumOfRenderOptions
+			Size
 		};
+		constexpr const char* RenderOptionsToString[] =
+		{
+			"ReverseZ",
+		};
+		static_assert(ARRAY_COUNT(RenderOptionsToString) == static_cast<u64>(RenderOptions::Size));
 
 		enum class DeviceUploadStatus
 		{
 			NotUploaded,
 			Queued,
 			Uploading,
-			Completed
+			Completed,
+
+			Size
 		};
+		constexpr const char* DeviceUploadStatusToString[] =
+		{
+			"NotUploaded",
+			"Queued",
+			"Uploading",
+			"Completed",
+		};
+		static_assert(ARRAY_COUNT(DeviceUploadStatusToString) == static_cast<u64>(DeviceUploadStatus::Size));
 
 		/// @brief Define all present modes available to the swap chain.
 		enum class SwapchainPresentModes
@@ -559,6 +730,15 @@ namespace Insight
 			Immediate,
 			VSync,
 			Variable,
+
+			Size
 		};
+		constexpr const char* SwapchainPresentModesToString[] =
+		{
+			"Immediate",
+			"VSync",
+			"Variable",
+		};
+		static_assert(ARRAY_COUNT(SwapchainPresentModesToString) == static_cast<u64>(SwapchainPresentModes::Size));
 	}
 }

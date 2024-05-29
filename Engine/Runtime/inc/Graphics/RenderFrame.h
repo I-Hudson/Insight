@@ -40,12 +40,13 @@ namespace Insight
         Maths::Matrix4 Transform;
         Maths::Matrix4 PreviousTransform;
         Graphics::BoundingBox BoudingBox;
+
         /// @brief All render calls for this mesh.
         std::vector<Runtime::MeshLOD> MeshLods;
         RenderMaterial Material;
 
-        bool SkinnedMesh = false;
         std::vector<Maths::Matrix4> BoneTransforms;
+        bool SkinnedMesh = false;
 
         const Runtime::MeshLOD& GetLOD(u32 lodIndex) const;
 

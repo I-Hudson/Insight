@@ -364,8 +364,8 @@ namespace Insight
 						colorImageBarriers.push_back(std::move(barrier));
 					}
 				}
-				colorPipelineBarrier.SrcStage = +PipelineStageFlagBits::TopOfPipe;
-				colorPipelineBarrier.DstStage = +PipelineStageFlagBits::ColourAttachmentOutput;
+				colorPipelineBarrier.SrcStage = static_cast<u32>(PipelineStageFlagBits::TopOfPipe);
+				colorPipelineBarrier.DstStage = static_cast<u32>(PipelineStageFlagBits::ColourAttachmentOutput);
 				colorPipelineBarrier.ImageBarriers = colorImageBarriers;
 
 				/// Depth write
@@ -391,8 +391,8 @@ namespace Insight
 					depthImageBarriers.push_back(std::move(barrier));
 				}
 
-				depthPipelineBarrier.SrcStage = +PipelineStageFlagBits::TopOfPipe;
-				depthPipelineBarrier.DstStage = +PipelineStageFlagBits::EarlyFramgmentShader;
+				depthPipelineBarrier.SrcStage = static_cast<u32>(PipelineStageFlagBits::TopOfPipe);
+				depthPipelineBarrier.DstStage = static_cast<u32>(PipelineStageFlagBits::EarlyFramgmentShader);
 				depthPipelineBarrier.ImageBarriers = depthImageBarriers;
 
 				if (colorPipelineBarrier.ImageBarriers.size() > 0 || colorPipelineBarrier.BufferBarriers.size() > 0)
@@ -443,12 +443,12 @@ namespace Insight
 						}
 					}
 				}
-				colorPipelineBarrier.SrcStage = +PipelineStageFlagBits::ColourAttachmentOutput;
-				colorPipelineBarrier.DstStage = +PipelineStageFlagBits::FragmentShader;
+				colorPipelineBarrier.SrcStage = static_cast<u32>(PipelineStageFlagBits::ColourAttachmentOutput);
+				colorPipelineBarrier.DstStage = static_cast<u32>(PipelineStageFlagBits::FragmentShader);
 				colorPipelineBarrier.ImageBarriers = std::move(colorImageBarriers);
 
-				depthPipelineBarrier.SrcStage = +PipelineStageFlagBits::EarlyFramgmentShader;
-				depthPipelineBarrier.DstStage = +PipelineStageFlagBits::FragmentShader;
+				depthPipelineBarrier.SrcStage = static_cast<u32>(PipelineStageFlagBits::EarlyFramgmentShader);
+				depthPipelineBarrier.DstStage = static_cast<u32>(PipelineStageFlagBits::FragmentShader);
 				depthPipelineBarrier.ImageBarriers = std::move(depthImageBarriers);
 				
 				if (colorPipelineBarrier.ImageBarriers.size() > 0 || colorPipelineBarrier.BufferBarriers.size() > 0)
@@ -497,8 +497,8 @@ namespace Insight
 			if (m_context->GetSwaphchainIamge()->GetLayout() != ImageLayout::PresentSrc)
 			{
 				PipelineBarrier barrier = { };
-				barrier.SrcStage = +PipelineStageFlagBits::ColourAttachmentOutput;
-				barrier.DstStage = +PipelineStageFlagBits::BottomOfPipe;
+				barrier.SrcStage =  static_cast<u32>(PipelineStageFlagBits::ColourAttachmentOutput);
+				barrier.DstStage =  static_cast<u32>(PipelineStageFlagBits::BottomOfPipe);
 
 				ImageBarrier imageBarrier = { };
 				imageBarrier.SrcAccessFlags = AccessFlagBits::ColorAttachmentWrite;

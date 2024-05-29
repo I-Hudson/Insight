@@ -1,4 +1,5 @@
 #include "Graphics/Enums.h"
+#include "Graphics/EnumStrings.h"
 #include "Graphics/PixelFormatExtensions.h"
 
 #include "Core/Asserts.h"
@@ -10,6 +11,7 @@ namespace Insight
 #define IF_FLAG_BITS_STR(flags, flagBit) if (flags & flagBit) { str += #flagBit; str += " |"; }
 #define IF_FLAG_STR(flag, flagBit) if (flag == flagBit) { str += #flagBit; str += " |"; }
 
+#if 0
 		std::string EnumToString(ResourceType type)
 		{
 			std::string str;
@@ -42,7 +44,7 @@ namespace Insight
 
 			return str;
 		}
-
+#endif
 		std::string ShaderStageFlagsToString(ShaderStageFlags flags)
 		{
 			std::string str;
@@ -59,7 +61,7 @@ namespace Insight
 			}
 			return str;
 		}
-
+#if 0
 		std::string PrimitiveTopologyTypeToString(PrimitiveTopologyType type)
 		{
 			std::string str;
@@ -127,7 +129,7 @@ namespace Insight
 			}
 			return str;
 		}
-
+#endif
 		std::string ColourComponentFlagsToString(ColourComponentFlags flags)
 		{
 			std::string str;
@@ -143,7 +145,7 @@ namespace Insight
 			}
 			return str;
 		}
-
+#if 0
 		std::string BlendFactorToString(BlendFactor factor)
 		{
 			std::string str;
@@ -293,7 +295,7 @@ namespace Insight
 			}
 			return str;
 		}
-
+#endif
 		AccessFlags ImageLayoutToAccessMask(ImageLayout layout)
 		{
 			AccessFlags access_flags;
@@ -539,6 +541,7 @@ namespace Insight
 			return aspect_flags;
 		}
 
+#if 0
 		std::string DynamicStateToString(DynamicState dynamic_state)
 		{
 			switch (dynamic_state)
@@ -551,5 +554,6 @@ namespace Insight
 			}
 			return "";
 		}
+#endif
 	}
 }

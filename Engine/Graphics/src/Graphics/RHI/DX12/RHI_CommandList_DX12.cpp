@@ -794,11 +794,11 @@ namespace Insight
 
 				if (image_layout == ImageLayout::PresentSrc)
 				{
-					pipeline_barrier.SrcStage = +PipelineStageFlagBits::BottomOfPipe;
+					pipeline_barrier.SrcStage = static_cast<u32>(PipelineStageFlagBits::BottomOfPipe);
 				}
 				else if (image_layout == ImageLayout::Undefined)
 				{
-					pipeline_barrier.SrcStage = +PipelineStageFlagBits::TopOfPipe;
+					pipeline_barrier.SrcStage = static_cast<u32>(PipelineStageFlagBits::TopOfPipe);
 				}
 				else
 				{
@@ -807,7 +807,7 @@ namespace Insight
 
 				if (image_layout == ImageLayout::PresentSrc)
 				{
-					pipeline_barrier.DstStage = +PipelineStageFlagBits::TopOfPipe;
+					pipeline_barrier.DstStage = static_cast<u32>(PipelineStageFlagBits::TopOfPipe);
 				}
 				else
 				{
