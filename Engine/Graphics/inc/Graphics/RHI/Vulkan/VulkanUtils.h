@@ -6,7 +6,7 @@
 #include "Graphics/PixelFormat.h"
 #include "Core/Asserts.h"
 
-#include "VmaUsage.h"
+#include <vulkan/vulkan_core.h>
 
 #include <vector>
 #include <string>

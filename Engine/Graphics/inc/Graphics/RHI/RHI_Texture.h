@@ -6,6 +6,8 @@
 #include "Graphics/RHI/RHI_UploadQueue.h"
 #include "Graphics/GPUDeferedManager.h"
 
+#include "Core/Delegate.h"
+
 #include "Maths/Vector4.h"
 
 #include <vector>

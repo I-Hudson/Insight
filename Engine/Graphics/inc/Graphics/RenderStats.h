@@ -8,22 +8,6 @@
 
 #include <string>
 
-#include <locale>
-
-class comma_numpunct : public std::numpunct<char>
-{
-protected:
-	virtual char do_thousands_sep() const
-	{
-		return ',';
-	}
-
-	virtual std::string do_grouping() const
-	{
-		return "\03";
-	}
-};
-
 IS_GRAPHICS std::string FormatU64ToCommaString(u64 value);
 
 namespace Insight

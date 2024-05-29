@@ -2,6 +2,7 @@
 
 #include "Core/Memory.h"
 #include "Core/TypeAlias.h"
+#include "Core/Delegate.h"
 
 #include "Graphics/Defines.h"
 #include "Graphics/Enums.h"

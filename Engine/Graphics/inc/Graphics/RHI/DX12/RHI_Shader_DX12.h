@@ -3,7 +3,7 @@
 #if defined(IS_DX12_ENABLED)
 
 #include "Graphics/RHI/RHI_Shader.h"
-#include "Graphics/RHI/DX12/RenderContext_DX12.h"
+#include <d3d12.h>
 #include <map>
 #include <array>
 
@@ -15,6 +15,8 @@ namespace Insight
 	{
 		namespace RHI::DX12
 		{
+			class RenderContext_DX12;
+
 			class RHI_Shader_DX12 : public RHI_Shader
 			{
 			public:
@@ -41,7 +43,7 @@ namespace Insight
 				D3D12_INPUT_LAYOUT_DESC m_inputLayout;
 				std::vector<D3D12_INPUT_ELEMENT_DESC> m_inputElements;
 				ShaderDesc m_shaderDesc;
-				std::array<ComPtr<IDxcBlob>, 5> m_modules;
+				std::array<IDxcBlob*, 5> m_modules;
 				RenderContext_DX12* m_context{ nullptr };
 			};
 		}

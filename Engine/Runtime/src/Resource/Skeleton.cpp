@@ -1,6 +1,7 @@
 #include "Resource/Skeleton.h"
 
 #include "Core/Logger.h"
+#include "Core/Asserts.h"
 
 namespace Insight
 {

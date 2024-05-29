@@ -3,6 +3,8 @@
 #include "ECS/Entity.h"
 #include "ECS/ComponentHandle.h"
 
+#include "Core/Asserts.h"
+
 #include "Serialisation/Serialiser.h"
 
 #include <vector>

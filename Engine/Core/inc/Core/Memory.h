@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core/Delegate.h"
+#include "Core/Defines.h"
 #include "Memory/MemoryAllocCategory.h"
 
 #include <memory>

@@ -1,15 +1,18 @@
 #if defined(IS_VULKAN_ENABLED)
 
 #include "Graphics/RHI/Vulkan/RHI_Shader_Vulkan.h"
-#include "Core/Logger.h"
+#include "Graphics/RHI/Vulkan/RenderContext_Vulkan.h"
+
 #include "Graphics/PixelFormat.h"
 #include "Graphics/PixelFormatExtensions.h"
 #include "Graphics/RHI/Vulkan/VulkanUtils.h"
 
-#include "dxc/dxcapi.h"
-#include "spirv_reflect.h"
+#include "Core/Logger.h"
 
-#include <fstream>
+#ifdef IS_PLATFORM_WINDOWS
+#include <Windows.h>
+#endif
+#include "dxc/dxcapi.h"
 
 /// PDB not found for glslang
 #pragma warning( disable : 4099 )

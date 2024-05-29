@@ -1,5 +1,6 @@
 #include "Animation/Animator.h"
 #include "Core/Profiler.h"
+#include "Core/Asserts.h"
 
 namespace Insight
 {

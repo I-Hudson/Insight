@@ -1,5 +1,6 @@
 #include "Asset/Asset.h"
 #include "Asset/AssetInfo.h"
+#include "Core/Asserts.h"
 
 namespace Insight::Runtime
 {

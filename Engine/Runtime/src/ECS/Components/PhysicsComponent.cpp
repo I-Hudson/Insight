@@ -5,6 +5,8 @@
 #include "Physics/BodyCreationSettings.h"
 #include "Physics/ShapeSettings.h"
 
+#include "Core/Asserts.h"
+
 namespace Insight
 {
     namespace ECS

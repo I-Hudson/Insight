@@ -1,4 +1,5 @@
 #include "Resource/AnimationClip.h"
+#include "Core/Asserts.h"
 
 namespace Insight
 {

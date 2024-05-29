@@ -1,4 +1,5 @@
 #include "Graphics/RHI/RHI_Shader.h"
+#include "Graphics/RenderContext.h"
 
 #if defined(IS_VULKAN_ENABLED)
 #include "Graphics/RHI/Vulkan/RHI_Shader_Vulkan.h"
@@ -319,9 +320,9 @@ namespace Insight
 
 			if (argDebugData)
 			{
-				ComPtr<IDxcBlob> pDebugData;
-				ComPtr<IDxcBlobUtf16> pDebugDataPath;
-				ShaderCompileResults->GetOutput(DXC_OUT_PDB, IID_PPV_ARGS(pDebugData.GetAddressOf()), pDebugDataPath.GetAddressOf());
+				IDxcBlob* pDebugData;
+				IDxcBlobUtf16* pDebugDataPath;
+				ShaderCompileResults->GetOutput(DXC_OUT_PDB, IID_PPV_ARGS(&pDebugData), &pDebugDataPath);
 				std::string debugPath = shaderPDBFolderPath + Platform::StringFromWString(pDebugDataPath->GetStringPointer());
 
 				shaderDisk.open(debugPath.c_str(), std::ios::trunc);
@@ -339,6 +340,8 @@ namespace Insight
 					shaderDisk.close();
 				}
 
+				pDebugData->Release();
+				pDebugDataPath->Release();
 				//ComPtr<IDxcBlob> pReflectData;
 				//ShaderReflectionResults->GetOutput(DXC_OUT_REFLECTION, IID_PPV_ARGS(pReflectData.GetAddressOf()), nullptr);
 

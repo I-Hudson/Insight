@@ -3,7 +3,9 @@
 #if defined(IS_VULKAN_ENABLED)
 
 #include "Graphics/RHI/RHI_Shader.h"
-#include "Graphics/RHI/Vulkan/RenderContext_Vulkan.h"
+
+#include <vulkan/vulkan_core.h>
+
 #include <map>
 #include <array>
 
@@ -13,6 +15,8 @@ namespace Insight
 	{
 		namespace RHI::Vulkan
 		{
+			class RenderContext_Vulkan;
+
 			struct VertexInputLayout_Vulkan
 			{
 				std::vector<VkVertexInputBindingDescription> Bindings;

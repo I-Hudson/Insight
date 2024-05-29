@@ -1,5 +1,8 @@
 #pragma once
 
+#include "Core/TypeAlias.h"
+#include "Core/Defines.h"
+
 namespace Insight::Core
 {
 	enum class MemoryAllocCategory : u8

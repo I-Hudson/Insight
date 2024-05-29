@@ -1,10 +1,12 @@
 #if defined(IS_DX12_ENABLED)
 
 #include "Graphics/RHI/DX12/RHI_Shader_DX12.h"
+#include "Graphics/RHI/DX12/RenderContext_DX12.h"
+
 #include "Graphics/PixelFormatExtensions.h"
 #include "Graphics/RHI/DX12/DX12Utils.h"
 
-#include "Algorithm/Vector.h"
+#include "dxcapi.h"
 
 namespace Insight
 {
@@ -15,7 +17,7 @@ namespace Insight
             IDxcBlob* RHI_Shader_DX12::GetStage(ShaderStageFlagBits stage)
             {
                 int index = BitFlagsToIndex(stage);
-                return m_modules.at(index).Get();
+                return m_modules[index];
             }
 
             void RHI_Shader_DX12::Create(RenderContext* context, ShaderDesc desc)
@@ -62,11 +64,11 @@ namespace Insight
 
             void RHI_Shader_DX12::Destroy()
             {
-                for (ComPtr<IDxcBlob>& mod : m_modules)
+                for (IDxcBlob*& mod : m_modules)
                 {
                     if (mod)
                     {
-                        mod.Reset();
+                        mod->Release();
                         mod = nullptr;
                     }
                 }
