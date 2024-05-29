@@ -289,7 +289,7 @@ namespace Insight::Physics::Jolt
 
 		JPH::Body* joltBody = m_physicsSystem.GetBodyInterface().CreateBody(settings);
 
-		Ref<Body> body = ::New<Body>(&m_physicsSystem, joltBody);
+		Ref<Body> body = ::New<Body>(&m_physicsSystem, joltBody, RemoveConst(bodyCreationSettings.Shape.Ptr()));
 		{
 			std::lock_guard l(m_bodiesMutex);
 			m_bodies.insert(body);

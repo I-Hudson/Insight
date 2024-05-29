@@ -21,8 +21,8 @@ namespace Insight
             IS_COMPONENT(PhysicsComponent);
             IS_SERIALISABLE_H(PhysicsComponent);
 
-            Physics::Body& GetPhysicsBodyId();
-            const Physics::Body& GetPhysicsBodyId() const;
+            Physics::Body& GetPhysicsBody();
+            const Physics::Body& GetPhysicsBody() const;
 
             // Component - Begin
 

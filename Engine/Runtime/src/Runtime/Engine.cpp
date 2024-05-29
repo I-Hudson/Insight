@@ -103,6 +103,7 @@ namespace Insight
 
 			m_inputSystem.Initialise();
 			m_graphicsSystem.Initialise(&m_inputSystem);
+			Physics::PhysicsWorld::Initialise();
 			m_worldSystem.Initialise();
 
 			m_projectSystem.Initialise();
@@ -117,8 +118,6 @@ namespace Insight
 			}
 
 			ImGui::GetIO().ConfigInputTrickleEventQueue = false;
-
-			Physics::PhysicsWorld::Initialise();
 
 			OnPostInit();
 
@@ -212,8 +211,6 @@ namespace Insight
 			Graphics::RenderContext::Instance().WaitForRenderThread();
 			Graphics::RenderContext::Instance().GpuWaitForIdle();
 
-			Physics::PhysicsWorld::Shutdown();
-
 			OnDestroy();
 
 			m_eventSystem.Shutdown();
@@ -223,6 +220,8 @@ namespace Insight
 			m_taskSystem.Shutdown();
 
 			m_worldSystem.Shutdown();
+
+			Physics::PhysicsWorld::Shutdown();
 
 			m_audioSystem.Shutdown();
 

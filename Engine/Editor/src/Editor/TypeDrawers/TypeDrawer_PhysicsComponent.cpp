@@ -20,11 +20,13 @@ namespace Insight
         {
             ECS::PhysicsComponent* physicsComponent = static_cast<ECS::PhysicsComponent*>(data);
 
-            float boxShape[3] = { 0,0,0 };
-            if (ImGui::DragFloat3("Box Shape", boxShape))
+            Physics::BoxShape* bodyCurrentShape = static_cast<Physics::BoxShape*>(physicsComponent->GetPhysicsBody().GetShape());
+            Maths::Vector3& boxShapeExtends = bodyCurrentShape->HalfExtent;
+
+            ImGui::DragFloat3("Box Shape", boxShapeExtends.data);
+            if (ImGui::Button("Update Shape"))
             {
-                Physics::BoxShape boxShape(Maths::Vector3(boxShape[0], boxShape[1], boxShape[2]));
-                Physics::PhysicsWorld::UpdateBodyShape(physicsComponent->GetPhysicsBodyId(), &boxShape);
+                physicsComponent->GetPhysicsBody().SetShape(bodyCurrentShape);
             }
         }
     }

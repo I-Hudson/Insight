@@ -1,9 +1,12 @@
 #pragma once
 
 #include "Physics/Defines.h"
+#include "Physics/Shapes/Shape.h"
+
 #include "Core/TypeAlias.h"
 #include "Core/NonCopyable.h"
 #include "Core/RefCount.h"
+#include "Core/ReferencePtr.h"
 
 #ifdef IS_PHYSICS_JOLT
 #include <Jolt/Jolt.h>
@@ -27,23 +30,28 @@ namespace Insight::Physics
 
     class IS_PHYSICS Body : public Core::RefCount, public NonCopyable
     {
-#ifdef IS_PHYSICS_JOLT
     public:
         Body() = delete;
-        Body(JPH::PhysicsSystem* const physicsSystem, JPH::Body* const physicsBody);
         ~Body();
-
         operator bool() const;
         bool operator==(const Body& other) const;
         bool operator!=(const Body& other) const;
 
-        void SetShape(const IShape* shape);
+        IShape* GetShape();
+        const IShape* GetShape() const;
+        void SetShape(const Ref<IShape>& shape);
 
+#ifdef IS_PHYSICS_JOLT
+        Body(JPH::PhysicsSystem* const physicsSystem, JPH::Body* const physicsBody, IShape* shape);
     private:
         JPH::PhysicsSystem* const m_physicsSystem = nullptr;
         JPH::Body* const m_body = nullptr;
         JPH::BodyID m_bodyId;
+#elif defined(IS_PHYSICS_PHYSX)
 #endif
+
+    private:
+        Ref<IShape> m_shape = nullptr;
 
         friend class Jolt::PhysicsWorld_Jolt;
         friend class Physx::PhysicsWorld_Physx;

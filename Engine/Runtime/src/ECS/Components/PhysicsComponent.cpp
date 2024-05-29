@@ -18,12 +18,14 @@ namespace Insight
 
         IS_SERIALISABLE_CPP(PhysicsComponent);
 
-        Physics::Body& PhysicsComponent::GetPhysicsBodyId()
+        Physics::Body& PhysicsComponent::GetPhysicsBody()
         {
+            ASSERT(m_physicsBody);
             return *m_physicsBody.Ptr();
         }
-        const Physics::Body& PhysicsComponent::GetPhysicsBodyId() const
+        const Physics::Body& PhysicsComponent::GetPhysicsBody() const
         {
+            ASSERT(m_physicsBody);
             return *m_physicsBody.Ptr();
         }
 
