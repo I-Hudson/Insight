@@ -20,6 +20,8 @@ namespace Insight
             IS_COMPONENT(PhysicsComponent);
             IS_SERIALISABLE_H(PhysicsComponent);
 
+            Physics::BodyId GetPhysicsBodyId() const;
+
             // Component - Begin
 
             virtual void OnCreate() override;
@@ -28,7 +30,7 @@ namespace Insight
             // Component - End
 
         private:
-            Physics::BodyId m_physicsBodyId = Physics::c_InvalidBodyId;
+            Physics::BodyId m_physicsBodyId;
         };
     }
 }

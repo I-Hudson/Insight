@@ -3,7 +3,7 @@
 
 #include "Physics/PhysicsWorld.h"
 #include "Physics/BodyCreationSettings.h"
-#include "Physics/ShapeSettings.h"
+#include "Physics/Shapes/BoxShape.h"
 
 #include "Core/Asserts.h"
 
@@ -16,13 +16,20 @@ namespace Insight
         PhysicsComponent::~PhysicsComponent()
         { }
 
+        IS_SERIALISABLE_CPP(PhysicsComponent);
+
+        Physics::BodyId PhysicsComponent::GetPhysicsBodyId() const
+        {
+            return m_physicsBodyId;
+        }
+
         void PhysicsComponent::OnCreate()
         {
             TransformComponent* transform = GetOwnerEntity()->GetComponent<TransformComponent>();
             ASSERT(transform);
 
-            Physics::BoxShapeSettings shapeSettings(Maths::Vector3(0.5f));
-            Physics::BodyCreationSettings bodySettings(&shapeSettings, transform->GetPosition(), transform->GetRotation(), Physics::MotionType::Static, Physics::ObjectLayers::NON_MOVING);
+            Ref<Physics::BoxShape> boxShape = ::New<Physics::BoxShape>(Maths::Vector3(0.5f));
+            Physics::BodyCreationSettings bodySettings(boxShape, transform->GetPosition(), transform->GetRotation(), Physics::MotionType::Static, Physics::ObjectLayers::NON_MOVING);
             m_physicsBodyId = Physics::PhysicsWorld::CreateBody(bodySettings);
         }
 
@@ -30,9 +37,6 @@ namespace Insight
         {
             Physics::PhysicsWorld::DestoryBody(m_physicsBodyId);
         }
-
-        IS_SERIALISABLE_CPP(PhysicsComponent);
-
 
     }
 }

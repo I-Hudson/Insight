@@ -36,6 +36,8 @@ namespace Insight
             /// @param bodyId 
             static void RemoveBody(const BodyId bodyId);
 
+            static void SetBodyShape(const BodyId& bodyId, IShape* shape);
+
         private:
             inline static IPhysicsWorld* s_PhsyicsWorld;
         };

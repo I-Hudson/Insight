@@ -70,5 +70,10 @@ namespace Insight
 		{
 			s_PhsyicsWorld->RemoveBody(bodyId);
 		}
+
+		void PhysicsWorld::SetBodyShape(const BodyId& bodyId, IShape* shape)
+		{
+			s_PhsyicsWorld->SetBodyShape(bodyId, shape);
+		}
     }
 }

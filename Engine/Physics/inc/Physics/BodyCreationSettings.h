@@ -3,7 +3,9 @@
 
 #include "Physics/MotionType.h"
 #include "Physics/ObjectLayers.h"
-#include "Physics/ShapeSettings.h"
+
+#include "Core/ReferencePtr.h"
+#include "Physics/Shapes/Shape.h"
 
 #include "Maths/Vector3.h"
 #include "Maths/Quaternion.h"
@@ -15,9 +17,9 @@ namespace Insight::Physics
     {
     public:
         BodyCreationSettings() = default;
-        BodyCreationSettings(const ShapeSettings* inShapeSettings, const Maths::Vector3& inPosition, const Maths::Quaternion& inRotation, const MotionType inMotionType, const ObjectLayer inObjectLayer);
+        BodyCreationSettings(Ref<IShape> shape, const Maths::Vector3& inPosition, const Maths::Quaternion& inRotation, const MotionType inMotionType, const ObjectLayer inObjectLayer);
 
-        const ShapeSettings* m_shapeSettings;
+        Ref<IShape> Shape;
         Maths::Vector3 m_position;
         Maths::Quaternion m_rotation;
         MotionType m_motionType;

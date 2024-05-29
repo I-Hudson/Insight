@@ -92,6 +92,9 @@ namespace Insight::Physics::Jolt
         /// @param bodyId 
         virtual void RemoveBody(const BodyId bodyId) override;
 
+        virtual void SetBodyShape(const BodyId bodyId, IShape* shape) override;
+
+
     private:
         bool HasBody(const BodyId bodyId) const;
 
@@ -100,6 +103,7 @@ namespace Insight::Physics::Jolt
         JPH::Quat QuaterianToJolt(const Maths::Quaternion& quat) const;
         JPH::Vec3 Vector3ToJolt(const Maths::Vector3& vec) const;
         JPH::Vec4 Vector4ToJolt(const Maths::Vector4& vec) const;
+        JPH::Ref<JPH::Shape> ShapeToJolt(const IShape* shape) const;
 
     private:
         JPH::PhysicsSystem m_physicsSystem;

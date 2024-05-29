@@ -1,11 +1,13 @@
 #pragma once
 
 #include "Core/TypeAlias.h"
+#include "Core/ReferencePtr.h"
 #include "Physics/BodyId.h"
 
 namespace Insight::Physics
 {
     class BodyCreationSettings;
+    class IShape;
 
     class IPhysicsWorld
     {
@@ -26,5 +28,6 @@ namespace Insight::Physics
         virtual void AddBody(const BodyId bodyId) = 0;
         virtual void RemoveBody(const BodyId bodyId) = 0;
 
+        virtual void SetBodyShape(const BodyId bodyId, IShape* shape) = 0;
     };
 }
