@@ -23,6 +23,8 @@ namespace Insight::Physics
             std::lock_guard otherTextLock(other.TextsMutex);
 
             Lines = other.Lines;
+            LinesDraw = other.LinesDraw;
+
             Texts = other.Texts;
         }
         DebugRendererData(DebugRendererData&& other)
@@ -34,9 +36,11 @@ namespace Insight::Physics
             std::lock_guard otherTextLock(other.TextsMutex);
 
             Lines = std::move(other.Lines);
-            Texts = std::move(other.Texts);
-
+            LinesDraw = std::move(other.LinesDraw);
             other.Lines.clear();
+            other.LinesDraw.clear();
+
+            Texts = std::move(other.Texts);
             other.Texts.clear();
         }
 
@@ -49,6 +53,8 @@ namespace Insight::Physics
             std::lock_guard otherTextLock(other.TextsMutex);
 
             Lines = other.Lines;
+            LinesDraw = other.LinesDraw;
+
             Texts = other.Texts;
 
             return *this;
@@ -62,9 +68,11 @@ namespace Insight::Physics
             std::lock_guard otherTextLock(other.TextsMutex);
 
             Lines = std::move(other.Lines);
-            Texts = std::move(other.Texts);
-
+            LinesDraw = std::move(other.LinesDraw);
             other.Lines.clear();
+            other.LinesDraw.clear();
+
+            Texts = std::move(other.Texts);
             other.Texts.clear();
 
             return *this;
@@ -72,24 +80,31 @@ namespace Insight::Physics
 
         struct IS_PHYSICS Line
         {
-            Maths::Vector3 From;
-            Maths::Vector3 FromColour;
-            Maths::Vector3 To;
-            Maths::Vector3 ToColour;
+            Maths::Vector4 From;
+            Maths::Vector4 FromColour;
+            Maths::Vector4 To;
+            Maths::Vector4 ToColour;
+        };
+        struct IS_PHYSICS LineDraw
+        {
+            u64 StartIndex = 0;
+            u64 Size = 0;
         };
 
         struct IS_PHYSICS Text
         {
-            Maths::Vector3 Position;
+            Maths::Vector4 Position;
             std::string Text;
             Maths::Vector4 Colour;
             float Height;
         };
 
         std::vector<Line> Lines;
+        std::vector<LineDraw> LinesDraw;
         mutable std::mutex LinesMutex;
     
         std::vector<Text> Texts;
         mutable std::mutex TextsMutex;
+
     };
 }

@@ -6,6 +6,7 @@
 
 #include "Graphics/RenderFrame.h"
 #include "Renderpass.h"
+#include "Graphics/PhysicsDebugRenderPass.h"
 
 #include "Editor/EditorWindows/Generated/WorldViewWindow_reflect_generated.h"
 
@@ -61,6 +62,8 @@ namespace Insight
             Maths::Vector2 m_renderResolution = Maths::Vector2(0, 0);
             bool m_fsr2Enabled = false;
             Maths::Vector2 m_taaJitterPrevious = Maths::Vector2(0, 0);
+
+            Graphics::PhysicsDebugRenderPass m_physicsDebugRenderPass;
 
             bool m_enableDepthPrepass = false;
             DoubleBufferVector<RenderData> m_renderingData;

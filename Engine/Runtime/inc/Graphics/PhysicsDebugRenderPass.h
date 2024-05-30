@@ -1,7 +1,10 @@
 #pragma once
 
+#include "Runtime/Defines.h"
 #include "Graphics/RenderContext.h"
 #include "Physics/DebugRendererData.h"
+
+#include "Maths/Matrix4.h"
 
 namespace Insight
 {
@@ -10,12 +13,20 @@ namespace Insight
         class RHI_Buffer;
         class RHI_Texture;
 
-        class PhysicsDebugRenderPass
+        class IS_RUNTIME PhysicsDebugRenderPass
         {
         public:
 
+            struct IS_RUNTIME ConstantBuffer
+            {
+                Maths::Matrix4 View;
+                Maths::Matrix4 Project;
+                Maths::Matrix4 LightView;
+                Maths::Matrix4 LightProjection;
+            };
+
             void Create();
-            void Render();
+            void Render(ConstantBuffer constantBuffer, std::string_view colourTextureName, std::string_view depthTextureName);
             void Destroy();
 
         private:

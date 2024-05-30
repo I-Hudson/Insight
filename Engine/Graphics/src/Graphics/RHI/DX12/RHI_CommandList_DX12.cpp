@@ -384,6 +384,8 @@ namespace Insight
 			{
 				IS_PROFILE_FUNCTION();
 
+				m_bound_vertex_buffer = nullptr;
+				m_bound_index_buffer = nullptr;
 			}
 
 			void RHI_CommandList_DX12::SetPipeline(PipelineStateObject pso)

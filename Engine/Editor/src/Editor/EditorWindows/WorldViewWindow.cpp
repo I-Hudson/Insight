@@ -45,6 +45,7 @@ namespace Insight
         WorldViewWindow::~WorldViewWindow()
         {
             Runtime::WorldSystem::Instance().RemoveWorld(Runtime::WorldSystem::Instance().FindWorldByName(c_WorldName));
+            m_physicsDebugRenderPass.Destroy();
         }
 
         void WorldViewWindow::Initialise()
@@ -62,6 +63,8 @@ namespace Insight
             m_editorCameraComponent = static_cast<ECS::CameraComponent*>(m_editorCameraEntity->AddComponentByName(ECS::CameraComponent::Type_Name));
             m_editorCameraComponent->CreatePerspective(Maths::DegreesToRadians(90.0f), aspect, 0.1f, 1024.0f);
             m_editorCameraEntity->AddComponentByName(ECS::FreeCameraControllerComponent::Type_Name);
+
+            m_physicsDebugRenderPass.Create();
         }
 
         void WorldViewWindow::OnDraw()
@@ -196,6 +199,14 @@ namespace Insight
             {
                 IS_PROFILE_SCOPE("RenderGraph passes");
 
+                Graphics::PhysicsDebugRenderPass::ConstantBuffer constantBuffer
+                {
+                    m_editorCameraComponent->GetViewMatrix(),
+                    m_editorCameraComponent->GetProjectionMatrix(),
+                    m_editorCameraComponent->GetViewMatrix(),
+                    m_editorCameraComponent->GetProjectionMatrix(),
+                };
+
                 LightShadowPass();
                 if (m_enableDepthPrepass)
                 {
@@ -203,6 +214,7 @@ namespace Insight
                 }
                 GBufferPass();
                 TransparentGBufferPass();
+                m_physicsDebugRenderPass.Render(constantBuffer, "EditorWorldColourRT", "EditorWorldDepthStencilRT");
                 LightPass();
                 FSR2Pass();
             }

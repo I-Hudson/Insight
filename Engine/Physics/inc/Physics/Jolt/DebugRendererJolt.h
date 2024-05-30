@@ -19,12 +19,17 @@ namespace Insight::Physics::Jolt
         virtual void DrawLine(JPH::RVec3Arg inFrom, JPH::RVec3Arg inTo, JPH::ColorArg inColor) override
         {
             std::lock_guard l(RendererData.LinesMutex);
+            RendererData.LinesDraw.push_back(DebugRendererData::LineDraw
+                {
+                    RendererData.Lines.size() * 2,
+                    2
+                });
             RendererData.Lines.push_back(DebugRendererData::Line
                 {
                     Maths::Vector3(inFrom.GetX(), inFrom.GetY(), inFrom.GetZ()),
-                    Maths::Vector4(inColor.r, inColor.g, inColor.b, inColor.a),
+                    Maths::Vector4((float)inColor.r / 255.0f, (float)inColor.g / 255.0f, (float)inColor.b / 255.0f, (float)inColor.a / 255.0f),
                     Maths::Vector3(inTo.GetX(), inTo.GetY(), inTo.GetZ()),
-                    Maths::Vector4(inColor.r, inColor.g, inColor.b, inColor.a),
+                    Maths::Vector4((float)inColor.r / 255.0f, (float)inColor.g / 255.0f, (float)inColor.b / 255.0f, (float)inColor.a / 255.0f),
                 });
         }
 
