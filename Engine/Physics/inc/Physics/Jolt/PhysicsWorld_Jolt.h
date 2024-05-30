@@ -6,6 +6,7 @@
 
 #include "Physics/Jolt/ObjectLayerFilters_Jolt.h"
 #include "Physics/Jolt/Listeners_Jolt.h"
+#include "Physics/Jolt/DebugRendererJolt.h"
 #include "Physics/MotionType.h"
 
 #include "Core/Asserts.h"
@@ -127,7 +128,8 @@ namespace Insight::Physics::Jolt
 #ifdef JPH_DEBUG_RENDERER
         bool m_isRecording = false;
         PhysicsStreamOut_Jolt m_recorderStreamOut;
-        JPH::DebugRendererRecorder* m_debugRendererRecorder = nullptr;
+
+        JPH::DebugRenderer* m_debugRenderer = nullptr;
 #endif
     };
 }

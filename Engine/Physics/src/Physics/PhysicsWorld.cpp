@@ -70,5 +70,10 @@ namespace Insight
 		{
 			s_PhsyicsWorld->RemoveBody(body);
 		}
+
+		const DebugRendererData& PhysicsWorld::GetDebugRenderData()
+		{
+			return s_PhsyicsWorld->GetDebugRenderData();
+		}
     }
 }

@@ -229,12 +229,13 @@ namespace Insight::Physics::Jolt
 		if (m_isRecording)
 		{
 			JPH::BodyManager::DrawSettings drawSettings;
-			m_physicsSystem.DrawBodies(drawSettings, m_debugRendererRecorder);
-			m_physicsSystem.DrawConstraints(m_debugRendererRecorder);
-			m_physicsSystem.DrawConstraintLimits(m_debugRendererRecorder);
-			m_physicsSystem.DrawConstraintReferenceFrame(m_debugRendererRecorder);
+			m_physicsSystem.DrawBodies(drawSettings, m_debugRenderer);
+			m_physicsSystem.DrawConstraints(m_debugRenderer);
+			m_physicsSystem.DrawConstraintLimits(m_debugRenderer);
+			m_physicsSystem.DrawConstraintReferenceFrame(m_debugRenderer);
 
-			m_debugRendererRecorder->EndFrame();
+			m_debugRenderData = std::move(static_cast<DebugRendererJolt*>(m_debugRenderer)->RendererData);
+			m_debugRenderer->NextFrame();
 		}
 #endif
 	}
@@ -243,8 +244,11 @@ namespace Insight::Physics::Jolt
 	{
 #ifdef JPH_DEBUG_RENDERER
 		m_isRecording = true;
-		if (!m_debugRendererRecorder)
+		if (!m_debugRenderer)
 		{
+#if 1
+			m_debugRenderer = ::New<DebugRendererJolt>();
+#else
 			auto t = std::time(nullptr);
 			auto tm = *std::localtime(&t);
 
@@ -256,6 +260,7 @@ namespace Insight::Physics::Jolt
 			m_recorderStreamOut.OpenFile("Physics/Physics_" + str + ".bin");
 
 			m_debugRendererRecorder = New<JPH::DebugRendererRecorder>(m_recorderStreamOut);
+#endif
 		}
 #endif
 	}
@@ -266,8 +271,8 @@ namespace Insight::Physics::Jolt
 		if (m_isRecording)
 		{
 			m_isRecording = false;
-			Delete(m_debugRendererRecorder);
-			m_debugRendererRecorder = nullptr;
+			Delete(m_debugRenderer);
+			m_debugRenderer = nullptr;
 
 			m_recorderStreamOut.Close();
 		}

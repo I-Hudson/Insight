@@ -3,6 +3,7 @@
 #include "Core/TypeAlias.h"
 #include "Core/ReferencePtr.h"
 #include "Physics/Body.h"
+#include "Physics/DebugRendererData.h"
 
 namespace Insight::Physics
 {
@@ -21,11 +22,15 @@ namespace Insight::Physics
 
         virtual void StartRecord() = 0;
         virtual void EndRecord() = 0;
+        const DebugRendererData& GetDebugRenderData() const { return m_debugRenderData; }
 
         virtual Ref<Body> CreateBody(const BodyCreationSettings& bodyCreationSettings) = 0;
         virtual void DestoryBody(const Ref<Body>& body) = 0;
 
         virtual void AddBody(const Ref<Body>& body) = 0;
         virtual void RemoveBody(const Ref<Body>& body) = 0;
+
+    protected:
+        DebugRendererData m_debugRenderData;
     };
 }

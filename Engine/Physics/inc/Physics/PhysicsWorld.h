@@ -36,6 +36,8 @@ namespace Insight
             /// @param bodyId 
             static void RemoveBody(const Ref<Body>& body);
 
+            static const DebugRendererData& GetDebugRenderData();
+
         private:
             inline static IPhysicsWorld* s_PhsyicsWorld;
         };
