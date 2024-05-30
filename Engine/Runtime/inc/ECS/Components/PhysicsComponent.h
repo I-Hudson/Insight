@@ -28,7 +28,8 @@ namespace Insight
 
             virtual void OnCreate() override;
             virtual void OnDestroy() override;
-            
+            virtual void OnUpdate(const float delta_time) override;
+
             // Component - End
 
         private:

@@ -44,5 +44,11 @@ namespace Insight
             Physics::PhysicsWorld::DestoryBody(m_physicsBody);
         }
 
+        void PhysicsComponent::OnUpdate(const float delta_time)
+        {
+            Maths::Matrix4 worldTransform = m_physicsBody->GetWorldTransform();
+            GetOwnerEntity()->GetComponent<TransformComponent>()->SetTransform(worldTransform);
+        }
+
     }
 }

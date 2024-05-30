@@ -171,7 +171,11 @@ namespace Insight
 
 					{
 						IS_PROFILE_SCOPE("PhysicsWorld Update");
-						Physics::PhysicsWorld::Update(delta_time);
+						TObjectPtr<Runtime::World> activeWorld = m_worldSystem.GetActiveWorld();
+						if (activeWorld && activeWorld->GetWorldState() == Runtime::WorldStates::Running)
+						{
+							Physics::PhysicsWorld::Update(delta_time);
+						}
 					}
 
 					{

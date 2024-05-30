@@ -23,6 +23,12 @@ namespace Insight
             Physics::BoxShape* bodyCurrentShape = static_cast<Physics::BoxShape*>(physicsComponent->GetPhysicsBody().GetShape());
             Maths::Vector3& boxShapeExtends = bodyCurrentShape->HalfExtent;
 
+            int moitionType = (int)physicsComponent->GetPhysicsBody().GetMotionType();
+            if (ImGui::ListBox("MotionType", &moitionType, Physics::MotionTypeToString, ARRAY_COUNT(Physics::MotionTypeToString)))
+            {
+                physicsComponent->GetPhysicsBody().SetMotionType((Physics::MotionType)moitionType);
+            }
+
             ImGui::DragFloat3("Box Shape", boxShapeExtends.data);
             if (ImGui::Button("Update Shape"))
             {

@@ -2,11 +2,14 @@
 
 #include "Physics/Defines.h"
 #include "Physics/Shapes/Shape.h"
+#include "Physics/MotionType.h"
 
 #include "Core/TypeAlias.h"
 #include "Core/NonCopyable.h"
 #include "Core/RefCount.h"
 #include "Core/ReferencePtr.h"
+
+#include "Maths/Matrix4.h"
 
 #ifdef IS_PHYSICS_JOLT
 #include <Jolt/Jolt.h>
@@ -37,6 +40,19 @@ namespace Insight::Physics
         bool operator==(const Body& other) const;
         bool operator!=(const Body& other) const;
 
+        /// @brief World space position of the body
+        /// @return Vector3
+        Maths::Vector3 GetPosition() const;
+        /// @brief World space rotation of the body
+        /// @return Quaternion
+        Maths::Quaternion GetRotation() const;
+        /// @brief Calculates the transform of this body
+        /// @return Matrix4
+        Maths::Matrix4 GetWorldTransform() const;
+
+        void SetMotionType(const MotionType motionType);
+        MotionType GetMotionType() const;
+
         IShape* GetShape();
         const IShape* GetShape() const;
         void SetShape(const Ref<IShape>& shape);
@@ -52,6 +68,7 @@ namespace Insight::Physics
 
     private:
         Ref<IShape> m_shape = nullptr;
+        MotionType m_motionType = MotionType::Static;
 
         friend class Jolt::PhysicsWorld_Jolt;
         friend class Physx::PhysicsWorld_Physx;
