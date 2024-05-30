@@ -203,6 +203,7 @@ namespace Insight
                 {
                     m_editorCameraComponent->GetViewMatrix(),
                     m_editorCameraComponent->GetProjectionMatrix(),
+                    m_editorCameraComponent->GetProjectionMatrix() * m_editorCameraComponent->GetViewMatrix(),
                     m_editorCameraComponent->GetViewMatrix(),
                     m_editorCameraComponent->GetProjectionMatrix(),
                 };

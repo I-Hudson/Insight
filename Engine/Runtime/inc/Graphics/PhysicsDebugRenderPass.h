@@ -20,7 +20,8 @@ namespace Insight
             struct IS_RUNTIME ConstantBuffer
             {
                 Maths::Matrix4 View;
-                Maths::Matrix4 Project;
+                Maths::Matrix4 Projection;
+                Maths::Matrix4 ProjectionView;
                 Maths::Matrix4 LightView;
                 Maths::Matrix4 LightProjection;
             };

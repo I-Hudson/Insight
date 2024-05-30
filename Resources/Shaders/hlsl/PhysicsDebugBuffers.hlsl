@@ -1,7 +1,8 @@
 cbuffer VertexShaderConstantBuffer : register(b0)
 {
-    matrix View;			// view matrix
-    matrix Projection;		// projection matrix
-	matrix LightView;		// view matrix of the light
-	matrix LightProjection;	// projection matrix of the light
+    float4x4 View;			    // view matrix
+    float4x4 Projection;		// projection matrix
+    float4x4 ProjectionView;
+	float4x4 LightView;		    // view matrix of the light
+	float4x4 LightProjection;	// projection matrix of the light
 };

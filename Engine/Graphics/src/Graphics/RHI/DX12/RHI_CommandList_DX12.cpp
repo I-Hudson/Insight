@@ -495,6 +495,8 @@ namespace Insight
 			{
 				IS_PROFILE_FUNCTION();
 
+				m_activePSO = pso;
+
 				RHI_Pipeline_DX12* pipeline = static_cast<RHI_Pipeline_DX12*>(m_contextDX12->GetPipelineManager().GetOrCreatePSO(pso));
 				m_commandList->SetPipelineState(pipeline->GetPipeline());
 

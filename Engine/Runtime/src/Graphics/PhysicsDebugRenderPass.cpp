@@ -72,7 +72,7 @@ namespace Insight
 
                 PipelineStateObject linePSO = { };
                 linePSO.Name = "PhysicsDebugPass_LinePSO";
-                linePSO.PolygonMode = PolygonMode::Line;
+                linePSO.PrimitiveTopologyType = PrimitiveTopologyType::LineList;
                 linePSO.CullMode = CullMode::Front;
                 linePSO.FrontFace = FrontFace::CounterClockwise;
                 linePSO.DepthTest = true;
