@@ -22,6 +22,7 @@
 #include "Asset/Assets/Model.h"
 #include "ECS/Components/TransformComponent.h"
 
+#include "Editor/EditorStyles.h"
 #include <imgui.h>
 
 namespace Insight
@@ -145,6 +146,7 @@ namespace Insight
                     }
                     ImGui::EndMenu();
                 }
+                EditorStylesMenu();
                 DrawProfileMenu();
                 ImGui::EndMainMenuBar();
 
@@ -208,6 +210,30 @@ namespace Insight
                 {
                     activeWorld->Destroy();
                 }
+            }
+        }
+
+        void MenuBar::EditorStylesMenu() const
+        {
+            if (ImGui::BeginMenu("Editor Styles"))
+            {
+                if (ImGui::MenuItem("Unreal Dark Theme"))
+                {
+                    UnrealDarkTheme();
+                }
+                else if (ImGui::MenuItem("Cherry Theme"))
+                {
+                    CherryTheme();
+                }
+                else if (ImGui::MenuItem("Corporate Grey Theme"))
+                {
+                    CorporateGreyTheme();
+                }
+                else if (ImGui::MenuItem("DarkTheme"))
+                {
+                    DarkTheme();
+                }
+                ImGui::EndMenu();
             }
         }
 

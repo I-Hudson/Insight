@@ -23,6 +23,7 @@ namespace Insight
             void DrawAllRegisteredWindow(EditorWindowCategories category) const;
 
             void WorldItems();
+            void EditorStylesMenu() const;
 
             void DrawProfileMenu() const;
 

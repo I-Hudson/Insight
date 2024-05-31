@@ -81,6 +81,7 @@ namespace Insight::Physics
         {
             m_motionType = motionType;
             JPH::BodyInterface& bodyInterface = m_physicsSystem->GetBodyInterface();
+            bodyInterface.DeactivateBody(m_bodyId);
             bodyInterface.SetMotionType(m_bodyId, Jolt::PhysicsWorld_Jolt::MotionTypeToJolt(m_motionType), JPH::EActivation::Activate);
             if (m_motionType == MotionType::Dynamic)
             {
@@ -90,6 +91,7 @@ namespace Insight::Physics
             {
                 bodyInterface.SetObjectLayer(m_bodyId, ObjectLayers::NON_MOVING);
             }
+            bodyInterface.ActivateBody(m_bodyId);
         }
     }
     MotionType Body::GetMotionType() const

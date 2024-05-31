@@ -144,13 +144,20 @@ namespace Insight
         {
             ImGui::BeginGroup();
 
-            ImGui::Text("%s", component->GetTypeName());
+            bool isEnabled = component->IsEnabled();
+            if (ImGui::Checkbox(std::string("##ComponentIsEnabled" + component->GetGuid().ToString()).c_str(), &isEnabled))
+            {
+                component->SetEnabled(isEnabled);
+            }
+            ImGui::SameLine();
+            ImGui::LabelText("%s", component->GetTypeName());
+
             std::string entityGuid = component->GetOwnerEntity()->GetGUID().ToString();
             std::string componentGuid = component->GetGuid().ToString();
             std::string payloadData = entityGuid + "::" + componentGuid;
             EditorGUI::ObjectFieldSource("EDW_COMPONENT_DRAG_DROP", payloadData.c_str());
 
-            ImGui::Text("%s", component->GetGuid().ToString().c_str());
+            ImGui::Text("Guid: %s", componentGuid.c_str());
             ImGui::Separator();
 
             const ITypeDrawer* componentTypeDrawer = TypeDrawerRegister::Instance().GetDrawer(component->GetTypeName());

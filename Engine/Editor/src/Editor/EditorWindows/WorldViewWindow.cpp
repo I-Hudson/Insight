@@ -201,9 +201,9 @@ namespace Insight
 
                 Graphics::PhysicsDebugRenderPass::ConstantBuffer constantBuffer
                 {
-                    m_editorCameraComponent->GetViewMatrix(),
+                    m_editorCameraComponent->GetProjectionViewMatrix(),
                     m_editorCameraComponent->GetProjectionMatrix(),
-                    m_editorCameraComponent->GetProjectionMatrix() * m_editorCameraComponent->GetViewMatrix(),
+                    m_editorCameraComponent->GetViewMatrix(),
                     m_editorCameraComponent->GetViewMatrix(),
                     m_editorCameraComponent->GetProjectionMatrix(),
                 };

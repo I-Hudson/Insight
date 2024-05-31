@@ -22,6 +22,7 @@
 
 #include "Serialisation/Archive.h"
 
+#include "Editor/EditorStyles.h"
 #include "Editor/EditorStyle.h"
 
 #include <SplashScreen.h>
@@ -47,6 +48,8 @@ namespace Insight
             IS_PROFILE_FUNCTION();
 
             EditorModule::Initialise(GetSystemRegistry().GetSystem<Core::ImGuiSystem>());
+
+            DarkTheme();
 
             static const std::string splashScreenBackGroundPath = EnginePaths::GetResourcePath() + "/Insight/cover.png";
             splashScreen.Init(860, 420);

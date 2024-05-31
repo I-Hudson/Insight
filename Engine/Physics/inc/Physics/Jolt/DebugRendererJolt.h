@@ -38,9 +38,9 @@ namespace Insight::Physics::Jolt
             // Set alpha to zero if we don't want to cast shadows to notify the pixel shader
             JPH::ColorArg color(inColor, inCastShadow == ECastShadow::Off ? 0 : 0xff);
 
-            DrawLine(inV1, inV2, color);
-            DrawLine(inV2, inV3, color);
-            DrawLine(inV3, inV1, color);
+            //DrawLine(inV1, inV2, color);
+            //DrawLine(inV2, inV3, color);
+            //DrawLine(inV3, inV1, color);
         }
 
         virtual void DrawText3D(JPH::RVec3Arg inPosition, const std::string_view& inString, JPH::ColorArg inColor, float inHeight) override

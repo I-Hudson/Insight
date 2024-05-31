@@ -229,6 +229,8 @@ namespace Insight::Physics::Jolt
 		if (m_isRecording)
 		{
 			JPH::BodyManager::DrawSettings drawSettings;
+			drawSettings.mDrawShapeWireframe = true;
+
 			m_physicsSystem.DrawBodies(drawSettings, m_debugRenderer);
 			m_physicsSystem.DrawConstraints(m_debugRenderer);
 			m_physicsSystem.DrawConstraintLimits(m_debugRenderer);
@@ -287,6 +289,9 @@ namespace Insight::Physics::Jolt
 			QuaterianToJolt(bodyCreationSettings.m_rotation),
 			MotionTypeToJolt(bodyCreationSettings.m_motionType),
 			bodyCreationSettings.m_objectLayer);
+
+		settings.mAllowDynamicOrKinematic = true;
+		settings.mAllowSleeping = true;
 
 		JPH::Ref<JPH::Shape> joltShape = ShapeToJolt(bodyCreationSettings.Shape.Ptr());
 		ASSERT(joltShape.GetPtr() != nullptr);
