@@ -29,98 +29,48 @@ namespace Insight
 
 		class RenderGraphV2;
 
-		struct RenderGraphExecuteData
-		{
-			RenderGraphV2& RenderGraph;
-			RHI_CommandList* CmdList;
-		};
-		struct RenderGraphPostData
-		{
-			RenderGraphV2& RenderGraph;
-			RHI_CommandList* CmdList;
-		};
+		using RGResourceHandle = u32;
 
-		class IS_GRAPHICS RenderGraphPassBaseV2 : public RenderGraphTask
+		class IS_GRAPHICS RenderGraphPassV2
 		{
+			using ExecuteFunc = std::function<void(RenderGraph*, RHI_CommandList*)>;
 		public:
-			RenderGraphPassBaseV2(RenderGraphV2* renderGraph, GPUQueue gpuQueue);
-			virtual ~RenderGraphPassBaseV2();
+			RenderGraphPassV2(RenderGraphV2* renderGraph, GPUQueue gpuQueue, const std::string name);
+			~RenderGraphPassV2();
 
-			RGBufferHandle CreateBuffer(std::string bufferName, RHI_BufferCreateInfo createInfo);
-			RGTextureHandle CreateTexture(std::string textureName, RHI_TextureInfo createInfo);
+			RenderGraphPassV2& AddBufferWrite(const std::string_view name, const RHI_BufferCreateInfo createInfo);
+			RenderGraphPassV2& AddTextureWrite(const std::string_view name, const RHI_TextureInfo createInfo);
 
-			void ReadBuffer(const RGBufferHandle handle);
-			void WriteBuffer(const RGBufferHandle handle);
+			RenderGraphPassV2& AddBufferRead(const std::string_view name);
+			RenderGraphPassV2& AddTextureRead(const std::string_view name);
 
-			void ReadTexture(const RGTextureHandle handle);
-			void WriteTexture(const RGTextureHandle handle);
+			RenderGraphPassV2& SetExecuteFunc(ExecuteFunc executeFunc);
+
+			std::string_view GetPassName() const { return PassName; }
+
+			bool IsBufferWritten(const std::string_view name) const;
+			bool IsBufferWritten(const RGResourceHandle handle) const;
+			bool IsTextureWritten(const std::string_view name) const;
+			bool IsTextureWritten(const RGResourceHandle handle) const;
+
+			bool IsBufferRead(const std::string_view name) const;
+			bool IsBufferRead(const RGResourceHandle handle) const;
+			bool IsTextureRead(const std::string_view name) const;
+			bool IsTextureRead(const RGResourceHandle handle) const;
 
 		public:
+			ExecuteFunc ExecuteFuncCallback;
 			std::string PassName;
+			RenderGraphV2* RenderGraph = nullptr;
+			GPUQueue GpuQueue;
 
-			std::vector<std::pair<RGBufferHandle, RHI_BufferCreateInfo>> BufferCreates;
-			std::vector<RGBufferHandle> BufferReads;
-			std::vector<RGBufferHandle> BufferWrites;
+			std::vector<std::pair<RGResourceHandle, RHI_BufferCreateInfo>> BufferWrites;
+			std::vector<std::pair<RGResourceHandle, RHI_TextureInfo>> TextureWrites;
 
-			std::vector<std::pair<RGTextureHandle, RHI_TextureInfo>> TextureCreates;
-			std::vector<RGTextureHandle> TextureReads;
-			std::vector<RGTextureHandle> TextureWrites;
+			std::vector<RGResourceHandle> BufferReads;
+			std::vector<RGResourceHandle> TextureReads;
 
 			std::vector<PipelineBarrier> PipelineBarriers;
-
-			friend class RenderGraphV2;
-		};
-
-		class IS_GRAPHICS RenderGraphGraphicsPassV2 : public RenderGraphPassBaseV2
-		{
-		public:
-			using PreExecuteFunc = std::function<void(RenderGraphGraphicsPassV2& graphPass)>;
-			using ExecuteFunc = std::function<void(const RenderGraphExecuteData& excuteData)>;
-			using PostExecuteFunc = std::function<void(const RenderGraphPostData& postExecuteData)>;
-
-			RenderGraphGraphicsPassV2(RenderGraphV2* renderGraph
-				, std::string passName
-				, PreExecuteFunc setupFunc
-				, ExecuteFunc executeFunc
-				, PostExecuteFunc postFunc);
-
-			virtual ~RenderGraphGraphicsPassV2() override;
-
-			virtual const char* GetTaskName() const override { return "RenderGraphGraphicsPassV2"; }
-
-			virtual void PreExecute() override;
-			virtual void Execute() override;
-			virtual void PostExecute() override;
-
-			void SetViewport(const u32 width, const u32 height);
-			void SetScissor(const u32 width, const u32 height);
-
-			void SetShader(const ShaderDesc shaderDesc);
-			void SetPipeline(const PipelineStateObject pipelineStateObject);
-			void SetRenderpass(const RenderpassDescription renderpassDescription);
-
-			/// @brief Does this pass render directly on top of the swapchain image.
-			void SetAsRenderToSwapchain();
-
-			RGTextureHandle GetDepthSteniclWriteTexture() const;
-
-		private:
-			/// Optional, define a custom render pass. Otherwise we create it and/or fill in the blanks.
-			RenderpassDescription m_renderpassDescription = { };
-
-			bool m_swapchainPass = false; // Does this render straight to the swap chain.
-
-			ShaderDesc m_shader = { }; // Shader to be used for this pass.
-			PipelineStateObject m_PSO = { }; // PSO to be used for this pass.
-
-			Maths::Vector2 m_viewport = Maths::Vector2(0, 0);
-			Maths::Vector2 m_scissor = Maths::Vector2(0, 0);
-
-			bool m_renderOnTopOfSwapchain = false;
-
-			PreExecuteFunc m_preExecuteFunc;
-			ExecuteFunc m_executeFunc;
-			PostExecuteFunc m_postExecuteFunc;
 
 			friend class RenderGraphV2;
 		};

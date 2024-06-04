@@ -156,7 +156,9 @@ namespace Insight
 		RGBufferHandle RenderGraphV2::GetBuffer(std::string bufferName) const
 		{
 			ASSERT(m_context->IsRenderThread());
-			return m_textureCaches.Get()->GetId(bufferName);
+			const int handle = m_bufferCaches.Get()->GetId(bufferName);
+			ASSERT(handle != -1);
+			return handle;
 		}
 
 		RHI_Buffer* RenderGraphV2::GetRHIBuffer(std::string bufferName) const
@@ -174,7 +176,9 @@ namespace Insight
 		RGTextureHandle RenderGraphV2::GetTexture(std::string textureName) const
 		{
 			ASSERT(m_context->IsRenderThread());
-			return m_textureCaches.Get()->GetId(textureName);
+			const int handle = m_textureCaches.Get()->GetId(textureName);
+			ASSERT(handle != -1);
+			return handle;
 		}
 
 		RHI_Texture* RenderGraphV2::GetRHITexture(std::string textureName) const

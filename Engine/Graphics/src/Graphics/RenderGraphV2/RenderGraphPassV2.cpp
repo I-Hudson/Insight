@@ -2,7 +2,6 @@
 
 #include "Graphics/RenderGraphV2/RenderGraphPassV2.h"
 #include "Graphics/RenderGraphV2/RenderGraphV2.h"
-#include "Graphics/PixelFormatExtensions.h"
 
 #include "Algorithm/Vector.h"
 
@@ -10,147 +9,102 @@ namespace Insight
 {
 	namespace Graphics
 	{
-		RenderGraphPassBaseV2::RenderGraphPassBaseV2(RenderGraphV2* renderGraph, GPUQueue gpuQueue)
-			: RenderGraphTask(renderGraph, gpuQueue)
-		{ 
-			ASSERT(RenderGraph);
-		}
-
-		RenderGraphPassBaseV2::~RenderGraphPassBaseV2()
+		RenderGraphPassV2::RenderGraphPassV2(RenderGraphV2* renderGraph, GPUQueue gpuQueue, const std::string name)
+			: RenderGraph(renderGraph)
+			, GpuQueue(gpuQueue)
+			, PassName(name)
 		{ }
 
-		RGBufferHandle RenderGraphPassBaseV2::CreateBuffer(std::string bufferName, RHI_BufferCreateInfo createInfo)
+		RenderGraphPassV2::~RenderGraphPassV2()
+		{ }
+
+		RenderGraphPassV2& RenderGraphPassV2::AddBufferWrite(const std::string_view name, const RHI_BufferCreateInfo createInfo)
 		{
-			const RGBufferHandle handle = RenderGraph->CreateBuffer(bufferName);
-			if (Algorithm::VectorFindIf(BufferCreates, [&handle](const std::pair<RGBufferHandle, RHI_BufferCreateInfo>& pair)
-				{
-					return handle == pair.first;
-				}) == BufferCreates.end())
+			const RGResourceHandle handle = RenderGraph->CreateBuffer(name.data());
+			if (std::find(BufferWrites.begin(), BufferWrites.end(), handle) == BufferWrites.end())
 			{
-				BufferCreates.push_back(std::make_pair(handle, createInfo));
+				BufferWrites.push_back(std::make_pair(handle, createInfo));
 			}
-			return handle;
-			return -1;
+			return *this;
+		}
+		RenderGraphPassV2& RenderGraphPassV2::AddTextureWrite(const std::string_view name, const RHI_TextureInfo createInfo)
+		{
+			const RGResourceHandle handle = RenderGraph->CreateTexture(name.data());
+			if (std::find(TextureWrites.begin(), TextureWrites.end(), handle) == TextureWrites.end())
+			{
+				TextureWrites.push_back(std::make_pair(handle, createInfo));
+			}
+			return *this;
 		}
 
-		RGTextureHandle RenderGraphPassBaseV2::CreateTexture(std::string textureName, RHI_TextureInfo createInfo)
+		RenderGraphPassV2& RenderGraphPassV2::AddBufferRead(const std::string_view name)
 		{
-			const RGTextureHandle handle = RenderGraph->CreateTexture(textureName);
-			if (Algorithm::VectorFindIf(TextureCreates, [&handle](const std::pair<RGTextureHandle, RHI_TextureInfo>& pair)
-				{
-					return handle == pair.first;
-				}) == TextureCreates.end())
-			{
-				TextureCreates.push_back(std::make_pair(handle, createInfo));
-			}
-			return handle;
-		}
-
-		void RenderGraphPassBaseV2::ReadBuffer(const RGBufferHandle handle)
-		{
+			const RGResourceHandle handle = RenderGraph->GetBuffer(name.data());
 			if (std::find(BufferReads.begin(), BufferReads.end(), handle) == BufferReads.end())
 			{
 				BufferReads.push_back(handle);
 			}
+			return *this;
 		}
-
-		void RenderGraphPassBaseV2::WriteBuffer(const RGBufferHandle handle)
+		RenderGraphPassV2& RenderGraphPassV2::AddTextureRead(const std::string_view name)
 		{
-			if (std::find(BufferWrites.begin(), BufferWrites.end(), handle) == BufferWrites.end())
-			{
-				BufferWrites.push_back(handle);
-			}
-		}
-
-		void RenderGraphPassBaseV2::ReadTexture(const RGTextureHandle handle)
-		{
+			const RGResourceHandle handle = RenderGraph->GetBuffer(name.data());
 			if (std::find(TextureReads.begin(), TextureReads.end(), handle) == TextureReads.end())
 			{
 				TextureReads.push_back(handle);
 			}
+			return *this;
 		}
 
-		void RenderGraphPassBaseV2::WriteTexture(const RGTextureHandle handle)
+		RenderGraphPassV2& RenderGraphPassV2::SetExecuteFunc(RenderGraphPassV2::ExecuteFunc executeFunc)
 		{
-			if (std::find(TextureWrites.begin(), TextureWrites.end(), handle) == TextureWrites.end())
-			{
-				TextureWrites.push_back(handle);
-			}
+			ExecuteFuncCallback = std::move(executeFunc);
 		}
 
-		RenderGraphGraphicsPassV2::RenderGraphGraphicsPassV2(RenderGraphV2* renderGraph
-			, std::string passName, PreExecuteFunc setupFunc, ExecuteFunc executeFunc, PostExecuteFunc postFunc)
-			: RenderGraphPassBaseV2(renderGraph, GPUQueue_Graphics)
-			, m_preExecuteFunc(std::move(setupFunc))
-			, m_executeFunc(std::move(executeFunc))
-			, m_postExecuteFunc(std::move(postFunc))
+		bool RenderGraphPassV2::IsBufferWritten(const std::string_view name) const
 		{
-			PassName = std::move(passName);
+			const RGResourceHandle handle = RenderGraph->GetBuffer(name.data());
+			return IsBufferWritten(handle);
 		}
-
-		RenderGraphGraphicsPassV2::~RenderGraphGraphicsPassV2()
+		bool RenderGraphPassV2::IsBufferWritten(const RGResourceHandle handle) const
 		{
-		}
-
-		void RenderGraphGraphicsPassV2::PreExecute()
-		{
-			m_preExecuteFunc(*this);
-		}
-
-		void RenderGraphGraphicsPassV2::Execute()
-		{
-			RenderGraphExecuteData data{ *RenderGraph, CmdList };
-			m_executeFunc(data);
-		}
-
-		void RenderGraphGraphicsPassV2::PostExecute()
-		{
-			RenderGraphPostData data{ *RenderGraph, CmdList };
-			m_postExecuteFunc(data);
-		}
-
-		void RenderGraphGraphicsPassV2::SetViewport(const u32 width, const u32 height)
-		{
-			m_viewport = Maths::Vector2(width, height);
-		}
-
-		void RenderGraphGraphicsPassV2::SetScissor(const u32 width, const u32 height)
-		{
-			m_scissor = Maths::Vector2(width, height);
-		}
-
-		void RenderGraphGraphicsPassV2::SetShader(const ShaderDesc shaderDesc)
-		{
-			m_shader = shaderDesc;
-		}
-
-		void RenderGraphGraphicsPassV2::SetPipeline(const PipelineStateObject pipelineStateObject)
-		{
-			m_PSO = pipelineStateObject;
-		}
-
-		void RenderGraphGraphicsPassV2::SetRenderpass(const RenderpassDescription renderpassDescription)
-		{
-			m_renderpassDescription = renderpassDescription;
-		}
-
-		void RenderGraphGraphicsPassV2::SetAsRenderToSwapchain()
-		{
-			m_renderOnTopOfSwapchain = true;
-		}
-
-		RGTextureHandle RenderGraphGraphicsPassV2::GetDepthSteniclWriteTexture() const
-		{
-			for (size_t i = 0; i < TextureWrites.size(); ++i)
-			{
-				const RGTextureHandle handle = TextureWrites.at(i);
-				RHI_Texture* texture = RenderGraph->GetRHITexture(handle);
-				if (texture && PixelFormatExtensions::IsDepthStencil(texture->GetFormat()))
+			return Algorithm::VectorFindIf(BufferWrites, [handle](const std::pair<RGResourceHandle, RHI_BufferCreateInfo>& pair)
 				{
-					return handle;
-				}
-			}
-			return -1;
+					return handle == pair.first;
+				}) != BufferWrites.end();
+		}
+
+		bool RenderGraphPassV2::IsTextureWritten(const std::string_view name) const
+		{
+			const RGResourceHandle handle = RenderGraph->GetTexture(name.data());
+			return IsTextureWritten(handle);
+		}
+		bool RenderGraphPassV2::IsTextureWritten(const RGResourceHandle handle) const
+		{
+			return Algorithm::VectorFindIf(TextureWrites, [handle](const std::pair<RGResourceHandle, RHI_TextureInfo>& pair)
+				{
+					return handle == pair.first;
+				}) != TextureWrites.end();
+		}
+
+		bool RenderGraphPassV2::IsBufferRead(const std::string_view name) const
+		{
+			const RGResourceHandle handle = RenderGraph->GetBuffer(name.data());
+			return IsBufferRead(handle);
+		}
+		bool RenderGraphPassV2::IsBufferRead(const RGResourceHandle handle) const
+		{
+			return Algorithm::VectorFind(BufferReads, handle) != BufferReads.end();
+		}
+
+		bool RenderGraphPassV2::IsTextureRead(const std::string_view name) const
+		{
+			const RGResourceHandle handle = RenderGraph->GetTexture(name.data());
+			return IsTextureRead(handle);
+		}
+		bool RenderGraphPassV2::IsTextureRead(const RGResourceHandle handle) const
+		{
+			return Algorithm::VectorFind(TextureReads, handle) != TextureReads.end();
 		}
 	}
 }

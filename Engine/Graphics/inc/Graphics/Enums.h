@@ -8,7 +8,6 @@ namespace Insight
 {
 	namespace Graphics
 	{
-		using RGTextureHandle = int;
 #if 0
 		template<typename FlagBits>
 		struct Flags

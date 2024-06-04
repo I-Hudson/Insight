@@ -79,3 +79,6 @@
 [submodule "vendor/PhysX"]
 	path = vendor/PhysX
 	url = https://github.com/NVIDIA-Omniverse/PhysX.git
+[submodule "vendor/Sharpmake"]
+	path = vendor/Sharpmake
+	url = https://github.com/ubisoft/Sharpmake
