@@ -65,6 +65,7 @@ namespace Insight
 			return static_cast<std::underlying_type_t<T>>(e);
 		}
 #endif 
+		using RGTextureHandle = int;
 
 		enum class ResourceType
 		{

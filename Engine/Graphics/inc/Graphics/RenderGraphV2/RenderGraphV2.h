@@ -34,10 +34,10 @@ namespace Insight
 			void Swap();
 			void Execute(RHI_CommandList* cmdList);
 
-			RGBufferHandle CreateBuffer(std::string bufferName);
+			RGResourceHandle CreateBuffer(std::string bufferName);
 			RGTextureHandle CreateTexture(std::string bufferName);
 
-			RGBufferHandle GetBuffer(std::string bufferName) const;
+			RGResourceHandle GetBuffer(std::string bufferName) const;
 			RHI_Buffer* GetRHIBuffer(std::string bufferName) const;
 			RHI_Buffer* GetRHIBuffer(RGTextureHandle handle) const;
 
@@ -60,19 +60,11 @@ namespace Insight
 			void AddPreRender(RenderGraphSetPreRenderFunc func);
 			void AddPostRender(RenderGraphSetPreRenderFunc func);
 
-			void AddGraphicsPass(std::string passName
-				, RenderGraphGraphicsPassV2::PreExecuteFunc preExecuteFunc
-				, RenderGraphGraphicsPassV2::ExecuteFunc executeFunc
-				, RenderGraphGraphicsPassV2::PostExecuteFunc postExecuteFunc)
+			RenderGraphPassV2& AddGraphicsPass(std::string passName)
 			{
 				std::lock_guard lock(m_mutex);
-				GetGraphicsPendingPasses().emplace_back(
-					RenderGraphGraphicsPassV2(
-						this
-						, std::move(passName)
-						, std::move(preExecuteFunc)
-						, std::move(executeFunc)
-						, std::move(postExecuteFunc)));
+				GetGraphicsPendingPasses().emplace_back(RenderGraphPassV2(this, GPUQueue_Graphics, passName));
+				return GetGraphicsPendingPasses().back();
 			}
 
 			/// @brief Set the render resolution size.
@@ -95,13 +87,13 @@ namespace Insight
 			void Render(RHI_CommandList* cmdList);
 			void Clear();
 
-			void PlaceBarriersInToPipeline(RenderGraphPassBaseV2* pass, RHI_CommandList* cmdList);
+			void PlaceBarriersInToPipeline(RenderGraphPassV2* pass, RHI_CommandList* cmdList);
 
-			std::vector<RenderGraphGraphicsPassV2>& GetGraphicsPendingPasses();
-			std::vector<RenderGraphGraphicsPassV2>& GetGraphicsRenderPasses();
+			std::vector<RenderGraphPassV2>& GetGraphicsPendingPasses();
+			std::vector<RenderGraphPassV2>& GetGraphicsRenderPasses();
 
-			const std::vector<RenderGraphGraphicsPassV2>& GetGraphicsPendingPasses() const;
-			const std::vector<RenderGraphGraphicsPassV2>& GetGraphicsRenderPasses() const;
+			const std::vector<RenderGraphPassV2>& GetGraphicsPendingPasses() const;
+			const std::vector<RenderGraphPassV2>& GetGraphicsRenderPasses() const;
 
 		private:
 			RenderContext* m_context = nullptr;
@@ -119,9 +111,9 @@ namespace Insight
 			std::vector<RenderGraphSetPreRenderFunc> m_renderPreRenderFunc;
 			std::vector<RenderGraphSetPostRenderFunc> m_renderPostRenderFunc;
 
-			std::vector<std::vector<RenderGraphGraphicsPassV2>> m_graphicsPasses;
+			std::vector<std::vector<RenderGraphPassV2>> m_graphicsPasses;
 			//std::vector<std::vector<UPtr<RenderGraphComputePassV2>>> m_computePasses;
-			std::vector<RenderGraphPassBaseV2*> m_orderedPasses;
+			std::vector<RenderGraphPassV2*> m_orderedPasses;
 
 
 			/// @brief General render resolution to be used for all render passes. Can be overwritten.

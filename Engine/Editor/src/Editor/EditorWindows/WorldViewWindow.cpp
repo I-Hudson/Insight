@@ -11,6 +11,9 @@
 #include "Graphics/GraphicsSystem.h"
 #include "Graphics/RenderGraph/RenderGraph.h"
 #include "Graphics/RenderGraph/RenderGraphBuilder.h"
+#ifdef RENDERGRAPH_V2_ENABLED
+#include "Graphics/RenderGraphV2/RenderGraphV2.h"
+#endif
 
 #include "Graphics/Enums.h"
 #include "Graphics/ShaderDesc.h"
@@ -228,6 +231,12 @@ namespace Insight
             struct WorldTransparentGBufferData
             { };
             WorldTransparentGBufferData passData;
+
+            Graphics::RenderGraphV2::Instance().AddGraphicsPass("EditorWorldLightShadowPass")
+                .SetExecuteFunc([](Graphics::RenderGraph* renderGraph, Graphics::RHI_CommandList* cmdList)
+                    {
+
+                    });
 
             Graphics::RenderGraph::Instance().AddPass<WorldTransparentGBufferData>("EditorWorldLightShadowPass",
                 [](WorldTransparentGBufferData& data, Graphics::RenderGraphBuilder& builder)

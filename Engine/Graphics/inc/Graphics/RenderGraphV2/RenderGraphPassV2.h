@@ -3,7 +3,6 @@
 #ifdef RENDERGRAPH_V2_ENABLED
 
 #include "Graphics/Enums.h"
-#include "Graphics/RenderGraphV2/RenderGraphTask.h"
 
 #include "Graphics/ShaderDesc.h"
 #include "Graphics/PipelineStateObject.h"
@@ -33,7 +32,7 @@ namespace Insight
 
 		class IS_GRAPHICS RenderGraphPassV2
 		{
-			using ExecuteFunc = std::function<void(RenderGraph*, RHI_CommandList*)>;
+			using ExecuteFunc = std::function<void(RenderGraphV2*, RHI_CommandList*)>;
 		public:
 			RenderGraphPassV2(RenderGraphV2* renderGraph, GPUQueue gpuQueue, const std::string name);
 			~RenderGraphPassV2();
