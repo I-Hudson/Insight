@@ -232,12 +232,6 @@ namespace Insight
             { };
             WorldTransparentGBufferData passData;
 
-            Graphics::RenderGraphV2::Instance().AddGraphicsPass("EditorWorldLightShadowPass")
-                .SetExecuteFunc([](Graphics::RenderGraph* renderGraph, Graphics::RHI_CommandList* cmdList)
-                    {
-
-                    });
-
             Graphics::RenderGraph::Instance().AddPass<WorldTransparentGBufferData>("EditorWorldLightShadowPass",
                 [](WorldTransparentGBufferData& data, Graphics::RenderGraphBuilder& builder)
                 {
@@ -773,7 +767,9 @@ namespace Insight
             IS_PROFILE_FUNCTION();
 
             struct WorldTransparentGBufferData
-            { };
+            {
+                bool ComputePass = false;
+            };
             WorldTransparentGBufferData passData;
 
             Graphics::RenderGraph::Instance().AddPass<WorldTransparentGBufferData>("EditorWorldLightPass",
@@ -788,7 +784,7 @@ namespace Insight
                           renderResolutionX
                         , renderResolutionY
                         , PixelFormat::R8G8B8A8_UNorm
-                        , Graphics::ImageUsageFlagsBits::ColourAttachment | Graphics::ImageUsageFlagsBits::Sampled);
+                        , Graphics::ImageUsageFlagsBits::ColourAttachment | Graphics::ImageUsageFlagsBits::Sampled | Graphics::ImageUsageFlagsBits::Storage);
                     Graphics::RGTextureHandle lightRT = builder.CreateTexture("EditorWorldLightRT", textureCreateInfo);
                     builder.WriteTexture(lightRT);
 
@@ -799,6 +795,9 @@ namespace Insight
 
                     Graphics::ShaderDesc shaderDesc("LightPass", {}, Graphics::ShaderStageFlagBits::ShaderStage_Vertex | Graphics::ShaderStageFlagBits::ShaderStage_Pixel);
                     builder.SetShader(shaderDesc);
+
+                    Graphics::ShaderDesc shaderDescCompute("LightPassCompute", {}, Graphics::ShaderStageFlagBits::ShaderStage_Compute);
+                    //builder.SetShader(shaderDesc);
 
                     Graphics::PipelineStateObject pso = { };
                     {
@@ -812,6 +811,12 @@ namespace Insight
                     }
                     builder.SetPipeline(pso);
 
+
+                    Graphics::ComputePipelineStateObject computePso = {};
+                    computePso.Name = "ComputeEditorLightPass";
+                    computePso.ShaderDescription = shaderDescCompute;
+                    builder.SetComputePipeline(computePso);
+
                     builder.SetViewport(renderResolutionX, renderResolutionY);
                     builder.SetScissor(renderResolutionX, renderResolutionY);
                 },
@@ -819,58 +824,77 @@ namespace Insight
                 {
                     IS_PROFILE_SCOPE("EditorLightPass pass execute");
 
-                    Graphics::PipelineStateObject pso = render_graph.GetPipelineStateObject("EditorWorldLightPass");
-                    cmdList->BindPipeline(pso, nullptr);
-                    cmdList->BeginRenderpass(render_graph.GetRenderpassDescription("EditorWorldLightPass"));
-
+                    if (!data.ComputePass)
                     {
-                        IS_PROFILE_SCOPE("Set Buffer Frame Uniform");
-                        BindCommonResources(cmdList, m_renderingData.GetCurrent());
-                    }
+                        Graphics::PipelineStateObject pso = render_graph.GetPipelineStateObject("EditorWorldLightPass");
+                        cmdList->BindPipeline(pso, nullptr);
+                        cmdList->BeginRenderpass(render_graph.GetRenderpassDescription("EditorWorldLightPass"));
 
-                    cmdList->SetTexture(6, 0, render_graph.GetRHITexture(render_graph.GetTexture("EditorWorldColourRT")));
-                    cmdList->SetTexture(6, 1, render_graph.GetRHITexture(render_graph.GetTexture("EditorWorldDepthStencilRT")));
-                    //cmdList->SetTexture(1, 7, render_graph.GetRHITexture(""));
-                    
-                    const RenderFrame& renderFrame = m_renderingData.GetCurrent().RenderFrame;
-                    for (const RenderWorld& world : renderFrame.RenderWorlds)
-                    {
-                        const u32 c_MaxPointLights = 32;
-
-                        struct PointLightBuffer
                         {
-                            RenderPointLight PointLights[c_MaxPointLights];
-                            int PointLightSize;
-                        };
+                            IS_PROFILE_SCOPE("Set Buffer Frame Uniform");
+                            BindCommonResources(cmdList, m_renderingData.GetCurrent());
+                        }
 
-                        PointLightBuffer pointLightBuffer;
+                        cmdList->SetTexture(6, 0, render_graph.GetRHITexture(render_graph.GetTexture("EditorWorldColourRT")));
+                        cmdList->SetTexture(6, 1, render_graph.GetRHITexture(render_graph.GetTexture("EditorWorldDepthStencilRT")));
+                        //cmdList->SetTexture(1, 7, render_graph.GetRHITexture(""));
+
+                        const RenderFrame& renderFrame = m_renderingData.GetCurrent().RenderFrame;
+                        for (const RenderWorld& world : renderFrame.RenderWorlds)
                         {
-                            IS_PROFILE_SCOPE("Set point light data");
-                            for (size_t i = 0; i < world.PointLights.size(); ++i)
+                            const u32 c_MaxPointLights = 32;
+
+                            struct PointLightBuffer
                             {
-                                if (i >= 32)
+                                RenderPointLight PointLights[c_MaxPointLights];
+                                int PointLightSize;
+                            };
+
+                            PointLightBuffer pointLightBuffer;
+                            {
+                                IS_PROFILE_SCOPE("Set point light data");
+                                for (size_t i = 0; i < world.PointLights.size(); ++i)
                                 {
-                                    FAIL_ASSERT_MSG("Only 32 point lights are supported.");
-                                    break;
+                                    if (i >= 32)
+                                    {
+                                        FAIL_ASSERT_MSG("Only 32 point lights are supported.");
+                                        break;
+                                    }
+
+                                    pointLightBuffer.PointLights[i] = world.PointLights[i];
+                                    cmdList->SetTexture(7, 0 + i, world.PointLights[i].DepthTexture);
                                 }
-
-                                pointLightBuffer.PointLights[i] = world.PointLights[i];
-                                cmdList->SetTexture(7, 0 + i, world.PointLights[i].DepthTexture);
+                                pointLightBuffer.PointLightSize = world.PointLights.size();
                             }
-                            pointLightBuffer.PointLightSize = world.PointLights.size();
+
+                            Graphics::RHI_BufferView spotLightRHIBuffer = cmdList->UploadUniform(pointLightBuffer);
+                            {
+                                IS_PROFILE_SCOPE("SetUniform");
+                                cmdList->SetUniform(6, 0, spotLightRHIBuffer);
+                            }
+                            cmdList->Draw(3, 1, 0, 0);
+
+                            break;
                         }
 
-                        Graphics::RHI_BufferView spotLightRHIBuffer = cmdList->UploadUniform(pointLightBuffer);
-                        {
-                            IS_PROFILE_SCOPE("SetUniform");
-                            cmdList->SetUniform(6, 0, spotLightRHIBuffer);
-                        }
-                        cmdList->Draw(3, 1, 0, 0);
-
-                        break;
+                        cmdList->EndRenderpass();
                     }
+                    else
+                    {
+                        Graphics::ComputePipelineStateObject pso = render_graph.GetComputePipelineStateObject("EditorWorldLightPass");
+                        cmdList->BindPipeline(pso);
 
-                    cmdList->EndRenderpass();
+                        BindCommonResources(cmdList, m_renderingData.GetCurrent());
+
+                        cmdList->SetUnorderedAccess(0, 0, render_graph.GetRHITexture(render_graph.GetTexture("EditorWorldLightRT")));
+                        cmdList->SetUnorderedAccess(0, 1, render_graph.GetRHITexture(render_graph.GetTexture("EditorWorldDepthStencilRT")));
+                        cmdList->SetUnorderedAccess(0, 2, render_graph.GetRHITexture(render_graph.GetTexture("EditorWorldColourRT")));
+
+                        // The descriptor allocator should "request" descriptor handles and such from resources as the resource can't just make every descriptor
+                        // for itself. Or the resource should make descriptors depending on the 'ImageUsageFlagsBits' it has been given.
+
+                        //cmdList->Dispatch();
+                    }
                 }, std::move(passData));
         }
 

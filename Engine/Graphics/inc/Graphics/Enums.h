@@ -122,8 +122,9 @@ namespace Insight
 			ShaderStage_TessEval		= 1 << 2,
 			ShaderStage_Geometry		= 1 << 3,
 			ShaderStage_Pixel			= 1 << 4,
+			ShaderStage_Compute			= 1 << 5,
 		};
-		const u32 ShaderStageCount = 5;
+		const u32 ShaderStageCount = 6;
 		using ShaderStageFlags = u32;
 
 		enum class PrimitiveTopologyType

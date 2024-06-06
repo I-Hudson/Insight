@@ -22,7 +22,11 @@ namespace Insight
 
 			void SetRenderContext(RenderContext* context);
 			RHI_PipelineLayout* GetOrCreateLayout(PipelineStateObject pso);
+			RHI_PipelineLayout* GetOrCreateLayout(ComputePipelineStateObject pso);
 			void Destroy();
+
+		private:
+			u64 HashDescriptors(const RHI_Shader* shader) const;
 
 		private:
 			std::map<u64, RHI_PipelineLayout*> m_layouts;
@@ -37,6 +41,7 @@ namespace Insight
 
 			void SetRenderContext(RenderContext* context);
 			RHI_Pipeline* GetOrCreatePSO(PipelineStateObject pso);
+			RHI_Pipeline* GetOrCreatePSO(ComputePipelineStateObject pso);
 			void Destroy();
 
 			void DestroyPipelineWithShader(const ShaderDesc& shaderDesc);

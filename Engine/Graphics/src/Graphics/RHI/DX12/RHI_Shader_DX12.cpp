@@ -31,6 +31,7 @@ namespace Insight
                 if (m_shaderDesc.Stages & ShaderStageFlagBits::ShaderStage_TessEval) { CompileStage(ShaderStageFlagBits::ShaderStage_TessEval, m_shaderDesc.ShaderData, 2); }
                 if (m_shaderDesc.Stages & ShaderStageFlagBits::ShaderStage_Geometry) { CompileStage(ShaderStageFlagBits::ShaderStage_Geometry, m_shaderDesc.ShaderData, 3); }
                 if (m_shaderDesc.Stages & ShaderStageFlagBits::ShaderStage_Pixel) { CompileStage(ShaderStageFlagBits::ShaderStage_Pixel, m_shaderDesc.ShaderData, 4); }
+                if (m_shaderDesc.Stages & ShaderStageFlagBits::ShaderStage_Compute) { CompileStage(ShaderStageFlagBits::ShaderStage_Compute, m_shaderDesc.ShaderData, 5); }
 
 #ifdef DX12_GROUP_SAMPLER_DESCRIPTORS
                 std::vector<DescriptorBinding> samplerBindings;
@@ -92,6 +93,11 @@ namespace Insight
 
             void RHI_Shader_DX12::CreateVertexInputLayout(const ShaderDesc& desc)
             {
+                if (desc.Stages & ShaderStageFlagBits::ShaderStage_Compute)
+                {
+                    return;
+                }
+
                 if (!desc.InputLayout.empty())
                 {
                     m_shaderInputLayout = desc.InputLayout;

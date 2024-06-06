@@ -97,6 +97,11 @@ namespace Insight
 			m_pass->m_pso = std::move(pso);
 		}
 
+		void RenderGraphBuilder::SetComputePipeline(ComputePipelineStateObject pso)
+		{
+			m_pass->m_computePSO = std::move(pso);
+		}
+
 		void RenderGraphBuilder::SetViewport(u32 width, u32 height)
 		{
 			m_pass->m_viewport = Maths::Vector2(width, height);

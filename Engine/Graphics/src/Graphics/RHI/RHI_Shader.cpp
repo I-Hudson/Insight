@@ -671,6 +671,7 @@ namespace Insight
 			case ShaderStageFlagBits::ShaderStage_TessEval: return "TEMain";
 			case ShaderStageFlagBits::ShaderStage_Geometry: return "GSMain";
 			case ShaderStageFlagBits::ShaderStage_Pixel: return "PSMain";
+			case ShaderStageFlagBits::ShaderStage_Compute: return "CSMain";
 				break;
 			}
 			return "";
@@ -685,6 +686,7 @@ namespace Insight
 			case ShaderStageFlagBits::ShaderStage_TessEval: return "te_6_1";
 			case ShaderStageFlagBits::ShaderStage_Geometry: return "gs_6_1";
 			case ShaderStageFlagBits::ShaderStage_Pixel: return "ps_6_1";
+			case ShaderStageFlagBits::ShaderStage_Compute: return "cs_6_1";
 				break;
 			}
 			FAIL_ASSERT();

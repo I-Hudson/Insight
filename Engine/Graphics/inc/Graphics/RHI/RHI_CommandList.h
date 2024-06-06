@@ -81,6 +81,8 @@ namespace Insight
 			void SetUniform(u32 set, u32 binding, const T& data) { SetUniform(set, binding, static_cast<const void*>(&data), sizeof(T)); }
 			void SetTexture(u32 set, u32 binding, const RHI_Texture* texture);
 			void SetSampler(u32 set, u32 binding, const RHI_Sampler* sampler);
+			void SetUnorderedAccess(const u32 set, const u32 binding, const RHI_BufferView bufferView);
+			void SetUnorderedAccess(const u32 set, const u32 binding, const RHI_Texture* texture);
 
 			/// @brief Upload data to the frame uniform buffer. Does not bind.
 			/// @param set 
@@ -110,6 +112,7 @@ namespace Insight
 
 			virtual void BindPipeline(PipelineStateObject pso, RHI_DescriptorLayout* layout) = 0;
 			virtual void BindPipeline(PipelineStateObject pso, bool clearDescriptors) = 0;
+			virtual void BindPipeline(ComputePipelineStateObject pso) = 0;
 
 			virtual void BeginTimeBlock(const std::string& blockName);
 			virtual void BeginTimeBlock(const std::string& blockName, Maths::Vector4 colour);
@@ -135,6 +138,7 @@ namespace Insight
 
 			PipelineStateObject m_pso;
 			PipelineStateObject m_activePSO;
+			ComputePipelineStateObject m_activeComputePSO;
 
 			RHI_CommandListStates m_state = RHI_CommandListStates::Idle;
 

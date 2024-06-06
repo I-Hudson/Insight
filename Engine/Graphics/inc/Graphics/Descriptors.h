@@ -44,6 +44,8 @@ namespace Insight
 			std::vector<RHI_BufferView> RHI_Buffer_View;
 			std::vector<const RHI_Texture*> RHI_Texture;
 			std::vector<const RHI_Sampler*> RHI_Sampler;
+			std::vector<RHI_BufferView> RHI_UAVBuffer;
+			std::vector<const RHI_Texture*> RHI_UAVTexture;
 		};
 
 		struct DescriptorSet

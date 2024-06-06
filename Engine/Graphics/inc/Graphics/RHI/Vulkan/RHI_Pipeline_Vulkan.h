@@ -23,6 +23,7 @@ namespace Insight
 
                 // RHI_Pipeline
                 virtual void Create(RenderContext* context, PipelineStateObject pso) override;
+                virtual void Create(RenderContext* context, ComputePipelineStateObject pso) override;
 
                 // RHI_Resource
                 virtual void Release() override;

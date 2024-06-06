@@ -77,6 +77,8 @@ namespace Insight
 
 				virtual void BindPipeline(PipelineStateObject pso, RHI_DescriptorLayout* layout) override;
 				virtual void BindPipeline(PipelineStateObject pso, bool clearDescriptors) override;
+				virtual void BindPipeline(ComputePipelineStateObject pso) override;
+
 
 				virtual void BeginTimeBlock(const std::string& blockName) override;
 				virtual void BeginTimeBlock(const std::string& blockName, Maths::Vector4 colour) override;

@@ -66,5 +66,16 @@ namespace Insight
 			}
 			return hash;
 		}
+
+		u64 Insight::Graphics::ComputePipelineStateObject::GetHash() const
+		{
+			u64 hash = 0;
+			IS_PROFILE_SCOPE("GetHash");
+			{
+				IS_PROFILE_SCOPE("shader");
+				HashCombine(hash, Shader);
+			}
+			return hash;
+		}
 	}
 }

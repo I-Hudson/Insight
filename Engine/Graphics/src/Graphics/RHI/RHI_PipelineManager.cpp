@@ -33,23 +33,26 @@ namespace Insight
 			IS_PROFILE_FUNCTION();
 			assert(m_context != nullptr);
 
-				u64 hash = 0;
+			const u64 hash = HashDescriptors(pso.Shader);
+
+			auto itr = m_layouts.find(hash);
+			if (itr != m_layouts.end())
 			{
-				IS_PROFILE_SCOPE("DescriptorSet hashing");
-				const std::vector<DescriptorSet> descriptor_sets = pso.Shader->GetDescriptorSets();
-				for (const DescriptorSet& descriptor_set : descriptor_sets)
-				{
-					HashCombine(hash, descriptor_set.GetHash(false));
-				}
+				return itr->second;
 			}
 
-			{
-				IS_PROFILE_SCOPE("PushConstant hashing");
-				PushConstant push_constant = pso.Shader->GetPushConstant();
-				HashCombine(hash, push_constant.ShaderStages);
-				HashCombine(hash, push_constant.Offset);
-				HashCombine(hash, push_constant.Size);
-			}
+			RHI_PipelineLayout* layout = RHI_PipelineLayout::New();
+			layout->Create(m_context, pso);
+			m_layouts[hash] = layout;
+			return layout;
+		}
+
+		RHI_PipelineLayout* RHI_PipelineLayoutManager::GetOrCreateLayout(ComputePipelineStateObject pso)
+		{
+			IS_PROFILE_FUNCTION();
+			assert(m_context != nullptr);
+
+			const u64 hash = HashDescriptors(pso.Shader);
 
 			auto itr = m_layouts.find(hash);
 			if (itr != m_layouts.end())
@@ -75,6 +78,30 @@ namespace Insight
 			m_layouts.clear();
 		}
 
+		u64 RHI_PipelineLayoutManager::HashDescriptors(const RHI_Shader* shader) const
+		{
+			ASSERT(shader);
+
+			u64 hash = 0;
+			{
+				IS_PROFILE_SCOPE("DescriptorSet hashing");
+				const std::vector<DescriptorSet> descriptor_sets = shader->GetDescriptorSets();
+				for (const DescriptorSet& descriptor_set : descriptor_sets)
+				{
+					HashCombine(hash, descriptor_set.GetHash(false));
+				}
+			}
+
+			{
+				IS_PROFILE_SCOPE("PushConstant hashing");
+				PushConstant push_constant = shader->GetPushConstant();
+				HashCombine(hash, push_constant.ShaderStages);
+				HashCombine(hash, push_constant.Offset);
+				HashCombine(hash, push_constant.Size);
+			}
+			return hash;
+		}
+
 		//-------------------------
 		// RHI_PipelineManager
 		//-------------------------
@@ -92,6 +119,25 @@ namespace Insight
 		}
 
 		RHI_Pipeline* RHI_PipelineManager::GetOrCreatePSO(PipelineStateObject pso)
+		{
+			IS_PROFILE_FUNCTION();
+
+			assert(m_context != nullptr);
+
+			const u64 psoHash = pso.GetHash();
+			auto itr = m_pipelineStateObjects.find(psoHash);
+			if (itr != m_pipelineStateObjects.end())
+			{
+				return itr->second;
+			}
+
+			RHI_Pipeline* pipeline = RHI_Pipeline::New();
+			pipeline->Create(m_context, pso);
+			m_pipelineStateObjects[psoHash] = pipeline;
+			return pipeline;
+		}
+
+		RHI_Pipeline* RHI_PipelineManager::GetOrCreatePSO(ComputePipelineStateObject pso)
 		{
 			IS_PROFILE_FUNCTION();
 

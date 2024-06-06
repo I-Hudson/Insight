@@ -79,16 +79,24 @@ namespace Insight
 		{
 			m_descriptorAllocator->SetUniform(set, binding, data, size);
 		}
-
 		void RHI_CommandList::SetTexture(u32 set, u32 binding, const RHI_Texture* texture)
 		{
 			m_descriptorAllocator->SetTexture(set, binding, texture);
 			m_context->GetResourceRenderTracker().TrackResource(texture);
 		}
-
 		void RHI_CommandList::SetSampler(u32 set, u32 binding, const RHI_Sampler* sampler)
 		{
 			m_descriptorAllocator->SetSampler(set, binding, sampler);
+		}
+		void RHI_CommandList::SetUnorderedAccess(const u32 set, const u32 binding, const RHI_BufferView bufferView)
+		{
+			m_descriptorAllocator->SetUnorderedAccess(set, binding, bufferView);
+			m_context->GetResourceRenderTracker().TrackResource(bufferView.GetBuffer());
+		}
+		void RHI_CommandList::SetUnorderedAccess(const u32 set, const u32 binding, const RHI_Texture* texture)
+		{
+			m_descriptorAllocator->SetUnorderedAccess(set, binding, texture);
+			m_context->GetResourceRenderTracker().TrackResource(texture);
 		}
 
 		RHI_BufferView RHI_CommandList::UploadUniform(const void* data, u32 size)

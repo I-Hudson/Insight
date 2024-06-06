@@ -39,6 +39,7 @@ namespace Insight
 
                 // RHI_Pipeline
                 virtual void Create(RenderContext* context, PipelineStateObject pso) override;
+                virtual void Create(RenderContext* context, ComputePipelineStateObject pso) override;
 
                 // RHI_Resource
                 virtual void Release() override;
@@ -46,6 +47,8 @@ namespace Insight
                 virtual void SetName(std::string name) override;
 
             private:
+                void CreateLayout(RenderContext* context, RHI_Shader* shader, std::string_view name);
+
                 bool CheckForRootDescriptors(const DescriptorSet& descriptorSet);
                 std::vector<CD3DX12_ROOT_DESCRIPTOR> GetRootDescriptor(const DescriptorSet& descriptorSet);
                 std::vector<CD3DX12_DESCRIPTOR_RANGE> GetDescriptoirRangesFromSet(const DescriptorSet& descriptorSet);

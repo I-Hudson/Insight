@@ -31,11 +31,43 @@ namespace Insight
 
 			void RHI_PipelineLayout_DX12::Create(RenderContext* context, PipelineStateObject pso)
 			{
+				CreateLayout(context, pso.Shader, pso.Name);
+			}
+
+			void RHI_PipelineLayout_DX12::Create(RenderContext* context, ComputePipelineStateObject pso)
+			{
+				CreateLayout(context, pso.Shader, pso.Name);
+			}
+
+			void RHI_PipelineLayout_DX12::Release()
+			{
+				if (m_rootSignature != nullptr)
+				{
+					m_rootSignature->Release();
+					m_rootSignature = nullptr;
+				}
+			}
+
+			bool RHI_PipelineLayout_DX12::ValidResource()
+			{
+				return m_rootSignature != nullptr;
+			}
+
+			void RHI_PipelineLayout_DX12::SetName(std::string name)
+			{
+				if (m_rootSignature)
+				{
+					m_context->SetObjectName(name, m_rootSignature);
+				}
+			}
+
+			void RHI_PipelineLayout_DX12::CreateLayout(RenderContext* context, RHI_Shader* shader, std::string_view name)
+			{
 				m_context = static_cast<RenderContext_DX12*>(context);
 
 				const u64 RootSignitureMaxSlots = 64;
 				u64 RootSignitureCurrentSlotsUsed = 0;
-				const std::vector<DescriptorSet> descriptor_sets = pso.Shader->GetDescriptorSets();
+				const std::vector<DescriptorSet> descriptor_sets = shader->GetDescriptorSets();
 				m_rootSignatureParameters = {};
 
 				u32 rootParamterIdx = 0;
@@ -141,29 +173,7 @@ namespace Insight
 
 				m_context->GetDevice()->CreateRootSignature(0, pSerializedRootSig->GetBufferPointer(), pSerializedRootSig->GetBufferSize(),
 					IID_PPV_ARGS(&m_rootSignature));
-				SetName(pso.Name + "_Layout");
-			}
-
-			void RHI_PipelineLayout_DX12::Release()
-			{
-				if (m_rootSignature != nullptr)
-				{
-					m_rootSignature->Release();
-					m_rootSignature = nullptr;
-				}
-			}
-
-			bool RHI_PipelineLayout_DX12::ValidResource()
-			{
-				return m_rootSignature != nullptr;
-			}
-
-			void RHI_PipelineLayout_DX12::SetName(std::string name)
-			{
-				if (m_rootSignature)
-				{
-					m_context->SetObjectName(name, m_rootSignature);
-				}
+				SetName(std::string(name.data()) + "_Layout");
 			}
 
 			bool RHI_PipelineLayout_DX12::CheckForRootDescriptors(const DescriptorSet& descriptorSet)

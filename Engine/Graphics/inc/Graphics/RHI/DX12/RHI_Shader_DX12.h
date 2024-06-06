@@ -43,7 +43,7 @@ namespace Insight
 				D3D12_INPUT_LAYOUT_DESC m_inputLayout;
 				std::vector<D3D12_INPUT_ELEMENT_DESC> m_inputElements;
 				ShaderDesc m_shaderDesc;
-				std::array<IDxcBlob*, 5> m_modules;
+				std::array<IDxcBlob*, ShaderStageCount> m_modules;
 				RenderContext_DX12* m_context{ nullptr };
 			};
 		}

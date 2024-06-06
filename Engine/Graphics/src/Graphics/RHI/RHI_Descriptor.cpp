@@ -406,13 +406,17 @@ namespace Insight
 
 		void DescriptorAllocator::SetPipeline(PipelineStateObject pso)
 		{
-			RHI_Shader* shader = pso.Shader;
+			SetPipeline(pso.Shader);
+		}
+
+		void DescriptorAllocator::SetPipeline(RHI_Shader* shader)
+		{
 			if (!shader)
 			{
 				return;
 			}
 
-			m_descriptor_sets = pso.Shader->GetDescriptorSets();
+			m_descriptor_sets = shader->GetDescriptorSets();
 
 			// Reset the hash used for DX12.
 			for (DescriptorSet& set : m_descriptor_sets)
@@ -584,6 +588,62 @@ namespace Insight
 					{
 						descriptorBinding->RHI_Sampler[bindingIdx] = sampler;
 						HashCombine(descriptorSet->DX_Hash, descriptorBinding->RHI_Sampler[bindingIdx]);
+					}
+				}
+			}
+		}
+
+		void DescriptorAllocator::SetUnorderedAccess(const u32 set, u32 binding, const RHI_BufferView buffer_view)
+		{
+			if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan)
+			{
+				// Apply an offset to our bindings as vulkan shaders are compiled with these offsets 
+				// due to the possible binding idx conflict.
+				binding += c_VulkanSamplerBindingShift;
+			}
+
+			if (!CheckSetAndBindingBounds(set, binding))
+			{
+				return;
+			}
+
+			if (DescriptorSet* descriptorSet = GetDescriptorSet(set))
+			{
+				if (DescriptorBinding* descriptorBinding = GetDescriptorBinding(descriptorSet, binding, DescriptorType::Storage_Buffer))
+				{
+					const u32 bindingIdx = binding - descriptorBinding->Binding;
+					if (descriptorBinding->RHI_UAVBuffer[bindingIdx] != buffer_view)
+					{
+						descriptorBinding->RHI_UAVBuffer[bindingIdx] = buffer_view;
+						HashCombine(descriptorSet->DX_Hash, descriptorBinding->RHI_UAVBuffer[bindingIdx]);
+					}
+				}
+			}
+		}
+
+		void DescriptorAllocator::SetUnorderedAccess(const u32 set, u32 binding, const RHI_Texture* texture)
+		{
+			if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan)
+			{
+				// Apply an offset to our bindings as vulkan shaders are compiled with these offsets 
+				// due to the possible binding idx conflict.
+				binding += c_VulkanSamplerBindingShift;
+			}
+
+			if (!CheckSetAndBindingBounds(set, binding))
+			{
+				return;
+			}
+
+			if (DescriptorSet* descriptorSet = GetDescriptorSet(set))
+			{
+				if (DescriptorBinding* descriptorBinding = GetDescriptorBinding(descriptorSet, binding, DescriptorType::Storage_Image))
+				{
+					const u32 bindingIdx = binding - descriptorBinding->Binding;
+					if (descriptorBinding->RHI_UAVTexture[bindingIdx] != texture)
+					{
+						descriptorBinding->RHI_UAVTexture[bindingIdx] = texture;
+						HashCombine(descriptorSet->DX_Hash, descriptorBinding->RHI_UAVTexture[bindingIdx]);
 					}
 				}
 			}

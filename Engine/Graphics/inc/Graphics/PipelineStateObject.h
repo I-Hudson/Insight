@@ -65,5 +65,21 @@ namespace Insight
 				return Shader;
 			}
 		};
+
+		struct ComputePipelineStateObject
+		{
+			std::string Name;
+			ShaderDesc ShaderDescription;
+
+			/// Private members. Should not be touched.
+			RHI_Shader* Shader = nullptr;
+
+			u64 GetHash() const;
+
+			bool IsValid() const
+			{
+				return Shader;
+			}
+		};
 	}
 }

@@ -105,6 +105,7 @@ namespace Insight
 			DescriptorAllocator();
 
 			void SetPipeline(PipelineStateObject pso);
+			void SetPipeline(RHI_Shader* shader);
 
 			bool WasUniformBufferResized() const;
 			RHI_BufferView UploadUniform(const void* data, u32 size);
@@ -113,6 +114,8 @@ namespace Insight
 			void SetUniform(u32 set, u32 binding, RHI_BufferView buffer_view);
 			void SetTexture(u32 set, u32 binding, const RHI_Texture* texture);
 			void SetSampler(u32 set, u32 binding, const RHI_Sampler* sampler);
+			void SetUnorderedAccess(const u32 set, u32 binding, const RHI_BufferView buffer_view);
+			void SetUnorderedAccess(const u32 set, u32 binding, const RHI_Texture* texture);
 
 			std::vector<DescriptorSet> const& GetAllocatorDescriptorSets() const;
 

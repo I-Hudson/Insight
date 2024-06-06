@@ -50,6 +50,7 @@ namespace Insight
 
 			RenderpassDescription GetRenderpassDescription(std::string_view passName) const;
 			PipelineStateObject GetPipelineStateObject(std::string_view passName) const;
+			ComputePipelineStateObject GetComputePipelineStateObject(std::string_view psoName) const;
 
 			void Release();
 

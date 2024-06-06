@@ -212,6 +212,33 @@ namespace Insight
 				SetName(pso.Name);
             }
 
+			void RHI_Pipeline_Vulkan::Create(RenderContext* context, ComputePipelineStateObject pso)
+			{
+				m_context = static_cast<RenderContext_Vulkan*>(context);
+				/// Create pipeline layout.
+				/// Create descriptor set layout
+				RHI_PipelineLayout* layout = m_context->GetPipelineLayoutManager().GetOrCreateLayout(pso);
+
+				RHI_Shader_Vulkan* shaderVulkan = static_cast<RHI_Shader_Vulkan*>(m_context->GetShaderManager().GetOrCreateShader(pso.ShaderDescription));
+				VkShaderModule shaderModule = shaderVulkan->GetStage(ShaderStage_Compute);
+
+				VkPipelineShaderStageCreateInfo computeShaderStage;
+				computeShaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+				computeShaderStage.stage = ShaderStageFlagBitsToVulkan(ShaderStage_Compute);
+				computeShaderStage.module = shaderModule;
+				std::string_view mainFuncName = shaderVulkan->GetMainFuncName(ShaderStage_Compute);
+				computeShaderStage.pName = mainFuncName.data();
+
+
+				VkComputePipelineCreateInfo computePipelineCreateInfo = { };
+				computePipelineCreateInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
+				computePipelineCreateInfo.stage = computeShaderStage;
+				computePipelineCreateInfo.layout = static_cast<RHI_PipelineLayout_Vulkan*>(layout)->GetPipelineLayout();
+
+				ThrowIfFailed(vkCreateComputePipelines(m_context->GetDevice(), nullptr, 1, &computePipelineCreateInfo, nullptr, &m_pipeline));
+				SetName(pso.Name);
+			}
+
             void RHI_Pipeline_Vulkan::Release()
             {
                 if (m_pipeline != VK_NULL_HANDLE)

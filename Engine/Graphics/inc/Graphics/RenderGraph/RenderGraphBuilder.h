@@ -43,6 +43,7 @@ namespace Insight
 
 			void SetShader(ShaderDesc shaderDesc);
 			void SetPipeline(PipelineStateObject pso);
+			void SetComputePipeline(ComputePipelineStateObject pso);
 
 			void SetViewport(u32 width, u32 height);
 			void SetScissor(u32 width, u32 height);

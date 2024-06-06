@@ -205,6 +205,20 @@ namespace Insight
 			return { };
 		}
 
+		ComputePipelineStateObject RenderGraph::GetComputePipelineStateObject(std::string_view psoName) const
+		{
+			ASSERT(m_context->IsRenderThread());
+			auto itr = std::find_if(GetRenderPasses().begin(), GetRenderPasses().end(), [psoName](const UPtr<RenderGraphPassBase>& pass)
+				{
+					return pass->m_computePSO.Name == psoName;
+				});
+			if (itr != GetRenderPasses().end())
+			{
+				return (*itr)->m_computePSO;
+			}
+			return { };
+		}
+
 		void RenderGraph::Release()
 		{
 			IS_PROFILE_FUNCTION();

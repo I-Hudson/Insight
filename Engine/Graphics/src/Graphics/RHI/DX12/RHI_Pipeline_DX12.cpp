@@ -135,7 +135,27 @@ namespace Insight
 				}
 
 				ThrowIfFailed(m_context->GetDevice()->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pipeline)));
-				SetName(pso.Name + "_Pipeline");
+				SetName(pso.Name + "_GraphicsPipeline");
+			}
+
+			void RHI_Pipeline_DX12::Create(RenderContext* context, ComputePipelineStateObject pso)
+			{
+				m_context = static_cast<RenderContext_DX12*>(context);
+
+				RHI_PipelineLayout_DX12* rootSignature = static_cast<RHI_PipelineLayout_DX12*>(m_context->GetPipelineLayoutManager().GetOrCreateLayout(pso));
+
+				ASSERT(pso.Shader);
+				RHI_Shader_DX12* vertexShader = static_cast<RHI_Shader_DX12*>(pso.Shader);
+				IDxcBlob* blob = vertexShader->GetStage(ShaderStage_Compute);
+				CD3DX12_SHADER_BYTECODE shaderByteCode(blob->GetBufferPointer(), blob->GetBufferSize());
+
+				// Describe and create the PSO for compute.
+				D3D12_COMPUTE_PIPELINE_STATE_DESC psoDesc = {};
+				psoDesc.pRootSignature = rootSignature->GetRootSignature();
+				psoDesc.CS = shaderByteCode;
+
+				ThrowIfFailed(m_context->GetDevice()->CreateComputePipelineState(&psoDesc, IID_PPV_ARGS(&m_pipeline)));
+				SetName(pso.Name + "_ComputePipeline");
 			}
 
 			void RHI_Pipeline_DX12::Release()

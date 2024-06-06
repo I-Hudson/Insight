@@ -23,11 +23,15 @@ namespace Insight
 
                 // RHI_Pipeline
                 virtual void Create(RenderContext* context, PipelineStateObject pso) override;
+                virtual void Create(RenderContext* context, ComputePipelineStateObject pso) override;
 
                 // RHI_Resource
                 virtual void Release() override;
                 virtual bool ValidResource() override;
                 virtual void SetName(std::string name) override;
+
+            private:
+                void CreateLayout(RenderContext* context, RHI_Shader* shader, std::string name);
 
             private:
                 VkPipelineLayout m_pipelineLayout = VK_NULL_HANDLE;

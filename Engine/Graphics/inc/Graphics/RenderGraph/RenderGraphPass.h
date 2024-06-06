@@ -61,6 +61,7 @@ namespace Insight
 
 			ShaderDesc m_shader = { };
 			PipelineStateObject m_pso = { };
+			ComputePipelineStateObject m_computePSO = { };
 
 			Maths::Vector2 m_viewport;
 			Maths::Vector2 m_scissor;
