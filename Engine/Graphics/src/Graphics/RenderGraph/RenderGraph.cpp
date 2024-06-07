@@ -284,6 +284,9 @@ namespace Insight
 				/// can lookup it up later. Just make sure it exists.
 				pso.Shader = m_context->GetShaderManager().GetOrCreateShader(pass.Get()->m_shader);
 
+				ComputePipelineStateObject& computePSO = pass.Get()->m_computePSO;
+				computePSO.Shader = m_context->GetShaderManager().GetOrCreateShader(computePSO.ShaderDescription);
+
 				int rtIndex = 0;
 				for (auto const& rt : pass.Get()->m_textureWrites)
 				{

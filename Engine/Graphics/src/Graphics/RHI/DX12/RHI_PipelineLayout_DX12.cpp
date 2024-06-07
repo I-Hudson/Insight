@@ -181,8 +181,7 @@ namespace Insight
 				for (const DescriptorBinding& binding : descriptorSet.Bindings)
 				{
 					if (binding.Type != DescriptorType::Unifom_Buffer
-						&& binding.Type != DescriptorType::Storage_Buffer
-						&& binding.Type != DescriptorType::Storage_Image)
+						&& binding.Type != DescriptorType::Storage_Buffer)
 					{
 						return false;
 					}

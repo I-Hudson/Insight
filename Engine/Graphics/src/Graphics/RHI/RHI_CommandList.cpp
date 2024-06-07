@@ -124,7 +124,7 @@ namespace Insight
 			FAIL_ASSERT();
 		}
 
-		bool RHI_CommandList::CanDraw()
+		bool RHI_CommandList::CanDraw(const GPUQueue gpuQueue)
 		{
 			IS_PROFILE_FUNCTION();
 			///u64 hash = 0;
@@ -152,12 +152,7 @@ namespace Insight
 				return false;
 			}
 			 
-			return BindDescriptorSets();
-		}
-
-		bool RHI_CommandList::BindDescriptorSets()
-		{
-			return false;
+			return BindDescriptorSets(gpuQueue);
 		}
 
 

@@ -325,6 +325,10 @@ namespace Insight
 				access_flags = AccessFlagBits::ShaderRead;
 				break;
 
+			case Insight::Graphics::ImageLayout::ShaderWrite:
+				access_flags = AccessFlagBits::ShaderWrite;
+				break;
+
 			case Insight::Graphics::ImageLayout::TransforSrc:
 				access_flags |= AccessFlagBits::TransferRead;
 				break;

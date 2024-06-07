@@ -449,7 +449,7 @@ namespace Insight
 			void RHI_CommandList_Vulkan::Draw(u32 vertexCount, u32 instanceCount, u32 firstVertex, u32 firstInstance)
 			{
 				IS_PROFILE_FUNCTION();
-				if (CanDraw())
+				if (CanDraw(GPUQueue::GPUQueue_Graphics))
 				{
 					vkCmdDraw(m_commandList, vertexCount, instanceCount, firstVertex, firstInstance);
 					RenderStats::Instance().DrawCalls++;
@@ -459,13 +459,24 @@ namespace Insight
 			void RHI_CommandList_Vulkan::DrawIndexed(u32 indexCount, u32 instanceCount, u32 firstIndex, u32 vertexOffset, u32 firstInstance)
 			{
 				IS_PROFILE_FUNCTION();
-				if (CanDraw())
+				if (CanDraw(GPUQueue::GPUQueue_Graphics))
 				{
 					{
 						IS_PROFILE_SCOPE("API call");
 						vkCmdDrawIndexed(m_commandList, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
 						RenderStats::Instance().DrawIndexedCalls++;
 						RenderStats::Instance().DrawIndexedIndicesCount += indexCount;
+					}
+				}
+			}
+
+			void RHI_CommandList_Vulkan::Dispatch(const u32 threadGroupX, const u32 threadGroupY)
+			{
+				if (CanDraw(GPUQueue::GPUQueue_Compute))
+				{
+					{
+						IS_PROFILE_SCOPE("Dispatch");
+						vkCmdDispatch(m_commandList, threadGroupX, threadGroupY, 1);
 					}
 				}
 			}
@@ -527,7 +538,7 @@ namespace Insight
 				m_activeDebugUtilsLabel = VkDebugUtilsLabelEXT();
 			}
 
-			bool RHI_CommandList_Vulkan::BindDescriptorSets()
+			bool RHI_CommandList_Vulkan::BindDescriptorSets(const GPUQueue gpuQueue)
 			{
 				IS_PROFILE_FUNCTION();
 

@@ -612,10 +612,10 @@ namespace Insight
 				if (DescriptorBinding* descriptorBinding = GetDescriptorBinding(descriptorSet, binding, DescriptorType::Storage_Buffer))
 				{
 					const u32 bindingIdx = binding - descriptorBinding->Binding;
-					if (descriptorBinding->RHI_UAVBuffer[bindingIdx] != buffer_view)
+					if (descriptorBinding->RHI_Buffer_View[bindingIdx] != buffer_view)
 					{
-						descriptorBinding->RHI_UAVBuffer[bindingIdx] = buffer_view;
-						HashCombine(descriptorSet->DX_Hash, descriptorBinding->RHI_UAVBuffer[bindingIdx]);
+						descriptorBinding->RHI_Buffer_View[bindingIdx] = buffer_view;
+						HashCombine(descriptorSet->DX_Hash, descriptorBinding->RHI_Buffer_View[bindingIdx]);
 					}
 				}
 			}
@@ -640,10 +640,10 @@ namespace Insight
 				if (DescriptorBinding* descriptorBinding = GetDescriptorBinding(descriptorSet, binding, DescriptorType::Storage_Image))
 				{
 					const u32 bindingIdx = binding - descriptorBinding->Binding;
-					if (descriptorBinding->RHI_UAVTexture[bindingIdx] != texture)
+					if (descriptorBinding->RHI_Texture[bindingIdx] != texture)
 					{
-						descriptorBinding->RHI_UAVTexture[bindingIdx] = texture;
-						HashCombine(descriptorSet->DX_Hash, descriptorBinding->RHI_UAVTexture[bindingIdx]);
+						descriptorBinding->RHI_Texture[bindingIdx] = texture;
+						HashCombine(descriptorSet->DX_Hash, descriptorBinding->RHI_Texture[bindingIdx]);
 					}
 				}
 			}

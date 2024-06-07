@@ -1,8 +1,8 @@
 #include "Common.hlsl"
 
 RWTexture2D<float4> OutputTex  : register(u0);
-Texture2D DepthTex : register(u1);
-Texture2D ColourTex : register(u2);
+Texture2D DepthTex : register(t0);
+Texture2D ColourTex : register(t1);
 
 [numthreads(8, 8, 1)]
 void CSMain(uint3 thread_id : SV_DispatchThreadID)
@@ -14,10 +14,10 @@ void CSMain(uint3 thread_id : SV_DispatchThreadID)
         return;
     }
     
-	const float DepthValue = DepthTex.Sample(Clamp_Sampler, input.UV).r;
-    const float3 worldPosition = reconstruct_position(input.UV, DepthValue, bf_Camera_Projection_View_Inverted);
-	const float3 albedo = (ColourTex.Sample(Clamp_Sampler, input.UV).xyz);
-    const float3 ambientAlbedo = albedo * 0.15;
+	const float DepthValue = DepthTex[thread_id.xy].r;
+    const float3 worldPosition = reconstruct_position(thread_id.xy, DepthValue, bf_Camera_Projection_View_Inverted);
+	const float3 albedo = ColourTex[thread_id.xy].rgb;
+    const float3 ambientAlbedo = albedo * 0.35;
 
-    tex_uav[thread_id.xy] = saturate_16(color);
+    OutputTex[thread_id.xy] = float4(ambientAlbedo, 1);
 }

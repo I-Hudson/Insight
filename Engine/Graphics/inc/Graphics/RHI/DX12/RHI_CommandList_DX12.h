@@ -75,6 +75,8 @@ namespace Insight
 				virtual void Draw(u32 vertexCount, u32 instanceCount, u32 firstVertex, u32 firstInstance) override;
 				virtual void DrawIndexed(u32 indexCount, u32 instanceCount, u32 firstIndex, u32 vertexOffset, u32 firstInstance) override;
 
+				virtual void Dispatch(const u32 threadGroupX, const u32 threadGroupY) override;
+
 				virtual void BindPipeline(PipelineStateObject pso, RHI_DescriptorLayout* layout) override;
 				virtual void BindPipeline(PipelineStateObject pso, bool clearDescriptors) override;
 				virtual void BindPipeline(ComputePipelineStateObject pso) override;
@@ -85,7 +87,7 @@ namespace Insight
 				virtual void EndTimeBlock() override;
 
 			protected:
-				virtual bool BindDescriptorSets() override;
+				virtual bool BindDescriptorSets(const GPUQueue gpuQueue) override;
 				virtual void SetImageLayoutTransition(RHI_Texture* texture, ImageLayout layout) override;
 
 

@@ -48,6 +48,9 @@ namespace Insight
 
 		D3D12_RESOURCE_STATES ImageLayoutToDX12ResouceState(ImageLayout layout);
 		D3D12_SRV_DIMENSION TextureTypeToDX12(TextureType type);
+
+		D3D12_UAV_DIMENSION TextureTypeToDX12UAVDimension(const TextureType type);
+
 		D3D12_DSV_DIMENSION TextureTypeToDX12DSVDimension(TextureType type);
 		D3D12_DSV_DIMENSION TextureTypeToDX12DSVDimension(TextureType type, u32 layerCount);
 

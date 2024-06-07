@@ -762,6 +762,7 @@ namespace Insight
                 }, std::move(passData));
         }
 
+        bool ComputePassForLight = true;
         void WorldViewWindow::LightPass()
         {
             IS_PROFILE_FUNCTION();
@@ -770,7 +771,11 @@ namespace Insight
             {
                 bool ComputePass = false;
             };
-            WorldTransparentGBufferData passData;
+            WorldTransparentGBufferData passData
+            {
+                ComputePassForLight
+            };
+            ImGui::Checkbox("LightPassCompute", &ComputePassForLight);
 
             Graphics::RenderGraph::Instance().AddPass<WorldTransparentGBufferData>("EditorWorldLightPass",
                 [](WorldTransparentGBufferData& data, Graphics::RenderGraphBuilder& builder)
@@ -796,9 +801,6 @@ namespace Insight
                     Graphics::ShaderDesc shaderDesc("LightPass", {}, Graphics::ShaderStageFlagBits::ShaderStage_Vertex | Graphics::ShaderStageFlagBits::ShaderStage_Pixel);
                     builder.SetShader(shaderDesc);
 
-                    Graphics::ShaderDesc shaderDescCompute("LightPassCompute", {}, Graphics::ShaderStageFlagBits::ShaderStage_Compute);
-                    //builder.SetShader(shaderDesc);
-
                     Graphics::PipelineStateObject pso = { };
                     {
                         IS_PROFILE_SCOPE("SetPipelineStateObject");
@@ -811,11 +813,15 @@ namespace Insight
                     }
                     builder.SetPipeline(pso);
 
-
+                    Graphics::ShaderDesc shaderDescCompute("LightPassCompute", {}, Graphics::ShaderStageFlagBits::ShaderStage_Compute);
                     Graphics::ComputePipelineStateObject computePso = {};
                     computePso.Name = "ComputeEditorLightPass";
                     computePso.ShaderDescription = shaderDescCompute;
                     builder.SetComputePipeline(computePso);
+                    if (data.ComputePass)
+                    {
+                        //builder.SetShader(shaderDescCompute);
+                    }
 
                     builder.SetViewport(renderResolutionX, renderResolutionY);
                     builder.SetScissor(renderResolutionX, renderResolutionY);
@@ -881,19 +887,55 @@ namespace Insight
                     }
                     else
                     {
-                        Graphics::ComputePipelineStateObject pso = render_graph.GetComputePipelineStateObject("EditorWorldLightPass");
+                        Graphics::RHI_Texture* outputTexture = render_graph.GetRHITexture(render_graph.GetTexture("EditorWorldLightRT"));
+
+                        Graphics::PipelineBarrier beforeBarreir;
+                        beforeBarreir.SrcStage = static_cast<u32>(Graphics::PipelineStageFlagBits::TopOfPipe);
+                        beforeBarreir.DstStage = static_cast<u32>(Graphics::PipelineStageFlagBits::ComputeShader);
+
+                        Graphics::ImageBarrier beforeImageBarrier;
+                        beforeImageBarrier.SrcAccessFlags = Graphics::AccessFlagBits::None;
+                        beforeImageBarrier.DstAccessFlags = Graphics::AccessFlagBits::ShaderWrite;
+                        beforeImageBarrier.OldLayout = outputTexture->GetLayout();
+                        beforeImageBarrier.NewLayout = Graphics::ImageLayout::ShaderWrite;
+                        beforeImageBarrier.SubresourceRange = Graphics::ImageSubresourceRange::SingleMipAndLayer(Graphics::ImageAspectFlagBits::Colour);
+                        beforeImageBarrier.Image = outputTexture;
+                        beforeBarreir.ImageBarriers.push_back(beforeImageBarrier);
+
+                        cmdList->PipelineBarrier(beforeBarreir);
+
+                        Graphics::ComputePipelineStateObject pso = render_graph.GetComputePipelineStateObject("ComputeEditorLightPass");
                         cmdList->BindPipeline(pso);
 
                         BindCommonResources(cmdList, m_renderingData.GetCurrent());
 
                         cmdList->SetUnorderedAccess(0, 0, render_graph.GetRHITexture(render_graph.GetTexture("EditorWorldLightRT")));
-                        cmdList->SetUnorderedAccess(0, 1, render_graph.GetRHITexture(render_graph.GetTexture("EditorWorldDepthStencilRT")));
-                        cmdList->SetUnorderedAccess(0, 2, render_graph.GetRHITexture(render_graph.GetTexture("EditorWorldColourRT")));
+                        cmdList->SetTexture(0, 0, render_graph.GetRHITexture(render_graph.GetTexture("EditorWorldDepthStencilRT")));
+                        cmdList->SetTexture(0, 1, render_graph.GetRHITexture(render_graph.GetTexture("EditorWorldColourRT")));
 
                         // The descriptor allocator should "request" descriptor handles and such from resources as the resource can't just make every descriptor
                         // for itself. Or the resource should make descriptors depending on the 'ImageUsageFlagsBits' it has been given.
 
-                        //cmdList->Dispatch();
+                        const float thread_group_count = 8.0f;
+                        const uint32_t threadGroupCountX = static_cast<uint32_t>(std::ceil(static_cast<float>(outputTexture->GetWidth()) / thread_group_count));
+                        const uint32_t threadGroupCountY = static_cast<uint32_t>(std::ceil(static_cast<float>(outputTexture->GetHeight()) / thread_group_count));
+
+                        cmdList->Dispatch(threadGroupCountX, threadGroupCountY);
+
+                        Graphics::PipelineBarrier afterBarreir;
+                        afterBarreir.SrcStage = static_cast<u32>(Graphics::PipelineStageFlagBits::ComputeShader);
+                        afterBarreir.DstStage = static_cast<u32>(Graphics::PipelineStageFlagBits::FragmentShader);
+
+                        Graphics::ImageBarrier afterImageBarrier;
+                        afterImageBarrier.SrcAccessFlags = beforeImageBarrier.DstAccessFlags;
+                        afterImageBarrier.DstAccessFlags = Graphics::AccessFlagBits::ShaderRead;
+                        afterImageBarrier.OldLayout = beforeImageBarrier.NewLayout;
+                        afterImageBarrier.NewLayout = Graphics::ImageLayout::ShaderReadOnly;
+                        afterImageBarrier.SubresourceRange = Graphics::ImageSubresourceRange::SingleMipAndLayer(Graphics::ImageAspectFlagBits::Colour);
+                        afterImageBarrier.Image = outputTexture;
+                        afterBarreir.ImageBarriers.push_back(afterImageBarrier);
+
+                        cmdList->PipelineBarrier(afterBarreir);
                     }
                 }, std::move(passData));
         }

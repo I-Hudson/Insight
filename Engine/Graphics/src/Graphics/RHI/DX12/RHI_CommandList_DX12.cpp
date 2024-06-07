@@ -462,7 +462,7 @@ namespace Insight
 			void RHI_CommandList_DX12::Draw(u32 vertexCount, u32 instanceCount, u32 firstVertex, u32 firstInstance)
 			{
 				IS_PROFILE_FUNCTION();
-				if (CanDraw())
+				if (CanDraw(GPUQueue::GPUQueue_Graphics))
 				{
 					{
 						IS_PROFILE_SCOPE("DrawInstanced");
@@ -475,13 +475,25 @@ namespace Insight
 			void RHI_CommandList_DX12::DrawIndexed(u32 indexCount, u32 instanceCount, u32 firstIndex, u32 vertexOffset, u32 firstInstance)
 			{
 				IS_PROFILE_FUNCTION();
-				if (CanDraw())
+				if (CanDraw(GPUQueue::GPUQueue_Graphics))
 				{
 					{
 						IS_PROFILE_SCOPE("DrawIndexedInstanced");
 						m_commandList->DrawIndexedInstanced(indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
 						++RenderStats::Instance().DrawIndexedCalls;
 						RenderStats::Instance().DrawIndexedIndicesCount += indexCount;
+					}
+				}
+			}
+
+			void RHI_CommandList_DX12::Dispatch(const u32 threadGroupX, const u32 threadGroupY)
+			{
+				IS_PROFILE_FUNCTION();
+				if (CanDraw(GPUQueue::GPUQueue_Compute))
+				{
+					{
+						IS_PROFILE_SCOPE("Dispatch");
+						m_commandList->Dispatch(threadGroupX, threadGroupY, 1);
 					}
 				}
 			}
@@ -522,7 +534,7 @@ namespace Insight
 				m_commandList->SetPipelineState(pipeline->GetPipeline());
 
 				RHI_PipelineLayout_DX12* pipelineLayout = static_cast<RHI_PipelineLayout_DX12*>(m_context->GetPipelineLayoutManager().GetOrCreateLayout(pso));
-				m_commandList->SetGraphicsRootSignature(pipelineLayout->GetRootSignature());
+				m_commandList->SetComputeRootSignature(pipelineLayout->GetRootSignature());
 
 				{
 					m_descriptorAllocator->SetPipeline(m_activeComputePSO.Shader);
@@ -553,7 +565,7 @@ namespace Insight
 				m_nvtxRangehandle = {};
 			}
 
-			bool RHI_CommandList_DX12::BindDescriptorSets()
+			bool RHI_CommandList_DX12::BindDescriptorSets(const GPUQueue gpuQueue)
 			{
 				IS_PROFILE_FUNCTION();
 
@@ -588,8 +600,7 @@ namespace Insight
 
 					if (set.Bindings.size() == c_MaxRootDescriptorBindingForRootDescriptor
 						&& (set.Bindings.at(0).Type == DescriptorType::Unifom_Buffer
-							|| set.Bindings.at(0).Type == DescriptorType::Storage_Buffer 
-							|| set.Bindings.at(0).Type == DescriptorType::Storage_Image))
+							|| set.Bindings.at(0).Type == DescriptorType::Storage_Buffer))
 					{
 						// Root descriptor
 						DescriptorBinding const& binding = set.Bindings.at(0);
@@ -607,8 +618,23 @@ namespace Insight
 									IS_PROFILE_SCOPE("Root constant buffer");
 
 									RHI::DX12::RHI_Buffer_DX12* bufferDX12 = static_cast<RHI::DX12::RHI_Buffer_DX12*>(buffer.GetBuffer());
-									m_commandList->SetGraphicsRootConstantBufferView(rootParameterIdx,
-										bufferDX12->GetResource()->GetGPUVirtualAddress() + buffer.GetOffset());
+									switch (gpuQueue)
+									{
+									case GPUQueue::GPUQueue_Graphics:
+									{
+										m_commandList->SetGraphicsRootConstantBufferView(rootParameterIdx,
+											bufferDX12->GetResource()->GetGPUVirtualAddress() + buffer.GetOffset());
+										break;
+									}
+									case GPUQueue::GPUQueue_Compute:
+									{
+										m_commandList->SetComputeRootConstantBufferView(rootParameterIdx,
+											bufferDX12->GetResource()->GetGPUVirtualAddress() + buffer.GetOffset());
+										break;
+									}
+									default:
+										break;
+									}
 									++RenderStats::Instance().DescriptorSetBindings;
 								}
 							}
@@ -626,29 +652,24 @@ namespace Insight
 									IS_PROFILE_SCOPE("Root UAV buffer");
 
 									RHI::DX12::RHI_Buffer_DX12* bufferDX12 = static_cast<RHI::DX12::RHI_Buffer_DX12*>(buffer.GetBuffer());
-									m_commandList->SetGraphicsRootUnorderedAccessView(rootParameterIdx,
-										bufferDX12->GetResource()->GetGPUVirtualAddress() + buffer.GetOffset());
-									++RenderStats::Instance().DescriptorSetBindings;
-								}
-							}
-							break;
-						}
-						case DescriptorType::Storage_Image:
-						{
-							ASSERT(binding.RHI_Texture.size() <= 1);
-							if (binding.RHI_Texture.size() > 0)
-							{
-								const RHI_Texture* texture = binding.RHI_Texture[0];
-								if (texture)
-								{
-									RHI_Texture_DX12 const* textureDX12 = static_cast<RHI_Texture_DX12 const*>(texture);
-									if (textureDX12->GetResource())
+									switch (gpuQueue)
 									{
-										IS_PROFILE_SCOPE("Root UAV texture");
-
-										m_commandList->SetGraphicsRootUnorderedAccessView(rootParameterIdx, textureDX12->GetResource()->GetGPUVirtualAddress());
-										++RenderStats::Instance().DescriptorSetBindings;
+									case GPUQueue::GPUQueue_Graphics:
+									{
+										m_commandList->SetGraphicsRootUnorderedAccessView(rootParameterIdx,
+											bufferDX12->GetResource()->GetGPUVirtualAddress() + buffer.GetOffset());
+										break;
 									}
+									case GPUQueue::GPUQueue_Compute:
+									{
+										m_commandList->SetComputeRootUnorderedAccessView(rootParameterIdx,
+											bufferDX12->GetResource()->GetGPUVirtualAddress() + buffer.GetOffset());
+										break;
+									}
+									default:
+										break;
+									}
+									++RenderStats::Instance().DescriptorSetBindings;
 								}
 							}
 							break;
@@ -697,16 +718,38 @@ namespace Insight
 										{
 											firstHandle = dstHandle;
 										}
-
 										if (buffer.IsValid())
 										{
-											IS_PROFILE_SCOPE("Create constant buffer");
+										RHI::DX12::RHI_Buffer_DX12* bufferDX12 = static_cast<RHI::DX12::RHI_Buffer_DX12*>(buffer.GetBuffer());
 
+										switch (binding.Type)
+										{
+										case DescriptorType::Unifom_Buffer:
+										{
+											IS_PROFILE_SCOPE("Create constant buffer");
 											D3D12_CONSTANT_BUFFER_VIEW_DESC desc = {};
-											RHI::DX12::RHI_Buffer_DX12* bufferDX12 = static_cast<RHI::DX12::RHI_Buffer_DX12*>(buffer.GetBuffer());
 											desc.BufferLocation = bufferDX12->GetResource()->GetGPUVirtualAddress() + buffer.GetOffset();
 											desc.SizeInBytes = static_cast<UINT>(buffer.GetSize());
 											m_contextDX12->GetDevice()->CreateConstantBufferView(&desc, dstHandle.CPUPtr);
+											break;
+										}
+										case DescriptorType::Storage_Buffer:
+										{
+											IS_PROFILE_SCOPE("Create unordered access view buffer");
+											//D3D12_UNORDERED_ACCESS_VIEW_DESC desc = {};
+											//desc.Buffer.FirstElement = 0;
+											//desc.Buffer.NumElements = 1;
+											//desc.Buffer.StructureByteStride = 1;
+											//m_contextDX12->GetDevice()->CreateUnorderedAccessView(&desc, dstHandle.CPUPtr);
+											FAIL_ASSERT();
+											break;
+										}
+										default:
+										{
+											FAIL_ASSERT();
+											break;
+										}
+										}
 											++RenderStats::Instance().DescriptorSetUpdates;
 										}
 										else
@@ -718,7 +761,8 @@ namespace Insight
 										}
 									}
 
-									if (binding.Type == DescriptorType::Sampled_Image
+									if ((binding.Type == DescriptorType::Sampled_Image
+										|| binding.Type == DescriptorType::Storage_Image)
 										&& bindingCountIdx < binding.RHI_Texture.size())
 									{
 										DescriptorHeapHandle_DX12 dstHandle = resouceHeap.GetNextHandle();
@@ -735,7 +779,23 @@ namespace Insight
 											{
 												IS_PROFILE_SCOPE("Copy texture");
 
-												DescriptorHeapHandle_DX12 srvHandle = textureDX12->GetDescriptorHandle();
+												DescriptorHeapHandle_DX12 srvHandle = {};
+												
+												switch (binding.Type)
+												{
+												case DescriptorType::Sampled_Image:
+												{
+													srvHandle = textureDX12->GetDescriptorHandle();
+													break;
+												}
+												case DescriptorType::Storage_Image:
+												{
+													srvHandle = textureDX12->GetUAVHandle();
+													break;
+												}
+												default:
+													break;
+												}
 												m_contextDX12->GetDevice()->CopyDescriptorsSimple(1, dstHandle.CPUPtr, srvHandle.CPUPtr, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 												++RenderStats::Instance().DescriptorSetUpdates;
 											}
@@ -792,7 +852,21 @@ namespace Insight
 							IS_PROFILE_SCOPE("Set table");
 
 							m_boundDescriptorSets.at(rootParameterIdx) = firstHandle;
-							m_commandList->SetGraphicsRootDescriptorTable(rootParameterIdx, firstHandle.GPUPtr);
+							switch (gpuQueue)
+							{
+							case GPUQueue::GPUQueue_Graphics:
+							{
+								m_commandList->SetGraphicsRootDescriptorTable(rootParameterIdx, firstHandle.GPUPtr);
+								break;
+							}
+							case GPUQueue::GPUQueue_Compute:
+							{
+								m_commandList->SetComputeRootDescriptorTable(rootParameterIdx, firstHandle.GPUPtr);
+								break;
+							}
+							default:
+								break;
+							}
 							++RenderStats::Instance().DescriptorSetBindings;
 						}
 					}

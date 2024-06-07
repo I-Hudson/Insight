@@ -28,8 +28,8 @@ namespace Insight
 				break;
 			}
 			case Insight::Graphics::DescriptorType::Unifom_Buffer:
-			case Insight::Graphics::DescriptorType::Storage_Buffer:
 			case Insight::Graphics::DescriptorType::Uniform_Buffer_Dynamic:
+			case Insight::Graphics::DescriptorType::Storage_Buffer:
 			case Insight::Graphics::DescriptorType::Storage_Buffer_Dyanmic:
 			{
 				RHI_Buffer_View.resize(count);

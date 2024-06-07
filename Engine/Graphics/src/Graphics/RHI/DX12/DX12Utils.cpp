@@ -195,8 +195,8 @@ namespace Insight
         D3D12_BARRIER_SYNC PipelineStageFlagsToDX12(PipelineStageFlags flags)
         {
             D3D12_BARRIER_SYNC result = D3D12_BARRIER_SYNC_NONE;
-            COMPARE_AND_SET(flags, PipelineStageFlagBits::TopOfPipe,                        D3D12_BARRIER_SYNC_ALL, result);
-            COMPARE_AND_SET(flags, PipelineStageFlagBits::DrawIndirect,                     D3D12_BARRIER_SYNC_ALL, result);
+            COMPARE_AND_SET(flags, PipelineStageFlagBits::TopOfPipe,                        D3D12_BARRIER_SYNC_NONE, result);
+            COMPARE_AND_SET(flags, PipelineStageFlagBits::DrawIndirect,                     D3D12_BARRIER_SYNC_EXECUTE_INDIRECT, result);
             COMPARE_AND_SET(flags, PipelineStageFlagBits::VertexInput,                      D3D12_BARRIER_SYNC_VERTEX_SHADING, result);
             COMPARE_AND_SET(flags, PipelineStageFlagBits::VertexShader,                     D3D12_BARRIER_SYNC_VERTEX_SHADING, result);
             COMPARE_AND_SET(flags, PipelineStageFlagBits::TessesllationControlShader,       D3D12_BARRIER_SYNC_VERTEX_SHADING, result);
@@ -249,6 +249,7 @@ namespace Insight
             case ImageLayout::DepthStencilAttachment:           return D3D12_BARRIER_LAYOUT::D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_WRITE;
             case ImageLayout::DepthStencilAttachmentReadOnly:   return D3D12_BARRIER_LAYOUT::D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_READ;
             case ImageLayout::ShaderReadOnly:                   return D3D12_BARRIER_LAYOUT::D3D12_BARRIER_LAYOUT_SHADER_RESOURCE;
+            case ImageLayout::ShaderWrite:                      return D3D12_BARRIER_LAYOUT::D3D12_BARRIER_LAYOUT_UNORDERED_ACCESS;
             case ImageLayout::TransforSrc:                      return D3D12_BARRIER_LAYOUT::D3D12_BARRIER_LAYOUT_COPY_SOURCE;
             case ImageLayout::TransforDst:                      return D3D12_BARRIER_LAYOUT::D3D12_BARRIER_LAYOUT_COPY_DEST;
             case ImageLayout::Preinitialised:                   return D3D12_BARRIER_LAYOUT::D3D12_BARRIER_LAYOUT_UNDEFINED;
@@ -277,6 +278,7 @@ namespace Insight
             case ImageLayout::DepthStencilAttachment:           return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_DEPTH_WRITE;
             case ImageLayout::DepthStencilAttachmentReadOnly:   return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_DEPTH_READ;
             case ImageLayout::ShaderReadOnly:                   return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+            case ImageLayout::ShaderWrite:                      return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
             case ImageLayout::TransforSrc:                      return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COPY_SOURCE;
             case ImageLayout::TransforDst:                      return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COPY_DEST;
             case ImageLayout::Preinitialised:                   return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON;
@@ -311,6 +313,22 @@ namespace Insight
             }
             FAIL_ASSERT();
             return D3D12_SRV_DIMENSION::D3D12_SRV_DIMENSION_UNKNOWN;
+        }
+
+        D3D12_UAV_DIMENSION TextureTypeToDX12UAVDimension(const TextureType type)
+        {
+            switch (type)
+            {
+            case Insight::Graphics::TextureType::Unknown:       return D3D12_UAV_DIMENSION::D3D12_UAV_DIMENSION_UNKNOWN;
+            case Insight::Graphics::TextureType::Tex1D:         return D3D12_UAV_DIMENSION::D3D12_UAV_DIMENSION_TEXTURE1D;
+            case Insight::Graphics::TextureType::Tex2D:         return D3D12_UAV_DIMENSION::D3D12_UAV_DIMENSION_TEXTURE2D;
+            case Insight::Graphics::TextureType::Tex2DArray:    return D3D12_UAV_DIMENSION::D3D12_UAV_DIMENSION_TEXTURE2DARRAY;
+            case Insight::Graphics::TextureType::Tex3D:         return D3D12_UAV_DIMENSION::D3D12_UAV_DIMENSION_TEXTURE3D;
+            default:
+                break;
+            }
+            FAIL_ASSERT();
+            return D3D12_UAV_DIMENSION::D3D12_UAV_DIMENSION_UNKNOWN;
         }
 
         D3D12_DSV_DIMENSION TextureTypeToDX12DSVDimension(TextureType type)

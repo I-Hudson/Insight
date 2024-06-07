@@ -110,6 +110,8 @@ namespace Insight
 			virtual void Draw(u32 vertexCount, u32 instanceCount, u32 firstVertex, u32 firstInstance) = 0;
 			virtual void DrawIndexed(u32 indexCount, u32 instanceCount, u32 firstIndex, u32 vertexOffset, u32 firstInstance) = 0;
 
+			virtual void Dispatch(const u32 threadGroupX, const u32 threadGroupY) = 0;
+
 			virtual void BindPipeline(PipelineStateObject pso, RHI_DescriptorLayout* layout) = 0;
 			virtual void BindPipeline(PipelineStateObject pso, bool clearDescriptors) = 0;
 			virtual void BindPipeline(ComputePipelineStateObject pso) = 0;
@@ -126,8 +128,8 @@ namespace Insight
 			Core::Delegate<> OnWorkCompleted;
 
 		protected:
-			bool CanDraw();
-			virtual bool BindDescriptorSets();
+			bool CanDraw(const GPUQueue gpuQueue);
+			virtual bool BindDescriptorSets(const GPUQueue gpuQueue) = 0;
 
 			virtual void SetImageLayoutTransition(RHI_Texture* texture, ImageLayout layout) = 0;
 

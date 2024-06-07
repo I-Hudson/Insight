@@ -34,11 +34,16 @@ namespace Insight
 				return m_allLayerDepthStencilHandle;
 			}
 
+			DescriptorHeapHandle_DX12 RHI_Texture_DX12::GetUAVHandle() const
+			{
+				return m_allLayerUAVHandle;
+			}
+
 			DescriptorHeapHandle_DX12 RHI_Texture_DX12::GetSingleLayerDescriptorHandle(u32 const index) const
 			{
 				if (index >= 0 && index < static_cast<u32>(m_singleLayerDescriptorHandle.size()))
 				{
-					return m_singleLayerDescriptorHandle.at(index);
+					return m_singleLayerDescriptorHandle[index];
 				}
 				return DescriptorHeapHandle_DX12();
 			}
@@ -47,7 +52,7 @@ namespace Insight
 			{
 				if (index >= 0 && index < static_cast<u32>(m_singleLayerRenderTargetHandle.size()))
 				{
-					return m_singleLayerRenderTargetHandle.at(index);
+					return m_singleLayerRenderTargetHandle[index];
 				}
 				return DescriptorHeapHandle_DX12();
 			}
@@ -56,7 +61,16 @@ namespace Insight
 			{
 				if (index >= 0 && index < static_cast<u32>(m_singleLayerDepthStencilHandle.size()))
 				{
-					return m_singleLayerDepthStencilHandle.at(index);
+					return m_singleLayerDepthStencilHandle[index];
+				}
+				return DescriptorHeapHandle_DX12();
+			}
+
+			DescriptorHeapHandle_DX12 RHI_Texture_DX12::GetSingleLayerUAVHandle(u32 const index) const
+			{
+				if (index >= 0 && index < static_cast<u32>(m_singleLayerUAVHandle.size()))
+				{
+					return m_singleLayerUAVHandle[index];
 				}
 				return DescriptorHeapHandle_DX12();
 			}
@@ -75,34 +89,34 @@ namespace Insight
 				}
 
 				CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Tex2D(
-					PixelFormatToDX12(m_infos.at(0).Format),
-					m_infos.at(0).Width,
-					m_infos.at(0).Height,
-					m_infos.at(0).Layer_Count,
-					m_infos.at(0).Mip_Count,
+					PixelFormatToDX12(m_infos[0].Format),
+					m_infos[0].Width,
+					m_infos[0].Height,
+					m_infos[0].Layer_Count,
+					m_infos[0].Mip_Count,
 					1,
 					0,
-					ImageUsageFlagsToDX12(m_infos.at(0).ImageUsage),
+					ImageUsageFlagsToDX12(m_infos[0].ImageUsage),
 					D3D12_TEXTURE_LAYOUT_UNKNOWN,
 					0);
 
 				D3D12_CLEAR_VALUE clearColour = {};
 				clearColour.Format = resourceDesc.Format;
 
-				if (m_infos.at(0).ImageUsage & ImageUsageFlagsBits::DepthStencilAttachment)
+				if (m_infos[0].ImageUsage & ImageUsageFlagsBits::DepthStencilAttachment)
 				{
 					clearColour.DepthStencil.Depth = RenderContext::Instance().IsRenderOptionsEnabled(RenderOptions::ReverseZ) ? 0.0f : 1.0f;
 					clearColour.DepthStencil.Stencil = 0;
 				}
-				if (m_infos.at(0).ImageUsage & ImageUsageFlagsBits::ColourAttachment)
+				if (m_infos[0].ImageUsage & ImageUsageFlagsBits::ColourAttachment)
 				{
 					const Maths::Vector4 textureClearColour = GetClearColour();
 					ASSERT(sizeof(clearColour.Color) == sizeof(textureClearColour));
 					Platform::MemCopy(clearColour.Color, &textureClearColour[0], sizeof(clearColour.Color));
 				}
 
-				bool optimiseClearColourEnabled = m_infos.at(0).ImageUsage & ImageUsageFlagsBits::DepthStencilAttachment
-					|| m_infos.at(0).ImageUsage & ImageUsageFlagsBits::ColourAttachment;
+				bool optimiseClearColourEnabled = m_infos[0].ImageUsage & ImageUsageFlagsBits::DepthStencilAttachment
+					|| m_infos[0].ImageUsage & ImageUsageFlagsBits::ColourAttachment;
 
 				D3D12MA::ALLOCATION_DESC allocationDesc = {};
 				allocationDesc.HeapType = D3D12_HEAP_TYPE_DEFAULT;
@@ -111,39 +125,49 @@ namespace Insight
 				ThrowIfFailed(m_context->GetAllocator()->CreateResource(
 					&allocationDesc,
 					&resourceDesc,
-					ImageLayoutToDX12ResouceState(m_infos.at(0).Layout),
+					ImageLayoutToDX12ResouceState(m_infos[0].Layout),
 					optimiseClearColourEnabled ? &clearColour : nullptr,
 					&m_allocation,
 					IID_NULL, NULL));
 				SetName(m_name);
 				ASSERT(m_allocation);
 
-				if (m_infos.at(0).ImageUsage & ImageUsageFlagsBits::Sampled)
+				if (m_infos[0].ImageUsage & ImageUsageFlagsBits::Sampled)
 				{
-					m_allLayerDescriptorHandle = CreateSharderResouceView(0, 1, m_infos.at(0).Layer_Count, 0, DescriptorHeapTypes::CBV_SRV_UAV);
+					m_allLayerDescriptorHandle = CreateSharderResouceView(0, 1, m_infos[0].Layer_Count, 0, DescriptorHeapTypes::CBV_SRV_UAV, ImageUsageFlagsBits::Sampled);
 				}
-				if (m_infos.at(0).ImageUsage & ImageUsageFlagsBits::DepthStencilAttachment)
+				if (m_infos[0].ImageUsage & ImageUsageFlagsBits::DepthStencilAttachment)
 				{
-					m_allLayerDepthStencilHandle = CreateSharderResouceView(0, 1, m_infos.at(0).Layer_Count, 0, DescriptorHeapTypes::DepthStencilView);
+					m_allLayerDepthStencilHandle = CreateSharderResouceView(0, 1, m_infos[0].Layer_Count, 0, DescriptorHeapTypes::DepthStencilView, ImageUsageFlagsBits::DepthStencilAttachment);
 				}
-				if (m_infos.at(0).ImageUsage & ImageUsageFlagsBits::ColourAttachment)
+				if (m_infos[0].ImageUsage & ImageUsageFlagsBits::ColourAttachment)
 				{
-					m_allLayerRenderTargetHandle= CreateSharderResouceView(0, 1, m_infos.at(0).Layer_Count, 0, DescriptorHeapTypes::RenderTargetView);
+					m_allLayerRenderTargetHandle= CreateSharderResouceView(0, 1, m_infos[0].Layer_Count, 0, DescriptorHeapTypes::RenderTargetView, ImageUsageFlagsBits::ColourAttachment);
 				}
+				if (m_infos[0].ImageUsage & ImageUsageFlagsBits::Storage)
+				{
+					m_allLayerUAVHandle = CreateSharderResouceView(0, 1, m_infos[0].Layer_Count, 0, DescriptorHeapTypes::CBV_SRV_UAV, ImageUsageFlagsBits::Storage);
+				}
+
+
 				// Create a image view for each layer. (Use image views when rendering to different layers).
 				for (u32 i = 0; i < createInfo.Layer_Count; ++i)
 				{
-					if (m_infos.at(0).ImageUsage & ImageUsageFlagsBits::Sampled)
+					if (m_infos[0].ImageUsage & ImageUsageFlagsBits::Sampled)
 					{
-						m_singleLayerDescriptorHandle.push_back(CreateSharderResouceView(0, 1, 1, i, DescriptorHeapTypes::CBV_SRV_UAV));
+						m_singleLayerDescriptorHandle.push_back(CreateSharderResouceView(0, 1, 1, i, DescriptorHeapTypes::CBV_SRV_UAV, ImageUsageFlagsBits::Sampled));
 					}
-					if (m_infos.at(0).ImageUsage & ImageUsageFlagsBits::DepthStencilAttachment)
+					if (m_infos[0].ImageUsage & ImageUsageFlagsBits::DepthStencilAttachment)
 					{
-						m_singleLayerDepthStencilHandle.push_back(CreateSharderResouceView(0, 1, 1, i, DescriptorHeapTypes::DepthStencilView));
+						m_singleLayerDepthStencilHandle.push_back(CreateSharderResouceView(0, 1, 1, i, DescriptorHeapTypes::DepthStencilView, ImageUsageFlagsBits::DepthStencilAttachment));
 					}
-					if (m_infos.at(0).ImageUsage & ImageUsageFlagsBits::ColourAttachment)
+					if (m_infos[0].ImageUsage & ImageUsageFlagsBits::ColourAttachment)
 					{
-						m_singleLayerRenderTargetHandle.push_back(CreateSharderResouceView(0, 1, 1, i, DescriptorHeapTypes::RenderTargetView));
+						m_singleLayerRenderTargetHandle.push_back(CreateSharderResouceView(0, 1, 1, i, DescriptorHeapTypes::RenderTargetView, ImageUsageFlagsBits::ColourAttachment));
+					}
+					if (m_infos[0].ImageUsage & ImageUsageFlagsBits::Storage)
+					{
+						m_singleLayerUAVHandle.push_back(CreateSharderResouceView(0, 1, 1, i, DescriptorHeapTypes::CBV_SRV_UAV, ImageUsageFlagsBits::Storage));
 					}
 				}
 			}
@@ -203,22 +227,31 @@ namespace Insight
 				{
 					m_context->GetDescriptorHeap(m_allLayerDepthStencilHandle.HeapType).FreeHandle(m_allLayerDepthStencilHandle);
 				}
+				if (m_allLayerUAVHandle.IsValid())
+				{
+					m_context->GetDescriptorHeap(m_allLayerUAVHandle.HeapType).FreeHandle(m_allLayerUAVHandle);
+				}
 
 				for (size_t i = 0; i < m_singleLayerDescriptorHandle.size(); ++i)
 				{
-					m_context->GetDescriptorHeap(m_singleLayerDescriptorHandle.at(i).HeapType).FreeHandle(m_singleLayerDescriptorHandle.at(i));
+					m_context->GetDescriptorHeap(m_singleLayerDescriptorHandle[i].HeapType).FreeHandle(m_singleLayerDescriptorHandle[i]);
 				}
 				for (size_t i = 0; i < m_singleLayerRenderTargetHandle.size(); ++i)
 				{
-					m_context->GetDescriptorHeap(m_singleLayerRenderTargetHandle.at(i).HeapType).FreeHandle(m_singleLayerRenderTargetHandle.at(i));
+					m_context->GetDescriptorHeap(m_singleLayerRenderTargetHandle[i].HeapType).FreeHandle(m_singleLayerRenderTargetHandle[i]);
 				}
 				for (size_t i = 0; i < m_singleLayerDepthStencilHandle.size(); ++i)
 				{
-					m_context->GetDescriptorHeap(m_singleLayerDepthStencilHandle.at(i).HeapType).FreeHandle(m_singleLayerDepthStencilHandle.at(i));
+					m_context->GetDescriptorHeap(m_singleLayerDepthStencilHandle[i].HeapType).FreeHandle(m_singleLayerDepthStencilHandle[i]);
+				}
+				for (size_t i = 0; i < m_singleLayerUAVHandle.size(); ++i)
+				{
+					m_context->GetDescriptorHeap(m_singleLayerUAVHandle[i].HeapType).FreeHandle(m_singleLayerUAVHandle[i]);
 				}
 				m_singleLayerDescriptorHandle.clear();
 				m_singleLayerRenderTargetHandle.clear();
 				m_singleLayerDepthStencilHandle.clear();
+				m_singleLayerUAVHandle.clear();
 			}
 
 			bool RHI_Texture_DX12::ValidResource()
@@ -237,7 +270,7 @@ namespace Insight
 				m_name = std::move(name);
 			}
 
-			DescriptorHeapHandle_DX12 RHI_Texture_DX12::CreateSharderResouceView(u32 mip_index, u32 mip_count, u32 layer_count, u32 layer_index, DescriptorHeapTypes heap)
+			DescriptorHeapHandle_DX12 RHI_Texture_DX12::CreateSharderResouceView(u32 mip_index, u32 mip_count, u32 layer_count, u32 layer_index, DescriptorHeapTypes heap, ImageUsageFlagsBits imageUsage)
 			{
 				DescriptorHeapHandle_DX12 handle = m_context->GetDescriptorHeap(heap).GetNewHandle();
 
@@ -253,32 +286,20 @@ namespace Insight
 						format = PixelFormat::R16_UNorm;
 					}
 
-					D3D12_SHADER_RESOURCE_VIEW_DESC shaderResouceViewDesc = {};
-					shaderResouceViewDesc.Format = PixelFormatToDX12(format);
-					shaderResouceViewDesc.ViewDimension = TextureTypeToDX12(GetType());
-					shaderResouceViewDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 
-					if (GetType() == TextureType::Tex2D)
+
+					if (imageUsage & ImageUsageFlagsBits::Sampled)
 					{
-						shaderResouceViewDesc.Texture2D.MipLevels = mip_count;
-					}
-					else if (GetType() == TextureType::Tex2DArray)
-					{
-						shaderResouceViewDesc.Texture2DArray.ArraySize = layer_count;
-						shaderResouceViewDesc.Texture2DArray.FirstArraySlice = layer_index;
-						shaderResouceViewDesc.Texture2DArray.MipLevels = mip_count;
-						shaderResouceViewDesc.Texture2DArray.MostDetailedMip = 0u;
-						shaderResouceViewDesc.Texture2DArray.PlaneSlice = 0u;
-						shaderResouceViewDesc.Texture2DArray.ResourceMinLODClamp = 0.0f;
-					}
-					else if (GetType() == TextureType::TexCube)
-					{
-						if (layer_count == 6)
+						D3D12_SHADER_RESOURCE_VIEW_DESC shaderResouceViewDesc = {};
+						shaderResouceViewDesc.Format = PixelFormatToDX12(format);
+						shaderResouceViewDesc.ViewDimension = TextureTypeToDX12(GetType());
+						shaderResouceViewDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+
+						if (GetType() == TextureType::Tex2D)
 						{
-							shaderResouceViewDesc.TextureCube.MipLevels = mip_count;
-							shaderResouceViewDesc.TextureCube.MostDetailedMip = 0;
+							shaderResouceViewDesc.Texture2D.MipLevels = mip_count;
 						}
-						else
+						else if (GetType() == TextureType::Tex2DArray)
 						{
 							shaderResouceViewDesc.Texture2DArray.ArraySize = layer_count;
 							shaderResouceViewDesc.Texture2DArray.FirstArraySlice = layer_index;
@@ -287,8 +308,44 @@ namespace Insight
 							shaderResouceViewDesc.Texture2DArray.PlaneSlice = 0u;
 							shaderResouceViewDesc.Texture2DArray.ResourceMinLODClamp = 0.0f;
 						}
+						else if (GetType() == TextureType::TexCube)
+						{
+							if (layer_count == 6)
+							{
+								shaderResouceViewDesc.TextureCube.MipLevels = mip_count;
+								shaderResouceViewDesc.TextureCube.MostDetailedMip = 0;
+							}
+							else
+							{
+								shaderResouceViewDesc.Texture2DArray.ArraySize = layer_count;
+								shaderResouceViewDesc.Texture2DArray.FirstArraySlice = layer_index;
+								shaderResouceViewDesc.Texture2DArray.MipLevels = mip_count;
+								shaderResouceViewDesc.Texture2DArray.MostDetailedMip = 0u;
+								shaderResouceViewDesc.Texture2DArray.PlaneSlice = 0u;
+								shaderResouceViewDesc.Texture2DArray.ResourceMinLODClamp = 0.0f;
+							}
+						}
+						m_context->GetDevice()->CreateShaderResourceView(m_allocation->GetResource(), &shaderResouceViewDesc, handle.CPUPtr);
 					}
-					m_context->GetDevice()->CreateShaderResourceView(m_allocation->GetResource(), &shaderResouceViewDesc, handle.CPUPtr);
+					else if (imageUsage & ImageUsageFlagsBits::Storage)
+					{
+						D3D12_UNORDERED_ACCESS_VIEW_DESC shaderUAVViewDesc = {};
+						shaderUAVViewDesc.Format = PixelFormatToDX12(format);
+						shaderUAVViewDesc.ViewDimension = TextureTypeToDX12UAVDimension(GetType());
+
+						if (GetType() == TextureType::Tex2D)
+						{
+							shaderUAVViewDesc.Texture2D.MipSlice = 0;
+						}
+						else if (GetType() == TextureType::Tex2DArray)
+						{
+							shaderUAVViewDesc.Texture2DArray.MipSlice = 0;
+							shaderUAVViewDesc.Texture2DArray.FirstArraySlice = layer_index;
+							shaderUAVViewDesc.Texture2DArray.ArraySize = layer_count;
+						}
+						m_context->GetDevice()->CreateUnorderedAccessView(m_allocation->GetResource(), nullptr, &shaderUAVViewDesc, handle.CPUPtr);
+					}
+
 				}
 				else if (heap == DescriptorHeapTypes::RenderTargetView)
 				{

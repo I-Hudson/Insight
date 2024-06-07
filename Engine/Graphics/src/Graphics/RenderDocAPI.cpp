@@ -19,6 +19,8 @@ namespace Insight
 				m_initialised = false;
 				m_captureState = CaptureState::None;
 
+				m_renderDocAPI->RemoveHooks();
+
 				Platform::FreeDynamicLibrary(m_renderDocDll);
 				m_renderDocAPI = nullptr;
 				m_renderDocDll = nullptr;
@@ -32,7 +34,6 @@ namespace Insight
 			{
 				return true;
 			}
-
 #ifdef RENDER_DOC_API
 			m_renderDocDll = Platform::LoadDynamicLibrary("renderdoc.dll");
 			if (!m_renderDocDll)

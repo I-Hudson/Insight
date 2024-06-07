@@ -223,12 +223,12 @@ namespace Insight
 			arguments.push_back(wResourcePath.c_str());
 
 			const bool argDebugData = true;
-			const bool argSkipOptimisations = false;
+			const bool argOptimisationsEnabled = false;
 			if (argDebugData)
 			{
 				arguments.push_back(DXC_ARG_DEBUG);
 			}
-			if (argSkipOptimisations)
+			if (argOptimisationsEnabled)
 			{
 				arguments.push_back(DXC_ARG_SKIP_OPTIMIZATIONS);
 			}
@@ -299,7 +299,9 @@ namespace Insight
 			// IDxcCompiler3::Compile will always return an error buffer, but its length will be zero if there are no warnings or errors.
 			if (pErrors != nullptr && pErrors->GetStringLength() != 0)
 			{
-				IS_LOG_CORE_ERROR(fmt::format("Shader compilation failed : \n\nName: {} \n\n Error:", name, pErrors->GetStringPointer()));
+				LPCSTR strPointer = pErrors->GetStringPointer();
+				SIZE_T strLength = pErrors->GetBufferSize();
+				IS_LOG_CORE_ERROR(fmt::format("Shader compilation failed : \n\nName: {} \n\n Error:", name, strPointer));
 			}
 			pErrors->Release();
 
@@ -699,7 +701,7 @@ namespace Insight
 			{
 			case SPV_REFLECT_DESCRIPTOR_TYPE_SAMPLER:						return DescriptorType::Sampler;
 			case SPV_REFLECT_DESCRIPTOR_TYPE_SAMPLED_IMAGE:					return DescriptorType::Sampled_Image;
-			case SPV_REFLECT_DESCRIPTOR_TYPE_STORAGE_IMAGE:					return DescriptorType::Storage_Buffer;
+			case SPV_REFLECT_DESCRIPTOR_TYPE_STORAGE_IMAGE:					return DescriptorType::Storage_Image;
 			case SPV_REFLECT_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER:			return DescriptorType::Uniform_Texel_Buffer;
 			case SPV_REFLECT_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER:			return DescriptorType::Storage_Texel_Buffer;
 			case SPV_REFLECT_DESCRIPTOR_TYPE_UNIFORM_BUFFER:				return DescriptorType::Unifom_Buffer;
