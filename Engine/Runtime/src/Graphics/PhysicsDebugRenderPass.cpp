@@ -21,7 +21,7 @@ namespace Insight
                 m_vertex_buffer.Setup();
                 m_vertex_buffer.ForEach([buffer_overrides](RHI_Buffer*& buffer)
                     {
-                        buffer = Renderer::CreateVertexBuffer(sizeof(Graphics::Vertex) * 1024, sizeof(Physics::DebugRendererData::Line) / 2, buffer_overrides);
+                        buffer = Renderer::CreateVertexBuffer(sizeof(Physics::DebugRendererData::Vertex) * 1024, sizeof(Physics::DebugRendererData::Vertex), buffer_overrides);
                     });
             }
             if (m_index_buffer.Size() == 0)
@@ -29,7 +29,7 @@ namespace Insight
                 m_index_buffer.Setup();
                 m_index_buffer.ForEach([buffer_overrides](RHI_Buffer*& buffer)
                     {
-                        buffer = Renderer::CreateIndexBuffer(sizeof(u32) * 1024, buffer_overrides);
+                        buffer = Renderer::CreateIndexBuffer(sizeof(u16) * 1024, buffer_overrides);
                     });
             }
 
@@ -38,9 +38,20 @@ namespace Insight
             shaderDesc.InputLayout = 
             {
                 ShaderInputLayout(0, PixelFormat::R32G32B32A32_Float, 0, "POSITION"),
-                ShaderInputLayout(1, PixelFormat::R32G32B32A32_Float, 16, "COLOR")
+                ShaderInputLayout(1, PixelFormat::R32G32B32A32_Float, 16, "COLOR"),
+                ShaderInputLayout(2, PixelFormat::R32G32_Float, 32, "TEXCOORD0")
             };
             RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
+
+            std::vector<Byte> triangleShaderData = Runtime::AssetRegistry::Instance().LoadAssetData(EnginePaths::GetResourcePath() + "/Shaders/hlsl/PhysicsDebugTriangle.hlsl");
+            ShaderDesc triangleShaderDesc("PhysicsDebugPass_TriangleShader", triangleShaderData, ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
+            triangleShaderDesc.InputLayout =
+            {
+                ShaderInputLayout(0, PixelFormat::R32G32B32A32_Float, 0, "POSITION"),
+                ShaderInputLayout(1, PixelFormat::R32G32B32A32_Float, 16, "COLOR"),
+                ShaderInputLayout(2, PixelFormat::R32G32_Float, 32, "TEXCOORD0")
+            };
+            RenderContext::Instance().GetShaderManager().GetOrCreateShader(triangleShaderDesc);
         }
 
         void PhysicsDebugRenderPass::Render(ConstantBuffer constantBuffer, std::string_view colourTextureName, std::string_view depthTextureName)
@@ -66,7 +77,8 @@ namespace Insight
                 lineShader.InputLayout =
                 {
                     ShaderInputLayout(0, PixelFormat::R32G32B32A32_Float, 0, "POSITION"),
-                    ShaderInputLayout(1, PixelFormat::R32G32B32A32_Float, 16, "COLOR")
+                    ShaderInputLayout(1, PixelFormat::R32G32B32A32_Float, 16, "COLOR"),
+                    ShaderInputLayout(2, PixelFormat::R32G32_Float, 32, "TEXCOORD0")
                 };
                 builder.SetShader(lineShader);
 
@@ -123,22 +135,56 @@ namespace Insight
                     cmdList->SetUniform(0, 0, constantBuffer);
 
                     RHI_Buffer* vertexBuffer = m_vertex_buffer.Get();
+                    RHI_Buffer* indexBuffer = m_index_buffer.Get();
 
                     const Physics::DebugRendererData& renderData = data.RenderData;
-                    const u64 vtxSize = sizeof(Physics::DebugRendererData::Line) / 2;
-                    const u64 numOfLineVtx = renderData.Lines.size() * 2;
-                    const u64 lineBytesSize = numOfLineVtx * vtxSize;
-                    if (vertexBuffer->GetSize() < lineBytesSize)
+                    const u64 requiredVertexBufferSize = renderData.Vertices.size() * sizeof(Physics::DebugRendererData::Vertex);
+                    const u64 requiredIndexBufferSize = renderData.Indices.size() * sizeof(u16);
+                    
+                    if (vertexBuffer->GetSize() < requiredVertexBufferSize)
                     {
-                        vertexBuffer->Resize(lineBytesSize);
+                        vertexBuffer->Resize(requiredVertexBufferSize);
                     }
-                    vertexBuffer->Upload(renderData.Lines.data(), renderData.Lines.size() * sizeof(Physics::DebugRendererData::Line));
-                    cmdList->SetVertexBuffer(vertexBuffer);
-
-                    for (size_t lineDrawIdx = 0; lineDrawIdx < renderData.LinesDraw.size(); ++lineDrawIdx)
+                    if (indexBuffer->GetSize() < requiredIndexBufferSize)
                     {
-                        const Physics::DebugRendererData::LineDraw& lineDraw = renderData.LinesDraw[lineDrawIdx];
-                        cmdList->Draw(lineDraw.Size, 1, lineDraw.StartIndex, 0);
+                        indexBuffer->Resize(requiredIndexBufferSize);
+                    }
+
+                    vertexBuffer->Upload(renderData.Vertices.data(), requiredVertexBufferSize);
+                    indexBuffer->Upload(renderData.Indices.data(), requiredIndexBufferSize);
+
+                    cmdList->SetVertexBuffer(vertexBuffer);
+                    cmdList->SetIndexBuffer(indexBuffer, IndexType::Uint16);
+
+                    // Line rendering
+                    for (size_t lineDrawIdx = 0; lineDrawIdx < renderData.Lines.size(); ++lineDrawIdx)
+                    {
+                        const Physics::DebugRendererData::Line& line = renderData.Lines[lineDrawIdx];
+                        cmdList->Draw(line.Size, 1, line.StartIndex, 0);
+                    }
+                    
+                    ShaderDesc triangleShader("PhysicsDebugPass_TriangleShader", {}, ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
+                    triangleShader.InputLayout =
+                    {
+                        ShaderInputLayout(0, PixelFormat::R32G32B32A32_Float, 0, "POSITION"),
+                        ShaderInputLayout(1, PixelFormat::R32G32B32A32_Float, 16, "COLOR"),
+                        ShaderInputLayout(2, PixelFormat::R32G32_Float, 32, "TEXCOORD0")
+                    };
+                    PipelineStateObject trianglePSO = pso;
+                    trianglePSO.Name = "PhysicsDebugPass_TrianglePSO";
+                    trianglePSO.PrimitiveTopologyType = PrimitiveTopologyType::TriangleList;
+                    trianglePSO.BlendEnable = false;
+                    trianglePSO.ShaderDescription = triangleShader;
+
+                    // Triangle rendering
+                    cmdList->BindPipeline(trianglePSO, nullptr);
+
+                    cmdList->SetUniform(0, 0, constantBuffer);
+
+                    for (size_t triangleIdx = 0; triangleIdx < renderData.Triangles.size(); ++triangleIdx)
+                    {
+                        const Physics::DebugRendererData::Triangle& triangle = renderData.Triangles[triangleIdx];
+                        cmdList->DrawIndexed(triangle.IndexCount, 1, triangle.IndexStartIndex, triangle.VertexStartIndex, 0);
                     }
 
                     cmdList->EndRenderpass();

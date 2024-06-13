@@ -2,6 +2,7 @@
 #include "Physics/Jolt/PhysicsWorld_Jolt.h"
 #include "Physics/BodyCreationSettings.h"
 #include "Physics/Shapes/BoxShape.h"
+#include "Physics/Jolt/DebugRendererJolt.h"
 
 #include "Core/Memory.h"
 #include "Core/Profiler.h"
@@ -229,7 +230,7 @@ namespace Insight::Physics::Jolt
 		if (m_isRecording)
 		{
 			JPH::BodyManager::DrawSettings drawSettings;
-			drawSettings.mDrawShapeWireframe = true;
+			drawSettings.mDrawShapeWireframe = false;
 
 			m_physicsSystem.DrawBodies(drawSettings, m_debugRenderer);
 			m_physicsSystem.DrawConstraints(m_debugRenderer);

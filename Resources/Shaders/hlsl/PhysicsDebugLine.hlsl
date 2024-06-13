@@ -1,17 +1,5 @@
 #include "PhysicsDebugBuffers.hlsl"
 
-struct VertexInput
-{
-	float4 Pos : POSITION;
-	float4 Colour : COLOR0;
-};
-
-struct VertexOutput
-{
-	float4 Pos		: SV_POSITION;
-	float4 Colour	: COLOR0;
-};
-
 VertexOutput VSMain(const VertexInput input)
 {
 	VertexOutput vsOut;

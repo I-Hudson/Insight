@@ -131,6 +131,8 @@ namespace Insight
 				return itr->second;
 			}
 
+			pso.Shader = RenderContext::Instance().GetShaderManager().GetOrCreateShader(pso.ShaderDescription);
+
 			RHI_Pipeline* pipeline = RHI_Pipeline::New();
 			pipeline->Create(m_context, pso);
 			m_pipelineStateObjects[psoHash] = pipeline;

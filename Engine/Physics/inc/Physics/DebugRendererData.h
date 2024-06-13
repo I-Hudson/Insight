@@ -1,12 +1,15 @@
 #pragma once
 
 #include "Physics/Defines.h"
+#include "Core/TypeAlias.h"
 
+#include "Maths/Vector2.h"
 #include "Maths/Vector3.h"
 #include "Maths/Vector4.h"
 
 #include <string>
 #include <mutex>
+#include <vector>
 
 namespace Insight::Physics
 {
@@ -16,29 +19,31 @@ namespace Insight::Physics
 
         DebugRendererData(const DebugRendererData& other)
         {
-            std::lock_guard linesLock(LinesMutex);
-            std::lock_guard otherLinesLock(other.LinesMutex);
+            std::lock_guard lock(Mutex);
 
-            std::lock_guard textLock(TextsMutex);
-            std::lock_guard otherTextLock(other.TextsMutex);
+            Vertices = std::move(other.Vertices);
+            Indices = std::move(other.Indices);
 
             Lines = other.Lines;
-            LinesDraw = other.LinesDraw;
+
+            Triangles = std::move(other.Triangles);
 
             Texts = other.Texts;
         }
         DebugRendererData(DebugRendererData&& other)
         {
-            std::lock_guard linesLock(LinesMutex);
-            std::lock_guard otherLinesLock(other.LinesMutex);
+            std::lock_guard lock(Mutex);
 
-            std::lock_guard textLock(TextsMutex);
-            std::lock_guard otherTextLock(other.TextsMutex);
+            Vertices = std::move(other.Vertices);
+            other.Vertices.clear();
+            Indices = std::move(other.Indices);
+            other.Indices.clear();
 
             Lines = std::move(other.Lines);
-            LinesDraw = std::move(other.LinesDraw);
             other.Lines.clear();
-            other.LinesDraw.clear();
+
+            Triangles = std::move(other.Triangles);
+            other.Triangles.clear();
 
             Texts = std::move(other.Texts);
             other.Texts.clear();
@@ -46,14 +51,14 @@ namespace Insight::Physics
 
         DebugRendererData& operator=(const DebugRendererData& other)
         {
-            std::lock_guard linesLock(LinesMutex);
-            std::lock_guard otherLinesLock(other.LinesMutex);
+            std::lock_guard lock(Mutex);
 
-            std::lock_guard textLock(TextsMutex);
-            std::lock_guard otherTextLock(other.TextsMutex);
+            Vertices = std::move(other.Vertices);
+            Indices = std::move(other.Indices);
 
             Lines = other.Lines;
-            LinesDraw = other.LinesDraw;
+
+            Triangles = std::move(other.Triangles);
 
             Texts = other.Texts;
 
@@ -61,16 +66,18 @@ namespace Insight::Physics
         }
         DebugRendererData& operator=(DebugRendererData&& other)
         {
-            std::lock_guard linesLock(LinesMutex);
-            std::lock_guard otherLinesLock(other.LinesMutex);
+            std::lock_guard lock(Mutex);
 
-            std::lock_guard textLock(TextsMutex);
-            std::lock_guard otherTextLock(other.TextsMutex);
+            Vertices = std::move(other.Vertices);
+            other.Vertices.clear();
+            Indices = std::move(other.Indices);
+            other.Indices.clear();
 
             Lines = std::move(other.Lines);
-            LinesDraw = std::move(other.LinesDraw);
             other.Lines.clear();
-            other.LinesDraw.clear();
+
+            Triangles = std::move(other.Triangles);
+            other.Triangles.clear();
 
             Texts = std::move(other.Texts);
             other.Texts.clear();
@@ -78,17 +85,24 @@ namespace Insight::Physics
             return *this;
         }
 
-        struct IS_PHYSICS Line
+        struct IS_PHYSICS Vertex
         {
-            Maths::Vector4 From;
-            Maths::Vector4 FromColour;
-            Maths::Vector4 To;
-            Maths::Vector4 ToColour;
+            Maths::Vector4 Position;
+            Maths::Vector4 Colour;
+            Maths::Vector2 UV;
         };
-        struct IS_PHYSICS LineDraw
+
+        struct IS_PHYSICS Line
         {
             u64 StartIndex = 0;
             u64 Size = 0;
+        };
+
+        struct IS_PHYSICS Triangle
+        {
+            u64 VertexStartIndex = 0;
+            u64 IndexStartIndex = 0;
+            u64 IndexCount = 0;
         };
 
         struct IS_PHYSICS Text
@@ -99,12 +113,14 @@ namespace Insight::Physics
             float Height;
         };
 
+        mutable std::mutex Mutex;
+
+        std::vector<Vertex> Vertices;
+        std::vector<u16> Indices;
+
         std::vector<Line> Lines;
-        std::vector<LineDraw> LinesDraw;
-        mutable std::mutex LinesMutex;
-    
+        std::vector<Triangle> Triangles;
         std::vector<Text> Texts;
-        mutable std::mutex TextsMutex;
 
     };
 }

@@ -6,7 +6,6 @@
 
 #include "Physics/Jolt/ObjectLayerFilters_Jolt.h"
 #include "Physics/Jolt/Listeners_Jolt.h"
-#include "Physics/Jolt/DebugRendererJolt.h"
 #include "Physics/MotionType.h"
 
 #include "Core/Asserts.h"

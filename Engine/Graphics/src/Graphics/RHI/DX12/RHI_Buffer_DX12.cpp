@@ -82,12 +82,14 @@ namespace Insight
 
 				if (data == nullptr)
 				{
+					m_uploadStatus = DeviceUploadStatus::Completed;
 					return {};
 				}
 
 				if (sizeInBytes > GetSize())
 				{
 					IS_LOG_CORE_ERROR("[RHI_Buffer_DX12::Upload] Upload size '{}' is too big available size '{}'.", sizeInBytes, GetSize());
+					m_uploadStatus = DeviceUploadStatus::NotUploaded;
 					return {};
 				}
 
