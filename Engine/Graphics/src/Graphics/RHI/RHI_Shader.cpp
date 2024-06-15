@@ -259,13 +259,21 @@ namespace Insight
 				arguments.push_back(L"DX12");
 			}
 
+#ifdef VERTEX_NORMAL_PACKED
+			arguments.push_back(L"-D");
+			arguments.push_back(L"VERTEX_NORMAL_PACKED");
+#endif
 #ifdef VERTEX_COLOUR_PACKED
 			arguments.push_back(L"-D");
 			arguments.push_back(L"VERTEX_COLOUR_PACKED");
 #endif
-#ifdef BONE_ID_PACKED
+#ifdef VERTEX_BONE_ID_PACKED
 			arguments.push_back(L"-D");
-			arguments.push_back(L"BONE_ID_PACKED");
+			arguments.push_back(L"VERTEX_BONE_ID_PACKED");
+#endif
+#ifdef VERTEX_BONE_WEIGHT_PACKED
+			arguments.push_back(L"-D");
+			arguments.push_back(L"VERTEX_BONE_WEIGHT_PACKED");
 #endif
 
 			// Compile shader

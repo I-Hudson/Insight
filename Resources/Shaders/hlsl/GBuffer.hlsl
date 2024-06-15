@@ -17,17 +17,13 @@ struct VertexOutput
 #define IDENTITY_MATRIX float4x4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
 #define ZERO_MATRIX float4x4(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 
-#ifdef BONE_ID_PACKED
-float4x4 SkinnedBoneMatrix(const int boneIds, const float4 boneWeights)
-#else
-float4x4 SkinnedBoneMatrix(const int4 boneIds, const float4 boneWeights)
-#endif
+float4x4 SkinnedBoneMatrix(const in GeoVertexInput input)
 {
 	float4x4 BoneTransform = ZERO_MATRIX; 
-	BoneTransform += bpo_BoneMatrices[GetVertexBondId(boneIds, 0)] * boneWeights[0];
-    BoneTransform += bpo_BoneMatrices[GetVertexBondId(boneIds, 1)] * boneWeights[1];
-    BoneTransform += bpo_BoneMatrices[GetVertexBondId(boneIds, 2)] * boneWeights[2];
-    BoneTransform += bpo_BoneMatrices[GetVertexBondId(boneIds, 3)] * boneWeights[3];
+	BoneTransform += bpo_BoneMatrices[GetVertexBondId(input.BoneIds, 0)] * GetVertexBoneWeight(input.BoneWeights, 0);
+    BoneTransform += bpo_BoneMatrices[GetVertexBondId(input.BoneIds, 1)] * GetVertexBoneWeight(input.BoneWeights, 1);
+    BoneTransform += bpo_BoneMatrices[GetVertexBondId(input.BoneIds, 2)] * GetVertexBoneWeight(input.BoneWeights, 2);
+    BoneTransform += bpo_BoneMatrices[GetVertexBondId(input.BoneIds, 3)] * GetVertexBoneWeight(input.BoneWeights, 3);
 	return BoneTransform;
 }
 
@@ -36,14 +32,14 @@ VertexOutput VSMain(const GeoVertexInput input)
 	VertexOutput vsOut;
 	vsOut.Pos = float4(input.Pos, 1);
 	vsOut.Colour = GetVertexColour(input);
-	vsOut.WorldNormal = float4(input.Normal.xyz, 1);
+	vsOut.WorldNormal = GetVertexNormal(input);
 
 	if (bpo_SkinnedMesh == 1)
 	{
-		const float4x4 BoneTransform = SkinnedBoneMatrix(input.BoneIds, input.BoneWeights);
+		const float4x4 BoneTransform = SkinnedBoneMatrix(input);
 		
 		vsOut.Pos = mul(BoneTransform, float4(vsOut.Pos.xyz, 1));
-		vsOut.WorldNormal = mul(BoneTransform, float4(input.Normal.xyz, 1));
+		vsOut.WorldNormal = mul(BoneTransform, float4(vsOut.WorldNormal.xyz, 1));
 	}
 	vsOut.WorldPos = mul(bpo_Transform, vsOut.Pos);
 	vsOut.Pos = mul(bf_Camera_Proj_View, vsOut.WorldPos);
@@ -70,6 +66,7 @@ struct PixelOutput
 PixelOutput PSMain(VertexOutput input)
 {	
 	PixelOutput Out;
+	Out.World_Normal = float4(input.WorldNormal.xyz, 1.0);
 	if(bpo_Textures_Set[0] == 1)
 	{
 		Out.Colour = Diffuse_Texture.Sample(Reapt_Sampler, input.UV);
@@ -78,7 +75,6 @@ PixelOutput PSMain(VertexOutput input)
 	{
 		Out.Colour = input.Colour;
 	}
-	Out.World_Normal = float4(input.WorldNormal.xyz, 1.0);
     
 	float2 position_ndc_current = (input.position_ss_current.xy / input.position_ss_current.w);
 	float2 position_ndc_previous = (input.position_ss_previous.xy / input.position_ss_previous.w);

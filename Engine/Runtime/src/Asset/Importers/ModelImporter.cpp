@@ -1612,11 +1612,12 @@ namespace Insight
 
 			for (int i = 0; i < Graphics::Vertex::MAX_BONE_COUNT; ++i)
 			{
-				if (vertex.BoneWeights[i] == 0.0f)
+				const float currentBoneWeight = vertex.GetBoneWeight(i);
+				if (currentBoneWeight == 0.0f)
 				{
 					ASSERT(boneId < 72);
 					vertex.SetBoneId(boneId, i);
-					vertex.BoneWeights[i] = boneWeight;
+					vertex.SetBoneWeight(boneWeight, i);
 					break;
 				}
 			}

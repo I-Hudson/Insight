@@ -87,19 +87,27 @@ namespace Insight
 				std::vector<ShaderInputLayout> DefaultShaderInputLayout =
 				{
 					ShaderInputLayout(0, PixelFormat::R32G32B32_Float, 0, "POSITION"),
+#ifdef VERTEX_NORMAL_PACKED
+					ShaderInputLayout(1, PixelFormat::R32_SInt, 0, "NORMAL0"),
+#else
 					ShaderInputLayout(1, PixelFormat::R32G32B32_Float, 0, "NORMAL0"),
+#endif
 #ifdef VERTEX_COLOUR_PACKED
 					ShaderInputLayout(2, PixelFormat::R32_SInt, 0, "COLOR0"),
 #else
 					ShaderInputLayout(2, PixelFormat::R32G32B32_Float, 0, "COLOR0"),
 #endif
 					ShaderInputLayout(3, PixelFormat::R32G32_Float, 0, "TEXCOORD0"),
-#ifdef BONE_ID_PACKED
+#ifdef VERTEX_BONE_ID_PACKED
 					ShaderInputLayout(4, PixelFormat::R32_SInt, 0, "BLENDINDICES"),
 #else
 					ShaderInputLayout(4, PixelFormat::R32G32B32A32_SInt, 0, "BLENDINDICES"),
 #endif
+#ifdef VERTEX_BONE_WEIGHT_PACKED
+					ShaderInputLayout(5, PixelFormat::R32G32_SInt, 0, "BLENDWEIGHT"),
+#else
 					ShaderInputLayout(5, PixelFormat::R32G32B32A32_Float, 0, "BLENDWEIGHT"),
+#endif
 				};
 
 				u64 offset = 0;
