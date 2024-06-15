@@ -67,6 +67,9 @@ namespace Insight
 			Matrix4& Translate(const Vector4 vector);
 			Matrix4 Translated(const Vector4 vector) const { return Matrix4(*this).Translate(vector); }
 
+			Matrix4& Rotate(const Quaternion& quat);
+			Matrix4 Rotated(const Quaternion& quat) const { return Matrix4(*this).Rotate(quat); }
+
 			Matrix4& Scale(const Vector4& vector);
 			Matrix4 Scaled(const Vector4& vector) const { return Matrix4(*this).Scale(vector); }
 

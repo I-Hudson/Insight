@@ -259,6 +259,42 @@ namespace Insight
 			return *this;
 		}
 
+		Matrix4& Matrix4::Rotate(const Quaternion& quat)
+		{
+#ifdef IS_MATHS_DIRECTX_MATHS
+			xmmatrix = DirectX::XMMatrixMultiply(DirectX::XMMatrixRotationQuaternion(DirectX::XMVectorSet(quat.x, quat.y, quat.z, quat.w)), xmmatrix);
+#elif defined(IS_MATHS_GLM)
+			mat4 = glm::rotate(mat4, glm::vec3(vector.vec4));
+#else
+			Matrix4 m = Matrix4::Identity;
+			const float qw = quat.w;
+			
+			const float qx = quat.x;
+			const float qxx = qx * qx;
+
+			float qy = quat.y;
+			float qyy = qy * qy;
+			
+			float qz = quat.z;
+			float qzz = qz * qz;
+			
+			m.m_00 = 1.f - 2.f * qyy - 2.f * qzz;
+			m.m_01 = 2.f * qx * qy + 2.f * qz * qw;
+			m.m_02 = 2.f * qx * qz - 2.f * qy * qw;
+
+			m.m_10 = 2.f * qx * qy - 2.f * qz * qw;
+			m.m_11 = 1.f - 2.f * qxx - 2.f * qzz;
+			m.m_12 = 2.f * qy * qz + 2.f * qx * qw;
+
+			m.m_20 = 2.f * qx * qz + 2.f * qy * qw;
+			m.m_21 = 2.f * qy * qz - 2.f * qx * qw;
+			m.m_22 = 1.f - 2.f * qxx - 2.f * qyy;
+
+			*this = *this * m;
+#endif
+			return *this;
+		}
+
 		Matrix4& Matrix4::Scale(const Vector4& vector)
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS

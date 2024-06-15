@@ -105,6 +105,9 @@ workspace "Insight"
         "RENDER_GRAPH_ENABLED",
         "TOBJECTPTR_REF_COUNTING",
 
+        "BONE_ID_PACKED",
+        "VERTEX_COLOUR_PACKED",
+
         --"RENDERGRAPH_V2_ENABLED",
         --"IS_RESOURCE_HANDLES_ENABLED",
 

@@ -7,6 +7,8 @@
 #include "Resource/Skeleton.h"
 #include "Resource/AnimationClip.h"
 
+#include "Maths/Vector2.h"
+
 #include "ECS/ICreateEntityHierarchy.h"
 
 #include "Generated/Model_reflect_generated.h"

@@ -2,6 +2,7 @@
 
 #include "Graphics/Defines.h"
 #include "Graphics/PixelFormat.h"
+#include "Graphics/PixelFormatExtensions.h"
 
 #include <string>
 #include <vector>
@@ -86,13 +87,24 @@ namespace Insight
 				std::vector<ShaderInputLayout> DefaultShaderInputLayout =
 				{
 					ShaderInputLayout(0, PixelFormat::R32G32B32_Float, 0, "POSITION"),
-					ShaderInputLayout(1, PixelFormat::R32G32B32_Float, 12, "NORMAL0"),
-					ShaderInputLayout(2, PixelFormat::R32G32B32_Float, 24, "COLOR0"),
-					ShaderInputLayout(3, PixelFormat::R32G32_Float, 36, "TEXCOORD0"),
-
-					ShaderInputLayout(4, PixelFormat::R32G32B32A32_SInt, 44, "BLENDINDICES"),
-					ShaderInputLayout(5, PixelFormat::R32G32B32A32_Float, 60, "BLENDWEIGHT"),
+					ShaderInputLayout(1, PixelFormat::R32G32B32_Float, 0, "NORMAL0"),
+					ShaderInputLayout(2, PixelFormat::R32G32B32_Float, 0, "COLOR0"),
+					ShaderInputLayout(3, PixelFormat::R32G32_Float, 0, "TEXCOORD0"),
+#ifdef BONE_ID_PACKED
+					ShaderInputLayout(4, PixelFormat::R32_SInt, 0, "BLENDINDICES"),
+#else
+					ShaderInputLayout(4, PixelFormat::R32G32B32A32_SInt, 0, "BLENDINDICES"),
+#endif
+					ShaderInputLayout(5, PixelFormat::R32G32B32A32_Float, 0, "BLENDWEIGHT"),
 				};
+
+				u64 offset = 0;
+				for (ShaderInputLayout& inputLayout : DefaultShaderInputLayout)
+				{
+					inputLayout.Stride = offset;
+					offset += PixelFormatExtensions::SizeInBytes(inputLayout.Format);
+				}
+
 				return DefaultShaderInputLayout;
 			}
 		};

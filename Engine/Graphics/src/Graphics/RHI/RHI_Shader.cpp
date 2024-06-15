@@ -259,6 +259,11 @@ namespace Insight
 				arguments.push_back(L"DX12");
 			}
 
+#ifdef BONE_ID_PACKED
+			arguments.push_back(L"-D");
+			arguments.push_back(L"BONE_ID_PACKED");
+#endif
+
 			// Compile shader
 			ASSERT(SUCCEEDED(DXCompiler->Compile(
 				&Source,									// Source buffer.

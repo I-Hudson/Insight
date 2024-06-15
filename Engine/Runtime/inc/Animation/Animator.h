@@ -27,6 +27,7 @@ namespace Insight
             const std::vector<Maths::Matrix4>& GetBoneTransforms() const;
 
         private:
+            void CalculateBoneTransform(const u32 boneId, const Maths::Vector3 parentPosition, const Maths::Quaternion parentQuaternion, const Maths::Vector3 parentScale);
             void CalculateBoneTransform(const u32 boneId, const Maths::Matrix4 parentTransform);
 #if ANIMATION_NODE_TRANSFORMS
             void CalculateBoneTransform(const AnimationNode* node, const Maths::Matrix4 parentTransform);
@@ -40,6 +41,10 @@ namespace Insight
             Maths::Matrix4 InterpolatePosition(const u32 boneId) const;
             Maths::Matrix4 InterpolateRotation(const u32 boneId) const;
             Maths::Matrix4 InterpolateScale(const u32 boneId) const;
+
+            Maths::Vector3 InterpolatePositionVec(const u32 boneId) const;
+            Maths::Quaternion InterpolateRotationQuat(const u32 boneId) const;
+            Maths::Vector3 InterpolateScaleVec(const u32 boneId) const;
 
             /// @brief Reset our animation time as either the skeleton or animation clip has changed.
             void Reset();

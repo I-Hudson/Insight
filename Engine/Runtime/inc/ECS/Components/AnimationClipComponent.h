@@ -51,6 +51,7 @@ namespace Insight
     OBJECT_SERIALISER(ECS::AnimationClipComponent, 1,
         SERIALISE_BASE(ECS::Component, 1, 0)
         //SERIALISE_COMPLEX(Serialisation::AnimationClipToGuid, m_animationClip, 1, 0)
+        //SERIALISE_COMPLEX(Serialisation::AnimationClipToGuid, m_animationClip, 1, 0)
         SERIALISE_PROPERTY(float, m_playbackScale, 1, 0)
     );
 }

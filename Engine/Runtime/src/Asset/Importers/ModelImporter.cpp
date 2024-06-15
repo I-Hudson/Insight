@@ -455,6 +455,7 @@ namespace Insight
 			}
 			meshNodes.clear();
 #endif
+
 			MaterialCache.clear();
 			modelAsset.Ptr()->m_assetState = AssetState::Loaded;
 		}
@@ -821,6 +822,12 @@ namespace Insight
 
 					uv.y = uv.y > 1.0f ? uv.y - 1.0f : uv.y;
 					uv.y = uv.y < 0.0f ? uv.y + 1.0f : uv.y;
+
+					u16 xU16 = uv.x * _UI16_MAX;
+					u16 yU16 = uv.y * _UI16_MAX;
+
+					float xF = (float)xU16 / (float)_UI16_MAX;
+					float yF = (float)yU16 / (float)_UI16_MAX;
 				}
 				else
 				{
@@ -1608,7 +1615,7 @@ namespace Insight
 				if (vertex.BoneWeights[i] == 0.0f)
 				{
 					ASSERT(boneId < 72);
-					vertex.BoneIds[i] = boneId;
+					vertex.SetBoneId(boneId, i);
 					vertex.BoneWeights[i] = boneWeight;
 					break;
 				}
