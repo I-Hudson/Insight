@@ -20,9 +20,9 @@ struct GeoVertexInput
 #ifdef VERTEX_COLOUR_PACKED
 float4 GetVertexColour(const in GeoVertexInput vertex)
 {
-	const float r = vertex.Colour / 255;
-	const float g = (vertex.Colour >> 8) / 255;
-	const float b = (vertex.Colour >> 16) / 255;
+	const float r = (float)(vertex.Colour & 0xFF) / 255.0;
+	const float g = (float)((vertex.Colour >> 8) & 0xFF) / 255.0;
+	const float b = (float)((vertex.Colour >> 16) & 0xFF) / 255.0;
 	return float4(r, g, b, 1.0);
 }
 #else

@@ -259,6 +259,10 @@ namespace Insight
 				arguments.push_back(L"DX12");
 			}
 
+#ifdef VERTEX_COLOUR_PACKED
+			arguments.push_back(L"-D");
+			arguments.push_back(L"VERTEX_COLOUR_PACKED");
+#endif
 #ifdef BONE_ID_PACKED
 			arguments.push_back(L"-D");
 			arguments.push_back(L"BONE_ID_PACKED");

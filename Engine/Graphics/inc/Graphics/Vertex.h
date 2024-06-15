@@ -49,9 +49,9 @@ namespace Insight
 				Normal[2] = nor[2];
 
 #ifdef VERTEX_COLOUR_PACKED
-				Color |= (colour.x * 255);
-				Color |= (colour.y * 255) << 8;
-				Color |= (colour.z * 255) << 16;
+				Colour |= static_cast<u8>(colour.x * 255);
+				Colour |= static_cast<u8>(colour.y * 255) << 8;
+				Colour |= static_cast<u8>(colour.z * 255) << 16;
 #else
 				Colour[0] = colour[0];
 				Colour[1] = colour[1];
@@ -82,21 +82,21 @@ namespace Insight
 #endif
 			}
 
-			float Position[3];
-			float Normal[3];
+			float Position[3] = { 0 };
+			float Normal[3] = { 0 };
 #ifdef VERTEX_COLOUR_PACKED
-			int Colour;
+			int Colour = 0;
 #else
-			float Colour[3];
+			float Colour[3] = { 0 };
 #endif
-			float UV[2];
+			float UV[2] = { 0 };
 
 #ifdef BONE_ID_PACKED
-			int BoneIds;
+			int BoneIds = 0;
 #else
-			int BoneIds[MAX_BONE_COUNT];
+			int BoneIds[MAX_BONE_COUNT] = { 0 };
 #endif
-			float BoneWeights[MAX_BONE_COUNT];
+			float BoneWeights[MAX_BONE_COUNT] = { 0 };
 
 			constexpr int GetStride() { return sizeof(Vertex); }
 		};

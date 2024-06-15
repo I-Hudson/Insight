@@ -88,7 +88,11 @@ namespace Insight
 				{
 					ShaderInputLayout(0, PixelFormat::R32G32B32_Float, 0, "POSITION"),
 					ShaderInputLayout(1, PixelFormat::R32G32B32_Float, 0, "NORMAL0"),
+#ifdef VERTEX_COLOUR_PACKED
+					ShaderInputLayout(2, PixelFormat::R32_SInt, 0, "COLOR0"),
+#else
 					ShaderInputLayout(2, PixelFormat::R32G32B32_Float, 0, "COLOR0"),
+#endif
 					ShaderInputLayout(3, PixelFormat::R32G32_Float, 0, "TEXCOORD0"),
 #ifdef BONE_ID_PACKED
 					ShaderInputLayout(4, PixelFormat::R32_SInt, 0, "BLENDINDICES"),
