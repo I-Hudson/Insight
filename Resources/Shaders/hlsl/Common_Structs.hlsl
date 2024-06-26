@@ -7,17 +7,25 @@ struct GeoVertexInput
 #else
 	float3 Normal : NORMAL0;
 #endif
+
 #ifdef VERTEX_COLOUR_PACKED
 	int Colour : COLOR0;
 #else
 	float3 Colour : COLOR0;
 #endif
+
+#ifdef VERTEX_UV_PACKED
+	int UV : TEXCOORD0;
+#else
 	float2 UV : TEXCOORD0;
+#endif
+
 #ifdef VERTEX_BONE_ID_PACKED
 	int BoneIds : BLENDINDICES;
 #else
 	int4 BoneIds : BLENDINDICES;
 #endif
+
 #ifdef VERTEX_BONE_WEIGHT_PACKED
 	int2 BoneWeights : BLENDWEIGHT;
 #else
@@ -26,17 +34,35 @@ struct GeoVertexInput
 };
 
 #ifdef VERTEX_NORMAL_PACKED
+float UnpackNormal(const in int normal, const in uint maxValue, const in uint bitshift)
+{
+	//const uint NormalPackedValueBits = 0x3FE;
+	const uint NormalPackedValueBits = 0xFF;
+
+	const uint normalData = normal >> bitshift;
+	const uint normalValue = normalData & NormalPackedValueBits;
+
+	const float sign = (normalData & 0x1) == 1 ? -1.0 : 1.0;
+	const float v = ((float)normalValue / (float)maxValue) * sign;
+	return v;
+}
+
 float4 GetVertexNormal(const in GeoVertexInput vertex)
 {
-	const float x = (float)(vertex.Normal & 0xFF) / 255.0;
-	const float y = (float)((vertex.Normal >> 8) & 0xFF) / 255.0;
-	const float z = (float)((vertex.Normal >> 16) & 0xFF) / 255.0;
+	const uint NormalPackedBitShiftInterval = 10;
+	const uint NormalPackedMaxValue = 1U << NormalPackedBitShiftInterval;
+
+	const float x = UnpackNormal(vertex.Normal, NormalPackedMaxValue, 0);
+	const float y = UnpackNormal(vertex.Normal, NormalPackedMaxValue, NormalPackedBitShiftInterval);
+	const float z = UnpackNormal(vertex.Normal, NormalPackedMaxValue, NormalPackedBitShiftInterval * 2);
+
 	return float4(x, y, z, 0.0);
 }
+
 #else
 float4 GetVertexNormal(const in GeoVertexInput vertex)
 {
-	return float4(vertex.Normal, 1.0);
+	return float4(vertex.Normal, 0.0);
 }
 #endif
 
@@ -52,6 +78,23 @@ float4 GetVertexColour(const in GeoVertexInput vertex)
 float4 GetVertexColour(const in GeoVertexInput vertex)
 {
 	return float4(vertex.Colour, 1.0);
+}
+#endif
+
+#ifdef VERTEX_UV_PACKED
+float2 GetVertexUVs(const in GeoVertexInput vertex)
+{
+	const int xInt = vertex.UV & 0x0000FFFF;
+	const int yInt = vertex.UV >> 16;
+
+	const float xFloat = xInt / 65535.0;
+	const float yFloat = yInt / 65535.0;
+	return float2(xFloat, yFloat);
+}
+#else
+float2 GetVertexUVs(const in GeoVertexInput vertex)
+{
+	return vertex.UV;
 }
 #endif
 

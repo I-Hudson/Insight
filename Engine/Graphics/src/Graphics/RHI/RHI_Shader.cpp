@@ -267,6 +267,10 @@ namespace Insight
 			arguments.push_back(L"-D");
 			arguments.push_back(L"VERTEX_COLOUR_PACKED");
 #endif
+#ifdef VERTEX_UV_PACKED
+			arguments.push_back(L"-D");
+			arguments.push_back(L"VERTEX_UV_PACKED");
+#endif
 #ifdef VERTEX_BONE_ID_PACKED
 			arguments.push_back(L"-D");
 			arguments.push_back(L"VERTEX_BONE_ID_PACKED");

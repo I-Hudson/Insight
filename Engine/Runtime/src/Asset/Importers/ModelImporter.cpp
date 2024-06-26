@@ -817,17 +817,13 @@ namespace Insight
 					uv.x = aiMesh->mTextureCoords[0][i].x;
 					uv.y = aiMesh->mTextureCoords[0][i].y;
 
-					uv.x = uv.x > 1.0f ? uv.x - 1.0f : uv.x;
-					uv.x = uv.x < 0.0f ? uv.x + 1.0f : uv.x;
+#ifdef VERTEX_DISABLE_TILE_UVS
+					uv.x = uv.x > 1.0f ? uv.x - ((int)uv.x) : uv.x;
+					uv.x = uv.x < 0.0f ? uv.x + (std::abs((int)uv.x)) : uv.x;
 
-					uv.y = uv.y > 1.0f ? uv.y - 1.0f : uv.y;
-					uv.y = uv.y < 0.0f ? uv.y + 1.0f : uv.y;
-
-					u16 xU16 = uv.x * _UI16_MAX;
-					u16 yU16 = uv.y * _UI16_MAX;
-
-					float xF = (float)xU16 / (float)_UI16_MAX;
-					float yF = (float)yU16 / (float)_UI16_MAX;
+					uv.y = uv.y > 1.0f ? uv.y - ((int)uv.y) : uv.y;
+					uv.y = uv.y < 0.0f ? uv.y + (std::abs((int)uv.y)) : uv.y;
+#endif
 				}
 				else
 				{

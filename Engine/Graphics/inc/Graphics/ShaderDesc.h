@@ -92,17 +92,25 @@ namespace Insight
 #else
 					ShaderInputLayout(1, PixelFormat::R32G32B32_Float, 0, "NORMAL0"),
 #endif
+
 #ifdef VERTEX_COLOUR_PACKED
 					ShaderInputLayout(2, PixelFormat::R32_SInt, 0, "COLOR0"),
 #else
 					ShaderInputLayout(2, PixelFormat::R32G32B32_Float, 0, "COLOR0"),
 #endif
+
+#ifdef VERTEX_UV_PACKED
+					ShaderInputLayout(3, PixelFormat::R32_UInt, 0, "TEXCOORD0"),
+#else
 					ShaderInputLayout(3, PixelFormat::R32G32_Float, 0, "TEXCOORD0"),
+#endif
+
 #ifdef VERTEX_BONE_ID_PACKED
 					ShaderInputLayout(4, PixelFormat::R32_SInt, 0, "BLENDINDICES"),
 #else
 					ShaderInputLayout(4, PixelFormat::R32G32B32A32_SInt, 0, "BLENDINDICES"),
 #endif
+
 #ifdef VERTEX_BONE_WEIGHT_PACKED
 					ShaderInputLayout(5, PixelFormat::R32G32_SInt, 0, "BLENDWEIGHT"),
 #else

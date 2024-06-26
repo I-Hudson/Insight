@@ -2,12 +2,15 @@
 
 #include "Core/Logger.h"
 
+#include "Core/CommandLineArgs.h"
 #include "Platforms/Platform.h"
 
 namespace Insight
 {
 	namespace Graphics
 	{
+		constexpr const char* renderdocapi_enabled = "renderdocapi_enabled";
+
 		RenderDocAPI::RenderDocAPI()
 		{ }
 
@@ -34,6 +37,13 @@ namespace Insight
 			{
 				return true;
 			}
+
+			if (!Core::CommandLineArgs::GetCommandLineValue(renderdocapi_enabled)->GetBool())
+			{
+				IS_LOG_CORE_WARN("[RenderDocAPI::Initialise] Unable to Initialise as '{}' cmd is not true.", renderdocapi_enabled);
+				return false;
+			}
+
 #ifdef RENDER_DOC_API
 			m_renderDocDll = Platform::LoadDynamicLibrary("renderdoc.dll");
 			if (!m_renderDocDll)

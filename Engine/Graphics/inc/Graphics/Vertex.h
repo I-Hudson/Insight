@@ -6,6 +6,8 @@
 #include "Maths/Vector2.h"
 #include "Maths/Vector3.h"
 
+#include "Core/Asserts.h"
+
 #include <cstring>
 
 namespace Insight
@@ -45,9 +47,16 @@ namespace Insight
 				Position[2] = pos[2];
 
 #ifdef VERTEX_NORMAL_PACKED
-				Normal |= static_cast<u8>(nor.x * 255);
-				Normal |= static_cast<u8>(nor.y * 255) << 8;
-				Normal |= static_cast<u8>(nor.z * 255) << 16;
+				const u32 bitshiftInterval = 8;
+				const u32 normalMaxValue = 1 << bitshiftInterval;
+
+				PackNormal(nor.x, normalMaxValue, 0);
+				PackNormal(nor.y, normalMaxValue, bitshiftInterval);
+				PackNormal(nor.z, normalMaxValue, bitshiftInterval * 2);
+
+				const float fX = UnpackNormal(Normal, normalMaxValue, 0);
+				const float fY = UnpackNormal(Normal, normalMaxValue, bitshiftInterval);
+				const float fZ = UnpackNormal(Normal, normalMaxValue, bitshiftInterval * 2);
 #else
 				Normal[0] = nor[0];
 				Normal[1] = nor[1];
@@ -63,8 +72,17 @@ namespace Insight
 				Colour[1] = colour[1];
 				Colour[2] = colour[2];
 #endif
+
+#ifdef VERTEX_UV_PACKED
+				const u16 xUVInt = PackNormalisedFloatToU16(uv.x, _UI16_MAX);
+				const u16 yUVInt = PackNormalisedFloatToU16(uv.y, _UI16_MAX);
+				
+				UV |= xUVInt;
+				UV |= yUVInt << 16;
+#else
 				UV[0] = uv[0];
 				UV[1] = uv[1];
+#endif
 
 				for (size_t boneIdx = 0; boneIdx < MAX_BONE_COUNT; ++boneIdx)
 				{
@@ -169,6 +187,46 @@ namespace Insight
 #endif
 		}
 
+			private:
+#ifdef VERTEX_NORMAL_PACKED
+				const static u32 c_NormapPackBits = 0x3FE;//0b0000'0000'0000'0000'0000'0011'1111'1110;
+				//const static u32 c_NormapPackBits = 0xFF;//0b0000'0000'0000'0000'0000'0000'1111'1110;
+				
+				void PackNormal(const float value, const u32 maxValue, const u8 bitshift)
+				{
+					ASSERT(std::abs(value) >= 0.0f && std::abs(value) <= 1.0f);
+					ASSERT(bitshift < 21);
+				
+					if (value < 0.0f)
+					{
+						Normal |= 1 << bitshift;
+					}
+				
+					const u32 normalData = static_cast<u32>(std::abs(value) * maxValue);
+					Normal |= (normalData & c_NormapPackBits) << bitshift;
+				}
+				
+				float UnpackNormal(const int normal, const u32 maxValue, const u8 bitshift) const
+				{
+					ASSERT(bitshift < 21);
+					const u32 normalData = normal >> bitshift;
+					const u32 normalValue = normalData & c_NormapPackBits;
+				
+					const int sign = (normalData & 0x1) == 0 ? 1 : -1;
+				
+					const float fValue = (static_cast<float>(normalValue) / static_cast<float>(maxValue)) * sign;
+					return fValue;
+				}
+#endif
+			u16 PackNormalisedFloatToU16(const float value, const u16 maxValue) const
+			{
+				ASSERT(std::abs(value) >= 0.0f && std::abs(value) <= 1.0f);
+				const u16 intValue = value * maxValue;
+				return intValue;
+			}
+
+			public:
+
 			float Position[3] = { 0 };
 #ifdef VERTEX_NORMAL_PACKED
 			int Normal = 0;
@@ -180,8 +238,11 @@ namespace Insight
 #else
 			float Colour[3] = { 0 };
 #endif
+#ifdef VERTEX_UV_PACKED
+			int UV = 0;
+#else
 			float UV[2] = { 0 };
-
+#endif
 #ifdef VERTEX_BONE_ID_PACKED
 			int BoneIds = 0;
 #else
