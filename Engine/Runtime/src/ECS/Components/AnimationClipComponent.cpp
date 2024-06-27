@@ -54,11 +54,25 @@ namespace Insight
         void AnimationClipComponent::OnCreate()
         {
             Runtime::AnimationSystem::Instance().AddAnimationInstance(GetGuid());
+
+            OnEnabled.Bind<OnEnabledCallback>(this);
         }
 
         void AnimationClipComponent::OnDestroy()
         {
             Runtime::AnimationSystem::Instance().RemoveAnimationInstance(GetGuid());
+        }
+
+        void AnimationClipComponent::OnEnabledCallback(const bool enabled) const
+        {
+            if (enabled)
+            {
+                Runtime::AnimationSystem::Instance().AddAnimationInstance(GetGuid());
+            }
+            else
+            {
+                Runtime::AnimationSystem::Instance().RemoveAnimationInstance(GetGuid());
+            }
         }
     }
 }

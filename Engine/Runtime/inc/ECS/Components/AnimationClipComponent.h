@@ -40,6 +40,9 @@ namespace Insight
             /// Component - End
 
         private:
+            void OnEnabledCallback(const bool enabled) const;
+
+        private:
             Ref<Runtime::AnimationClip> m_animationClip;
             Ref<Runtime::Skeleton> m_skeleton;
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/TypeAlias.h"
+#include "Core/Delegate.h"
 #include "Platforms/Platform.h"
 #include "Runtime/Defines.h"
 #include "Core/GUID.h"
@@ -122,7 +123,7 @@ namespace Insight
 
 			Entity* GetOwnerEntity() const { return m_ownerEntity; }
 			bool IsEnabled() const { return m_isEnabled; }
-			void SetEnabled(bool enabled) { m_isEnabled = enabled; }
+			void SetEnabled(bool enabled) { m_isEnabled = enabled; OnEnabled(m_isEnabled); }
 
 			IS_SERIALISABLE_H(Component)
 
@@ -136,6 +137,8 @@ namespace Insight
 			bool m_on_begin_called : 1;
 			/// @brief Track when OnEnd has been called (Should only be called once, for each time this object is Enabled).
 			bool m_on_end_called : 1;
+
+			Core::Delegate<bool> OnEnabled;
 
 		private:
 			// TODO Low: Must add type information.

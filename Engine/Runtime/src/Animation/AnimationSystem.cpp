@@ -31,39 +31,46 @@ namespace Insight
                 return;
             }
 
-            std::lock_guard lock(m_animationsLock);
 
+            if (m_enableGPUSkinning)
+            {
+                GPUSkinning();
+            }
+            else
+            {
+                std::lock_guard lock(m_animationsLock);
 #if PARALLEL_FOR
-            Threading::ParallelFor<AnimationInstance>(16, m_animations, [deltaTime](AnimationInstance& instance)
-            {
-                instance.Animator.Update(deltaTime);
-            });
-#else
-#if ANIMATION_THREADING
-            std::vector<std::shared_ptr<Threading::Task>> aniationTasks;
-#endif
-            for (size_t animIdx = 0; animIdx < m_animations.size(); ++animIdx)
-            {
-                AnimationInstance& instance = m_animations[animIdx];
-#if ANIMATION_THREADING
-                aniationTasks.push_back(Threading::TaskSystem::Instance().CreateTask([&]()
-                    {
+                Threading::ParallelFor<AnimationInstance>(16, m_animations, [deltaTime](AnimationInstance& instance)
+                {
                         instance.Animator.Update(deltaTime);
-                    }));
+                });
 #else
-                instance.Animator.Update(deltaTime);
+#if ANIMATION_THREADING
+                std::vector<std::shared_ptr<Threading::Task>> aniationTasks;
 #endif
-            }
+                for (size_t animIdx = 0; animIdx < m_animations.size(); ++animIdx)
+                {
+                    AnimationInstance& instance = m_animations[animIdx];
+#if ANIMATION_THREADING
+                    aniationTasks.push_back(Threading::TaskSystem::Instance().CreateTask([&]()
+                        {
+                            instance.Animator.Update(deltaTime);
+                        }));
+#else
+                    instance.Animator.Update(deltaTime);
+#endif
+                }
 
 #if ANIMATION_THREADING
-            for (size_t taskIdx = 0; taskIdx < aniationTasks.size(); ++taskIdx)
-            {
-                IS_PROFILE_SCOPE("Anin wait");
-                std::shared_ptr<Threading::Task>& task = aniationTasks[taskIdx];
-                task->Wait();
+                for (size_t taskIdx = 0; taskIdx < aniationTasks.size(); ++taskIdx)
+                {
+                    IS_PROFILE_SCOPE("Anin wait");
+                    std::shared_ptr<Threading::Task>& task = aniationTasks[taskIdx];
+                    task->Wait();
+                }
+#endif
+#endif
             }
-#endif
-#endif
         }
 
         AnimationInstance* AnimationSystem::AddAnimationInstance(const Core::GUID& guid)
@@ -122,6 +129,15 @@ namespace Insight
                 }
             }
             return nullptr;
+        }
+
+        void AnimationSystem::GPUSkinning()
+        {
+            std::lock_guard lock(m_animationsLock);
+            for (size_t animIdx = 0; animIdx < m_animations.size(); ++animIdx)
+            {
+                const AnimationInstance& animInstance = m_animations[animIdx];
+            }
         }
     }
 }

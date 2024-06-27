@@ -47,6 +47,7 @@ namespace Insight
 
         std::vector<Maths::Matrix4> BoneTransforms;
         bool SkinnedMesh = false;
+        Core::GUID SkinnedMeshGuid;
 
         const Runtime::MeshLOD& GetLOD(u32 lodIndex) const;
 

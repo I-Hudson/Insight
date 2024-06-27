@@ -207,6 +207,7 @@ namespace Insight
                                 if (animationClipComponent)
                                 {
                                     IS_PROFILE_SCOPE("SetBoneTransforms");
+                                    renderMesh.SkinnedMeshGuid = animationClipComponent->GetGuid();
 #if 0
                                     const u32 skeletonBoneCount = skinnedMeshComponent->GetSkeleton()->GetNumberOfBones();
                                     {
