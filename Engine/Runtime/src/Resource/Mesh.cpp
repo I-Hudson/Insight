@@ -64,6 +64,12 @@ namespace Insight
 			return m_assetInfo;
 		}
 
+		const MeshLOD& Mesh::GetLOD(const u32 lodIndex) const
+		{
+			ASSERT(lodIndex >= 0 && lodIndex < m_lods.size());
+			return m_lods[lodIndex];
+		}
+
 		u32 Mesh::GetLODCount() const
 		{
 			return static_cast<u32>(m_lods.size());

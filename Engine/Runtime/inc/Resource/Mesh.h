@@ -35,6 +35,7 @@ namespace Insight
 			u32 Index_count = 0;
 
 			Graphics::RHI_Buffer* Vertex_buffer = nullptr;
+			Graphics::RHI_BufferView VertexBufferView;
 			Graphics::RHI_Buffer* Index_buffer = nullptr;
 		};
 
@@ -66,6 +67,7 @@ namespace Insight
 
 			const AssetInfo* GetAssetInfo() const;
 
+			const MeshLOD& GetLOD(const u32 lodIndex = 0) const;
 			u32 GetLODCount() const;
 			static const u32 s_MAX_LOD_COUNT = 4;
 

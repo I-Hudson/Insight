@@ -40,14 +40,15 @@ namespace Insight
         Maths::Matrix4 Transform;
         Maths::Matrix4 PreviousTransform;
         Graphics::BoundingBox BoudingBox;
+        Core::GUID EntityGuid;
 
         /// @brief All render calls for this mesh.
         std::vector<Runtime::MeshLOD> MeshLods;
         RenderMaterial Material;
 
         std::vector<Maths::Matrix4> BoneTransforms;
-        bool SkinnedMesh = false;
         Core::GUID SkinnedMeshGuid;
+        bool SkinnedMesh = false;
 
         const Runtime::MeshLOD& GetLOD(u32 lodIndex) const;
 
@@ -179,6 +180,9 @@ namespace Insight
         void CreateRenderFrameFromWorldSystem(Runtime::WorldSystem* worldSystem);
         void Sort();
         void SetCameraForAllWorlds(ECS::Camera mainCamera, const Maths::Matrix4 transform);
+
+        RenderMesh& GetRenderMesh(const ECS::Entity* entity);
+        const RenderMesh& GetRenderMesh(const ECS::Entity* entity) const;
 
     private:
         void Clear();

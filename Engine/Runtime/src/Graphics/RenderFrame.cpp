@@ -172,6 +172,7 @@ namespace Insight
                         }
 
                         RenderMesh renderMesh;
+                        renderMesh.EntityGuid = entity->GetGUID();
                         {
                             IS_PROFILE_SCOPE("Set Transforms");
                             renderMesh.Transform = transformComponent->GetTransform();
@@ -361,5 +362,27 @@ namespace Insight
         {
             world.SetMainCamera(mainCamera, transform);
         }
+    }
+
+    RenderMesh& RenderFrame::GetRenderMesh(const ECS::Entity* entity)
+    {
+        return RemoveConst(const_cast<const RenderFrame&>(*this).GetRenderMesh(entity));
+    }
+
+    const RenderMesh& RenderFrame::GetRenderMesh(const ECS::Entity* entity) const
+    {
+        IS_PROFILE_FUNCTION();
+        for (const RenderWorld& world : RenderWorlds)
+        {
+            for (size_t meshIdx = 0; meshIdx < world.Meshes.size(); ++meshIdx)
+            {
+                const RenderMesh& renderMesh = world.Meshes[meshIdx];
+                if (renderMesh.EntityGuid == entity->GetGUID())
+                {
+                    return renderMesh;
+                }
+            }
+        }
+        FAIL_ASSERT();
     }
 }

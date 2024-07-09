@@ -96,13 +96,13 @@ namespace Insight
 
 			OnPreInit();
 
-			m_animationSystem.Initialise();
 			m_audioSystem.Initialise();
 			m_taskSystem.Initialise();
 			m_eventSystem.Initialise();
 
 			m_inputSystem.Initialise();
 			m_graphicsSystem.Initialise(&m_inputSystem);
+			m_animationSystem.Initialise();
 			Physics::PhysicsWorld::Initialise();
 			m_worldSystem.Initialise();
 
@@ -197,6 +197,12 @@ namespace Insight
 					m_graphicsSystem.CreateRenderFrame();
 					Graphics::RenderStats::Instance().Draw();
 					OnRender();
+
+					{
+						m_animationSystem.WaitForAllAnimationUpdates();
+						m_animationSystem.GPUSkinning(RemoveConst(m_graphicsSystem.GetRenderFrame()));
+					}
+
 					{
 						IS_PROFILE_SCOPE("GraphicsSystem Render");
 						m_graphicsSystem.Render();
@@ -227,9 +233,9 @@ namespace Insight
 
 			Physics::PhysicsWorld::Shutdown();
 
-			m_audioSystem.Shutdown();
-
 			m_animationSystem.Shutdown();
+
+			m_audioSystem.Shutdown();
 
 			m_assetRegistry.Shutdown();
 

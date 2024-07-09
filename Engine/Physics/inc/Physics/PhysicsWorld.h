@@ -39,7 +39,7 @@ namespace Insight
             static const DebugRendererData& GetDebugRenderData();
 
         private:
-            inline static IPhysicsWorld* s_PhsyicsWorld;
+            inline static IPhysicsWorld* s_PhsyicsWorld = nullptr;
         };
     }
 }

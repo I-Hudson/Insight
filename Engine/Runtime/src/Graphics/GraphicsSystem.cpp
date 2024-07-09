@@ -92,7 +92,7 @@ namespace Insight
 			WorldSystem* worldSystem = App::Engine::Instance().GetSystemRegistry().GetSystem<WorldSystem>();
 			if (worldSystem)
 			{
-				m_renderFrame.GetPending().CreateRenderFrameFromWorldSystem(worldSystem);
+				m_renderFrame.GetCurrent().CreateRenderFrameFromWorldSystem(worldSystem);
 			}
 		}
 

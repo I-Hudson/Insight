@@ -39,39 +39,40 @@ namespace Insight
 
         Runtime::Animator* AnimationClipComponent::GetAnimator()
         {
-            Runtime::AnimationInstance* animInstance = Runtime::AnimationSystem::Instance().GetAnimationInstance(GetGuid());
+            Runtime::AnimationInstance* animInstance = Runtime::AnimationSystem::Instance().GetAnimationInstance(GetOwnerEntity());
             ASSERT(animInstance);
             return &animInstance->Animator;
         }
 
         const Runtime::Animator* AnimationClipComponent::GetAnimator() const
         {
-            const Runtime::AnimationInstance* animInstance = Runtime::AnimationSystem::Instance().GetAnimationInstance(GetGuid());
+            const Runtime::AnimationInstance* animInstance = Runtime::AnimationSystem::Instance().GetAnimationInstance(GetOwnerEntity());
             ASSERT(animInstance);
             return &animInstance->Animator;
         }
 
         void AnimationClipComponent::OnCreate()
         {
-            Runtime::AnimationSystem::Instance().AddAnimationInstance(GetGuid());
+            Runtime::AnimationSystem::Instance().AddAnimationInstance(GetOwnerEntity());
 
-            OnEnabled.Bind<OnEnabledCallback>(this);
+            OnEnabled.Bind<&AnimationClipComponent::OnEnabledCallback>(this);
         }
 
         void AnimationClipComponent::OnDestroy()
         {
-            Runtime::AnimationSystem::Instance().RemoveAnimationInstance(GetGuid());
+            Runtime::AnimationSystem::Instance().RemoveAnimationInstance(GetOwnerEntity());
+            OnEnabled.Unbind<&AnimationClipComponent::OnEnabledCallback>(this);
         }
 
         void AnimationClipComponent::OnEnabledCallback(const bool enabled) const
         {
             if (enabled)
             {
-                Runtime::AnimationSystem::Instance().AddAnimationInstance(GetGuid());
+                Runtime::AnimationSystem::Instance().AddAnimationInstance(GetOwnerEntity());
             }
             else
             {
-                Runtime::AnimationSystem::Instance().RemoveAnimationInstance(GetGuid());
+                Runtime::AnimationSystem::Instance().RemoveAnimationInstance(GetOwnerEntity());
             }
         }
     }

@@ -21,6 +21,11 @@ namespace Insight
 
 		void PhysicsWorld::Initialise()
 		{
+			if (s_PhsyicsWorld)
+			{
+				return;
+			}
+
 #ifdef IS_PHYSICS_PHYSX
 			//s_PhsyicsWorld = ::New<Jolt::PhysicsWorld_Physx>();
 #elif defined(IS_PHYSICS_JOLT)

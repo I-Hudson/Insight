@@ -54,6 +54,10 @@ namespace Insight
 					heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
 					resourceState = D3D12_RESOURCE_STATE_GENERIC_READ;
 				}
+				if (overrides.AllowUnorderedAccess)
+				{
+					//resourceState |= D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+				}
 
 				m_currentResouceState = resourceState;
 				/// Create the constant buffer.

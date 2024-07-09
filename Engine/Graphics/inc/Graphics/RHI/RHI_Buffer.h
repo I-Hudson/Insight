@@ -16,6 +16,7 @@ namespace Insight
 		struct IS_GRAPHICS RHI_Buffer_Overrides
 		{
 			bool Force_Host_Writeable = false;
+			bool AllowUnorderedAccess = false;
 		};
 
 		class IS_GRAPHICS RHI_BufferView

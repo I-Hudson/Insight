@@ -10,6 +10,7 @@ namespace Insight
 	namespace Graphics
 	{
 		constexpr const char* renderdocapi_enabled = "renderdocapi_enabled";
+		constexpr bool c_OverrideRenderDocAPIEnabled = false;
 
 		RenderDocAPI::RenderDocAPI()
 		{ }
@@ -38,7 +39,7 @@ namespace Insight
 				return true;
 			}
 
-			if (!Core::CommandLineArgs::GetCommandLineValue(renderdocapi_enabled)->GetBool())
+			if (!c_OverrideRenderDocAPIEnabled && !Core::CommandLineArgs::GetCommandLineValue(renderdocapi_enabled)->GetBool())
 			{
 				IS_LOG_CORE_WARN("[RenderDocAPI::Initialise] Unable to Initialise as '{}' cmd is not true.", renderdocapi_enabled);
 				return false;
