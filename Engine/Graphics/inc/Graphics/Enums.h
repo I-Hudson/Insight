@@ -593,6 +593,8 @@ namespace Insight
 			Staging,
 			Readback,
 
+			UnorderedAccess,
+
 			Size
 		};
 		constexpr const char* BufferTypeToString[] =
@@ -604,6 +606,7 @@ namespace Insight
 			"Raw",
 			"Staging",
 			"Readback",
+			"UnorderedAccess",
 		};
 		static_assert(ARRAY_COUNT(BufferTypeToString) == static_cast<u64>(BufferType::Size));
 

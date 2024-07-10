@@ -707,7 +707,10 @@ namespace Insight
 
 				if (!meshData.RHI_VertexBuffer)
 				{
-					meshData.RHI_VertexBuffer = Renderer::CreateVertexBuffer(meshData.Vertices.size() * sizeof(Graphics::Vertex), sizeof(Graphics::Vertex));
+					Graphics::RHI_Buffer_Overrides vertexOverrides;
+					vertexOverrides.AllowUnorderedAccess = true;
+
+					meshData.RHI_VertexBuffer = Renderer::CreateVertexBuffer(meshData.Vertices.size() * sizeof(Graphics::Vertex), sizeof(Graphics::Vertex), vertexOverrides);
 					// TODO: Look into why when using the Sponza model and QueueUpload if the editor camera is in certain positions then the mesh disappears.
 					//meshData.RHI_VertexBuffer->QueueUpload(meshData.Vertices.data(), meshData.RHI_VertexBuffer->GetSize());
 					meshData.RHI_VertexBuffer->Upload(meshData.Vertices.data(), meshData.RHI_VertexBuffer->GetSize());
@@ -1358,7 +1361,10 @@ namespace Insight
 
 				if (!meshData->RHI_VertexBuffer)
 				{
-					meshData->RHI_VertexBuffer = Renderer::CreateVertexBuffer(meshData->Vertices.size() * sizeof(Graphics::Vertex), sizeof(Graphics::Vertex));
+					Graphics::RHI_Buffer_Overrides vertexOverrides;
+					vertexOverrides.AllowUnorderedAccess = true;
+
+					meshData->RHI_VertexBuffer = Renderer::CreateVertexBuffer(meshData->Vertices.size() * sizeof(Graphics::Vertex), sizeof(Graphics::Vertex), vertexOverrides);
 					meshData->RHI_VertexBuffer->Upload(meshData->Vertices.data(), meshData->RHI_VertexBuffer->GetSize());
 				}
 				else
@@ -1556,7 +1562,10 @@ namespace Insight
 
 				if (!meshData.RHI_VertexBuffer)
 				{
-					meshData.RHI_VertexBuffer = Renderer::CreateVertexBuffer(meshData.Vertices.size() * sizeof(Graphics::Vertex), sizeof(Graphics::Vertex));
+					Graphics::RHI_Buffer_Overrides vertexOverrides;
+					vertexOverrides.AllowUnorderedAccess = true;
+
+					meshData.RHI_VertexBuffer = Renderer::CreateVertexBuffer(meshData.Vertices.size() * sizeof(Graphics::Vertex), sizeof(Graphics::Vertex), vertexOverrides);
 					// TODO: Look into why when using the Sponza model and QueueUpload if the editor camera is in certain positions then the mesh disappears.
 					//meshData.RHI_VertexBuffer->QueueUpload(meshData.Vertices.data(), meshData.RHI_VertexBuffer->GetSize());
 					meshData.RHI_VertexBuffer->Upload(meshData.Vertices.data(), meshData.RHI_VertexBuffer->GetSize());

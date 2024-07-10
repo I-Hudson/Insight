@@ -56,7 +56,7 @@ namespace Insight
 				}
 				if (overrides.AllowUnorderedAccess)
 				{
-					//resourceState |= D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+					resourceDesc.Flags |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
 				}
 
 				m_currentResouceState = resourceState;

@@ -12,6 +12,8 @@ namespace Insight
 	{
 		namespace RHI::DX12
 		{
+			class RHI_CommandList_DX12;
+
 			class RHI_Buffer_DX12 : public RHI_Buffer
 			{
 			public:
@@ -37,6 +39,8 @@ namespace Insight
 				RenderContext_DX12* m_context = nullptr;
 				D3D12_RESOURCE_STATES m_currentResouceState;
 				ComPtr<ID3D12Resource> m_resource;
+
+				friend class RHI_CommandList_DX12;
 			};
 		}
 	}

@@ -7,6 +7,7 @@
 
 #include "Animation/Animator.h"
 #include "Graphics/RenderFrame.h"
+#include "Graphics/RenderContext.h"
 
 #include "Graphics/RHI/RHI_Buffer.h"
 
@@ -37,7 +38,11 @@ namespace Insight
         {
             Ref<Skeleton> Skeleton;
             Graphics::RHI_BufferView SkeletonBones;
+            Graphics::RHI_BufferView InputMeshVertices;
             Graphics::RHI_BufferView SkinnedVertex;
+
+            u32 InputVertexCount = 0;
+
             const ECS::Entity* Entity;
         };
 
@@ -67,6 +72,7 @@ namespace Insight
         private:
             Graphics::RHI_BufferView UploadGPUSkeletonBoneData(const AnimationInstance& anim, const Ref<Skeleton>& skeleton);
             Graphics::RHI_BufferView AllocateMeshVertexBuffer(const AnimationInstance& anim, RenderMesh& skinnedMesh);
+            void SetupComputeSkinningPass();
 
         private:
             std::vector<AnimationInstance> m_animations;
@@ -74,10 +80,10 @@ namespace Insight
             
             bool m_enableGPUSkinning = false;
 
-            Graphics::RHI_Buffer* m_GPUSkeletonBonesBuffer = nullptr;
+            Graphics::FrameResource<Graphics::RHI_Buffer*> m_GPUSkeletonBonesBuffer;
             std::unordered_map<Core::GUID, Graphics::RHI_BufferView> m_skeletonBonesBuffers;
 
-            Graphics::RHI_Buffer* m_GPUSkinnedVertexBuffer = nullptr;
+            Graphics::FrameResource<Graphics::RHI_Buffer*> m_GPUSkinnedVertexBuffer;
             std::unordered_map<Core::GUID, Graphics::RHI_BufferView> m_vertexBuffers;
 
             /// @brief Base offset within 'm_GPUSkinningBuffer' in which the bones data is stored from.

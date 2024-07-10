@@ -1498,6 +1498,10 @@ namespace Insight
 			shaderData = Runtime::AssetRegistry::Instance().LoadAssetData(EnginePaths::GetResourcePath() + "/Shaders/hlsl/LightPassCompute.hlsl");
 			shaderDesc = ShaderDesc("LightPassCompute", shaderData, ShaderStageFlagBits::ShaderStage_Compute);
 			RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
+
+			shaderData = Runtime::AssetRegistry::Instance().LoadAssetData(EnginePaths::GetResourcePath() + "/Shaders/hlsl/ComputeSkinning.hlsl");
+			shaderDesc = ShaderDesc("ComputeSkinning", shaderData, ShaderStageFlagBits::ShaderStage_Compute);
+			RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
 		}
 
 		void Renderpass::BindCommonResources(RHI_CommandList* cmd_list, BufferFrame& buffer_frame, BufferSamplers& buffer_samplers)

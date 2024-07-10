@@ -24,11 +24,11 @@ namespace Insight
 		public:
 			RHI_BufferView();
 			RHI_BufferView(RHI_Buffer* buffer, u64 offset, u64 size);
-			RHI_BufferView(const RHI_BufferView& other);
-			RHI_BufferView(RHI_BufferView&& other);
+			//RHI_BufferView(const RHI_BufferView& other);
+			//RHI_BufferView(RHI_BufferView&& other);
 
-			RHI_BufferView& operator=(const RHI_BufferView& other);
-			RHI_BufferView& operator=(RHI_BufferView&& other);
+			//RHI_BufferView& operator=(const RHI_BufferView& other);
+			//RHI_BufferView& operator=(RHI_BufferView&& other);
 
 			bool operator==(const RHI_BufferView& other) const;
 			bool operator!=(const RHI_BufferView& other) const;
@@ -39,10 +39,15 @@ namespace Insight
 			constexpr u64 GetOffset() const { return m_offset; }
 			constexpr u64 GetSize() const { return m_size; }
 
+			u64 UAVStartIndex = 0;
+			u64 UAVNumOfElements = 0;
+			u64 Stride = 0;
+
 		private:
 			RHI_Buffer* m_buffer = nullptr;
 			u64 m_offset = 0;
 			u64 m_size = 0;
+
 			friend std::hash<RHI_BufferView>;
 		};
 

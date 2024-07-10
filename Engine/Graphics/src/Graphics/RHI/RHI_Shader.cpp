@@ -532,7 +532,7 @@ namespace Insight
 						&& 
 						(b2.Type != DescriptorType::Unifom_Buffer
 						|| b2.Type != DescriptorType::Storage_Buffer)
-						? -1 : 0;
+						? 0 : 1;
 					});
 			}
 

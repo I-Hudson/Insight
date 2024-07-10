@@ -370,13 +370,14 @@ namespace Insight
         {
             switch (bufferType)
             {
-            case BufferType::Vertex:  return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
-            case BufferType::Index:   return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_INDEX_BUFFER;
-            case BufferType::Uniform: return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ;
-            case BufferType::Storage: return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ;
-            case BufferType::Raw:     return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON;
-            case BufferType::Staging: return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ;
-            case BufferType::Readback:return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COPY_DEST;
+            case BufferType::Vertex:            return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
+            case BufferType::Index:             return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_INDEX_BUFFER;
+            case BufferType::Uniform:           return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ;
+            case BufferType::Storage:           return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ;
+            case BufferType::Raw:               return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON;
+            case BufferType::Staging:           return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ;
+            case BufferType::Readback:          return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COPY_DEST;
+            case BufferType::UnorderedAccess:   return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
             default:
                 break;
             }
@@ -388,13 +389,14 @@ namespace Insight
         {
             switch (bufferType)
             {
-            case BufferType::Vertex:  return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
-            case BufferType::Index:   return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_INDEX_BUFFER;
-            case BufferType::Uniform: return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ;
-            case BufferType::Storage: return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ;
-            case BufferType::Raw:     return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON;
-            case BufferType::Staging: return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ;
-            case BufferType::Readback:return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COPY_DEST;
+            case BufferType::Vertex:            return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
+            case BufferType::Index:             return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_INDEX_BUFFER;
+            case BufferType::Uniform:           return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ;
+            case BufferType::Storage:           return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ;
+            case BufferType::Raw:               return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON;
+            case BufferType::Staging:           return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ;
+            case BufferType::Readback:          return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COPY_DEST;
+            case BufferType::UnorderedAccess:   return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
             default:
                 break;
             }

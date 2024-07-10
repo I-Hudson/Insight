@@ -15,6 +15,9 @@ namespace Insight
 		{
 			AccessFlags SrcAccessFlags;
 			AccessFlags DstAccessFlags;
+
+			BufferType NewLayout;
+
 			RHI_Buffer* Buffer;
 			u32 Offset;
 			u32 Size;

@@ -62,44 +62,44 @@ namespace Insight
 			: m_buffer(buffer), m_offset(offset), m_size(size)
 		{ }
 
-		RHI_BufferView::RHI_BufferView(const RHI_BufferView& other)
-		{
-			m_buffer = other.m_buffer;
-			m_offset = other.m_offset;
-			m_size = other.m_size;
-		}
+		//RHI_BufferView::RHI_BufferView(const RHI_BufferView& other)
+		//{
+		//	m_buffer = other.m_buffer;
+		//	m_offset = other.m_offset;
+		//	m_size = other.m_size;
+		//}
 
-		RHI_BufferView::RHI_BufferView(RHI_BufferView&& other)
-		{
-			m_buffer = other.m_buffer;
-			m_offset = other.m_offset;
-			m_size = other.m_size;
+		//RHI_BufferView::RHI_BufferView(RHI_BufferView&& other)
+		//{
+		//	m_buffer = other.m_buffer;
+		//	m_offset = other.m_offset;
+		//	m_size = other.m_size;
 
-			other.m_buffer = nullptr;
-			other.m_offset = 0;
-			other.m_size = 0;
-		}
+		//	other.m_buffer = nullptr;
+		//	other.m_offset = 0;
+		//	other.m_size = 0;
+		//}
 
-		RHI_BufferView& RHI_BufferView::operator=(const RHI_BufferView& other)
-		{
-			m_buffer = other.m_buffer;
-			m_offset = other.m_offset;
-			m_size = other.m_size;
-			return *this;
-		}
+		//RHI_BufferView& RHI_BufferView::operator=(const RHI_BufferView& other)
+		//{
+		//	m_buffer = other.m_buffer;
+		//	m_offset = other.m_offset;
+		//	m_size = other.m_size;
+		//	return *this;
+		//}
 
-		RHI_BufferView& RHI_BufferView::operator=(RHI_BufferView&& other)
-		{
-			m_buffer = other.m_buffer;
-			m_offset = other.m_offset;
-			m_size = other.m_size;
+		//RHI_BufferView& RHI_BufferView::operator=(RHI_BufferView&& other)
+		//{
+		//	m_buffer = other.m_buffer;
+		//	m_offset = other.m_offset;
+		//	m_size = other.m_size;
 
-			other.m_buffer = nullptr;
-			other.m_offset = 0;
-			other.m_size = 0;
+		//	other.m_buffer = nullptr;
+		//	other.m_offset = 0;
+		//	other.m_size = 0;
 
-			return *this;
-		}
+		//	return *this;
+		//}
 
 		bool RHI_BufferView::operator==(const RHI_BufferView& other) const
 		{

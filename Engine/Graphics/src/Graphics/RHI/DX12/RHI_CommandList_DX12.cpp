@@ -109,7 +109,19 @@ namespace Insight
 				for (const BufferBarrier& bufferBarrier : barrier.BufferBarriers)
 				{
 					RHI_Buffer_DX12* bufferDX12 = static_cast<RHI_Buffer_DX12*>(bufferBarrier.Buffer);
-					FAIL_ASSERT();
+
+					D3D12_RESOURCE_STATES oldState = bufferDX12->m_currentResouceState;
+					D3D12_RESOURCE_STATES newState = BufferTypeToDX12ResourceState(bufferBarrier.NewLayout);
+					if (oldState != newState
+						&& bufferDX12->GetResource() != nullptr)
+					{
+						resouceBarriers.push_back(
+							CD3DX12_RESOURCE_BARRIER::Transition(
+								bufferDX12->GetResource(),
+								oldState,
+								newState));
+						bufferDX12->m_currentResouceState = newState;
+					}
 				}
 
 				for (const ImageBarrier& imageBarrier : barrier.ImageBarriers)
@@ -712,7 +724,7 @@ namespace Insight
 										{
 											continue;
 										}
-										
+
 										DescriptorHeapHandle_DX12 dstHandle = resouceHeap.GetNextHandle();
 										if (firstHandle.CPUPtr.ptr == 0)
 										{
@@ -720,36 +732,39 @@ namespace Insight
 										}
 										if (buffer.IsValid())
 										{
-										RHI::DX12::RHI_Buffer_DX12* bufferDX12 = static_cast<RHI::DX12::RHI_Buffer_DX12*>(buffer.GetBuffer());
+											RHI::DX12::RHI_Buffer_DX12* bufferDX12 = static_cast<RHI::DX12::RHI_Buffer_DX12*>(buffer.GetBuffer());
 
-										switch (binding.Type)
-										{
-										case DescriptorType::Unifom_Buffer:
-										{
-											IS_PROFILE_SCOPE("Create constant buffer");
-											D3D12_CONSTANT_BUFFER_VIEW_DESC desc = {};
-											desc.BufferLocation = bufferDX12->GetResource()->GetGPUVirtualAddress() + buffer.GetOffset();
-											desc.SizeInBytes = static_cast<UINT>(buffer.GetSize());
-											m_contextDX12->GetDevice()->CreateConstantBufferView(&desc, dstHandle.CPUPtr);
-											break;
-										}
-										case DescriptorType::Storage_Buffer:
-										{
-											IS_PROFILE_SCOPE("Create unordered access view buffer");
-											//D3D12_UNORDERED_ACCESS_VIEW_DESC desc = {};
-											//desc.Buffer.FirstElement = 0;
-											//desc.Buffer.NumElements = 1;
-											//desc.Buffer.StructureByteStride = 1;
-											//m_contextDX12->GetDevice()->CreateUnorderedAccessView(&desc, dstHandle.CPUPtr);
-											FAIL_ASSERT();
-											break;
-										}
-										default:
-										{
-											FAIL_ASSERT();
-											break;
-										}
-										}
+											switch (binding.Type)
+											{
+											case DescriptorType::Unifom_Buffer:
+											{
+												IS_PROFILE_SCOPE("Create constant buffer");
+												D3D12_CONSTANT_BUFFER_VIEW_DESC desc = {};
+												desc.BufferLocation = bufferDX12->GetResource()->GetGPUVirtualAddress() + buffer.GetOffset();
+												desc.SizeInBytes = static_cast<UINT>(buffer.GetSize());
+												m_contextDX12->GetDevice()->CreateConstantBufferView(&desc, dstHandle.CPUPtr);
+												break;
+											}
+											case DescriptorType::Storage_Buffer:
+											{
+												IS_PROFILE_SCOPE("Create unordered access view buffer");
+												D3D12_UNORDERED_ACCESS_VIEW_DESC desc = {};
+												desc.Format = DXGI_FORMAT_UNKNOWN;
+												desc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
+												desc.Buffer.FirstElement = buffer.UAVStartIndex;
+												desc.Buffer.NumElements = buffer.UAVNumOfElements;
+												desc.Buffer.StructureByteStride = buffer.Stride;
+
+												m_contextDX12->GetDevice()->CreateUnorderedAccessView(bufferDX12->GetResource(), nullptr, &desc, dstHandle.CPUPtr);
+
+												break;
+											}
+											default:
+											{
+												FAIL_ASSERT();
+												break;
+											}
+											}
 											++RenderStats::Instance().DescriptorSetUpdates;
 										}
 										else
