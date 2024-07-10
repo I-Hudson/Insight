@@ -9,6 +9,17 @@ cbuffer MeshInfoBuffer : register(b0)
     uint MeshInfoVertexCount;
 }
 
+#define ZERO_MATRIX float4x4(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+float4x4 SkinnedBoneMatrix(const in GeoVertexInput input)
+{
+	float4x4 BoneTransform = ZERO_MATRIX; 
+	BoneTransform += SkeletonBones[GetVertexBondId(input.BoneIds, 0)] * GetVertexBoneWeight(input.BoneWeights, 0);
+    BoneTransform += SkeletonBones[GetVertexBondId(input.BoneIds, 1)] * GetVertexBoneWeight(input.BoneWeights, 1);
+    BoneTransform += SkeletonBones[GetVertexBondId(input.BoneIds, 2)] * GetVertexBoneWeight(input.BoneWeights, 2);
+    BoneTransform += SkeletonBones[GetVertexBondId(input.BoneIds, 3)] * GetVertexBoneWeight(input.BoneWeights, 3);
+	return BoneTransform;
+}
+
 [numthreads(64, 1, 1)]
 void CSMain(uint3 thread_id : SV_DispatchThreadID)
 {
@@ -20,8 +31,10 @@ void CSMain(uint3 thread_id : SV_DispatchThreadID)
         return;
     }
 
-    const uint vertexOffset = sizeof(GeoVertexInput) * vertexId;
+    GeoVertexInput inputVertex = InputVertices[vertexId];
+    //const float4x4 boneTransform = SkinnedBoneMatrix(inputVertex);
 
-    const GeoVertexInput inputVertex = InputVertices[vertexId];
+    //inputVertex.Pos = mul(boneTransform, float4(inputVertex.Pos.xyz, 1)).xyz;
+
     OutputVertices[vertexId] = inputVertex;
 }

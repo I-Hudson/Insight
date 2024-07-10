@@ -40,10 +40,11 @@ namespace Insight
             m_GPUSkeletonBonesBuffer.Setup();
             m_GPUSkeletonBonesBuffer.ForEach([](Graphics::RHI_Buffer*& buffer)
                 {
-                    Graphics::RHI_Buffer_Overrides vertexOverrides;
-                    vertexOverrides.Force_Host_Writeable = true;
+                    Graphics::RHI_Buffer_Overrides overrides;
+                    overrides.Force_Host_Writeable = true;
+                    //overrides.AllowUnorderedAccess = true;
 
-                    buffer = Renderer::CreateRawBuffer(c_SkeletonBoneDataByteSize, vertexOverrides);
+                    buffer = Renderer::CreateRawBuffer(c_SkeletonBoneDataByteSize, overrides);
                     buffer->SetName("GPUSkeletonBonesBuffer");
                 }); 
 
@@ -374,6 +375,9 @@ namespace Insight
                 struct MeshInfo
                 {
                     u32 VertexCount;
+                    u32 __pad0 = 0;
+                    u32 __pad1 = 0;
+                    u32 __pad2 = 0;
                 };
 
                 for (size_t i = 0; i < data.AnimGPUSkinning.size(); ++i)
@@ -382,9 +386,13 @@ namespace Insight
                     cmdList->SetUnorderedAccess(0, 0, animGPUSkinning.InputMeshVertices);
                     cmdList->SetUnorderedAccess(0, 1, animGPUSkinning.SkinnedVertex);
                     cmdList->SetUnorderedAccess(0, 2, animGPUSkinning.SkeletonBones);
-                    cmdList->SetUniform(0, 0, animGPUSkinning.InputVertexCount);
+                    cmdList->SetUniform(0, 0, MeshInfo{ animGPUSkinning.InputVertexCount });
 
-                    cmdList->Dispatch(64, 1);
+                    const u32 threadGroupCount = 64;
+                    const u32 threadGroupCountX = static_cast<uint32_t>(
+                        std::ceil(static_cast<float>(animGPUSkinning.SkinnedVertex.UAVNumOfElements) / static_cast<float>(threadGroupCount)));
+
+                    cmdList->Dispatch(threadGroupCountX, 1);
                 }
 
                 Graphics::PipelineBarrier afterBarreir;
