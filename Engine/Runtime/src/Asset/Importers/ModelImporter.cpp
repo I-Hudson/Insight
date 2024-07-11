@@ -836,6 +836,7 @@ namespace Insight
 
 				//Graphics::VertexOptomised vertexOptomised(vertex);
 				meshData.Vertices.push_back(Graphics::Vertex(position, normal, colour, uv));
+				meshData.VerticesBoneInfluence.push_back(Graphics::VertexBoneInfluence());
 			}
 
 			//meshData.Indices.reserve(meshData.Indices.size() + (static_cast<u64>(aiMesh->mNumFaces) * 3));
@@ -1072,7 +1073,7 @@ namespace Insight
 					int vertexId = weights[weightIndex].mVertexId;
 					float weight = weights[weightIndex].mWeight;
 					assert(vertexId <= meshData->Vertices.size());
-					SetVertexBoneData(meshData->Vertices[vertexId], boneId, weight);
+					SetVertexBoneData(meshData->Vertices[vertexId], meshData->VerticesBoneInfluence[vertexId], boneId, weight);
 				}
 				/*
 				const aiVertexWeight* aiBonewights = aiBone->mWeights;
@@ -1611,7 +1612,7 @@ namespace Insight
 			}
 		}
 
-		void ModelImporter::SetVertexBoneData(Graphics::Vertex& vertex, const u32 boneId, const float boneWeight) const
+		void ModelImporter::SetVertexBoneData(Graphics::Vertex& vertex, Graphics::VertexBoneInfluence& vertexBoneInfluence, const u32 boneId, const float boneWeight) const
 		{
 			IS_PROFILE_FUNCTION();
 
@@ -1623,6 +1624,10 @@ namespace Insight
 					ASSERT(boneId < 72);
 					vertex.SetBoneId(boneId, i);
 					vertex.SetBoneWeight(boneWeight, i);
+
+					vertexBoneInfluence.SetBoneId(boneId, i);
+					vertexBoneInfluence.SetBoneWeight(boneWeight, i);
+
 					break;
 				}
 			}

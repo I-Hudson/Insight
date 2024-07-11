@@ -185,14 +185,14 @@ namespace Insight
 #else
 				BoneWeights[idx] = boneWeight;
 #endif
-		}
+			}
 
-			private:
+		private:
 #ifdef VERTEX_NORMAL_PACKED
-				const static u32 c_NormapPackBits = 0x3FE;//0b0000'0000'0000'0000'0000'0011'1111'1110;
+			const static u32 c_NormapPackBits = 0x3FE;//0b0000'0000'0000'0000'0000'0011'1111'1110;
 				//const static u32 c_NormapPackBits = 0xFF;//0b0000'0000'0000'0000'0000'0000'1111'1110;
-				
-				void PackNormal(const float value, const u32 maxValue, const u8 bitshift)
+			
+			void PackNormal(const float value, const u32 maxValue, const u8 bitshift)
 				{
 					ASSERT(std::abs(value) >= 0.0f && std::abs(value) <= 1.0f);
 					ASSERT(bitshift < 21);
@@ -205,8 +205,8 @@ namespace Insight
 					const u32 normalData = static_cast<u32>(std::abs(value) * maxValue);
 					Normal |= (normalData & c_NormapPackBits) << bitshift;
 				}
-				
-				float UnpackNormal(const int normal, const u32 maxValue, const u8 bitshift) const
+			
+			float UnpackNormal(const int normal, const u32 maxValue, const u8 bitshift) const
 				{
 					ASSERT(bitshift < 21);
 					const u32 normalData = normal >> bitshift;
@@ -255,6 +255,126 @@ namespace Insight
 #endif
 
 			constexpr int GetStride() { return sizeof(Vertex); }
+		};
+
+		struct IS_GRAPHICS VertexBoneInfluence
+		{
+			VertexBoneInfluence()
+			{
+				for (size_t boneIdx = 0; boneIdx < Vertex::MAX_BONE_COUNT; ++boneIdx)
+				{
+#ifdef VERTEX_BONE_ID_PACKED
+					BoneIds = 0;
+#else
+					BoneIds[boneIdx] = 0;
+#endif
+					BoneWeights[boneIdx] = 0.0f;
+				}
+			}
+
+			void SetBoneId(const u32 boneId, const u8 boneIdx)
+			{
+#ifdef VERTEX_BONE_ID_PACKED
+				const u32 bitShiftStep = 8;
+				const u32 bitShift = bitShiftStep * boneIdx;
+				BoneIds |= boneId << bitShift;
+#else
+				BoneIds[boneIdx] = boneId;
+#endif
+			}
+
+			float GetBoneWeight(const u8 idx) const
+			{
+#ifdef VERTEX_BONE_WEIGHT_PACKED
+				const u32 bitShiftStep = 16;
+				u16 packedWeight = 0;
+				switch (idx)
+				{
+				case 0:
+				{
+					const u32 bitShift = bitShiftStep * 0;
+					packedWeight |= (BoneWeights[0] >> bitShift) & 0xFFFF;
+					break;
+				}
+				case 1:
+				{
+					const u32 bitShift = bitShiftStep * 1;
+					packedWeight |= (BoneWeights[0] >> bitShift) & 0xFFFF;
+					break;
+				}
+				case 2:
+				{
+					const u32 bitShift = bitShiftStep * 0;
+					packedWeight |= (BoneWeights[1] >> bitShift) & 0xFFFF;
+					break;
+				}
+				case 3:
+				{
+					const u32 bitShift = bitShiftStep * 1;
+					packedWeight |= (BoneWeights[1] >> bitShift) & 0xFFFF;
+					break;
+				}
+				default:
+					break;
+				}
+
+				const float weight = (float)packedWeight / (float)_UI16_MAX;
+				return weight;
+#else
+				return BoneWeights[idx];
+#endif
+			}
+
+			void SetBoneWeight(const float boneWeight, const u8 idx)
+			{
+#ifdef VERTEX_BONE_WEIGHT_PACKED
+				const int weight = static_cast<u16>(boneWeight * _UI16_MAX);
+				const u32 bitShiftStep = 16;
+
+				switch (idx)
+				{
+				case 0:
+				{
+					const u32 bitShift = bitShiftStep * 0;
+					BoneWeights[0] |= weight << bitShift;
+					break;
+				}
+				case 1:
+				{
+					const u32 bitShift = bitShiftStep * 1;
+					BoneWeights[0] |= weight << bitShift;
+					break;
+				}
+				case 2:
+				{
+					const u32 bitShift = bitShiftStep * 0;
+					BoneWeights[1] |= weight << bitShift;
+					break;
+				}
+				case 3:
+				{
+					const u32 bitShift = bitShiftStep * 1;
+					BoneWeights[1] |= weight << bitShift;
+					break;
+				}
+				default:
+					break;
+				}
+#else
+				BoneWeights[idx] = boneWeight;
+#endif
+			}
+
+#ifdef VERTEX_BONE_ID_PACKED
+			int BoneIds = 0;
+#else
+			int BoneIds[MAX_BONE_COUNT] = { 0 };
+#endif
+#ifdef VERTEX_BONE_WEIGHT_PACKED
+			int BoneWeights[MAX_BONE_COUNT / 2] = { 0 };
+#else
+			float BoneWeights[Vertex::MAX_BONE_COUNT] = { 0 };
+#endif
 		};
 
 		/*

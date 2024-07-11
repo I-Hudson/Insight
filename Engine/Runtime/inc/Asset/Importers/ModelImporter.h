@@ -56,6 +56,7 @@ namespace Insight
             };
 
             std::vector<Graphics::Vertex> Vertices;
+            std::vector<Graphics::VertexBoneInfluence> VerticesBoneInfluence;
             std::vector<u32> Indices;
             std::vector<LOD> LODs;
 
@@ -144,7 +145,7 @@ namespace Insight
             void ProcessMesh(const aiScene* aiScene, const aiMesh* aiMesh, MeshData* meshData, MeshNode* meshNode) const;
             Ref<MaterialAsset> ProcessMaterial(MeshNode* meshNode) const;
 #endif
-            void SetVertexBoneData(Graphics::Vertex& vertex, const u32 boneId, const float boneWeight) const;
+            void SetVertexBoneData(Graphics::Vertex& vertex, Graphics::VertexBoneInfluence& vertexBoneInfluence, const u32 boneId, const float boneWeight) const;
             void ProcessMesh(MeshData& meshData, ModelAsset* modelAsset) const;
 
             /// @brief Returns the texture path from the model directory.
