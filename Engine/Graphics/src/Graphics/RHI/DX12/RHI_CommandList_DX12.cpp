@@ -342,6 +342,7 @@ namespace Insight
 				{
 					m_contextDX12->SetObjectName(name, m_commandList);
 				}
+				m_name = name;
 			}
 
 			void RHI_CommandList_DX12::BeginRenderpass(RenderpassDescription renderDescription)
@@ -1034,6 +1035,7 @@ namespace Insight
 				{
 					m_context->SetObjectName(name, m_allocator.Get());
 				}
+				m_name = name;
 			}
 		}
 	}

@@ -178,6 +178,7 @@ namespace Insight
 				{
 					m_context->SetObjectName(name, m_pipeline);
 				}
+				m_name = name;
 			}
 		}
 	}

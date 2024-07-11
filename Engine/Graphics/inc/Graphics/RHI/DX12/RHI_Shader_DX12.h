@@ -28,7 +28,7 @@ namespace Insight
 				// RHI_Resource - Begin
 				virtual void Release() override { Destroy(); }
 				virtual bool ValidResource() override { return m_compiled; }
-				virtual void SetName(std::string name) { }
+				virtual void SetName(std::string name) { m_name = name; }
 				// RHI_Resource - End
 
 			private:

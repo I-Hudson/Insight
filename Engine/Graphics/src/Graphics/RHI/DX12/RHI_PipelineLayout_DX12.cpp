@@ -59,6 +59,7 @@ namespace Insight
 				{
 					m_context->SetObjectName(name, m_rootSignature);
 				}
+				m_name = name;
 			}
 
 			void RHI_PipelineLayout_DX12::CreateLayout(RenderContext* context, RHI_Shader* shader, std::string_view name)

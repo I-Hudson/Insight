@@ -213,6 +213,7 @@ namespace Insight
 				{
 					m_context->SetObjectName(name, m_resource.Get());
 				}
+				m_name = name;
 			}
 		}
 	}

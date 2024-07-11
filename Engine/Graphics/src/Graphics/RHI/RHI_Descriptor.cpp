@@ -143,6 +143,7 @@ namespace Insight
 
 		void RHI_DescriptorSet::SetName(std::string name)
 		{
+			m_name = name;
 		}
 
 		void RHI_DescriptorSet::Create(RHI_DescriptorLayout* layout)
