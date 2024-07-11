@@ -36,7 +36,7 @@ namespace Insight
 			float TAA_Jitter_Previous[2];
 
 			float Delta_Time;
-			float __pad0;
+			u32 RenderOptions;
 			float __pad1;
 			float __pad2;
 		};

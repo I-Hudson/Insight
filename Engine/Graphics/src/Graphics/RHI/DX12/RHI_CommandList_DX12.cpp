@@ -396,8 +396,8 @@ namespace Insight
 			{
 				IS_PROFILE_FUNCTION();
 
-				m_bound_vertex_buffer = nullptr;
-				m_bound_index_buffer = nullptr;
+				m_boundVertexBufferView = { };
+				m_boundIndexBufferView = { };
 			}
 
 			void RHI_CommandList_DX12::SetPipeline(PipelineStateObject pso)
@@ -428,46 +428,46 @@ namespace Insight
 				IS_LOG_CORE_INFO("[ RHI_CommandList_DX12::SetLineWidth] Not implemented.");
 			}
 
-			void RHI_CommandList_DX12::SetVertexBuffer(RHI_Buffer* buffer)
+			void RHI_CommandList_DX12::SetVertexBuffer(const RHI_BufferView& bufferView)
 			{
 				IS_PROFILE_FUNCTION();
-				if (buffer == m_bound_vertex_buffer)
+				if (!bufferView.IsValid() || bufferView == m_boundVertexBufferView)
 				{
 					return;
 				}
 
-				const RHI_Buffer_DX12* bufferDX12 = static_cast<RHI_Buffer_DX12*>(buffer);
+				const RHI_Buffer_DX12* bufferDX12 = static_cast<RHI_Buffer_DX12*>(bufferView.GetBuffer());
 				const D3D12_VERTEX_BUFFER_VIEW views[] = 
 				{ 
 					D3D12_VERTEX_BUFFER_VIEW
 					{
-						bufferDX12->GetResource()->GetGPUVirtualAddress(), 
+						bufferDX12->GetResource()->GetGPUVirtualAddress() + bufferView.GetOffset(),
 						(UINT)bufferDX12->GetSize(),
 						(UINT)bufferDX12->GetStride() 
 					}
 				};
 				m_commandList->IASetVertexBuffers(0, 1, views);
-				m_bound_vertex_buffer = buffer;
+				m_boundVertexBufferView = bufferView;
 				++RenderStats::Instance().VertexBufferBindings;
 			}
 
-			void RHI_CommandList_DX12::SetIndexBuffer(RHI_Buffer* buffer, IndexType index_type)
+			void RHI_CommandList_DX12::SetIndexBuffer(const RHI_BufferView& bufferView, const IndexType index_type)
 			{
 				IS_PROFILE_FUNCTION();
-				if (buffer == m_bound_index_buffer)
+				if (!bufferView.IsValid() || bufferView == m_boundIndexBufferView)
 				{
 					return;
 				}
 
-				const RHI_Buffer_DX12* bufferDX12 = static_cast<RHI_Buffer_DX12*>(buffer);
+				const RHI_Buffer_DX12* bufferDX12 = static_cast<RHI_Buffer_DX12*>(bufferView.GetBuffer());
 				const D3D12_INDEX_BUFFER_VIEW view = 
 				{ 
-					bufferDX12->GetResource()->GetGPUVirtualAddress(), 
+					bufferDX12->GetResource()->GetGPUVirtualAddress() + bufferView.GetOffset(),
 					(UINT)bufferDX12->GetSize(),  
 					IndexTypeToDX12(index_type)
 				};
 				m_commandList->IASetIndexBuffer(&view);
-				m_bound_index_buffer = buffer;
+				m_boundIndexBufferView = bufferView;
 				++RenderStats::Instance().IndexBufferBindings;
 			}
 

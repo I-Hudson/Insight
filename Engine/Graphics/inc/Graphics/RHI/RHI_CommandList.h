@@ -104,8 +104,11 @@ namespace Insight
 			virtual void SetScissor(int x, int y, int width, int height) = 0;
 			virtual void SetLineWidth(float width) = 0;
 
-			virtual void SetVertexBuffer(RHI_Buffer* buffer) = 0;
-			virtual void SetIndexBuffer(RHI_Buffer* buffer, IndexType index_type) = 0;
+			virtual void SetVertexBuffer(const RHI_BufferView& bufferView) = 0;
+			void SetVertexBuffer(RHI_Buffer* buffer) { SetVertexBuffer(RHI_BufferView(buffer, 0, buffer->GetSize())); }
+
+			virtual void SetIndexBuffer(const RHI_BufferView& bufferView, const IndexType index_type) = 0;
+			void SetIndexBuffer(RHI_Buffer* buffer, IndexType index_type) { SetIndexBuffer(RHI_BufferView(buffer, 0, buffer->GetSize()), index_type); }
 
 			virtual void Draw(u32 vertexCount, u32 instanceCount, u32 firstVertex, u32 firstInstance) = 0;
 			virtual void DrawIndexed(u32 indexCount, u32 instanceCount, u32 firstIndex, u32 vertexOffset, u32 firstInstance) = 0;
@@ -148,8 +151,8 @@ namespace Insight
 
 			DescriptorAllocator* m_descriptorAllocator = nullptr;
 
-			RHI_Buffer* m_bound_vertex_buffer = nullptr;
-			RHI_Buffer* m_bound_index_buffer = nullptr;
+			RHI_BufferView m_boundVertexBufferView;
+			RHI_BufferView m_boundIndexBufferView;
 
 			friend class RenderContext;
 		};

@@ -35,33 +35,32 @@ namespace Insight
         {
             std::lock_guard lock(m_animationsLock);
 
+            
+            Graphics::RHI_Buffer_Overrides gpuSkinningUploadBufferOverrides;
+            gpuSkinningUploadBufferOverrides.Force_Host_Writeable = true;
+            m_GPUSkeletonBonesUploadBuffer = Renderer::CreateRawBuffer(c_SkeletonBoneDataByteSize, gpuSkinningUploadBufferOverrides);
+            m_GPUSkeletonBonesUploadBuffer->SetName("GPUSkeletonBonesUploadBuffer");
 
 
             m_GPUSkeletonBonesBuffer.Setup();
             m_GPUSkeletonBonesBuffer.ForEach([](Graphics::RHI_Buffer*& buffer)
                 {
                     Graphics::RHI_Buffer_Overrides overrides;
-                    overrides.Force_Host_Writeable = true;
-                    //overrides.AllowUnorderedAccess = true;
-
+                    overrides.AllowUnorderedAccess = true;
                     buffer = Renderer::CreateRawBuffer(c_SkeletonBoneDataByteSize, overrides);
                     buffer->SetName("GPUSkeletonBonesBuffer");
-                }); 
-
-            m_GPUSkinnedVertexBuffer.Setup();
-            m_GPUSkinnedVertexBuffer.ForEach([](Graphics::RHI_Buffer*& buffer)
-                {
-                    Graphics::RHI_Buffer_Overrides overrides;
-                    overrides.AllowUnorderedAccess = true;
-
-                    buffer = Renderer::CreateVertexBuffer(c_VertexByteSize, sizeof(Graphics::Vertex), overrides);
-                    buffer->SetName("GPUSkinnedVertexBuffer");
                 });
+
+            Graphics::RHI_Buffer_Overrides gpuSkinningVertexBufferOverrides;
+            gpuSkinningVertexBufferOverrides.AllowUnorderedAccess = true;
+            gpuSkinningVertexBufferOverrides.InitialUploadState = Graphics::DeviceUploadStatus::Completed;
+            m_GPUSkinnedVertexBuffer = Renderer::CreateVertexBuffer(c_VertexByteSize, sizeof(Graphics::Vertex), gpuSkinningVertexBufferOverrides);
+            m_GPUSkinnedVertexBuffer->SetName("GPUSkinnedVertexBuffer");
 
             m_gpuBoneBaseOffset = 0;
             m_gpuVertexBaseOffset = 0;
 
-            m_enableGPUSkinning = true;
+            m_enableGPUSkinning = false;
 
             m_state = Core::SystemStates::Initialised;
         }
@@ -71,17 +70,17 @@ namespace Insight
             std::lock_guard lock(m_animationsLock);
             m_animations.clear();
 
+            Renderer::FreeRawBuffer(m_GPUSkeletonBonesUploadBuffer);
+            m_GPUSkeletonBonesUploadBuffer = nullptr;
+
             m_GPUSkeletonBonesBuffer.ForEach([](Graphics::RHI_Buffer*& buffer)
                 {
                     Renderer::FreeVertexBuffer(buffer);
                     buffer = nullptr;
                 });
 
-            m_GPUSkinnedVertexBuffer.ForEach([](Graphics::RHI_Buffer*& buffer)
-                {
-                    Renderer::FreeVertexBuffer(buffer);
-                    buffer = nullptr;
-                });
+            Renderer::FreeVertexBuffer(m_GPUSkinnedVertexBuffer);
+            m_GPUSkinnedVertexBuffer = nullptr;
 
             m_state = Core::SystemStates::Not_Initialised;
         }
@@ -271,7 +270,9 @@ namespace Insight
             const u64 bonesBytesSize = sizeof(bones[0]) * bones.size();
             ASSERT(m_gpuBoneOffset + bonesBytesSize < c_SkeletonBoneDataByteSize);
             
-            Graphics::RHI_BufferView gpuBoneData = m_GPUSkeletonBonesBuffer.Get()->Upload(bones.data(), bonesBytesSize, m_gpuBoneBaseOffset + m_gpuBoneOffset, 8);
+            Graphics::RHI_BufferView gpuBoneData = m_GPUSkeletonBonesUploadBuffer->Upload(bones.data(), bonesBytesSize, m_gpuBoneBaseOffset + m_gpuBoneOffset, 8);
+            gpuBoneData = Graphics::RHI_BufferView(m_GPUSkeletonBonesBuffer.Get(), gpuBoneData.GetOffset(), gpuBoneData.GetSize());
+
             gpuBoneData.UAVStartIndex = m_gpuBoneOffset > 0 ? m_gpuBoneOffset / sizeof(bones[0]) : 0;
             gpuBoneData.UAVNumOfElements = (m_gpuBoneOffset + bonesBytesSize) / sizeof(bones[0]);
             gpuBoneData.Stride = sizeof(bones[0]);
@@ -297,7 +298,7 @@ namespace Insight
             const u64 vertexByteSize = sizeof(Graphics::Vertex) * vertexCount;
             ASSERT(m_gpuVertexOffset + vertexByteSize < c_VertexByteSize);
 
-            Graphics::RHI_BufferView gpuVertexData(m_GPUSkinnedVertexBuffer.Get(), m_gpuVertexBaseOffset + m_gpuVertexOffset, vertexByteSize);
+            Graphics::RHI_BufferView gpuVertexData(m_GPUSkinnedVertexBuffer, m_gpuVertexBaseOffset + m_gpuVertexOffset, vertexByteSize);
             gpuVertexData.UAVStartIndex = m_gpuVertexOffset > 0 ? m_gpuVertexOffset / sizeof(Graphics::Vertex) : 0;
             gpuVertexData.UAVNumOfElements = vertexCount;
             gpuVertexData.Stride = sizeof(Graphics::Vertex);
@@ -321,17 +322,19 @@ namespace Insight
             AnimationSkinnedData animationSkinnedData =
             {
                 m_GPUSkeletonBonesBuffer.Get(),
-                m_GPUSkinnedVertexBuffer.Get(),
+                m_GPUSkinnedVertexBuffer,
                 std::move(m_animGPUSkinning)
             };
 
-            Graphics::RenderGraph::Instance().AddPass<AnimationSkinnedData>("ComputeSkinning",
+            Graphics::RenderGraph::Instance().AddSyncPoint([this]()
+                {
+                    m_GPUSkeletonBonesBuffer.Get()->Upload(m_GPUSkeletonBonesUploadBuffer);
+                });
+
+            Graphics::RenderGraph::Instance().AddPassFront<AnimationSkinnedData>("ComputeSkinning",
             [](AnimationSkinnedData& data, Graphics::RenderGraphBuilder& builder)
             {
                 IS_PROFILE_SCOPE("ComputeSkinning pass setup");
-
-                const u32 renderResolutionX = builder.GetRenderResolution().x;
-                const u32 renderResolutionY = builder.GetRenderResolution().y;
 
                 Graphics::ShaderDesc shaderDesc("ComputeSkinning", {}, Graphics::ShaderStageFlagBits::ShaderStage_Compute);
                 builder.SetShader(shaderDesc);
@@ -343,9 +346,6 @@ namespace Insight
                     pso.ShaderDescription = shaderDesc;
                 }
                 builder.SetComputePipeline(pso);
-
-                builder.SetViewport(renderResolutionX, renderResolutionY);
-                builder.SetScissor(renderResolutionX, renderResolutionY);
             },
             [this](AnimationSkinnedData& data, Graphics::RenderGraph& render_graph, Graphics::RHI_CommandList* cmdList)
             {
@@ -362,7 +362,7 @@ namespace Insight
                 beforeBufferBarrier.NewLayout = Graphics::BufferType::UnorderedAccess;
 
                 beforeBufferBarrier.Buffer = data.GPUBonesData;
-                //beforeBarreir.BufferBarriers.push_back(beforeBufferBarrier);
+                beforeBarreir.BufferBarriers.push_back(beforeBufferBarrier);
 
                 beforeBufferBarrier.Buffer = data.GPUSkinnedVertexData;
                 beforeBarreir.BufferBarriers.push_back(beforeBufferBarrier);
@@ -413,7 +413,7 @@ namespace Insight
                 afterBarreir.BufferBarriers.push_back(afterBufferBarrier);
 
                 cmdList->PipelineBarrier(afterBarreir);
-            }, std::move(animationSkinnedData));
+            }, [](AnimationSkinnedData&, Graphics::RenderGraph&, Graphics::RHI_CommandList*) { }, std::move(animationSkinnedData));
         }
     }
 }

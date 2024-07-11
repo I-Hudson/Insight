@@ -196,12 +196,13 @@ namespace Insight
 					IS_PROFILE_SCOPE("Render Update");
 					m_graphicsSystem.CreateRenderFrame();
 					Graphics::RenderStats::Instance().Draw();
-					OnRender();
 
 					{
 						m_animationSystem.WaitForAllAnimationUpdates();
 						m_animationSystem.GPUSkinning(RemoveConst(m_graphicsSystem.GetRenderFrame()));
 					}
+
+					OnRender();
 
 					{
 						IS_PROFILE_SCOPE("GraphicsSystem Render");

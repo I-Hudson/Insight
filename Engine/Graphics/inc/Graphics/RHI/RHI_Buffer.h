@@ -17,6 +17,8 @@ namespace Insight
 		{
 			bool Force_Host_Writeable = false;
 			bool AllowUnorderedAccess = false;
+
+			DeviceUploadStatus InitialUploadState = DeviceUploadStatus::NotUploaded;
 		};
 
 		class IS_GRAPHICS RHI_BufferView
@@ -71,6 +73,7 @@ namespace Insight
 			virtual void Create(RenderContext* context, const RHI_BufferCreateInfo& createInfo) { Create(context, createInfo.BufferType, createInfo.SizeBytes, createInfo.Stride, createInfo.Overrides); }
 			virtual void Create(RenderContext* context, BufferType bufferType, u64 sizeBytes, u64 stride, RHI_Buffer_Overrides overrides) = 0;
 			virtual RHI_BufferView Upload(const void* data, u64 sizeInBytes, u64 offset, u64 alignment) = 0;
+			virtual RHI_BufferView Upload(RHI_Buffer* srcBuffer) = 0;
 
 			RHI_BufferView Upload(const void* data, u64 sizeInBytes) { return Upload(data, sizeInBytes, 0, 0); }
 			RPtr<RHI_UploadQueueRequest> QueueUpload(void* data, int sizeInBytes);

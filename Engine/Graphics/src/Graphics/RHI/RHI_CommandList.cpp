@@ -40,8 +40,8 @@ namespace Insight
 			m_pso = {};
 			m_activePSO = {};
 			m_drawData = {};
-			m_bound_vertex_buffer = nullptr;
-			m_bound_index_buffer = nullptr;
+			m_boundVertexBufferView = { };
+			m_boundIndexBufferView = { };
 			m_discard = false;
 		}
 
@@ -146,8 +146,8 @@ namespace Insight
 			///}
 
 			// Make sure our buffers are good to go.
-			if ((m_bound_vertex_buffer && m_bound_vertex_buffer->GetUploadStatus() != DeviceUploadStatus::Completed)
-				|| (m_bound_index_buffer && m_bound_index_buffer->GetUploadStatus() != DeviceUploadStatus::Completed))
+			if ((m_boundVertexBufferView.IsValid() && m_boundVertexBufferView.GetBuffer()->GetUploadStatus() != DeviceUploadStatus::Completed)
+				|| (m_boundIndexBufferView.IsValid() && m_boundIndexBufferView.GetBuffer()->GetUploadStatus() != DeviceUploadStatus::Completed))
 			{
 				return false;
 			}

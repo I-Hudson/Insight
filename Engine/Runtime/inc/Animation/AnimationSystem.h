@@ -80,10 +80,12 @@ namespace Insight
             
             bool m_enableGPUSkinning = false;
 
+            Graphics::RHI_Buffer* m_GPUSkeletonBonesUploadBuffer;
+
             Graphics::FrameResource<Graphics::RHI_Buffer*> m_GPUSkeletonBonesBuffer;
             std::unordered_map<Core::GUID, Graphics::RHI_BufferView> m_skeletonBonesBuffers;
 
-            Graphics::FrameResource<Graphics::RHI_Buffer*> m_GPUSkinnedVertexBuffer;
+            Graphics::RHI_Buffer* m_GPUSkinnedVertexBuffer;
             std::unordered_map<Core::GUID, Graphics::RHI_BufferView> m_vertexBuffers;
 
             /// @brief Base offset within 'm_GPUSkinningBuffer' in which the bones data is stored from.

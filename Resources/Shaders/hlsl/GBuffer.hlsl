@@ -27,20 +27,22 @@ float4x4 SkinnedBoneMatrix(const in GeoVertexInput input)
 	return BoneTransform;
 }
 
-VertexOutput VSMain(const GeoVertexInput input)
+VertexOutput VSMain(const GeoVertexInput input, uint vertexID : SV_VertexID)
 {
 	VertexOutput vsOut;
 	vsOut.Pos = float4(input.Pos, 1);
 	vsOut.Colour = GetVertexColour(input);
 	vsOut.WorldNormal = GetVertexNormal(input);
 
-	if (bpo_SkinnedMesh == 1)
+	[branch]
+	if (bpo_SkinnedMesh == 1 && true)
 	{
 		const float4x4 BoneTransform = SkinnedBoneMatrix(input);
 		
 		vsOut.Pos = mul(BoneTransform, float4(vsOut.Pos.xyz, 1));
 		vsOut.WorldNormal = mul(BoneTransform, float4(vsOut.WorldNormal.xyz, 1));
 	}
+
 	vsOut.WorldPos = mul(bpo_Transform, vsOut.Pos);
 	vsOut.Pos = mul(bf_Camera_Proj_View, vsOut.WorldPos);
 	

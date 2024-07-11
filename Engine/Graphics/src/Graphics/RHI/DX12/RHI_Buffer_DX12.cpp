@@ -60,6 +60,8 @@ namespace Insight
 				}
 
 				m_currentResouceState = resourceState;
+				m_uploadStatus = m_overrides.InitialUploadState;
+
 				/// Create the constant buffer.
 				ThrowIfFailed(m_context->GetDevice()->CreateCommittedResource(
 					&heapProperties,
@@ -71,7 +73,7 @@ namespace Insight
 
 				if (m_bufferType == BufferType::Uniform
 					|| m_bufferType == BufferType::Storage
-					|| m_bufferType == BufferType::Raw
+					|| (m_bufferType == BufferType::Raw && m_overrides.Force_Host_Writeable)
 					|| m_bufferType == BufferType::Staging
 					|| m_bufferType == BufferType::Readback
 					|| overrides.Force_Host_Writeable)
@@ -121,6 +123,20 @@ namespace Insight
 				sizeInBytes = AlignUp(sizeInBytes, alignment);
 				m_uploadStatus = DeviceUploadStatus::Completed;
 				return RHI_BufferView(this, offset, sizeInBytes);
+			}
+
+			RHI_BufferView RHI_Buffer_DX12::Upload(RHI_Buffer* srcBuffer)
+			{
+				ASSERT(srcBuffer && srcBuffer->GetSize() == GetSize());
+
+				RHI_CommandList_DX12* cmdList = static_cast<RHI_CommandList_DX12*>(m_context->GetCommandListManager().GetCommandList());
+				cmdList->CopyBufferToBuffer(this, 0, srcBuffer, 0, srcBuffer->GetSize());
+				cmdList->Close();
+
+				m_context->SubmitCommandListAndWait(cmdList);
+				m_context->GetCommandListManager().ReturnCommandList(cmdList);
+
+				return RHI_BufferView(this, 0, GetSize());
 			}
 
 			std::vector<Byte> RHI_Buffer_DX12::Download()

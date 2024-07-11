@@ -62,6 +62,32 @@ namespace Insight
 			void AddPreRender(RenderGraphSetPreRenderFunc func);
 			void AddPostRender(RenderGraphSetPreRenderFunc func);
 
+			
+			template<typename TData>
+			void AddPassFront(std::string passName
+				, typename RenderGraphPass<TData>::SetupFunc setupFunc
+				, typename RenderGraphPass<TData>::ExecuteFunc executeFunc
+				, typename RenderGraphPass<TData>::PostFunc postFunc
+				, TData initalData = { })
+			{
+				IS_PROFILE_FUNCTION();
+				std::lock_guard lock(m_mutex);
+				GetUpdatePasses().emplace_back(nullptr);
+
+				for (size_t i = GetUpdatePasses().size() - 1; i > 0 ; --i)
+				{
+					const u64 a = i - 1;
+					GetUpdatePasses()[i] = std::move(GetUpdatePasses()[a]);
+				}
+				GetUpdatePasses()[0] = 
+					MakeUPtr<RenderGraphPass<TData>>(
+						std::move(passName)
+						, std::move(setupFunc)
+						, std::move(executeFunc)
+						, std::move(postFunc)
+						, std::move(initalData));
+			}
+
 			template<typename TData>
 			void AddPass(std::string passName, typename RenderGraphPass<TData>::SetupFunc setupFunc
 				, typename RenderGraphPass<TData>::ExecuteFunc executeFunc, TData initalData = { })

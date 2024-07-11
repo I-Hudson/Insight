@@ -409,41 +409,41 @@ namespace Insight
 				vkCmdSetLineWidth(m_commandList, width);
 			}
 
-			void RHI_CommandList_Vulkan::SetVertexBuffer(RHI_Buffer* buffer)
+			void RHI_CommandList_Vulkan::SetVertexBuffer(const RHI_BufferView& bufferView)
 			{
 				IS_PROFILE_FUNCTION();
 
-				if (buffer == m_bound_vertex_buffer)
+				if (!bufferView.IsValid() || bufferView == m_boundVertexBufferView)
 				{
 					return;
 				}
 
-				m_bound_vertex_buffer = buffer;
-				const RHI_Buffer_Vulkan* bufferVulkan = static_cast<RHI_Buffer_Vulkan*>(buffer);
+				m_boundVertexBufferView = bufferView;
+				const RHI_Buffer_Vulkan* bufferVulkan = static_cast<RHI_Buffer_Vulkan*>(bufferView.GetBuffer());
 				std::array<VkBuffer, 1> buffers = { bufferVulkan->GetBuffer() };
-				std::array<VkDeviceSize, 1> offsets = { 0 };
+				std::array<VkDeviceSize, 1> offsets = { bufferView.GetOffset() };
 				{
 					IS_PROFILE_SCOPE("bindVertexBuffers");
 					vkCmdBindVertexBuffers(m_commandList, 0, static_cast<u32>(buffers.size()), buffers.data(), offsets.data());
 					RenderStats::Instance().VertexBufferBindings++;
-					m_context->GetResourceRenderTracker().TrackResource(buffer);
+					m_context->GetResourceRenderTracker().TrackResource(bufferView.GetBuffer());
 				}
 			}
 
-			void RHI_CommandList_Vulkan::SetIndexBuffer(RHI_Buffer* buffer, IndexType index_type)
+			void RHI_CommandList_Vulkan::SetIndexBuffer(const RHI_BufferView& bufferView, const IndexType index_type)
 			{
 				IS_PROFILE_FUNCTION();
 
-				if (buffer == m_bound_index_buffer)
+				if (!bufferView.IsValid() || bufferView == m_boundIndexBufferView)
 				{
 					return;
 				}
 
-				m_bound_index_buffer = buffer;
-				const RHI_Buffer_Vulkan* bufferVulkan = static_cast<RHI_Buffer_Vulkan*>(buffer);
-				vkCmdBindIndexBuffer(m_commandList, bufferVulkan->GetBuffer(), 0, IndexTypeToVulkan(index_type));
+				m_boundIndexBufferView = bufferView;
+				const RHI_Buffer_Vulkan* bufferVulkan = static_cast<RHI_Buffer_Vulkan*>(bufferView.GetBuffer());
+				vkCmdBindIndexBuffer(m_commandList, bufferVulkan->GetBuffer(), bufferView.GetOffset(), IndexTypeToVulkan(index_type));
 				RenderStats::Instance().IndexBufferBindings++;
-				m_context->GetResourceRenderTracker().TrackResource(buffer);
+				m_context->GetResourceRenderTracker().TrackResource(bufferView.GetBuffer());
 			}
 
 			void RHI_CommandList_Vulkan::Draw(u32 vertexCount, u32 instanceCount, u32 firstVertex, u32 firstInstance)

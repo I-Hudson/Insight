@@ -9,7 +9,9 @@ cbuffer MeshInfoBuffer : register(b0)
     uint MeshInfoVertexCount;
 }
 
+#define ZERO_IDENTITY float4x4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
 #define ZERO_MATRIX float4x4(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+
 float4x4 SkinnedBoneMatrix(const in GeoVertexInput input)
 {
 	float4x4 BoneTransform = ZERO_MATRIX; 
@@ -32,9 +34,13 @@ void CSMain(uint3 thread_id : SV_DispatchThreadID)
     }
 
     GeoVertexInput inputVertex = InputVertices[vertexId];
-    //const float4x4 boneTransform = SkinnedBoneMatrix(inputVertex);
+    const float4x4 boneTransform = SkinnedBoneMatrix(inputVertex);
 
-    //inputVertex.Pos = mul(boneTransform, float4(inputVertex.Pos.xyz, 1)).xyz;
+	inputVertex.Pos = mul(boneTransform, float4(inputVertex.Pos.xyz, 1)).xyz;
+
+    //float4x4 transform = ZERO_IDENTITY;
+    //transform[3] = float4(0, 10, 0, 1);
+    //inputVertex.Pos = inputVertex.Pos + float3(0, 5, 0);
 
     OutputVertices[vertexId] = inputVertex;
 }
