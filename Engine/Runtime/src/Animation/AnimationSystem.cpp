@@ -22,7 +22,7 @@ namespace Insight
         const u64 c_SkeletonBoneDataIncrementSize = sizeof(Maths::Matrix4) * Skeleton::c_MaxBoneCount;
         const u64 c_SkeletonBoneDataByteSize = c_SkeletonBoneDataIncrementSize * c_MaxGPUSkinnedObjects;
 
-        const u64 c_MaxVertexCount = 128_MB / sizeof(Graphics::Vertex);
+        const u64 c_MaxVertexCount = 256_MB / sizeof(Graphics::Vertex);
         const u64 c_VertexByteSize = sizeof(Graphics::Vertex) * c_MaxVertexCount;
 
         AnimationSystem::AnimationSystem()
@@ -226,24 +226,24 @@ namespace Insight
 
         void AnimationSystem::InitGPUSkinningResources()
         {
-            if (!m_GPUSkeletonBonesUploadBuffer)
+            if (!m_GPUSkeletonBonesUploadBuffer.GetCurrent())
             {
                 Graphics::RHI_Buffer_Overrides gpuSkinningUploadBufferOverrides;
                 gpuSkinningUploadBufferOverrides.Force_Host_Writeable = true;
-                m_GPUSkeletonBonesUploadBuffer = Renderer::CreateRawBuffer(c_SkeletonBoneDataByteSize, gpuSkinningUploadBufferOverrides);
-                m_GPUSkeletonBonesUploadBuffer->SetName("GPUSkeletonBonesUploadBuffer");
+             
+                m_GPUSkeletonBonesUploadBuffer.GetCurrent() = Renderer::CreateRawBuffer(c_SkeletonBoneDataByteSize, gpuSkinningUploadBufferOverrides);
+                m_GPUSkeletonBonesUploadBuffer.GetCurrent()->SetName("GPUSkeletonBonesUploadBuffer1");
+
+                m_GPUSkeletonBonesUploadBuffer.GetPending() = Renderer::CreateRawBuffer(c_SkeletonBoneDataByteSize, gpuSkinningUploadBufferOverrides);
+                m_GPUSkeletonBonesUploadBuffer.GetPending()->SetName("GPUSkeletonBonesUploadBuffer2");
             }
 
-            if (m_GPUSkeletonBonesBuffer.Size() == 0)
+            if (!m_GPUSkeletonBonesBuffer)
             {
-                m_GPUSkeletonBonesBuffer.Setup();
-                m_GPUSkeletonBonesBuffer.ForEach([](Graphics::RHI_Buffer*& buffer)
-                    {
-                            Graphics::RHI_Buffer_Overrides overrides;
-                            overrides.AllowUnorderedAccess = true;
-                            buffer = Renderer::CreateRawBuffer(c_SkeletonBoneDataByteSize, overrides);
-                            buffer->SetName("GPUSkeletonBonesBuffer");
-                    });
+                Graphics::RHI_Buffer_Overrides overrides;
+                overrides.AllowUnorderedAccess = true;
+                m_GPUSkeletonBonesBuffer = Renderer::CreateRawBuffer(c_SkeletonBoneDataByteSize, overrides);
+                m_GPUSkeletonBonesBuffer->SetName("GPUSkeletonBonesBuffer");
             }
 
             if (!m_GPUSkinnedVertexBuffer)
@@ -261,14 +261,13 @@ namespace Insight
 
         void AnimationSystem::DestroyGPUSkinningResoruces()
         {
-            Renderer::FreeRawBuffer(m_GPUSkeletonBonesUploadBuffer);
-            m_GPUSkeletonBonesUploadBuffer = nullptr;
+            Renderer::FreeRawBuffer(m_GPUSkeletonBonesBuffer);
+            m_GPUSkeletonBonesBuffer = nullptr;
 
-            m_GPUSkeletonBonesBuffer.ForEach([](Graphics::RHI_Buffer*& buffer)
-                {
-                    Renderer::FreeVertexBuffer(buffer);
-                    buffer = nullptr;
-                });
+            Renderer::FreeVertexBuffer(m_GPUSkeletonBonesUploadBuffer.GetCurrent());
+            m_GPUSkeletonBonesUploadBuffer.GetCurrent() = nullptr;
+            Renderer::FreeVertexBuffer(m_GPUSkeletonBonesUploadBuffer.GetPending());
+            m_GPUSkeletonBonesUploadBuffer.GetPending() = nullptr;
 
             Renderer::FreeVertexBuffer(m_GPUSkinnedVertexBuffer);
             m_GPUSkinnedVertexBuffer = nullptr;
@@ -287,8 +286,8 @@ namespace Insight
             const u64 bonesBytesSize = sizeof(bones[0]) * bones.size();
             ASSERT(m_gpuBoneOffset + bonesBytesSize < c_SkeletonBoneDataByteSize);
             
-            Graphics::RHI_BufferView gpuBoneData = m_GPUSkeletonBonesUploadBuffer->Upload(bones.data(), bonesBytesSize, m_gpuBoneBaseOffset + m_gpuBoneOffset, 8);
-            gpuBoneData = Graphics::RHI_BufferView(m_GPUSkeletonBonesBuffer.Get(), gpuBoneData.GetOffset(), gpuBoneData.GetSize());
+            Graphics::RHI_BufferView gpuBoneData = m_GPUSkeletonBonesUploadBuffer.GetCurrent()->Upload(bones.data(), bonesBytesSize, m_gpuBoneBaseOffset + m_gpuBoneOffset, 8);
+            gpuBoneData = Graphics::RHI_BufferView(m_GPUSkeletonBonesBuffer, gpuBoneData.GetOffset(), gpuBoneData.GetSize());
 
             gpuBoneData.UAVStartIndex = m_gpuBoneOffset > 0 ? m_gpuBoneOffset / sizeof(bones[0]) : 0;
             gpuBoneData.UAVNumOfElements = (m_gpuBoneOffset + bonesBytesSize) / sizeof(bones[0]);
@@ -327,7 +326,7 @@ namespace Insight
 
             return gpuVertexData;
         }
-
+#pragma optimize("",off)
         void AnimationSystem::SetupComputeSkinningPass()
         {
             struct AnimationSkinnedData
@@ -338,14 +337,19 @@ namespace Insight
             };
             AnimationSkinnedData animationSkinnedData =
             {
-                m_GPUSkeletonBonesBuffer.Get(),
+                m_GPUSkeletonBonesBuffer,
                 m_GPUSkinnedVertexBuffer,
                 std::move(m_animGPUSkinning)
             };
 
+            Graphics::RHI_Buffer* boneUploadBuffer = m_GPUSkeletonBonesUploadBuffer.GetCurrent();
+            Graphics::GPUDeferedManager::Instance().Push([this, boneUploadBuffer](Graphics::RHI_CommandList* cmdList)
+                {
+                    cmdList->CopyBufferToBuffer(m_GPUSkeletonBonesBuffer, 0, boneUploadBuffer,0, boneUploadBuffer->GetSize());
+                });
             Graphics::RenderGraph::Instance().AddSyncPoint([this]()
                 {
-                    m_GPUSkeletonBonesBuffer.Get()->Upload(m_GPUSkeletonBonesUploadBuffer);
+                    m_GPUSkeletonBonesUploadBuffer.Swap();
                 });
 
             Graphics::RenderGraph::Instance().AddPassFront<AnimationSkinnedData>("ComputeSkinning",
@@ -432,5 +436,6 @@ namespace Insight
                 cmdList->PipelineBarrier(afterBarreir);
             }, [](AnimationSkinnedData&, Graphics::RenderGraph&, Graphics::RHI_CommandList*) { }, std::move(animationSkinnedData));
         }
+#pragma optimize("",on)
     }
 }

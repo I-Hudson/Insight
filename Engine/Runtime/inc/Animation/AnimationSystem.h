@@ -87,9 +87,9 @@ namespace Insight
             
             bool m_enableGPUSkinning = false;
 
-            Graphics::RHI_Buffer* m_GPUSkeletonBonesUploadBuffer = nullptr;
+            DoubleBufferVector<Graphics::RHI_Buffer*> m_GPUSkeletonBonesUploadBuffer;
 
-            Graphics::FrameResource<Graphics::RHI_Buffer*> m_GPUSkeletonBonesBuffer;
+            Graphics::RHI_Buffer* m_GPUSkeletonBonesBuffer;
             std::unordered_map<Core::GUID, Graphics::RHI_BufferView> m_skeletonBonesBuffers;
 
             Graphics::RHI_Buffer* m_GPUSkinnedVertexBuffer = nullptr;
