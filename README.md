@@ -10,6 +10,7 @@ Some features are:
 - Memory tracking
 - Multiple graphics API support (Vulkan/DX12)
 - Runtime shader creation (with descriptor reflection)
+- GPU Skinning
 
 ## Thrid Party
 

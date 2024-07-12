@@ -21,27 +21,38 @@ namespace Insight
 		class RHI_Sampler;
 		class RenderTarget;
 
-		struct BufferFrame
+		struct IS_RUNTIME BufferFrame
 		{
+			BufferFrame();
+
 			Maths::Matrix4 Proj_View = { };
 			Maths::Matrix4 Projection = { };
 			Maths::Matrix4 View = { };
 			Maths::Matrix4 View_Inverted = { };
 			Maths::Matrix4 Projection_View_Inverted = { };
 
-			float Render_Resolution[2];
-			float Ouput_Resolution[2];
+			float Render_Resolution[2] = { 0.0f };
+			float Ouput_Resolution[2] = { 0.0f };
 
-			float TAA_Jitter_Current[2];
-			float TAA_Jitter_Previous[2];
+			float TAA_Jitter_Current[2] = { 0.0f };
+			float TAA_Jitter_Previous[2] = { 0.0f };
 
-			float Delta_Time;
-			u32 RenderOptions;
-			float __pad1;
-			float __pad2;
+			float Delta_Time = { 0.0f };
+			u32 RenderOptions = { 0 };
+			float __pad0 = { 0.0f };
+			float __pad1 = { 0.0f };
+
+			void SetGPUSkinningEnabled(const bool enabled) { SetRenderOptionBit(0, enabled); }
+
+		private:
+			void SetRenderOptionBit(const u32 bit, const bool value)
+			{
+				RenderOptions &= ~(1 << bit);
+				RenderOptions |= static_cast<u32>(value) << bit;
+			}
 		};
 
-		struct BufferSamplers
+		struct IS_RUNTIME BufferSamplers
 		{
 			RHI_Sampler* Shadow_Sampler;
 			RHI_Sampler* Repeat_Sampler;
@@ -50,7 +61,7 @@ namespace Insight
 		};
 
 		static const u8 s_Cascade_Count = 4;
-		struct BufferLight
+		struct IS_RUNTIME BufferLight
 		{
 			Maths::Matrix4 ProjView[s_Cascade_Count];
 			Maths::Matrix4 Projection[s_Cascade_Count];
@@ -68,7 +79,7 @@ namespace Insight
 			static void GetCascades(BufferLight& buffer_light, const BufferFrame& buffer_frame, u32 cascade_count, float split_lambda = 0.95f);
 		};
 
-		struct BufferPerObject
+		struct IS_RUNTIME BufferPerObject
 		{
 			Maths::Matrix4 Transform = Maths::Matrix4::Identity;
 			Maths::Matrix4 Previous_Transform = Maths::Matrix4::Identity;

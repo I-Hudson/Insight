@@ -50,6 +50,8 @@ namespace Insight
 			static FfxFsr2ContextDescription m_ffx_fsr2_context_description;
 			static FfxFsr2DispatchDescription m_ffx_fsr2_dispatch_description;
 
+            static void* m_scratchBuffer;
+
             static bool m_fsr2IsEnabled;
 		};
 	}

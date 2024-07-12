@@ -28,6 +28,7 @@ namespace Insight
         FfxFsr2Context              RHI_FSR::m_ffx_fsr2_context;
         FfxFsr2ContextDescription   RHI_FSR::m_ffx_fsr2_context_description;
         FfxFsr2DispatchDescription  RHI_FSR::m_ffx_fsr2_dispatch_description;
+        void*                       RHI_FSR::m_scratchBuffer = nullptr;
         bool                        RHI_FSR::m_fsr2IsEnabled;
 
         void RHI_FSR::Init()
@@ -55,12 +56,7 @@ namespace Insight
                     GPUDeferedManager::Instance().Push([this](RHI_CommandList* cmdList)
                         {
                             RenderContext::Instance().GpuWaitForIdle();
-                            if (m_ffx_fsr2_context_description.callbacks.scratchBuffer != nullptr)
-                            {
-                                ASSERT(ffxFsr2ContextDestroy(&m_ffx_fsr2_context) == FFX_OK);
-                                free(m_ffx_fsr2_context_description.callbacks.scratchBuffer);
-                                m_ffx_fsr2_context_description.callbacks.scratchBuffer = nullptr;
-                            }
+                            ASSERT(ffxFsr2ContextDestroy(&m_ffx_fsr2_context) == FFX_OK);
 
                             RenderContext* render_context = &RenderContext::Instance();
                             Maths::Vector2 render_resolution = RenderGraph::Instance().GetRenderResolution();
@@ -73,12 +69,8 @@ namespace Insight
         void RHI_FSR::Destroy()
         {
             Core::EventSystem::Instance().RemoveEventListener(this, Core::EventType::Graphics_Swapchain_Resize);
-            if (m_ffx_fsr2_context_description.callbacks.scratchBuffer != nullptr)
-            {
-                ASSERT(ffxFsr2ContextDestroy(&m_ffx_fsr2_context) == FFX_OK);
-                free(m_ffx_fsr2_context_description.callbacks.scratchBuffer);
-                m_ffx_fsr2_context_description.callbacks.scratchBuffer = nullptr;
-            }
+            ASSERT(ffxFsr2ContextDestroy(&m_ffx_fsr2_context) == FFX_OK);
+            free(m_scratchBuffer);
         }
 
         void RHI_FSR::SetIsEnabled(const bool value) const
@@ -216,9 +208,15 @@ namespace Insight
             {
 #ifdef IS_VULKAN_ENABLED
                 RHI::Vulkan::RenderContext_Vulkan* renderContextVulkan = static_cast<RHI::Vulkan::RenderContext_Vulkan*>(render_context);
-                const u64 scratchBufferSize = ffxFsr2GetScratchMemorySizeVK(renderContextVulkan->GetPhysicalDevice());
-                void* scratchBuffer = malloc(scratchBufferSize);
-                FfxErrorCode errorCode = ffxFsr2GetInterfaceVK(&m_ffx_fsr2_context_description.callbacks, scratchBuffer
+
+                const u64 scratchBufferSize = ffxFsr2GetScratchMemorySizeDX12();
+                if (!m_scratchBuffer)
+                {
+                    m_scratchBuffer = malloc(scratchBufferSize);
+                }
+
+                FfxErrorCode errorCode = ffxFsr2GetInterfaceVK(&m_ffx_fsr2_context_description.callbacks
+                    , m_scratchBuffer
                     , scratchBufferSize
                     , renderContextVulkan->GetPhysicalDevice()
                     , vkGetDeviceProcAddr);
@@ -238,12 +236,17 @@ namespace Insight
             {
 #ifdef IS_DX12_ENABLED
                 RHI::DX12::RenderContext_DX12* renderContextDX12 = static_cast<RHI::DX12::RenderContext_DX12*>(render_context);
+
                 const u64 scratchBufferSize = ffxFsr2GetScratchMemorySizeDX12();
-                void* scratchBuffer = malloc(scratchBufferSize);
+                if (!m_scratchBuffer)
+                {
+                    m_scratchBuffer = malloc(scratchBufferSize);
+                }
+
                 FfxErrorCode errorCode = ffxFsr2GetInterfaceDX12(
                     &m_ffx_fsr2_context_description.callbacks
                     , renderContextDX12->GetDevice()
-                    , scratchBuffer
+                    , m_scratchBuffer
                     , scratchBufferSize);
                 ASSERT(errorCode == FFX_OK);
 

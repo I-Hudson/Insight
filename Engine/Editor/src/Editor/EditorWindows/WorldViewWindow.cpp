@@ -88,6 +88,10 @@ namespace Insight
             static int editorOutput = 0;
             ImGui::Combo("Editor Output", &editorOutput, editorOutputItems, ARRAY_COUNT(editorOutputItems));
 
+            bool gpuSkinningEnabled = Runtime::AnimationSystem::Instance().IsGPUSkinningEnabled();
+            ImGui::Checkbox("GPU Skinning", &gpuSkinningEnabled);
+            Runtime::AnimationSystem::Instance().SetGPUSkinningEnabled(gpuSkinningEnabled);
+
             Graphics::RHI_Texture* worldViewTexture = Graphics::RenderGraph::Instance().GetRenderCompletedRHITexture(editorOutputItems[editorOutput]);
             if (worldViewTexture == nullptr)
             {
@@ -1076,8 +1080,6 @@ namespace Insight
 
             bufferFrame.Ouput_Resolution[0] = Graphics::RenderGraph::Instance().GetOutputResolution().x;
             bufferFrame.Ouput_Resolution[1] = Graphics::RenderGraph::Instance().GetOutputResolution().y;
-
-            bufferFrame.RenderOptions |= 0 << 0;
 
             return bufferFrame;
         }

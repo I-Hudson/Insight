@@ -35,7 +35,7 @@ VertexOutput VSMain(const GeoVertexInput input, uint vertexID : SV_VertexID)
 	vsOut.WorldNormal = GetVertexNormal(input);
 
 	[branch]
-	if (bpo_SkinnedMesh == 1 && true)
+	if (bpo_SkinnedMesh == 1 && !GPUSkinningEnabled())
 	{
 		const float4x4 BoneTransform = SkinnedBoneMatrix(input);
 		

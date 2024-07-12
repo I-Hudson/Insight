@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Runtime/Defines.h"
 #include "Core/ISysytem.h"
 #include "Core/Singleton.h"
 #include "Core/GUID.h"
@@ -46,7 +47,7 @@ namespace Insight
             const ECS::Entity* Entity;
         };
 
-        class AnimationSystem : public Core::ISystem, public Core::Singleton<AnimationSystem>
+        class IS_RUNTIME AnimationSystem : public Core::ISystem, public Core::Singleton<AnimationSystem>
         {
         public:
             AnimationSystem();
@@ -63,6 +64,9 @@ namespace Insight
             void WaitForAllAnimationUpdates() const;
             void GPUSkinning(RenderFrame& renderFrame);
 
+            void SetGPUSkinningEnabled(const bool enabled) { m_enableGPUSkinning = enabled; }
+            bool IsGPUSkinningEnabled() const { return m_enableGPUSkinning; }
+
             AnimationInstance* AddAnimationInstance(const ECS::Entity* entity);
             void RemoveAnimationInstance(const ECS::Entity* entity);
 
@@ -70,6 +74,9 @@ namespace Insight
             const AnimationInstance* GetAnimationInstance(const ECS::Entity* entity) const;
 
         private:
+            void InitGPUSkinningResources();
+            void DestroyGPUSkinningResoruces();
+
             Graphics::RHI_BufferView UploadGPUSkeletonBoneData(const AnimationInstance& anim, const Ref<Skeleton>& skeleton);
             Graphics::RHI_BufferView AllocateMeshVertexBuffer(const AnimationInstance& anim, RenderMesh& skinnedMesh);
             void SetupComputeSkinningPass();
@@ -80,12 +87,12 @@ namespace Insight
             
             bool m_enableGPUSkinning = false;
 
-            Graphics::RHI_Buffer* m_GPUSkeletonBonesUploadBuffer;
+            Graphics::RHI_Buffer* m_GPUSkeletonBonesUploadBuffer = nullptr;
 
             Graphics::FrameResource<Graphics::RHI_Buffer*> m_GPUSkeletonBonesBuffer;
             std::unordered_map<Core::GUID, Graphics::RHI_BufferView> m_skeletonBonesBuffers;
 
-            Graphics::RHI_Buffer* m_GPUSkinnedVertexBuffer;
+            Graphics::RHI_Buffer* m_GPUSkinnedVertexBuffer = nullptr;
             std::unordered_map<Core::GUID, Graphics::RHI_BufferView> m_vertexBuffers;
 
             /// @brief Base offset within 'm_GPUSkinningBuffer' in which the bones data is stored from.

@@ -11,16 +11,19 @@ cbuffer BufferFrame : register(b0, FrameSpace)
     float2 Render_Resolution;
     float2 Output_Resolution;
 
-    float bf_TAA_Jitter_Current;
-    float bf_TAA_Jitter_Previous;
+    float2 bf_TAA_Jitter_Current;
+    float2 bf_TAA_Jitter_Previous;
+
     float Delta_Time;
-    int RenderOptions;
+    int bf_RenderOptions;
     // bit0 - GPUSkinning Enabled
+    float bf__pad0;
+    float bf__pad1;
 }
 
 bool GPUSkinningEnabled()
 {
-    return RenderOptions & 0x1;
+    return (bf_RenderOptions & 0x1) == 1;
 }
 
 #define s_Cascade_Count 4

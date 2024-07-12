@@ -14,9 +14,9 @@ namespace Insight
 {
     namespace Runtime
     {
-#define ANIMATION_THREADING 1
+#define BACKGROUND_THREADS 0
 #define PARALLEL_FOR 1
-#define BACKGROUND_THREADS 1
+#define ANIMATION_THREADING 1
 
         const u64 c_MaxGPUSkinnedObjects = 1024;
         const u64 c_SkeletonBoneDataIncrementSize = sizeof(Maths::Matrix4) * Skeleton::c_MaxBoneCount;
@@ -35,31 +35,6 @@ namespace Insight
         {
             std::lock_guard lock(m_animationsLock);
 
-            
-            Graphics::RHI_Buffer_Overrides gpuSkinningUploadBufferOverrides;
-            gpuSkinningUploadBufferOverrides.Force_Host_Writeable = true;
-            m_GPUSkeletonBonesUploadBuffer = Renderer::CreateRawBuffer(c_SkeletonBoneDataByteSize, gpuSkinningUploadBufferOverrides);
-            m_GPUSkeletonBonesUploadBuffer->SetName("GPUSkeletonBonesUploadBuffer");
-
-
-            m_GPUSkeletonBonesBuffer.Setup();
-            m_GPUSkeletonBonesBuffer.ForEach([](Graphics::RHI_Buffer*& buffer)
-                {
-                    Graphics::RHI_Buffer_Overrides overrides;
-                    overrides.AllowUnorderedAccess = true;
-                    buffer = Renderer::CreateRawBuffer(c_SkeletonBoneDataByteSize, overrides);
-                    buffer->SetName("GPUSkeletonBonesBuffer");
-                });
-
-            Graphics::RHI_Buffer_Overrides gpuSkinningVertexBufferOverrides;
-            gpuSkinningVertexBufferOverrides.AllowUnorderedAccess = true;
-            gpuSkinningVertexBufferOverrides.InitialUploadState = Graphics::DeviceUploadStatus::Completed;
-            m_GPUSkinnedVertexBuffer = Renderer::CreateVertexBuffer(c_VertexByteSize, sizeof(Graphics::Vertex), gpuSkinningVertexBufferOverrides);
-            m_GPUSkinnedVertexBuffer->SetName("GPUSkinnedVertexBuffer");
-
-            m_gpuBoneBaseOffset = 0;
-            m_gpuVertexBaseOffset = 0;
-
             m_enableGPUSkinning = false;
 
             m_state = Core::SystemStates::Initialised;
@@ -70,17 +45,7 @@ namespace Insight
             std::lock_guard lock(m_animationsLock);
             m_animations.clear();
 
-            Renderer::FreeRawBuffer(m_GPUSkeletonBonesUploadBuffer);
-            m_GPUSkeletonBonesUploadBuffer = nullptr;
-
-            m_GPUSkeletonBonesBuffer.ForEach([](Graphics::RHI_Buffer*& buffer)
-                {
-                    Renderer::FreeVertexBuffer(buffer);
-                    buffer = nullptr;
-                });
-
-            Renderer::FreeVertexBuffer(m_GPUSkinnedVertexBuffer);
-            m_GPUSkinnedVertexBuffer = nullptr;
+            DestroyGPUSkinningResoruces();
 
             m_state = Core::SystemStates::Not_Initialised;
         }
@@ -220,6 +185,8 @@ namespace Insight
                 return;
             }
 
+            InitGPUSkinningResources();
+
             m_gpuBoneOffset = 0;
             m_gpuVertexOffset = 0;
 
@@ -255,6 +222,56 @@ namespace Insight
             }
 
             SetupComputeSkinningPass();
+        }
+
+        void AnimationSystem::InitGPUSkinningResources()
+        {
+            if (!m_GPUSkeletonBonesUploadBuffer)
+            {
+                Graphics::RHI_Buffer_Overrides gpuSkinningUploadBufferOverrides;
+                gpuSkinningUploadBufferOverrides.Force_Host_Writeable = true;
+                m_GPUSkeletonBonesUploadBuffer = Renderer::CreateRawBuffer(c_SkeletonBoneDataByteSize, gpuSkinningUploadBufferOverrides);
+                m_GPUSkeletonBonesUploadBuffer->SetName("GPUSkeletonBonesUploadBuffer");
+            }
+
+            if (m_GPUSkeletonBonesBuffer.Size() == 0)
+            {
+                m_GPUSkeletonBonesBuffer.Setup();
+                m_GPUSkeletonBonesBuffer.ForEach([](Graphics::RHI_Buffer*& buffer)
+                    {
+                            Graphics::RHI_Buffer_Overrides overrides;
+                            overrides.AllowUnorderedAccess = true;
+                            buffer = Renderer::CreateRawBuffer(c_SkeletonBoneDataByteSize, overrides);
+                            buffer->SetName("GPUSkeletonBonesBuffer");
+                    });
+            }
+
+            if (!m_GPUSkinnedVertexBuffer)
+            {
+                Graphics::RHI_Buffer_Overrides gpuSkinningVertexBufferOverrides;
+                gpuSkinningVertexBufferOverrides.AllowUnorderedAccess = true;
+                gpuSkinningVertexBufferOverrides.InitialUploadState = Graphics::DeviceUploadStatus::Completed;
+                m_GPUSkinnedVertexBuffer = Renderer::CreateVertexBuffer(c_VertexByteSize, sizeof(Graphics::Vertex), gpuSkinningVertexBufferOverrides);
+                m_GPUSkinnedVertexBuffer->SetName("GPUSkinnedVertexBuffer");
+            }
+
+            m_gpuBoneBaseOffset = 0;
+            m_gpuVertexBaseOffset = 0;
+        }
+
+        void AnimationSystem::DestroyGPUSkinningResoruces()
+        {
+            Renderer::FreeRawBuffer(m_GPUSkeletonBonesUploadBuffer);
+            m_GPUSkeletonBonesUploadBuffer = nullptr;
+
+            m_GPUSkeletonBonesBuffer.ForEach([](Graphics::RHI_Buffer*& buffer)
+                {
+                    Renderer::FreeVertexBuffer(buffer);
+                    buffer = nullptr;
+                });
+
+            Renderer::FreeVertexBuffer(m_GPUSkinnedVertexBuffer);
+            m_GPUSkinnedVertexBuffer = nullptr;
         }
 
         Graphics::RHI_BufferView AnimationSystem::UploadGPUSkeletonBoneData(const AnimationInstance& anim, const Ref<Skeleton>& skeleton)

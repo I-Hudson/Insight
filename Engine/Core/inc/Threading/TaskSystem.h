@@ -3,6 +3,7 @@
 #include "Core/Singleton.h"
 #include "Core/ISysytem.h"
 #include "Core/TypeAlias.h"
+#include "Core/Profiler.h"
 
 #include "Threading/Task.h"
 #include "Threading/Thread.h"
@@ -31,6 +32,8 @@ namespace Insight
 			template<typename Func, typename... Args>
 			static auto CreateTask(Func func, Args&&... args)
 			{
+				IS_PROFILE_FUNCTION();
+
 				using ResultType = std::invoke_result_t<Func, Args...>;
 				TaskResult<ResultType>* taskResult = New<TaskResult<ResultType>, Core::MemoryAllocCategory::Threading>();
 				TaskFuncWrapper<ResultType, Func, Args...>* taskWrapper = New<TaskFuncWrapper<ResultType, Func, Args...>>(taskResult, std::move(func), std::move(args)...);

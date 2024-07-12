@@ -16,8 +16,8 @@
 
 #include "World/WorldSystem.h"
 #include "ECS/Components/TransformComponent.h"
-#include "ECS/Components/MeshComponent.h"
-#include "ECS/Components/FreeCameraControllerComponent.h"
+
+#include "Animation/AnimationSystem.h"
 
 #include "Maths/Utils.h"
 
@@ -77,6 +77,11 @@ namespace Insight
 			RHI_BufferView Buffer_Directional_Light_View = { };
 		};
 		GlobalResources g_global_resources = {};
+
+		BufferFrame::BufferFrame()
+		{
+			SetGPUSkinningEnabled(Runtime::AnimationSystem::Instance().IsGPUSkinningEnabled());
+		}
 
 		float aspect = 0.0f;
 		void Renderpass::Create()
