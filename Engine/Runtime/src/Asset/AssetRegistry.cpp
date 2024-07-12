@@ -170,7 +170,7 @@ namespace Insight::Runtime
 
         m_pathToAssetInfo[newInfo->GetFullFilePath()] = newInfo;
         const AssetInfo* addedInfo = package->AddAsset(newInfo);
-        ASSERT(newInfo == addedInfo);
+        ASSERT_MSG(newInfo == addedInfo, "[AssetRegistry::AddAsset] '.assetmeta' already exists for asset at path '%s'.", path.data());
 
         return newInfo;
     }

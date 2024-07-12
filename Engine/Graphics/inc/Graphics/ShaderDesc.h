@@ -118,7 +118,7 @@ namespace Insight
 #endif
 				};
 
-				u64 offset = 0;
+				int offset = 0;
 				for (ShaderInputLayout& inputLayout : DefaultShaderInputLayout)
 				{
 					inputLayout.Stride = offset;
