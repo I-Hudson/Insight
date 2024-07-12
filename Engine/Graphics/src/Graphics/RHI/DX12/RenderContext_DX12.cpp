@@ -101,11 +101,13 @@ namespace Insight
 					IID_PPV_ARGS(&m_device)
 				));
 
-				m_gpuCrashTracker = RHI_GPUCrashTracker::Create();
-				if (!m_desc.GPUValidation
-					&& m_gpuCrashTracker)
+				if (!m_desc.GPUValidation)
 				{
-					m_gpuCrashTracker->Init();
+					m_gpuCrashTracker = RHI_GPUCrashTracker::Create();
+					if (m_gpuCrashTracker)
+					{
+						//m_gpuCrashTracker->Init();
+					}
 				}
 
 				m_d3d12maAllocationCallbacks.pAllocate = D3D12Allocate;

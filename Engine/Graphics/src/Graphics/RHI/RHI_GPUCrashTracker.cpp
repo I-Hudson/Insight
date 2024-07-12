@@ -126,6 +126,13 @@ namespace Insight
 #ifdef IS_NVIDIA_AFTERMATH_ENABLED
 		void RHI_GPUCrashTrackerNvidiaAftermath::Init()
 		{
+			u32 aftermathAPIFlag =
+#ifdef IS_DX12_ENABLED
+				GFSDK_Aftermath_GpuCrashDumpWatchedApiFlags_DX;
+#elif defined(IS_VULKAN_ENABLED)
+				GFSDK_Aftermath_GpuCrashDumpWatchedApiFlags_Vulkan;
+#endif
+
 			// Enable GPU crash dumps and set up the callbacks for crash dump notifications,
 			// shader debug information notifications, and providing additional crash
 			// dump description data.Only the crash dump callback is mandatory. The other two
@@ -137,7 +144,7 @@ namespace Insight
 			// ShaderDebugInfoCallback will be called for every shader that is compiled.
 			AFTERMATH_CHECK_ERROR(GFSDK_Aftermath_EnableGpuCrashDumps(
 				GFSDK_Aftermath_Version_API,
-				GFSDK_Aftermath_GpuCrashDumpWatchedApiFlags_Vulkan | GFSDK_Aftermath_GpuCrashDumpWatchedApiFlags_DX,
+				aftermathAPIFlag,
 				GFSDK_Aftermath_GpuCrashDumpFeatureFlags_Default,				  // Let the Nsight Aftermath library cache shader debug information.
 				GpuCrashDumpCallback,                                             // Register callback for GPU crash dumps.
 				ShaderDebugInfoCallback,                                          // Register callback for shader debug information.

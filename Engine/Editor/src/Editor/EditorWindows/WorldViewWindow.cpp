@@ -619,9 +619,9 @@ namespace Insight
                             }
                             else
                             {
+                                cmdList->SetVertexBuffer(renderMeshLod.Vertex_buffer);
                             }
 
-                            cmdList->SetVertexBuffer(renderMeshLod.Vertex_buffer);
                             cmdList->SetIndexBuffer(renderMeshLod.Index_buffer, Graphics::IndexType::Uint32);
                             cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
 
