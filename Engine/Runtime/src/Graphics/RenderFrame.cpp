@@ -272,7 +272,7 @@ namespace Insight
                     const float nearPlane = 0.01f;
                     const float shadowMapResolution = static_cast<float>(pointLightComponent->GetShadowResolution());
 
-                    pointLight.Projection = Maths::Matrix4::CreatePerspective(Maths::DegreesToRadians(90.0f), shadowMapResolution / shadowMapResolution, nearPlane, pointLightComponent->GetRadius());
+                    pointLight.Projection = Maths::Matrix4::CreatePerspective(Maths::DegreesToRadians(90.0f), shadowMapResolution / shadowMapResolution, nearPlane, std::max(0.1f, pointLightComponent->GetRadius()));
 
                     pointLight.CreateViewMatrixs(Maths::Vector3(transformComponent->GetPosition()));
 

@@ -322,7 +322,7 @@ namespace Insight
 			{
 				LPCSTR strPointer = pErrors->GetStringPointer();
 				SIZE_T strLength = pErrors->GetBufferSize();
-				IS_LOG_CORE_ERROR(fmt::format("Shader compilation failed : \n\nName: {} \n\n Error:", name, strPointer));
+				IS_LOG_CORE_ERROR(fmt::format("Shader compilation failed : \n\nName: {} \n\n Error: {}", name, strPointer));
 			}
 			pErrors->Release();
 
@@ -532,7 +532,7 @@ namespace Insight
 						&& 
 						(b2.Type != DescriptorType::Unifom_Buffer
 						|| b2.Type != DescriptorType::Storage_Buffer)
-						? 0 : 1;
+						? 0 : 0;
 					});
 			}
 

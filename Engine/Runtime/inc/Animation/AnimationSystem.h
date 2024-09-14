@@ -89,7 +89,7 @@ namespace Insight
 
             DoubleBufferVector<Graphics::RHI_Buffer*> m_GPUSkeletonBonesUploadBuffer;
 
-            Graphics::RHI_Buffer* m_GPUSkeletonBonesBuffer;
+            Graphics::RHI_Buffer* m_GPUSkeletonBonesBuffer = nullptr;
             std::unordered_map<Core::GUID, Graphics::RHI_BufferView> m_skeletonBonesBuffers;
 
             Graphics::RHI_Buffer* m_GPUSkinnedVertexBuffer = nullptr;

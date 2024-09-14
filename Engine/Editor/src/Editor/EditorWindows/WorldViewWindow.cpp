@@ -801,7 +801,7 @@ namespace Insight
                     Graphics::RHI_TextureInfo textureCreateInfo = Graphics::RHI_TextureInfo::Tex2D(
                           renderResolutionX
                         , renderResolutionY
-                        , PixelFormat::R8G8B8A8_UNorm
+                        , PixelFormat::R32G32B32A32_Float
                         , Graphics::ImageUsageFlagsBits::ColourAttachment | Graphics::ImageUsageFlagsBits::Sampled | Graphics::ImageUsageFlagsBits::Storage);
                     Graphics::RGTextureHandle lightRT = builder.CreateTexture("EditorWorldLightRT", textureCreateInfo);
                     builder.WriteTexture(lightRT);
@@ -926,6 +926,43 @@ namespace Insight
                         cmdList->SetTexture(0, 0, render_graph.GetRHITexture(render_graph.GetTexture("EditorWorldDepthStencilRT")));
                         cmdList->SetTexture(0, 1, render_graph.GetRHITexture(render_graph.GetTexture("EditorWorldColourRT")));
 
+                        const RenderFrame& renderFrame = m_renderingData.GetCurrent().RenderFrame;
+                        for (const RenderWorld& world : renderFrame.RenderWorlds)
+                        {
+                            const u32 c_MaxPointLights = 32;
+
+                            struct PointLightBuffer
+                            {
+                                RenderPointLight PointLights[c_MaxPointLights];
+                                int PointLightSize;
+                            };
+                            PointLightBuffer pointLightBuffer;
+                            {
+                                IS_PROFILE_SCOPE("Set point light data");
+                                for (size_t i = 0; i < world.PointLights.size(); ++i)
+                                {
+                                    if (i >= 32)
+                                    {
+                                        FAIL_ASSERT_MSG("Only 32 point lights are supported.");
+                                        break;
+                                    }
+
+                                    pointLightBuffer.PointLights[i] = world.PointLights[i];
+                                    cmdList->SetTexture(1, 0 + i, world.PointLights[i].DepthTexture);
+                                }
+                                pointLightBuffer.PointLightSize = world.PointLights.size();
+                            }
+
+                            if (pointLightBuffer.PointLightSize > 0)
+                            {
+                                Graphics::RHI_BufferView spotLightRHIBuffer = cmdList->UploadUniform(pointLightBuffer);
+                                {
+                                    IS_PROFILE_SCOPE("Set Light Uniform");
+                                    cmdList->SetUniform(1, 0, spotLightRHIBuffer);
+                                }
+                            }
+                        }
+
                         // The descriptor allocator should "request" descriptor handles and such from resources as the resource can't just make every descriptor
                         // for itself. Or the resource should make descriptors depending on the 'ImageUsageFlagsBits' it has been given.
 
@@ -934,6 +971,7 @@ namespace Insight
                         const uint32_t threadGroupCountY = static_cast<uint32_t>(std::ceil(static_cast<float>(outputTexture->GetHeight()) / thread_group_count));
 
                         cmdList->Dispatch(threadGroupCountX, threadGroupCountY);
+
 
                         Graphics::PipelineBarrier afterBarreir;
                         afterBarreir.SrcStage = static_cast<u32>(Graphics::PipelineStageFlagBits::ComputeShader);
