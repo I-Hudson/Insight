@@ -343,6 +343,27 @@ namespace Insight::Runtime
         return LoadAsset(assetInfo->GetFullFilePath());
     }
 
+    AssetAsyncRequest AssetRegistry::LoadAssetAsync(std::string path)
+    {
+        return Ref<Asset>();
+    }
+
+    AssetAsyncRequest AssetRegistry::LoadAssetAsync(const Core::GUID guid)
+    {
+        if (!guid.IsValid())
+        {
+            return AssetAsyncRequest();
+        }
+
+        const AssetInfo* assetInfo = GetAssetInfo(guid);
+        if (assetInfo == nullptr)
+        {
+            IS_LOG_CORE_ERROR("[AssetRegistry::LoadAsset] Unable to get AssetInfo from guid '{}'.", guid.ToString());
+            return AssetAsyncRequest();
+        }
+        return LoadAssetAsync(assetInfo->GetFullFilePath());
+    }
+
     const AssetInfo* AssetRegistry::GetAssetInfo(const std::string& path) const
     {
 #define GET_ASSET_INFO_DIRECT_FROM_ASSET_PACKAGE

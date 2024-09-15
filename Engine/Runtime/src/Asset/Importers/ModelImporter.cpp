@@ -878,6 +878,10 @@ namespace Insight
 			const std::string materialname;// aiMaterial->GetName().C_Str();
 			const std::string_view Directory = modelAsset->GetAssetInfo()->FilePath;
 
+			std::unordered_map<TextureAssetTypes, AssetAsyncRequest> loadedTexturesAsync;
+			loadedTexturesAsync[TextureAssetTypes::Diffuse] = LoadTextureAsync(aiScene, aiMaterial, aiTextureType_BASE_COLOR, aiTextureType_DIFFUSE, modelAsset);
+			loadedTexturesAsync[TextureAssetTypes::Normal] = LoadTextureAsync(aiScene, aiMaterial, aiTextureType_NORMAL_CAMERA, aiTextureType_NORMALS, modelAsset);
+
 			material->SetTexture(TextureAssetTypes::Diffuse, LoadTexture(aiScene, aiMaterial, aiTextureType_BASE_COLOR, aiTextureType_DIFFUSE, modelAsset));
 			material->SetTexture(TextureAssetTypes::Normal, LoadTexture(aiScene, aiMaterial, aiTextureType_NORMAL_CAMERA, aiTextureType_NORMALS, modelAsset));
 
@@ -903,16 +907,38 @@ namespace Insight
 		Ref<TextureAsset> ModelImporter::LoadTexture(const aiScene* assimpScene, const aiMaterial* assimpMaterial, const aiTextureType PBRType, const aiTextureType legacyType, ModelAsset* modelAsset) const
 		{
 			const std::string texturePath = GetTexturePath(assimpMaterial, modelAsset->GetAssetInfo()->FilePath, PBRType, legacyType);
+			Ref<TextureAsset> texture = LoadEmbeddedTexture(assimpScene, assimpMaterial, PBRType, legacyType, modelAsset);
+			if (!texture)
+			{
+				texture = AssetRegistry::Instance().LoadAsset(texturePath).As<TextureAsset>();
+			}
+			return texture.As<TextureAsset>();
+		}
+
+		AssetAsyncRequest ModelImporter::LoadTextureAsync(const aiScene* assimpScene, const aiMaterial* assimpMaterial, const aiTextureType PBRType, const aiTextureType legacyType, ModelAsset* modelAsset) const
+		{
+			const std::string texturePath = GetTexturePath(assimpMaterial, modelAsset->GetAssetInfo()->FilePath, PBRType, legacyType);
+			Ref<TextureAsset> texture = LoadEmbeddedTexture(assimpScene, assimpMaterial, PBRType, legacyType, modelAsset);
+			if (!texture)
+			{
+				return AssetRegistry::Instance().LoadAssetAsync(texturePath);
+			}
+			return AssetAsyncRequest(texture.As<TextureAsset>(), true);
+		}
+
+		Ref<TextureAsset> ModelImporter::LoadEmbeddedTexture(const aiScene* assimpScene, const aiMaterial* assimpMaterial, const aiTextureType PBRType, const aiTextureType legacyType, ModelAsset* modelAsset) const
+		{
+			const std::string texturePath = GetTexturePath(assimpMaterial, modelAsset->GetAssetInfo()->FilePath, PBRType, legacyType);
 			Ref<TextureAsset> texture;
 
 			const aiTexture* embededTexture = assimpScene->GetEmbeddedTexture(texturePath.c_str());
 			if (embededTexture != nullptr)
 			{
 				texture = ::New<TextureAsset>(modelAsset->GetAssetInfo());
-			
+
 				const bool isCompressed = embededTexture->mHeight == 0;
-				const u64 dataSize = isCompressed ? embededTexture->mWidth : embededTexture->mWidth * embededTexture-> mHeight;
-			
+				const u64 dataSize = isCompressed ? embededTexture->mWidth : embededTexture->mWidth * embededTexture->mHeight;
+
 				TextureImporter textureImporter;
 				if (!textureImporter.IsValidImporterForFileExtension(embededTexture->achFormatHint))
 				{
@@ -922,11 +948,8 @@ namespace Insight
 				textureImporter.ImportFromMemory(texture, embededTexture->pcData, dataSize);
 				modelAsset->m_embeddedTextures.push_back(texture);
 			}
-			else
-			{
-				texture = AssetRegistry::Instance().LoadAsset(texturePath).As<TextureAsset>();
-			}
-			return texture.As<TextureAsset>();
+
+			return texture;
 		}
 
 		void ModelImporter::ExtractSkeleton(const aiScene* aiScene, const aiNode* aiNode, Maths::Matrix4 parentTransform, ModelAsset* modelAsset) const
