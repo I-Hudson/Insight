@@ -400,8 +400,8 @@ namespace Insight
 					VkExtent2D{ static_cast<uint32_t>(width), static_cast<uint32_t>(height) } }
 			};
 				vkCmdSetScissor(m_commandList, 0, static_cast<u32>(scissors.size()), scissors.data());
-				m_drawData.Siccsior.x = width;
-				m_drawData.Siccsior.y = height;
+				m_drawData.Siccsior.x = static_cast<float>(width);
+				m_drawData.Siccsior.y = static_cast<float>(height);
 			}
 
 			void RHI_CommandList_Vulkan::SetLineWidth(float width)

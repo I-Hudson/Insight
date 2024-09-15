@@ -388,7 +388,7 @@ namespace Insight
 				if (Window::Instance().GetSize() != m_swapchainBufferSize)
 				{
 					IS_PROFILE_SCOPE("Swapchain resize");
-					SetSwaphchainResolution(Maths::Vector2(Window::Instance().GetWidth(), Window::Instance().GetHeight()));
+					SetSwaphchainResolution(Maths::Vector2(static_cast<float>(Window::Instance().GetWidth()), static_cast<float>(Window::Instance().GetHeight())));
 					return false;
 				}
 
@@ -467,7 +467,7 @@ namespace Insight
 				// Swap chain can not be 0.
 				desc.Width = std::max(1u, desc.Width);
 				desc.Height = std::max(1u, desc.Height);
-				m_swapchainBufferSize = Maths::Vector2(desc.Width, desc.Height);
+				m_swapchainBufferSize = Maths::Vector2(static_cast<float>(desc.Width), static_cast<float>(desc.Height));
 
 				BOOL allowTearing = FALSE;
 				bool tearingSupported = FALSE;
@@ -589,8 +589,8 @@ namespace Insight
 						WaitForGpu();
 
 						SwapchainDesc desc = m_swapchainDesc;
-						desc.Width = resolution.x;
-						desc.Height = resolution.y;
+						desc.Width = static_cast<u32>(resolution.x);
+						desc.Height = static_cast<u32>(resolution.y);
 
 						CreateSwapchain(desc);
 						Core::EventSystem::Instance().DispatchEvent(MakeRPtr<Core::GraphcisSwapchainResize>(m_swapchainBufferSize.x, m_swapchainBufferSize.y));
@@ -805,7 +805,7 @@ namespace Insight
 				}
 
 				/// Resize our swap chain buffers.
-				m_swapchain->ResizeBuffers(RenderContext::Instance().GetFramesInFligtCount(), m_swapchainBufferSize.x, m_swapchainBufferSize.y, DXGI_FORMAT_UNKNOWN, 0);
+				m_swapchain->ResizeBuffers(RenderContext::Instance().GetFramesInFligtCount(), static_cast<u32>(m_swapchainBufferSize.x), static_cast<u32>(m_swapchainBufferSize.y), DXGI_FORMAT_UNKNOWN, 0);
 				const UINT frameIndex = m_swapchain->GetCurrentBackBufferIndex();
 
 				/// Create new render targets for the swapchain.

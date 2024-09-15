@@ -753,8 +753,8 @@ namespace Insight
 												desc.Format = DXGI_FORMAT_UNKNOWN;
 												desc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
 												desc.Buffer.FirstElement = buffer.UAVStartIndex;
-												desc.Buffer.NumElements = buffer.UAVNumOfElements;
-												desc.Buffer.StructureByteStride = buffer.Stride;
+												desc.Buffer.NumElements = static_cast<UINT>(buffer.UAVNumOfElements);
+												desc.Buffer.StructureByteStride = static_cast<UINT>(buffer.Stride);
 
 												m_contextDX12->GetDevice()->CreateUnorderedAccessView(bufferDX12->GetResource(), nullptr, &desc, dstHandle.CPUPtr);
 

@@ -159,9 +159,9 @@ namespace Insight::Physics::Jolt
                 return batch;
 
             const int indexCount = inIndexCount / 3;
-            for (size_t triangleIdx = 0; triangleIdx < indexCount; ++triangleIdx)
+            for (u32 triangleIdx = 0; triangleIdx < indexCount; ++triangleIdx)
             {
-                for (size_t vertexIdx = 0; vertexIdx < 3; ++vertexIdx)
+                for (u32 vertexIdx = 0; vertexIdx < 3; ++vertexIdx)
                 {
                     const u32 indexIdx = triangleIdx * 3;
                     const u32 verticesIdx = indexIdx + vertexIdx;
@@ -200,7 +200,7 @@ namespace Insight::Physics::Jolt
                 JPH::RVec3 v0 = inModelMatrix * JPH::Vec3(PhysicsWorld_Jolt::Vector4ToJolt(V0.Position));
                 JPH::RVec3 v1 = inModelMatrix * JPH::Vec3(PhysicsWorld_Jolt::Vector4ToJolt(V1.Position));
                 JPH::RVec3 v2 = inModelMatrix * JPH::Vec3(PhysicsWorld_Jolt::Vector4ToJolt(V2.Position));
-                JPH::Color color = inModelColor * JPH::Color(V0.Colour.x, V0.Colour.y, V0.Colour.z, V0.Colour.w);
+                JPH::Color color = inModelColor * JPH::Color(static_cast<u8>(V0.Colour.x), static_cast<u8>(V0.Colour.y), static_cast<u8>(V0.Colour.z), static_cast<u8>(V0.Colour.w));
 
                 switch (inDrawMode)
                 {

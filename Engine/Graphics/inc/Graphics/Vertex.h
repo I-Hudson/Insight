@@ -221,7 +221,7 @@ namespace Insight
 			u16 PackNormalisedFloatToU16(const float value, const u16 maxValue) const
 			{
 				ASSERT(std::abs(value) >= 0.0f && std::abs(value) <= 1.0f);
-				const u16 intValue = value * maxValue;
+				const u16 intValue = static_cast<u16>(value * maxValue);
 				return intValue;
 			}
 

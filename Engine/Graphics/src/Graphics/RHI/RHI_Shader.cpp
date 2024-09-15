@@ -19,6 +19,7 @@
 #include "spirv_reflect.h"
 
 #include <string>
+#include <algorithm>
 
 namespace Insight
 {

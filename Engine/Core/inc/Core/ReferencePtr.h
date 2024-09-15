@@ -63,7 +63,7 @@ namespace Insight
         }
 
         template<typename TOther>
-        ReferencePtr<TOther> As()
+        ReferencePtr<TOther> As() const
         {
             ReferencePtr<TOther> referencePtr(dynamic_cast<TOther*>(m_pointer));
             return referencePtr;

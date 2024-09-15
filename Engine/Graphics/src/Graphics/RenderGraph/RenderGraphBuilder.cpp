@@ -104,12 +104,12 @@ namespace Insight
 
 		void RenderGraphBuilder::SetViewport(u32 width, u32 height)
 		{
-			m_pass->m_viewport = Maths::Vector2(width, height);
+			m_pass->m_viewport = Maths::Vector2(static_cast<float>(width), static_cast<float>(height));
 		}
 
 		void RenderGraphBuilder::SetScissor(u32 width, u32 height)
 		{
-			m_pass->m_scissor = Maths::Vector2(width, height);
+			m_pass->m_scissor = Maths::Vector2(static_cast<float>(width), static_cast<float>(height));
 		}
 
 		void RenderGraphBuilder::SkipTextureWriteBarriers()

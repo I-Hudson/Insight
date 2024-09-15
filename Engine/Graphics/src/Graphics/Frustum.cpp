@@ -203,10 +203,10 @@ namespace Insight
             for (const Plane& plane : m_planes)
             {
                 const Maths::Vector4 lt(
-                    plane.normal[0] < Maths::Vector4::Zero[0] ? 1 : 0,
-                    plane.normal[1] < Maths::Vector4::Zero[1] ? 1 : 0,
-                    plane.normal[2] < Maths::Vector4::Zero[2] ? 1 : 0,
-                    plane.normal[3] < Maths::Vector4::Zero[3] ? 1 : 0
+                    plane.normal[0] < Maths::Vector4::Zero[0] ? 1.0f : 0.0f,
+                    plane.normal[1] < Maths::Vector4::Zero[1] ? 1.0f : 0.0f,
+                    plane.normal[2] < Maths::Vector4::Zero[2] ? 1.0f : 0.0f,
+                    plane.normal[3] < Maths::Vector4::Zero[3] ? 1.0f : 0.0f
                 );
 
                 const Maths::Vector4 furthestFromPlane(

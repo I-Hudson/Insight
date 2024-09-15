@@ -521,7 +521,7 @@ namespace Insight
 				if (Window::Instance().GetSize() != m_swapchainBufferSize)
 				{
 					IS_PROFILE_SCOPE("Swapchain resize");
-					SetSwaphchainResolution(Maths::Vector2(Window::Instance().GetWidth(), Window::Instance().GetHeight()));
+					SetSwaphchainResolution(static_cast<float>(Maths::Vector2(Window::Instance().GetWidth()), static_cast<float>(Window::Instance().GetHeight())));
 					return false;
 				}
 
@@ -555,7 +555,7 @@ namespace Insight
 
 					if (acquireNextImageResult != VK_SUCCESS)
 					{
-						SetSwaphchainResolution(Maths::Vector2(Window::Instance().GetWidth(), Window::Instance().GetHeight()));
+						SetSwaphchainResolution(static_cast<float>(Maths::Vector2(Window::Instance().GetWidth()), static_cast<float>(Window::Instance().GetHeight())));
 						return false;
 					}
 				}
@@ -623,7 +623,7 @@ namespace Insight
 
 							if (presentResult != VK_SUCCESS)
 							{
-								SetSwaphchainResolution(Maths::Vector2(Window::Instance().GetWidth(), Window::Instance().GetHeight()));
+								SetSwaphchainResolution(static_cast<float>(Maths::Vector2(Window::Instance().GetWidth()), static_cast<float>(Window::Instance().GetHeight())));
 							}
 							m_currentFrame = (m_currentFrame + 1) % RenderContext::Instance().GetFramesInFligtCount();
 						}
@@ -662,7 +662,7 @@ namespace Insight
 					// If the surface size is defined, the swap chain size must match
 					swapchainExtent = surfaceCapabilites.currentExtent;
 				}
-				m_swapchainBufferSize = Maths::Vector2(swapchainExtent.width, swapchainExtent.height);
+				m_swapchainBufferSize = Maths::Vector2(static_cast<float>(swapchainExtent.width), static_cast<float>(swapchainExtent.height));
 
 				// Select a present mode for the swapchain
 
@@ -819,8 +819,8 @@ namespace Insight
 				WaitForGpu();
 
 				SwapchainDesc desc = m_swapchainDesc;
-				desc.Width = resolution.x;
-				desc.Height = resolution.y;
+				desc.Width = static_cast<u32>(resolution.x);
+				desc.Height = static_cast<u32>(resolution.y);
 				CreateSwapchain(desc);
 
 				Core::EventSystem::Instance().DispatchEvent(MakeRPtr<Core::GraphcisSwapchainResize>(m_swapchainBufferSize.x, m_swapchainBufferSize.y));

@@ -177,7 +177,7 @@ namespace Insight
 			}
 
 			m_title = std::move(title);
-			SetSize(Maths::Vector2(width, height));
+			SetSize(Maths::Vector2(static_cast<float>(width), static_cast<float>(height)));
 
 			m_glfwInit = glfwInit();
 			if (!m_glfwInit)
@@ -203,7 +203,7 @@ namespace Insight
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 			glfwWindowHint(GLFW_REFRESH_RATE, GLFW_DONT_CARE);
 
-			m_glfwWindow = glfwCreateWindow(GetSize().x, GetSize().y, m_title.c_str(), NULL, NULL);
+			m_glfwWindow = glfwCreateWindow(static_cast<int>(GetSize().x), static_cast<int>(GetSize().y), m_title.c_str(), NULL, NULL);
 
 			int windowPosX, windowPosY;
 			glfwGetWindowPos(m_glfwWindow, &windowPosX, &windowPosY);
