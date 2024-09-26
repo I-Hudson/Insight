@@ -28,7 +28,6 @@ namespace Insight
 			default:
 				break;
 			}
-			FAIL_ASSERT();
 			return "Unknown";
 		}
 
@@ -44,7 +43,7 @@ namespace Insight
 			default:
 				break;
 			}
-			return "";
+			return "Unknown";
 		}
 
 		const char* ControllerTriggerToString(ControllerTriggers trigger)
@@ -58,7 +57,6 @@ namespace Insight
 			default:
 				break;
 			}
-			FAIL_ASSERT();
 			return "Unknown";
 		}
 
@@ -75,7 +73,6 @@ namespace Insight
 			default:
 				break;
 			}
-			FAIL_ASSERT();
 			return "Unknown";
 		}
 
