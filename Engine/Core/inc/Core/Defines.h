@@ -56,7 +56,8 @@
 #define INLINE inline
 #define FORCE_INLINE inline
 #define FORCE_NOINLINE __attribute__((noinline))
-#define NO_EXPECT noexpect
+#define NO_EXPECT
+#define CONSTEXPR constexpr
 #define NO_RETURN __attribute__((noreturn))
 #define PACK_BEGIN()
 #define PACK_END() __attribute__((__packed__))
@@ -64,6 +65,11 @@
 #define ALIGN_END(_align) __attribute__( (aligned(_align) ) )
 #define OFFSET_OF(X, Y) __builtin_offsetof(X, Y)
 #define DEPRECATED
+#define DEPRECATED_MSG(msg)
+#define NO_DISCARD [[nodiscard]]
+#define NO_VTABLE __declspec(novtable)
+#define FUNCTION __FUNCSIG__
+#define PROCESSER_PAUSE _mm_pause()
 
 #pragma clang diagnostic ignored "-Wswitch"
 #pragma clang diagnostic ignored "-Wmacro-redefined"

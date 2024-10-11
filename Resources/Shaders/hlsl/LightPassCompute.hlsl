@@ -34,18 +34,18 @@ cbuffer PointLightBuffers : register(b0, space1)
 float PointShadowCalculation(Texture2DArray<float4> depthTexture, const float3 worldPosition, const RenderPointLight light)
 {
     float3 wPosToLightPos = worldPosition - light.Position;
-
-    float shadowDepth = depthTexture[wPosToLightPos].r;
-
     const uint shadowSliceIndex = DirectionToCubeFaceIndex(wPosToLightPos);
+
+    float shadowDepth = depthTexture[float3(wPosToLightPos.x, wPosToLightPos.y, shadowSliceIndex)].r;
+
     float4x4 shadowProjectionView = mul(light.Projection, light.View[shadowSliceIndex]);
     float3 shadowNDC = world_to_ndc(worldPosition, shadowProjectionView);
 
     if (shadowDepth < shadowNDC.z)
     {
-        return shadowSliceIndex;
+        return 0;
     }
-    return shadowSliceIndex;
+    return 1;
 }
 
 [numthreads(8, 8, 1)]

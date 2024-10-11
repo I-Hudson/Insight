@@ -1,6 +1,6 @@
 #include "Editor/TypeDrawers/TypeDrawer_Float.h"
 
-#include <imgui/imgui.h>
+#include <imgui.h>
 
 namespace Insight
 {
