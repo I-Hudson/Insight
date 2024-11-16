@@ -33,7 +33,7 @@ namespace Insight
             IS_PROFILE_FUNCTION();
 
             Core::CPUInformation cpuInfo = Platform::GetCPUInformation();
-            float speedInGHz = static_cast<float>(cpuInfo.SpeedInMHz) / 1000;
+            const float speedInGHz = cpuInfo.SpeedInMHz / 1000.0f;
 
             ImGui::Text("CPU Information");
             ImGui::Separator();

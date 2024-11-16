@@ -504,7 +504,7 @@ namespace Insight
 					LONG result = CallNtPowerInformation(ProcessorInformation, NULL, 0, processInformation.data(), static_cast<ULONG>(processInformation.size() * sizeof(PROCESSOR_POWER_INFORMATION)));
 					if (result == 0)
 					{
-						s_cpuInformation.SpeedInMHz = static_cast<u32>(processInformation.at(0).MaxMhz);
+						s_cpuInformation.SpeedInMHz = static_cast<float>(processInformation.at(0).MaxMhz);
 					}
 				}
 
@@ -596,7 +596,7 @@ namespace Insight
 							CPUParameters cpuParameters;
 							if (obj->GetCPUParameters(cpuParameters) == 0)
 							{
-								info.SpeedInMHz = cpuParameters.dPeakSpeed;
+								info.SpeedInMHz = static_cast<float>(cpuParameters.dPeakSpeed);
 							}
 						}
 					}

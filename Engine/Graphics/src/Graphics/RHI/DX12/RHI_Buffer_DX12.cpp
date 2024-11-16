@@ -62,14 +62,19 @@ namespace Insight
 				m_currentResouceState = resourceState;
 				m_uploadStatus = m_overrides.InitialUploadState;
 
+				D3D12MA::ALLOCATION_DESC allocationDesc = { };
+				allocationDesc.HeapType = heapProperties.Type;
+
 				/// Create the constant buffer.
-				ThrowIfFailed(m_context->GetDevice()->CreateCommittedResource(
-					&heapProperties,
-					D3D12_HEAP_FLAG_NONE,
+				ThrowIfFailed(m_context->GetAllocator()->CreateResource(
+					&allocationDesc,
 					&resourceDesc,
 					resourceState,
 					nullptr,
+					&m_d3d12maAllocation,
 					IID_PPV_ARGS(&m_resource)));
+
+				ASSERT(m_resource == m_d3d12maAllocation->GetResource())
 
 				if (m_bufferType == BufferType::Uniform
 					|| m_bufferType == BufferType::Storage
@@ -198,7 +203,9 @@ namespace Insight
 						m_resource->Unmap(0, nullptr);
 						m_mappedData = nullptr;
 					}
-					m_resource.Reset();
+					m_resource = nullptr;
+					m_d3d12maAllocation->Release();
+					m_d3d12maAllocation = nullptr;
 				}
 			}
 
@@ -211,7 +218,7 @@ namespace Insight
 			{
 				if (m_resource)
 				{
-					m_context->SetObjectName(name, m_resource.Get());
+					m_context->SetObjectName(name, m_resource);
 				}
 				m_name = name;
 			}

@@ -46,7 +46,7 @@
 #define THREAD_SAFE
 
 #if defined(__clang__)
-
+#define CLANG_COMPILER 1
 #define DLLEXPORT __attribute__ ((__visibility__ ("default")))
 #define DLLIMPORT
 #define THREADLOCAL __thread
@@ -78,7 +78,7 @@
 #pragma clang diagnostic ignored "-Winvalid-noreturn"
 
 #elif defined(__GNUC__)
-
+#define GCC_COMPILER 1
 #define DLLEXPORT __attribute__ ((__visibility__ ("default")))
 #define DLLIMPORT
 #define THREADLOCAL __thread
@@ -133,6 +133,8 @@
 #endif
 
 #ifdef COMPILER_DEFINES
+#define MSVC_COMPILER 1
+
 #define DLLEXPORT __declspec(dllexport)
 #define DLLIMPORT __declspec(dllimport)
 #define THREADLOCAL __declspec(thread)

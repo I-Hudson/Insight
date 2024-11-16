@@ -189,6 +189,7 @@ workspace "Insight"
 
     filter { "platforms:Win64" or "platforms:UWP" }
         toolset("msc-v143")
+        --toolset("clang")
         defines
         {
             "IS_PLATFORM_WINDOWS",

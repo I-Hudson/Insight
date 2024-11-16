@@ -1,7 +1,7 @@
 project "tracyProfiler"
 	kind "WindowedApp"
 	language "C++"
-    cppdialect "C++17"
+    cppdialect "C++20"
     configurations { "Debug", "Release" } 
 
     targetdir (outputdir_target .. "/%{prj.name}")
@@ -39,10 +39,6 @@ project "tracyProfiler"
         folderDirTracy.. "zstd/**.h",
         folderDirTracy.. "zstd/**.cpp",
         folderDirTracy.. "zstd/**.c",
-
-        folderDirTracy.. "profiler/build/win32/DebugVis.matvis",
-        folderDirTracy.. "profiler/build/win32/Tracy.manifest",
-        folderDirTracy.. "profiler/build/win32/Tracy.rc",
 	}
 
 	includedirs
@@ -56,18 +52,17 @@ project "tracyProfiler"
 		folderDirTracy.. "zstd",
 
 		folderDirTracy.. "vcpkg_installed/x64-windows-static/include/brotli",
-		folderDirTracy.. "vcpkg_installed/x64-windows-static/include/capstone",
-		folderDirTracy.. "vcpkg_installed/x64-windows-static/include/freetype",
-		folderDirTracy.. "vcpkg_installed/x64-windows-static/include/GLFW",
+		folderDirTracy.. "profiler/build/_deps/capstone-src/include/capstone",
+		folderDirTracy.. "profiler/build/_deps/capstone-src/include",
+		folderDirTracy.. "rofiler/build/_deps/freetype-build/include",
+		folderDirTracy.. "profiler/build/_deps/freetype-src/include",
+		folderDirTracy.. "profiler/build/_deps/glfw-src/include",
 		folderDirTracy.. "vcpkg_installed/x64-windows-static/include/libpng16",
 		folderDirTracy.. "vcpkg_installed/x64-windows-static/include",
 	}
 
 	links
 	{
-		"brotlicommon-static.lib",
-		"brotlidec-static.lib",
-		"brotlienc-static.lib",
 		"capstone.lib",
 		"glfw3.lib",
 
@@ -122,6 +117,11 @@ project "tracyProfiler"
 		}
 		
     filter "system:Windows"
+		files
+		{
+			folderDirTracy.. "profiler/win32/Tracy.manifest",
+			folderDirTracy.. "profiler/win32/Tracy.rc",
+		}
 		removefiles 
 		{
 			folderDirTracy.. "profiler/src/wayland/**.c",

@@ -158,7 +158,7 @@ namespace Insight::Physics::Jolt
             if (inVertices == nullptr || inVertexCount == 0 || inIndices == nullptr || inIndexCount == 0)
                 return batch;
 
-            const int indexCount = inIndexCount / 3;
+            const u32 indexCount = static_cast<u32>(inIndexCount / 3);
             for (u32 triangleIdx = 0; triangleIdx < indexCount; ++triangleIdx)
             {
                 for (u32 vertexIdx = 0; vertexIdx < 3; ++vertexIdx)

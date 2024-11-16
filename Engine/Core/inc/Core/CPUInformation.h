@@ -45,7 +45,7 @@ namespace Insight
 
             u32 PhysicalCoreCount = 0;
             u32 LogicalCoreCount = 0;
-            u32 SpeedInMHz = 0;
+            float SpeedInMHz = 0.0f;
 
             bool IsHyperThreaded = false;
 

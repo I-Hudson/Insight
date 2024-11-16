@@ -19,7 +19,7 @@ namespace Insight
 			public:
 				virtual ~RHI_Buffer_DX12() override;
 
-				ID3D12Resource* GetResource() const { return m_resource.Get(); }
+				ID3D12Resource* GetResource() const { return m_resource; }
 				D3D12_RESOURCE_STATES GetResourceState() const;
 				void SetResourceState(D3D12_RESOURCE_STATES resourceState);
 
@@ -39,7 +39,8 @@ namespace Insight
 			private:
 				RenderContext_DX12* m_context = nullptr;
 				D3D12_RESOURCE_STATES m_currentResouceState;
-				ComPtr<ID3D12Resource> m_resource;
+				ID3D12Resource* m_resource;
+				D3D12MA::Allocation* m_d3d12maAllocation;
 
 				friend class RHI_CommandList_DX12;
 			};

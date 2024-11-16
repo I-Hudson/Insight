@@ -288,7 +288,7 @@ namespace Insight
 				axisReading.resize(rawGameController.AxisCount());
 
 				const u64 getCurrentReadingRCode = rawGameController.GetCurrentReading(winrt::array_view<bool>(buttonReading.get(), buttonReading.get() + rawGameController.ButtonCount()), switchPositionReading, axisReading);
-				for (size_t buttonIdx = 0; buttonIdx < rawGameController.ButtonCount(); ++buttonIdx)
+				for (i32 buttonIdx = 0; buttonIdx < rawGameController.ButtonCount(); ++buttonIdx)
 				{
 					const winrt::Windows::Gaming::Input::GameControllerButtonLabel buttonLabel = rawGameController.GetButtonLabel(buttonIdx);
 					const auto gamebuttonLabelToInteral = WINDOWS_GAMING_INPUT_GAME_CONTROLLER_BUTTON_LABEL_TO_INTERNAL.find(buttonLabel);

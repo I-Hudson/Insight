@@ -111,7 +111,7 @@ namespace Insight
 				ComPtr<IDXGIFactory4> m_factory{ nullptr };
 				ComPtr<ID3D12Device> m_device{ nullptr };
 				ComPtr<ID3D12Debug> m_debugController{ nullptr };
-				D3D12MA::ALLOCATION_CALLBACKS m_d3d12maAllocationCallbacks;
+				D3D12MA::ALLOCATION_CALLBACKS m_d3d12maAllocationCallbacks = { };
 
 #ifdef IS_RESOURCE_HANDLES_ENABLED
 				RHI_ResourcePool<TextureDrawData_DX12, Texture> m_texturePool;
