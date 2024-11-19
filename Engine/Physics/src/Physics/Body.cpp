@@ -1,5 +1,6 @@
 #include "Physics/Body.h"
 #include "Core/Logger.h"
+#include "Core/Asserts.h"
 
 #ifdef IS_PHYSICS_JOLT
 #include "Physics/Jolt/PhysicsWorld_Jolt.h"
@@ -15,6 +16,9 @@ namespace Insight::Physics
         , m_shape(shape)
     { }
 #elif defined(IS_PHYSICS_PHYSX)
+#else 
+    Body::Body()
+    { }
 #endif
 
     Body::~Body()
@@ -25,6 +29,8 @@ namespace Insight::Physics
 #ifdef IS_PHYSICS_JOLT
         return !m_bodyId.IsInvalid();
 #elif defined(IS_PHYSICS_PHYSX)
+#else 
+        return Body();
 #endif
     }
 
@@ -33,15 +39,14 @@ namespace Insight::Physics
 #ifdef IS_PHYSICS_JOLT
         return m_bodyId == other.m_bodyId;
 #elif defined(IS_PHYSICS_PHYSX)
+#else
+        return false;
 #endif
     }
 
     bool Body::operator!=(const Body& other) const
     {
-#ifdef IS_PHYSICS_JOLT
         return !(*this == other);
-#elif defined(IS_PHYSICS_PHYSX)
-#endif
     }
 
     Maths::Vector3 Body::GetPosition() const
@@ -50,6 +55,8 @@ namespace Insight::Physics
         JPH::Vec3 joltPosition = m_body->GetPosition();
         return Maths::Vector3(joltPosition.GetX(), joltPosition.GetY(), joltPosition.GetZ());
 #elif defined(IS_PHYSICS_PHYSX)
+#else 
+        return Maths::Vector3::Zero;
 #endif
     }
 
@@ -59,6 +66,8 @@ namespace Insight::Physics
         JPH::Quat joltRotation = m_body->GetRotation();
         return Maths::Quaternion(joltRotation.GetW(), joltRotation.GetX(), joltRotation.GetY(), joltRotation.GetZ());
 #elif defined(IS_PHYSICS_PHYSX)
+#else 
+        return Maths::Quaternion::Identity;
 #endif
     }
 
@@ -72,6 +81,8 @@ namespace Insight::Physics
             joltTransform.GetColumn4(2).GetX(), joltTransform.GetColumn4(2).GetY(), joltTransform.GetColumn4(2).GetZ(), joltTransform.GetColumn4(2).GetW(),
             joltTransform.GetColumn4(3).GetX(), joltTransform.GetColumn4(3).GetY(), joltTransform.GetColumn4(3).GetZ(), joltTransform.GetColumn4(3).GetW());
 #elif defined(IS_PHYSICS_PHYSX)
+#else 
+        return Maths::Matrix4::Identity;
 #endif
     }
 
@@ -80,6 +91,7 @@ namespace Insight::Physics
         if (m_motionType != motionType)
         {
             m_motionType = motionType;
+#ifdef IS_PHYSICS_JOLT
             JPH::BodyInterface& bodyInterface = m_physicsSystem->GetBodyInterface();
             bodyInterface.DeactivateBody(m_bodyId);
             bodyInterface.SetMotionType(m_bodyId, Jolt::PhysicsWorld_Jolt::MotionTypeToJolt(m_motionType), JPH::EActivation::Activate);
@@ -92,6 +104,8 @@ namespace Insight::Physics
                 bodyInterface.SetObjectLayer(m_bodyId, ObjectLayers::NON_MOVING);
             }
             bodyInterface.ActivateBody(m_bodyId);
+#elif defined(IS_PHYSICS_PHYSX)
+#endif
         }
     }
     MotionType Body::GetMotionType() const

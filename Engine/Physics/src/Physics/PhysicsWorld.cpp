@@ -1,4 +1,5 @@
 #include "Physics/PhysicsWorld.h"
+#include "Core/Asserts.h"
 
 #ifdef IS_PHYSICS_PHYSX
 //#include "Physics/Jolt/PhysicsWorld_Physx.h"
@@ -31,6 +32,8 @@ namespace Insight
 #elif defined(IS_PHYSICS_JOLT)
 			s_PhsyicsWorld = ::New<Jolt::PhysicsWorld_Jolt>();
 #endif
+
+			ASSERT(s_PhsyicsWorld);
 			s_PhsyicsWorld->Initialise();
 		}
 

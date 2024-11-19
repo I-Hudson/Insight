@@ -1,5 +1,6 @@
 #include "Audio/AudioSystem.h"
 
+#include "Audio/Backend/IAudioBackend.h"
 #include "Audio/Backend/XAudio2Backend.h"
 #include "Audio/Backend/MiniAudioBackend.h"
 

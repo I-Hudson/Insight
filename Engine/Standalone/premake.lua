@@ -211,6 +211,7 @@ project "InsightStandalone"
             "SPIRV-Tools.lib",
             "SPIRV-Tools-opt.lib",
             "SPVRemapper.lib",
+            "assimpd.lib",
 
             "ffx_fsr2_api_x64d.lib",
             "ffx_fsr2_api_vk_x64d.lib",

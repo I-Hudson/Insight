@@ -33,9 +33,9 @@ namespace Insight::Memory
 	IS_CORE void MemoryUnTrackPtr(void* ptr);
 }
 
-NO_DISCARD FORCE_INLINE IS_CORE void* NewBytes(u64 bytes, Insight::Core::MemoryAllocCategory memoryAllocCategory);
+NO_DISCARD IS_CORE void* NewBytes(u64 bytes, Insight::Core::MemoryAllocCategory memoryAllocCategory);
 
-NO_DISCARD FORCE_INLINE IS_CORE void* NewBytes(u64 bytes);
+NO_DISCARD IS_CORE void* NewBytes(u64 bytes);
 
 template<typename T, typename... Params>
 NO_DISCARD FORCE_INLINE T* New(Params&&... params)

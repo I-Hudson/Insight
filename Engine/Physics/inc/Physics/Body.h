@@ -34,8 +34,8 @@ namespace Insight::Physics
     class IS_PHYSICS Body : public Core::RefCount, public NonCopyable
     {
     public:
-        Body() = delete;
         ~Body();
+
         operator bool() const;
         bool operator==(const Body& other) const;
         bool operator!=(const Body& other) const;
@@ -64,6 +64,8 @@ namespace Insight::Physics
         JPH::Body* const m_body = nullptr;
         JPH::BodyID m_bodyId;
 #elif defined(IS_PHYSICS_PHYSX)
+#else
+        Body();
 #endif
 
     private:
