@@ -1,6 +1,7 @@
 #include "Core/Console.h"
 
 #include <imgui.h>
+#include <../imgui/misc/cpp/imgui_stdlib.h>
 
 namespace Insight
 {
@@ -45,6 +46,7 @@ namespace Insight
             consoleMessage.Message = message;
             consoleMessage.Colour = colour;
 
+            std::lock_guard l(m_messagesMutex);
             m_consoleMessages[m_consoleMessageLastIndex] = consoleMessage;
 
             // Wrap the start index back to 0 if required otherwise just increment by one.
@@ -61,7 +63,7 @@ namespace Insight
             return m_isShowing;
         }
 
-        void Console::Render()
+        void Console::Render(const u32 x, const u32 y, const u32 width, const u32 height)
         {
 #ifndef IMGUI_DISABLE
             if (!m_isShowing)
@@ -69,7 +71,61 @@ namespace Insight
                 return;
             }
 
+            static std::string inputText;
 
+            const ImVec2 windowPos = ImVec2(static_cast<float>(x), static_cast<float>(y));
+            const ImVec2 windowSize = ImVec2(static_cast<float>(width), static_cast<float>(height));
+
+            ImGui::SetNextWindowPos(windowPos);
+            ImGui::SetNextWindowSize(windowSize);
+            //ImGui::SetNextWindowViewport(ImGui::GetMainViewport()->ID);
+            const ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoDecoration;
+
+            ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(1, 0, 0, 1));
+            ImGui::SetNextWindowBgAlpha(0.35f); // Transparent background
+
+            const char* c_ConsoleWindowKey = "InAppConsoleWindow";
+            if (ImGui::Begin(c_ConsoleWindowKey, nullptr, windowFlags))
+            {
+                ImGui::Text("Console");
+
+                const ImVec2 textArea = ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y - ImGui::GetTextLineHeight());
+
+                ImGui::BeginChild("InAppConsoleWindow_Text", textArea);
+                {
+                    std::lock_guard l(m_messagesMutex);
+
+                    u8 messageIndex = m_consoleMessageLastIndex;
+                    const u8 endMessageIndex = m_consoleMessageLastIndex == 0 ? c_ConsoleMessageSize - 1 : m_consoleMessageLastIndex - 1;
+                    while (messageIndex != endMessageIndex)
+                    {
+                        const ConsoleMessage& message = m_consoleMessages[messageIndex];
+                        if (!message.Message.empty())
+                        {
+                            ImGui::Text(message.Message.data());
+                        }
+                        messageIndex = (messageIndex + 1) % c_ConsoleMessageSize;
+                    }
+
+                    const ConsoleMessage& message = m_consoleMessages[messageIndex];
+                    if (!message.Message.empty())
+                    {
+                        ImGui::Text(message.Message.data());
+                    }
+                }
+
+                ImGui::EndChild();
+
+                ImGui::SetNextItemWidth(-FLT_MIN);
+                if (ImGui::InputText("##ConsoleInputText", &inputText, ImGuiInputTextFlags_EnterReturnsTrue))
+                {
+                    Message(inputText);
+                    inputText.clear();
+                }
+            }
+            ImGui::End();
+
+            ImGui::PopStyleColor();
 #endif
         }
     }

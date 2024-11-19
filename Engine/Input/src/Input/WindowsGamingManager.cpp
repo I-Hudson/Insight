@@ -276,7 +276,7 @@ namespace Insight
 			}
 			else
 			{
-				IS_LOG_CORE_WARN("[WindowsGamingManager::ProcessInput] Controller at index '{}' was unable to create winrt::Windows::Gaming::Input::Gamepad. Falling back to RawGameController.", controllerIndex);
+				//IS_LOG_CORE_WARN("[WindowsGamingManager::ProcessInput] Controller at index '{}' was unable to create winrt::Windows::Gaming::Input::Gamepad. Falling back to RawGameController.", controllerIndex);
 				const winrt::Windows::Gaming::Input::RawGameController& rawGameController = m_connectControllers[controllerIndex];
 
 				std::unique_ptr<bool[]> buttonReading = std::make_unique<bool[]>(rawGameController.ButtonCount());

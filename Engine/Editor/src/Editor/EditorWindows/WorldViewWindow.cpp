@@ -92,14 +92,26 @@ namespace Insight
             ImGui::Checkbox("GPU Skinning", &gpuSkinningEnabled);
             Runtime::AnimationSystem::Instance().SetGPUSkinningEnabled(gpuSkinningEnabled);
 
+            bool consoleShow = Core::Console::Instance().IsShowing();
+            ImGui::Checkbox("Show Console", &consoleShow);
+            Core::Console::Instance().Show(consoleShow);
+
             Graphics::RHI_Texture* worldViewTexture = Graphics::RenderGraph::Instance().GetRenderCompletedRHITexture(editorOutputItems[editorOutput]);
             if (worldViewTexture == nullptr)
             {
                 return;
             }
 
-            ImVec2 windowSize = ImVec2(ImGui::GetWindowSize().x, ImGui::GetWindowSize().y);
+            const ImVec2 windowSize = ImGui::GetContentRegionAvail();
             ImGui::Image(worldViewTexture, windowSize);
+
+            {
+                // Render in game console window on top of the game viewport.
+                const ImVec2 cursorPos = ImVec2(ImGui::GetCursorPos().x, ImGui::GetCursorPos().y);
+                const u32 consoleWindowHeight = windowSize.y * 0.3f;
+                const u32 consoleWindowHalfHeight = consoleWindowHeight * 0.5f;
+                Core::Console::Instance().Render(cursorPos.x, cursorPos.y - (30), windowSize.x, 120);
+            }
 
             ContentWindowDragTarget();
 
@@ -114,6 +126,7 @@ namespace Insight
 
             if (worldEntitiesWindowBase != nullptr)
             {
+                // Set the transform gizmo for selected entities.
                 WorldEntitiesWindow* worldEntitiesWindow = static_cast<WorldEntitiesWindow*>(worldEntitiesWindowBase);
                 std::unordered_set<Core::GUID> selectedEntites = worldEntitiesWindow->GetSelectedEntities();
                 if (!selectedEntites.empty())

@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <string>
 #include <array>
+#include <mutex>
 
 namespace Insight
 {
@@ -101,7 +102,7 @@ namespace Insight
             void Show(const bool shouldShow);
             bool IsShowing() const;
 
-            void Render();
+            void Render(const u32 x, const u32 y, const u32 width, const u32 height);
 
         private:
             void Message(const std::string_view message);
@@ -114,9 +115,11 @@ namespace Insight
             const static u8 c_ConsoleMessageSize = 64;
             // Keep the last 64 console messages.
             std::array<ConsoleMessage, c_ConsoleMessageSize> m_consoleMessages;
+            std::mutex m_messagesMutex;
             u8 m_consoleMessageLastIndex = 0;
 
             bool m_isShowing = false;
+
 
             friend ConsoleSink;
             friend ConsoleWindow;
