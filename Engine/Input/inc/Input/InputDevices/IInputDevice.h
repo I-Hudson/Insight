@@ -20,6 +20,7 @@ namespace Insight
 		class IS_INPUT IInputDevice
 		{
 		public:
+			IInputDevice(const InputDeviceTypes inputDeviceType);
 			virtual ~IInputDevice() = default;
 			
 			virtual void Initialise(u32 id) = 0;
@@ -37,6 +38,7 @@ namespace Insight
 		protected:
 			u32 m_id = 0;
 			DeviceInfo m_deviceInfo;
+			InputDeviceTypes m_deviceType;
 		};
 	}
 }

@@ -128,6 +128,7 @@ namespace Insight
 		}
 
 		InputDevice_KeyboardMouse::InputDevice_KeyboardMouse()
+			: IInputDevice(InputDeviceTypes::KeyboardMouse)
 		{ }
 
 		InputDevice_KeyboardMouse::~InputDevice_KeyboardMouse()

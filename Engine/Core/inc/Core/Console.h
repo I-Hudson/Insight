@@ -6,11 +6,15 @@
 
 #include <unordered_map>
 #include <string>
+#include <array>
 
 namespace Insight
 {
     namespace Core
     {
+        class ConsoleSink;
+        class ConsoleWindow;
+
         struct ConsoleValue
         {
             std::string Key;
@@ -67,6 +71,26 @@ namespace Insight
 
         class IS_CORE Console : public Singleton<Console>
         {
+            struct ConsoleMessageColour
+            {
+                union
+                {
+                    float Colour[4];
+                    struct
+                    {
+                        float r; 
+                        float g;
+                        float b;
+                        float a;
+                    };
+                };
+            };
+            struct ConsoleMessage
+            {
+                std::string Message;
+                ConsoleMessageColour Colour;
+            };
+
         public:
             Console();
             ~Console();
@@ -74,9 +98,28 @@ namespace Insight
             static void SetValue(const std::string& key, const std::string& value);
             const ConsoleValue& GetValue(const std::string& key) const;
 
+            void Show(const bool shouldShow);
+            bool IsShowing() const;
+
+            void Render();
+
+        private:
+            void Message(const std::string_view message);
+            void Message(const std::string_view message, const ConsoleMessageColour colour);
+
         private:
             static std::unordered_map<std::string, ConsoleValue> m_values;
             ConsoleValue m_emptyConsoleValue;
+
+            const static u8 c_ConsoleMessageSize = 64;
+            // Keep the last 64 console messages.
+            std::array<ConsoleMessage, c_ConsoleMessageSize> m_consoleMessages;
+            u8 m_consoleMessageLastIndex = 0;
+
+            bool m_isShowing = false;
+
+            friend ConsoleSink;
+            friend ConsoleWindow;
         };
     }
 }

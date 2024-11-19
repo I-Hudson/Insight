@@ -50,19 +50,12 @@ namespace Insight
 
 			None,
 		};
+		constexpr const char* GraphicsAPIStrings[] = { "Vulkan", "DX12", "None" };
+		static_assert(ARRAY_COUNT(GraphicsAPIStrings) == (static_cast<u64>(GraphicsAPI::None) + 1));
+
 		IS_GRAPHICS constexpr const char* GraphicsAPIToString(GraphicsAPI api)
 		{
-			switch (api)
-			{
-			case Insight::Graphics::GraphicsAPI::Vulkan: return "Vulkan";
-			case Insight::Graphics::GraphicsAPI::DX12: return "DX12";
-			case Insight::Graphics::GraphicsAPI::None:
-				break;
-			default:
-				break;
-			}
-			FAIL_ASSERT();
-			return "";
+			return GraphicsAPIStrings[static_cast<u32>(api)];
 		}
 
 		//// <summary>

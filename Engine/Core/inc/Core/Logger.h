@@ -5,6 +5,7 @@
 #pragma warning( push )
 #pragma warning( disable : 4275 )
 #include "spdlog/spdlog.h"
+#include "spdlog/sinks/base_sink.h"
 #pragma warning( pop )
 
 namespace Insight
@@ -26,6 +27,13 @@ namespace Insight
 		private:
 			static std::shared_ptr<spdlog::logger> s_CoreLogger;
 			static std::shared_ptr<spdlog::logger> s_ClientLogger;
+		};
+
+		class ConsoleSink : public spdlog::sinks::base_sink<std::mutex>
+		{
+		protected:
+			virtual void sink_it_(const spdlog::details::log_msg& msg) override;
+			virtual void flush_() override;
 		};
 	}
 }

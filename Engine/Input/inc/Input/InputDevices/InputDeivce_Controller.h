@@ -74,7 +74,7 @@ namespace Insight
 		class IS_INPUT InputDevice_Controller : public IInputDevice
 		{
 		public:
-			InputDevice_Controller() = default;
+			InputDevice_Controller();
 			virtual ~InputDevice_Controller() override = default;
 
 			virtual void Initialise(u32 id) override;

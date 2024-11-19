@@ -76,6 +76,10 @@ namespace Insight
 			return "Unknown";
 		}
 
+		InputDevice_Controller::InputDevice_Controller()
+			: IInputDevice(InputDeviceTypes::Controller)
+		{ }
+
 		void InputDevice_Controller::Initialise(u32 id)
 		{
 			m_id = id;

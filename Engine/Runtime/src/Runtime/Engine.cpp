@@ -20,6 +20,9 @@
 
 #include "Event/EventSystem.h"
 
+#include "Input/InputDevices/InputDevice_KeyboardMouse.h"
+#include "Input/InputDevices/InputDeivce_Controller.h"
+
 #include "ECS/ECSWorld.h"
 #include "ECS/Components/TagComponent.h"
 
@@ -139,13 +142,22 @@ namespace Insight
 				float delta_time = s_FrameTimer.GetElapsedTimeMillFloat();
 				delta_time = std::max(delta_time, 1.0f / 1000.0f);
 				s_FrameTimer.Start();
-
 				{
 					IS_PROFILE_SCOPE("Game Update");
 
 					Graphics::Window::Instance().Update();
 					Graphics::RenderContext::Instance().ImGuiBeginFrame();
 					GPUProfiler::Instance().GetFrameData().Draw();
+
+					{
+						Input::InputDevice_KeyboardMouse* mouseAndKeyboardDevice = m_inputSystem.GetKeyboardMouseDevice();
+						Input::InputDevice_Controller* controllerDevice = m_inputSystem.GetController(0);
+						if ((mouseAndKeyboardDevice && mouseAndKeyboardDevice->WasReleased(Input::KeyboardButtons::Key_Tilde))
+							|| (controllerDevice && controllerDevice->WasReleased(Input::ControllerButtons::Thumbstick_Left) && controllerDevice->WasReleased(Input::ControllerButtons::Thumbstick_Right)))
+						{
+							m_console.Show(!m_console.IsShowing());
+						}
+					}
 
 					{
 						IS_PROFILE_SCOPE("EventSystem");
