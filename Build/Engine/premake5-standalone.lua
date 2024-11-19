@@ -1,6 +1,10 @@
 local InsightEngineIncludes = require "lua/InsightEngineIncludes"
 local InsightVendorIncludes = require "lua/InsightVendorIncludes"
 
+local InsightDefines = require "lua/InsightDefines"
+local InsightConfigurations = require "lua/InsightConigurations"
+local InsightPlatforms = require "lua/InsightPlatforms"
+
 local profileTool="tracy"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
@@ -47,25 +51,7 @@ workspace "InsightStandalone"
         "Win64",
     }
 
-    defines
-    {
-        "_CRT_SECURE_NO_WARNINGS",
-        "_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS",
-        "_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING",
-        "_SILENCE_ALL_MS_EXT_DEPRECATION_WARNINGS",
-
-        "GLM_FORCE_SWIZZLE",
-        "GLM_FORCE_LEFT_HANDED",
-        "GLM_FORCE_DEPTH_ZERO_TO_ONE",
-
-        "REFLECT_TYPE_INFO_ENABLED",
-
-        "IS_PLATFORM_X64",
-        "IS_MEMORY_TRACKING",
-        "RENDER_GRAPH_ENABLED",
-        "TOBJECTPTR_REF_COUNTING",
-        --"IS_RESOURCE_HANDLES_ENABLED",
-    }
+    InsightDefines.All()
 
     flags
     {
@@ -107,6 +93,9 @@ workspace "InsightStandalone"
             "WinPixEventRuntime.lib"
         }
     end
+
+    InsightConfigurations.All()
+    InsightPlatforms.All()
 
 include "../../Engine/Standalone/premake.lua"
 

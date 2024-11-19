@@ -32,6 +32,7 @@ project "InsightStandalone"
         "%{IncludeDirs.InsightCore}",
         "%{IncludeDirs.InsightMaths}",
         "%{IncludeDirs.InsightInput}",
+        "%{IncludeDirs.InsightPhysics}",
         "%{IncludeDirs.InsightGraphics}",
         "%{IncludeDirs.InsightRuntime}",
 
@@ -91,6 +92,13 @@ project "InsightStandalone"
         "../../Engine/Input/inc/**.cpp", 
         "../../Engine/Input/src/**.cpp", 
         "../../Engine/Input/src/**.inl",
+
+        "../../Engine/Physics/inc/**.hpp", 
+        "../../Engine/Physics/inc/**.h", 
+        "../../Engine/Physics/inc/**.inl",
+        "../../Engine/Physics/inc/**.cpp", 
+        "../../Engine/Physics/src/**.cpp", 
+        "../../Engine/Physics/src/**.inl",
 
         "../../Engine/Graphics//inc/**.hpp", 
         "../../Engine/Graphics/inc/**.h", 

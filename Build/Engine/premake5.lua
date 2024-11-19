@@ -1,6 +1,11 @@
 local InsightEngineIncludes = require "lua/InsightEngineIncludes"
 local InsightVendorIncludes = require "lua/InsightVendorIncludes"
 
+local InsightDefines = require "lua/InsightDefines"
+local InsightAddtionalDirs = require "lua/InsightAddtionalDirs"
+local InsightConfigurations = require "lua/InsightConigurations"
+local InsightPlatforms = require "lua/InsightPlatforms"
+
 local profileTool="tracy"
 local monolith_build="false"
 
@@ -85,53 +90,8 @@ workspace "Insight"
     	"MultiProcessorCompile"
     }
 
-    defines
-    {
-        "_CRT_SECURE_NO_WARNINGS",
-        "_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS",
-        "_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING",
-        "_SILENCE_ALL_MS_EXT_DEPRECATION_WARNINGS",
-
-        "GLM_FORCE_SWIZZLE",
-        "GLM_FORCE_LEFT_HANDED",
-        "GLM_FORCE_DEPTH_ZERO_TO_ONE",
-
-        "REFLECT_TYPE_INFO_ENABLED",
-        "REFLECT_DLL_IMPORT",
-
-        "IS_PLATFORM_X64",
-        "IS_MEMORY_TRACKING",
-        "IS_ENGINE",
-        "RENDER_GRAPH_ENABLED",
-        "TOBJECTPTR_REF_COUNTING",
-
-        "VERTEX_NORMAL_PACKED",
-        "VERTEX_COLOUR_PACKED",
-        --"VERTEX_UV_PACKED",
-        "VERTEX_BONE_ID_PACKED",
-        --"VERTEX_BONE_WEIGHT_PACKED",
-
-        --"RENDERGRAPH_V2_ENABLED",
-        --"IS_RESOURCE_HANDLES_ENABLED",
-
-        "SPDLOG_COMPILED_LIB",
-        --"SPDLOG_SHARED_LIB",
-    }
-
-    includedirs
-    {
-        "%{IncludeDirs.tracy}",
-        "%{IncludeDirs.doctest}",
-        "%{IncludeDirs.pix}",
-        "%{IncludeDirs.IconFontCppHeaders}",
-        "%{IncludeDirs.nlohmann_json}",
-        "%{IncludeDirs.implot}",
-    }
-
-    libdirs
-    {
-        "%{LibDirs.deps_lib}",
-    }
+    InsightDefines.All()
+    InsightAddtionalDirs.All()
 
     if (monolith_build == "false") then
         defines{ "IS_EXPORT_DLL", }
@@ -160,112 +120,8 @@ workspace "Insight"
         defines { "IS_PROFILE_ENABLED", "IS_PROFILE_PIX", "USE_PIX" }
     end
 
-    filter "configurations:Debug"
-        defines
-        {
-            "DOCTEST_CONFIG_DISABLE",
-            "IS_DEBUG",
-        }
-
-    filter { "configurations:Debug", "configurations:Testing" }
-        buildoptions "/MDd"
-        defines
-        {
-            "_DEBUG",
-            "IS_TEST"
-        }
-
-    filter "configurations:Release"
-        buildoptions "/MD"
-        defines
-        {
-            "NDEBUG",
-            "IS_RELEASE",
-            "DOCTEST_CONFIG_DISABLE",
-        }
-
-    filter "system:windows"
-
-
-    filter { "platforms:Win64" or "platforms:UWP" }
-        toolset("msc-v143")
-        --toolset("clang")
-        defines
-        {
-            "IS_PLATFORM_WINDOWS",
-            "IS_PLATFORM_WIN32",
-            "IS_MATHS_DIRECTX_MATHS",
-            --"IS_MATHS_CONSTRUCTOR_GLM",
-            --"IS_MATHS_GLM",
-            "IS_DX12_ENABLED",
-            "IS_CPP_WINRT",
-
-            "USE_PIX",
-            "NOMINMAX",
-
-            "SPLASH_PLATFORM_WINDOWS",
-            
-            "VK_USE_PLATFORM_WIN32_KHR",
-        }
-
-        if VULKAN_SDK == nil then
-        else
-            defines
-            {
-                "IS_VULKAN_ENABLED",
-            }
-        end
-
-        links
-        {
-            "WinPixEventRuntime.lib",
-            "cppwinrt_fast_forwarder.lib",
-            "Comctl32.lib",
-            "spdlog.lib",
-        }
-
-    filter { "platforms:Win64", "configurations:Debug" or "configurations:Testing" }
-        ignoredefaultlibraries
-        {
-            "libcmt.lib",
-            "msvcrt.lib",
-            "libcmtd.lib",
-        }
-    filter { "platforms:Win64", "configurations:Release" }
-        ignoredefaultlibraries
-        {
-            "libcmt.lib",
-            "libcmtd.lib",
-            "msvcrtd.lib",
-        }
-
-    filter "configurations:Testing"
-        defines
-        {
-            "IS_TESTING",
-            "TEST_ENABLED",
-        }
-        files 
-        { 
-            "vendor/doctest/doctest/doctest.h",
-        }
-        includedirs
-        {
-            "../../vendor/glm",
-        }
-        libdirs
-        {
-            "%{LibDirs.deps_testing_lib}",
-        }
-    
-    filter "system:Unix"
-    	system "linux"
-    	toolset("clang")
-        defines
-        {
-            "IS_PLATFORM_LINUX",
-            "IS_VULKAN_ENABLED",
-        }
+    InsightConfigurations.All()
+    InsightPlatforms.All()
 
 group "Editor"
     include "../../Engine/Editor/Editor.lua"
