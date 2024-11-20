@@ -50,6 +50,8 @@ namespace Insight
 #else
 			return false;
 #endif
+#else
+			return false;
 #endif
 		}
 

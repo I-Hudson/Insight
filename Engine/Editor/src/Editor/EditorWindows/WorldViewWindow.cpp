@@ -92,10 +92,6 @@ namespace Insight
             ImGui::Checkbox("GPU Skinning", &gpuSkinningEnabled);
             Runtime::AnimationSystem::Instance().SetGPUSkinningEnabled(gpuSkinningEnabled);
 
-            bool consoleShow = Core::Console::Instance().IsShowing();
-            ImGui::Checkbox("Show Console", &consoleShow);
-            Core::Console::Instance().Show(consoleShow);
-
             Graphics::RHI_Texture* worldViewTexture = Graphics::RenderGraph::Instance().GetRenderCompletedRHITexture(editorOutputItems[editorOutput]);
             if (worldViewTexture == nullptr)
             {

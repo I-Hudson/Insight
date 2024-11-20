@@ -51,7 +51,8 @@ namespace Insight
 		{
 			if (Console::IsValidInstance())
 			{
-				Console::Instance().Message(std::string_view(msg.payload.data(), msg.payload.size()));
+				Console::Instance().Message(std::string_view(msg.payload.data(), msg.payload.size()), 
+					static_cast<ConsoleLogLevel>(static_cast<u32>(msg.level)));
 			}
 		}
 

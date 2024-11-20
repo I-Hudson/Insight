@@ -150,16 +150,6 @@ namespace Insight
 					GPUProfiler::Instance().GetFrameData().Draw();
 
 					{
-						Input::InputDevice_KeyboardMouse* mouseAndKeyboardDevice = m_inputSystem.GetKeyboardMouseDevice();
-						Input::InputDevice_Controller* controllerDevice = m_inputSystem.GetController(0);
-						if ((mouseAndKeyboardDevice && mouseAndKeyboardDevice->WasReleased(Input::KeyboardButtons::Key_Tilde))
-							|| (controllerDevice && controllerDevice->WasReleased(Input::ControllerButtons::Thumbstick_Left) && controllerDevice->WasReleased(Input::ControllerButtons::Thumbstick_Right)))
-						{
-							m_console.Show(!m_console.IsShowing());
-						}
-					}
-
-					{
 						IS_PROFILE_SCOPE("EventSystem");
 						m_eventSystem.Update();
 					}
@@ -170,13 +160,23 @@ namespace Insight
 					}
 
 					{
+						IS_PROFILE_SCOPE("InputSsytem Update");
+						m_inputSystem.Update(delta_time);
+					}
+
+					{
 						IS_PROFILE_SCOPE("AnimationSystem Update");
 						m_animationSystem.Update(delta_time);
 					}
 
 					{
-						IS_PROFILE_SCOPE("InputSsytem Update");
-						m_inputSystem.Update(delta_time);
+						Input::InputDevice_KeyboardMouse* mouseAndKeyboardDevice = m_inputSystem.GetKeyboardMouseDevice();
+						Input::InputDevice_Controller* controllerDevice = m_inputSystem.GetController(0);
+						if ((mouseAndKeyboardDevice && mouseAndKeyboardDevice->WasReleased(Input::KeyboardButtons::Key_Tilde))
+							|| (controllerDevice && controllerDevice->WasReleased(Input::ControllerButtons::Thumbstick_Left) && controllerDevice->WasReleased(Input::ControllerButtons::Thumbstick_Right)))
+						{
+							m_console.Show(!m_console.IsShowing());
+						}
 					}
 
 					OnUpdate();

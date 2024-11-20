@@ -22,6 +22,17 @@ namespace Insight
             std::string Value;
         };
 
+        enum class ConsoleLogLevel
+        {
+            Trace,
+            Debug,
+            Info,
+            Warn,
+            Error,
+            Critical
+        };
+
+
         template<typename T>
         constexpr bool ConsoleValuesSupported =
             std::is_same_v<bool, T>
@@ -74,6 +85,29 @@ namespace Insight
         {
             struct ConsoleMessageColour
             {
+                ConsoleMessageColour()
+                {
+                    r = 0;
+                    g = 0;
+                    b = 0;
+                    r = 0;
+                }
+                ConsoleMessageColour(const float r, const float g, const float b, const float a)
+                {
+                    this->r = r;
+                    this->g = g;
+                    this->b = b;
+                    this->a = a;
+                }
+
+                bool IsSet() const
+                {
+                    return r != 0
+                        || g != 0
+                        || b != 0
+                        || a != 0;
+                }
+
                 union
                 {
                     float Colour[4];
@@ -90,6 +124,7 @@ namespace Insight
             {
                 std::string Message;
                 ConsoleMessageColour Colour;
+                ConsoleLogLevel Level;
             };
 
         public:
@@ -105,8 +140,10 @@ namespace Insight
             void Render(const u32 x, const u32 y, const u32 width, const u32 height);
 
         private:
-            void Message(const std::string_view message);
-            void Message(const std::string_view message, const ConsoleMessageColour colour);
+            void Message(const std::string_view message, const ConsoleLogLevel logLevel);
+            void Message(const std::string_view message, const ConsoleLogLevel logLevel, const ConsoleMessageColour colour);
+
+            ConsoleMessageColour GetMesageColour(const ConsoleMessage& message) const;
 
         private:
             static std::unordered_map<std::string, ConsoleValue> m_values;
@@ -119,6 +156,7 @@ namespace Insight
             u8 m_consoleMessageLastIndex = 0;
 
             bool m_isShowing = false;
+            bool m_windowDiffStateLastFrame = true;
 
 
             friend ConsoleSink;
