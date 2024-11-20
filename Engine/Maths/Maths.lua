@@ -1,4 +1,5 @@
-local_post_build_commands = post_build_commands
+local CommonConfig = require "../lua/CommonConfig"
+local MathsConfig = require "lua/MathsConfig"
 
 project "Insight_Maths"  
     location "./"
@@ -12,23 +13,6 @@ project "Insight_Maths"
     {
     }
 
-    defines
-    {
-        "IS_EXPORT_MATHS_DLL",
-        --"IS_MATHS_DIRECTX_MATHS",
-        --"IS_MATHS_GLM",
-    }
-    
-    includedirs
-    {
-        "inc",
-        "../../vendor/glm",
-        "%{IncludeDirs.spdlog}",
-        "%{IncludeDirs.imgui}",
-        "%{IncludeDirs.glm}",
-        "%{IncludeDirs.reflect}",
-    }
-
     files 
     { 
         "inc/**.hpp", 
@@ -38,71 +22,13 @@ project "Insight_Maths"
         "src/**.inl",
     }
 
-    links
-    {
-        "imgui.lib",
-        "glm.lib"
-    }
-    if (profileTool == "pix") then
-        links
-        {
-            "WinPixEventRuntime.lib"
-        }
-    end
-    
-    libdirs
-    {
-        "%{wks.location}/deps/lib",
-    }
+    MathsConfig.DefinesSharedLib()
 
-    filter { "kind:SharedLib or SharedLib" }
-        postbuildcommands
-        {
-            "{COPY} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".dll\" \"%{wks.location}deps/".. outputdir..  "/dll/\"\n",
-            "{COPY} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".lib\" \"%{wks.location}deps/".. outputdir..  "/lib/\"\n",
-            "{COPY} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".pdb\" \"%{wks.location}deps/".. outputdir..  "/pdb/\"\n",
-            "{COPY} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".dll\" \"%{wks.location}bin/".. outputdir..  "/" .. output_executable .. "/\"\n",
-        }
-    filter { "kind:StaticLib or StaticLib" }
-        postbuildcommands
-        {
-            "{COPY} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".lib\" \"%{wks.location}deps/".. outputdir..  "/lib/\"\n",
-            "{COPY} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".pdb\" \"%{wks.location}deps/".. outputdir..  "/pdb/\"\n",
-        }
-    
-    filter "configurations:Debug or configurations:Testing"
-        defines { "DEBUG" }  
-        symbols "On" 
-        links
-        {
-        }
-        libdirs
-        {
-            "%{wks.location}/deps/lib/debug",
-        }
+    MathsConfig.IncludeDirs()
+    MathsConfig.LibraryDirs()
+    MathsConfig.LibraryLinks()
 
-    filter "configurations:Release"  
-        defines { "NDEBUG" }    
-        optimize "On" 
-        links
-        {
-        }
-        libdirs
-        {
-            "%{wks.location}/deps/lib/release",
-        }
+    MathsConfig.FilterConfigurations()
+    MathsConfig.FilterPlatforms()
 
-    filter "configurations:Testing"
-        includedirs
-        {
-            "../../vendor/glm",
-        }
-
-    filter "platforms:Win64"
-        links
-        {
-            "Ole32.lib",
-            "dbghelp.lib",
-            "Rpcrt4.lib",
-        }
-         
+    CommonConfig.PostBuildCopyLibraryToOutput()

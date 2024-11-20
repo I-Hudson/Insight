@@ -1,3 +1,12 @@
+local CommonConfig = require "../lua/CommonConfig"
+
+local CoreConfig = require "../Core/lua/CoreConfig"
+local MathsConfig = require "../Maths/lua/MathsConfig"
+local InputConfig = require "../Input/lua/InputConfig"
+local GraphicsConfig = require "../Graphics/lua/GraphicsConfig"
+local PhysicsConfig = require "../Physics/lua/PhysicsConfig"
+local RuntimeConfig = require "../Runtime/lua/RuntimeConfig"
+
 project "InsightStandalone"  
     configurations { "Debug", "Release" } 
     location "./"
@@ -24,50 +33,6 @@ project "InsightStandalone"
 
         "COMMAND_LIST_RENDER_BATCH",
         "IS_NVIDIA_AFTERMATH_ENABLED",
-    }
-
-    includedirs
-    {
-        "inc",
-        "%{IncludeDirs.InsightCore}",
-        "%{IncludeDirs.InsightMaths}",
-        "%{IncludeDirs.InsightInput}",
-        "%{IncludeDirs.InsightPhysics}",
-        "%{IncludeDirs.InsightGraphics}",
-        "%{IncludeDirs.InsightRuntime}",
-
-        "%{IncludeDirs.spdlog}",
-        "%{IncludeDirs.doctest}",
-        "%{IncludeDirs.imgui}",
-        "%{IncludeDirs.implot}",
-        "%{IncludeDirs.xxHash}",
-        "%{IncludeDirs.glm}",
-        "%{IncludeDirs.glfw}",
-        "%{IncludeDirs.stb_image}",
-        "%{IncludeDirs.splash}",
-        "%{IncludeDirs.lz4}",
-        "%{IncludeDirs.qoi}",
-        "%{IncludeDirs.reflect}",
-        "%{IncludeDirs.zip}",
-
-        "%{IncludeDirs.assimp}",
-        "%{IncludeDirs.assimp}/../build/include",
-        "%{IncludeDirs.meshoptimizer}",
-        "%{IncludeDirs.simplygon}",
-
-        "%{IncludeDirs.vma}",
-        "%{IncludeDirs.vulkan}",
-        "%{IncludeDirs.spirv_reflect}",
-        "%{IncludeDirs.FFR2}",
-        "%{IncludeDirs.Aftermath}",
-        "%{IncludeDirs.nvtx}",
-        "%{IncludeDirs.DirectXHeaders}",
-        "%{IncludeDirs.DirectXAgilityHeaders}",
-        "%{IncludeDirs.DirectXShaderCompiler}",
-        "%{IncludeDirs.D3D12MemoryAllocator}",
-
-        "%{IncludeDirs.IconFontCppHeaders}",
-        "%{IncludeDirs.nlohmann_json}",
     }
 
     files 
@@ -129,226 +94,97 @@ project "InsightStandalone"
         "../../vendor/SPIRV-Reflect/spirv_reflect.cpp",
     }
 
-    filter "system:Windows"
-        files
-        {
-            "../../vendor/D3D12MemoryAllocator/src/D3D12MemAlloc.cpp",
-            "../../vendor/D3D12MemoryAllocator/include/D3D12MemAlloc.h",
-        }
-
-    links
+    includedirs
     {
-        --"Insight_Core" .. output_project_subfix .. ".lib",
-        --"Insight_Maths" .. output_project_subfix .. ".lib",
-        --"Insight_Input" .. output_project_subfix .. ".lib",
-        
-        "GLFW.lib",
-        "glm.lib",
-        "imgui.lib",
-        "zip.lib",
-
-        "vulkan-1.lib",
-        "D3d12.lib",
-        "DXGI.lib",
-        "dxguid.lib",
-        "dxcompiler.lib",
-        "meshoptimizer.lib",
-        "GFSDK_Aftermath_Lib.x64.lib",
-    }
-    
-    libdirs
-    {
-        "%{LibDirs.vulkan}",
-        "%{LibDirs.deps_lib}",
+        "inc",
+        "%{IncludeDirs.InsightCore}",
+        "%{IncludeDirs.InsightMaths}",
+        "%{IncludeDirs.InsightInput}",
+        "%{IncludeDirs.InsightPhysics}",
+        "%{IncludeDirs.InsightGraphics}",
+        "%{IncludeDirs.InsightRuntime}",
     }
 
-    filter { "kind:SharedLib or SharedLib" }
-        postbuildcommands
-        {
-            "{COPY} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".dll\" \"%{wks.location}deps/".. outputdir..  "/dll/\"\n",
-            "{COPY} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".lib\" \"%{wks.location}deps/".. outputdir..  "/lib/\"\n",
-            "{COPY} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".pdb\" \"%{wks.location}deps/".. outputdir..  "/pdb/\"\n",
-            "{COPY} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".dll\" \"%{wks.location}bin/".. outputdir..  "/" .. output_executable .. "/\"\n",
-        }
-    filter { "kind:StaticLib or StaticLib" }
-        postbuildcommands
-        {
-            "{COPY} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".lib\" \"%{wks.location}deps/".. outputdir..  "/lib/\"\n",
-            "{COPY} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".pdb\" \"%{wks.location}deps/".. outputdir..  "/pdb/\"\n",
-        }
+    CoreConfig.DefinesStaticLib()
+    MathsConfig.DefinesStaticLib()
+    InputConfig.DefinesStaticLib()
+    GraphicsConfig.DefinesStaticLib()
+    PhysicsConfig.DefinesStaticLib()
+    RuntimeConfig.DefinesStaticLib()
 
-    filter "configurations:Debug or configurations:Testing"
-        buildoptions "/MDd"
-        defines
-        {
-            "_DEBUG",
-            "IS_DEBUG",
-        }
-        links
-        {
-            "Splashd.lib",
-            "glm.lib",
-            "imgui.lib",
-            "xxHashd.lib",
-            "meshoptimizer.lib",
-            "lz4d.lib",
-            "Reflectd.lib",
+    CoreConfig.IncludeDirs()
+    MathsConfig.IncludeDirs()
+    InputConfig.IncludeDirs()
+    GraphicsConfig.IncludeDirs()
+    PhysicsConfig.IncludeDirs()
+    RuntimeConfig.IncludeDirs()
 
-            "GLFW.lib",
-            "vulkan-1.lib",
-            "D3d12.lib",
-            "DXGI.lib",
-            "dxguid.lib",
-            "dxcompiler.lib",
-            "GFSDK_Aftermath_Lib.x64.lib",
+    CoreConfig.LibraryDirs()
+    MathsConfig.LibraryDirs()
+    InputConfig.LibraryDirs()
+    GraphicsConfig.LibraryDirs()
+    PhysicsConfig.LibraryDirs()
+    RuntimeConfig.LibraryDirs()
 
-            "GenericCodeGen.lib",
-            "glslang.lib",
-            "glslang-default-resource-limits.lib",
-            "MachineIndependent.lib",
-            "OSDependent.lib",
-            "SPIRV.lib",
-            "SPIRV-Tools.lib",
-            "SPIRV-Tools-opt.lib",
-            "SPVRemapper.lib",
-            "assimpd.lib",
+    CoreConfig.LibraryLinks()
+    MathsConfig.LibraryLinks()
+    InputConfig.LibraryLinks()
+    GraphicsConfig.LibraryLinks()
+    PhysicsConfig.LibraryLinks()
+    RuntimeConfig.LibraryLinks()
 
-            "ffx_fsr2_api_x64d.lib",
-            "ffx_fsr2_api_vk_x64d.lib",
-            "ffx_fsr2_api_dx12_x64d.lib",
-        }
-        prebuildcommands { "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/dll/\" \"%{cfg.targetdir}\"", "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/pdb/\" \"%{cfg.targetdir}\"",  }
+    CoreConfig.FilterConfigurations()
+    MathsConfig.FilterConfigurations()
+    InputConfig.FilterConfigurations()
+    GraphicsConfig.FilterConfigurations()
+    --PhysicsConfig.FilterConfigurations()
+    RuntimeConfig.FilterConfigurations()
 
-    filter "configurations:Release"
-    buildoptions "/MD"
-        optimize "On"   
-                defines
-        {
-            "NDEBUG",
-            "IS_RELEASE",
-            "DOCTEST_CONFIG_DISABLE",
-        }
-        links
-        {
-            "Splash.lib",
-            "glm.lib",
-            "imgui.lib",
-            "xxHash.lib",
-            "meshoptimizer.lib",
-            "lz4.lib",
-            "Reflect.lib",
+    CoreConfig.FilterPlatforms()
+    MathsConfig.FilterPlatforms()
+    InputConfig.FilterPlatforms()
+    GraphicsConfig.FilterPlatforms()
+    --PhysicsConfig.FilterPlatforms()
+    RuntimeConfig.FilterPlatforms()
 
-            "GLFW.lib",
-            "vulkan-1.lib",
-            "D3d12.lib",
-            "DXGI.lib",
-            "dxguid.lib",
-            "dxcompiler.lib",
-            "GFSDK_Aftermath_Lib.x64.lib",
-
-            "glslang.lib",
-            "MachineIndependent.lib",
-            "GenericCodeGen.lib",
-            "OGLCompiler.lib",
-            "OSDependent.lib",
-            "assimp.lib",
-
-            "ffx_fsr2_api_x64.lib",
-            "ffx_fsr2_api_vk_x64.lib",
-            "ffx_fsr2_api_dx12_x64.lib",
-        }
-        prebuildcommands { "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/dll/\" \"%{cfg.targetdir}\"", "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/pdb/\" \"%{cfg.targetdir}\"", }
-        
-    filter "configurations:Testing" 
-        links
-        {
-            "doctest.lib",
-        }
-        libdirs
-        {
-            "%{LibDirs.deps_testing_lib}",
-        }
-
-    filter "system:Windows"
-    	system "windows"
-    	toolset("msc-v143")
-        defines
-        {
-            "IS_PLATFORM_WINDOWS",
-            "IS_PLATFORM_WIN32",
-            "IS_MATHS_DIRECTX_MATHS",
-            "IS_MATHS_CONSTRUCTOR_GLM",
-            "IS_DX12_ENABLED",
-            "IS_VULKAN_ENABLED",
-            "IS_CPP_WINRT",
-
-            "NOMINMAX",
-
-            "SPLASH_PLATFORM_WINDOWS",
-            
-            "VK_USE_PLATFORM_WIN32_KHR",
-        }
-        if VULKAN_SDK == nil then
-        else
-            defines
-            {
-                "IS_VULKAN_ENABLED",
-            }
-        end
-        includedirs
-         { 
-            "%{IncludeDirs.pix}",
-         }
-        links
-        {
-            "WinPixEventRuntime.lib",
-            "cppwinrt_fast_forwarder.lib",
-            "Xinput.lib",
-            "Comctl32.lib",
-        }
-        files
-        {
-            "../../vendor/D3D12MemoryAllocator/src/D3D12MemAlloc.cpp",
-            "../../vendor/D3D12MemoryAllocator/include/D3D12MemAlloc.h",
-        }
+    removelinks
+    {
+        "Insight_Core" .. output_project_subfix .. ".lib",
+        "Insight_Maths" .. output_project_subfix .. ".lib",
+        "Insight_Input" .. output_project_subfix .. ".lib",
+        "Insight_Graphics" .. output_project_subfix .. ".lib",
+        "Insight_Physics" .. output_project_subfix .. ".lib",
+        "Insight_Runtime" .. output_project_subfix .. ".lib",
+    }
+    CommonConfig.PostBuildCopyLibraryToOutput()
 
     filter { "system:Windows", "configurations:Debug" or "configurations:Testing" }
-        ignoredefaultlibraries
-        {
-            "libcmt.lib",
-            "msvcrt.lib",
-            "libcmtd.lib",
-        }
-    filter { "system:Windows", "configurations:Release" }
-        ignoredefaultlibraries
-        {
-            "libcmt.lib",
-            "libcmtd.lib",
-            "msvcrtd.lib",
-        }
+    ignoredefaultlibraries
+    {
+        "libcmt.lib",
+        "msvcrt.lib",
+        "libcmtd.lib",
+    }
+filter { "system:Windows", "configurations:Release" }
+    ignoredefaultlibraries
+    {
+        "libcmt.lib",
+        "libcmtd.lib",
+        "msvcrtd.lib",
+    }
 
-    filter "configurations:Testing"
-        defines
-        {
-            --"TESTING",
-            "TEST_ENABLED",
-            --"DOCTEST_CONFIG_IMPLEMENTATION_IN_DLL",
-        }
-        files 
-        { 
-            "vendor/doctest/doctest/doctest.h",
-        } 
-        libdirs
-        {
-            "%{LibDirs.deps_testing_lib}",
-        }
-    	
-    
-    filter "system:Unix"
-    	system "linux"
-    	toolset("clang")
-        defines
-        {
-            "IS_PLATFORM_LINUX",
-            "IS_VULKAN_ENABLED",
-        }
+filter "configurations:Testing"
+    defines
+    {
+        --"TESTING",
+        "TEST_ENABLED",
+        --"DOCTEST_CONFIG_IMPLEMENTATION_IN_DLL",
+    }
+    files 
+    { 
+        "vendor/doctest/doctest/doctest.h",
+    } 
+    libdirs
+    {
+        "%{LibDirs.deps_testing_lib}",
+    }

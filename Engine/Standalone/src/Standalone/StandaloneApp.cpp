@@ -67,6 +67,9 @@ namespace Insight
 
 		void StandaloneApp::OnUpdate()
 		{
+			const Graphics::Window& window = Graphics::Window::Instance();
+			const u32 consoleHeight = window.GetHeight() * 0.3f;
+			Core::Console::Instance().Render(0, window.GetHeight() - consoleHeight, window.GetWidth(), consoleHeight);
 		}
 
 		void StandaloneApp::OnDestroy()

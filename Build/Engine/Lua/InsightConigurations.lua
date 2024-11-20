@@ -3,18 +3,11 @@ local InsightConfigurations = { }
 
 function InsightConfigurations.All()
     filter "configurations:Debug"
+    buildoptions "/MDd"
     defines
     {
         "DOCTEST_CONFIG_DISABLE",
         "IS_DEBUG",
-    }
-
-    filter { "configurations:Debug", "configurations:Testing" }
-    buildoptions "/MDd"
-    defines
-    {
-        "_DEBUG",
-        "IS_TEST"
     }
 
     filter "configurations:Release"

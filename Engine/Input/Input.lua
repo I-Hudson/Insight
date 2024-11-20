@@ -1,4 +1,5 @@
-local local_post_build_commands = post_build_commands
+local CommonConfig = require "../lua/CommonConfig"
+local InputConfig = require "lua/InputConfig"
 
 project "Insight_Input"  
     configurations { "Debug", "Release" } 
@@ -15,21 +16,6 @@ project "Insight_Input"
         "Insight_Maths",
     }
 
-    defines
-    {
-        "IS_EXPORT_INPUT_DLL",
-    }
-    
-    includedirs
-    {
-        "inc",
-        "%{IncludeDirs.InsightCore}",
-        "%{IncludeDirs.InsightMaths}",
-
-        "%{IncludeDirs.imgui}",
-        "%{IncludeDirs.spdlog}",
-    }
-
     files 
     { 
         "inc/**.hpp", 
@@ -42,55 +28,13 @@ project "Insight_Input"
         "../Core/src/Memory/NewDeleteOverload.cpp",
     }
 
-    links
-    {
-        "Insight_Core" .. output_project_subfix .. ".lib",
-        "Insight_Maths" .. output_project_subfix .. ".lib",
+    InputConfig.DefinesSharedLib()
 
-        "imgui.lib",
-    }
-    if (profileTool == "pix") then
-        links
-        {
-            "WinPixEventRuntime.lib"
-        }
-    end
-    
-    libdirs
-    {
-    }
+    InputConfig.IncludeDirs()
+    InputConfig.LibraryDirs()
+    InputConfig.LibraryLinks()
 
-    filter { "kind:SharedLib or SharedLib" }
-        postbuildcommands
-        {
-            "{COPY} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".dll\" \"%{wks.location}deps/".. outputdir..  "/dll/\"\n",
-            "{COPY} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".lib\" \"%{wks.location}deps/".. outputdir..  "/lib/\"\n",
-            "{COPY} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".pdb\" \"%{wks.location}deps/".. outputdir..  "/pdb/\"\n",
-            "{COPY} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".dll\" \"%{wks.location}bin/".. outputdir..  "/" .. output_executable .. "/\"\n",
-        }
-    filter { "kind:StaticLib or StaticLib" }
-        postbuildcommands
-        {
-            "{COPY} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".lib\" \"%{wks.location}deps/".. outputdir..  "/lib/\"\n",
-            "{COPY} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".pdb\" \"%{wks.location}deps/".. outputdir..  "/pdb/\"\n",
-        }
-    
-    filter "platforms:Win64"
-        links
-        {
-            "Xinput.lib",
-        }
+    InputConfig.FilterConfigurations()
+    InputConfig.FilterPlatforms()
 
-    filter "configurations:Debug or configurations:Testing"
-        defines { "DEBUG" }
-        symbols "On" 
-        links
-        {
-        }
-
-    filter "configurations:Release"  
-        defines { "NDEBUG" }    
-        optimize "On"   
-        links
-        {
-        }
+    CommonConfig.PostBuildCopyLibraryToOutput()

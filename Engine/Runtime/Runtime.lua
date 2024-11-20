@@ -1,26 +1,5 @@
-local local_post_build_commands = post_build_commands
-
---- Check if a file or directory exists in this path
-function fileExists(file)
-    local ok, err, code = os.rename(file, file)
-    if not ok then
-       if code == 13 then
-          --print "Permission denied, but it exists"
-          return true
-       elseif code == 5 then
-        --print "Permission denied, but it exists"
-        return true
-       end
-    end
-    return false
- end
- 
- --- Check if a directory exists in this path
- function isdir(path)
-    -- "/" works on both Unix and Windows
-    local result = fileExists(path)
-    return result
- end
+local CommonConfig = require "../lua/CommonConfig"
+local RuntimeConfig = require "lua/RuntimeConfig"
 
 project "Insight_Runtime"  
     configurations { "Debug", "Release" } 
@@ -38,39 +17,6 @@ project "Insight_Runtime"
         "Insight_Physics",
         "Insight_Graphics",
         "Insight_Input",
-    }
-
-    defines
-    {
-        "IS_EXPORT_RUNTIME_DLL",
-        "IS_AUDIO_MINIAUDIO_ENABLE",
-        "ANIMATION_NODE_TRANSFORMS=0",
-    }
-    
-    includedirs
-    {
-        "inc",
-        "%{IncludeDirs.InsightCore}",
-        "%{IncludeDirs.InsightMaths}",
-        "%{IncludeDirs.InsightPhysics}",
-        "%{IncludeDirs.InsightGraphics}",
-        "%{IncludeDirs.InsightInput}",
-
-        "%{IncludeDirs.spdlog}",
-        "%{IncludeDirs.glm}",
-        "%{IncludeDirs.imgui}",
-        "%{IncludeDirs.glfw}",
-        "%{IncludeDirs.stb_image}",
-        "%{IncludeDirs.splash}",
-        "%{IncludeDirs.qoi}",
-        "%{IncludeDirs.zip}",
-        "%{IncludeDirs.miniaudio}",
-        
-        "%{IncludeDirs.assimp}",
-        "%{IncludeDirs.assimp}/../build/include",
-        "%{IncludeDirs.meshoptimizer}",
-        "%{IncludeDirs.simplygon}",
-        "%{IncludeDirs.reflect}",
     }
 
     files 
@@ -93,92 +39,13 @@ project "Insight_Runtime"
         "../../vendor/stb/stb_image_write.h",
     }
 
-    links
-    {
-        "Insight_Core" .. output_project_subfix .. ".lib",
-        "Insight_Maths" .. output_project_subfix .. ".lib",
-        "Insight_Physics" .. output_project_subfix .. ".lib",
-        "Insight_Graphics" .. output_project_subfix .. ".lib",
-        "Insight_Input" .. output_project_subfix .. ".lib",
-        
-        "glm.lib",
-        "imgui.lib",
-        "zip.lib",
-        "meshoptimizer.lib",
-    }
-    if (profileTool == "pix") then
-        links
-        {
-            "WinPixEventRuntime.lib"
-        }
-    end
-    
-    libdirs
-    {
-        "%{wks.location}/deps/lib",
-    }
+    RuntimeConfig.DefinesSharedLib()
 
-    filter { "kind:SharedLib or SharedLib" }
-        postbuildcommands
-        {
-            "{COPY} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".dll\" \"%{wks.location}deps/".. outputdir..  "/dll/\"\n",
-            "{COPY} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".lib\" \"%{wks.location}deps/".. outputdir..  "/lib/\"\n",
-            "{COPY} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".pdb\" \"%{wks.location}deps/".. outputdir..  "/pdb/\"\n",
-            "{COPY} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".dll\" \"%{wks.location}bin/".. outputdir..  "/" .. output_executable .. "/\"\n",
-        }
-    filter { "kind:StaticLib or StaticLib" }
-        postbuildcommands
-        {
-            "{COPY} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".lib\" \"%{wks.location}deps/".. outputdir..  "/lib/\"\n",
-            "{COPY} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".pdb\" \"%{wks.location}deps/".. outputdir..  "/pdb/\"\n",
-        }
+    RuntimeConfig.IncludeDirs()
+    RuntimeConfig.LibraryDirs()
+    RuntimeConfig.LibraryLinks()
 
-    filter "platforms:Win64"
-        local NVIDIATextureToolsPath="C:/Program Files/NVIDIA Corporation/NVIDIA Texture Tools"      
-        if isdir(NVIDIATextureToolsPath) == true then
-            defines
-            {
-                "NVIDIA_Texture_Tools",
-            }
-            includedirs
-            {
-                NVIDIATextureToolsPath .. "/include",
-            }
-            links
-            {
-                "nvtt30205.lib",
-            }
-            prebuildcommands
-            {
-                "{COPY} \"" .. NVIDIATextureToolsPath .. "/lib/x64-v142/nvtt30205.lib\" \"%{wks.location}deps/".. outputdir..  "/lib/\"\n",
-                "{COPY} \"" .. NVIDIATextureToolsPath .. "/nvtt30205.dll\" \"%{wks.location}deps/".. outputdir..  "/dll/\"\n",
-            }
-        end    
+    RuntimeConfig.FilterConfigurations()
+    RuntimeConfig.FilterPlatforms()
 
-    filter "configurations:Debug or configurations:Testing"
-        defines { "DEBUG" }  
-        symbols "On" 
-        links
-        {
-            "assimpd.lib",
-            "Splashd.lib",
-            "Reflectd.lib",
-        }
-        libdirs
-        {
-            "%{wks.location}/deps/lib/debug",
-        }
-
-    filter "configurations:Release"  
-        defines { "NDEBUG" }    
-        optimize "On" 
-        links
-        {
-            "assimp.lib",
-            "Splash.lib",
-            "Reflect.lib",
-        }
-        libdirs
-        {
-            "%{wks.location}/deps/lib/release",
-        }
+    CommonConfig.PostBuildCopyLibraryToOutput()

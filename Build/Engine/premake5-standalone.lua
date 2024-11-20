@@ -2,6 +2,7 @@ local InsightEngineIncludes = require "lua/InsightEngineIncludes"
 local InsightVendorIncludes = require "lua/InsightVendorIncludes"
 
 local InsightDefines = require "lua/InsightDefines"
+local InsightAddtionalDirs = require "lua/InsightAddtionalDirs"
 local InsightConfigurations = require "lua/InsightConigurations"
 local InsightPlatforms = require "lua/InsightPlatforms"
 
@@ -52,6 +53,7 @@ workspace "InsightStandalone"
     }
 
     InsightDefines.All()
+    InsightAddtionalDirs.All()
 
     flags
     {
@@ -62,9 +64,9 @@ workspace "InsightStandalone"
     {
         "%{IncludeDirs.tracy}",
     }
-     
+
     prebuildcommands
-     { 
+    { 
         "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/dll/\" \"%{cfg.targetdir}\"", 
     }
 

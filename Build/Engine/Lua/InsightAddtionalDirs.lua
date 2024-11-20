@@ -1,7 +1,7 @@
 -- table for our functions
-local InsightAddtionalDirs = { }
+local InsightAdditionalDirs = { }
 
-function InsightAddtionalDirs.All()
+function InsightAdditionalDirs.All()
     includedirs
     {
         "%{IncludeDirs.tracy}",
@@ -18,4 +18,4 @@ function InsightAddtionalDirs.All()
     }
 end
 
-return InsightAddtionalDirs
+return InsightAdditionalDirs

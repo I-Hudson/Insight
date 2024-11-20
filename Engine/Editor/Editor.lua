@@ -1,4 +1,4 @@
-local local_post_build_commands = {}
+local EditorConfig = require "lua/EditorConfig"
 
 project "Insight_Editor"  
     kind "ConsoleApp"   
@@ -22,35 +22,7 @@ project "Insight_Editor"
         "Insight_Runtime",
     }
 
-    defines
-    {
-        "IS_EDITOR_ENABLED",
-        "IS_EXPORT_EDITOR_DLL",
-    }
-    
-    includedirs
-    {
-        "inc",
-        "%{IncludeDirs.InsightCore}",
-        "%{IncludeDirs.InsightMaths}",
-        "%{IncludeDirs.InsightPhysics}",
-        "%{IncludeDirs.InsightInput}",
-        "%{IncludeDirs.InsightGraphics}",
-        "%{IncludeDirs.InsightRuntime}",
-    
-        "%{IncludeDirs.glfw}",
-        "%{IncludeDirs.glm}",
-        "%{IncludeDirs.spdlog}",
-        "%{IncludeDirs.imgui}",
-        "%{IncludeDirs.ImGuizmo}",
-        "%{IncludeDirs.imgui_string}",
-        "%{IncludeDirs.reflect}",
-        "%{IncludeDirs.zip}",
-        "%{IncludeDirs.splash}",
-        "%{IncludeDirs.efsw}",
-    }
-
-    files 
+        files 
     { 
         "inc/**.hpp", 
         "inc/**.h", 
@@ -76,98 +48,11 @@ project "Insight_Editor"
         "../../vendor/ImGuizmo/ImZoomSlider.h",
     }
 
-    links
-    {
-        "Insight_Core" .. output_project_subfix .. ".lib",
-        "Insight_Maths" .. output_project_subfix .. ".lib",
-        "Insight_Physics" .. output_project_subfix .. ".lib",
-        "Insight_Input" .. output_project_subfix .. ".lib",
-        "Insight_Graphics" .. output_project_subfix .. ".lib",
-        "Insight_Runtime" .. output_project_subfix .. ".lib",
+    EditorConfig.DefinesSharedLib()
+    EditorConfig.IncludeDirs()
+    EditorConfig.LibraryDirs()
+    EditorConfig.LibraryLinks(output_project_subfix)
+    EditorConfig.PostBuildCommands(output_project_subfix, outputdir)
 
-        "glm.lib",
-        "imgui.lib",
-        "zip.lib",
-    }
-    
-    if (profileTool == "pix") then
-        links
-        {
-            "WinPixEventRuntime.lib"
-        }
-    end
-    
-    libdirs
-    {
-        "%{wks.location}/vendor/glfw/lib",
-    }
-
-    postbuildcommands
-    {
-        "{COPY} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".lib\" \"%{wks.location}deps/".. outputdir..  "/lib/\"\n",
-        "{COPY} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".pdb\" \"%{wks.location}deps/".. outputdir..  "/pdb/\"\n",
-    }
-
-    prebuildcommands 
-    {
-        --"call $(SolutionDir)Build/Engine/RunInsightReflectTool.bat"
-    }
-
-    filter "platforms:Win64"
-        system "windows"
-        files
-        {
-            "Insight_Editor.rc",
-            "resource.h",
-        }
-
-    filter "configurations:Debug"
-        defines { "DEBUG" }  
-        symbols "On"
-        links
-        {
-            "Reflectd.lib",
-            "Splashd.lib",
-            "efswd.lib",
-        }
-        libdirs
-        {
-            "%{wks.location}/deps/lib/debug",
-        }
-        prebuildcommands { "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/dll/\" \"%{cfg.targetdir}\"", "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/pdb/\" \"%{cfg.targetdir}\"",  }
-
-    filter "configurations:Release"  
-        defines { "NDEBUG" }
-        optimize "On" 
-        links
-        {
-            "Reflect.lib",
-            "Splash.lib",
-            "efsw.lib",
-        }
-        libdirs
-        {
-            "%{wks.location}/deps/lib/release",
-        }
-        prebuildcommands { "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/dll/\" \"%{cfg.targetdir}\"", "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/pdb/\" \"%{cfg.targetdir}\"", }
-
-
-    filter "configurations:Testing"
-        defines { "DEBUG" }  
-        symbols "On"
-        links
-        {
-            "Reflectd.lib",
-            "Splashd.lib",
-            "efswd.lib",
-        }
-        libdirs
-        {
-            "%{wks.location}/deps/lib/debug",
-        }
-        prebuildcommands { "{COPYDIR} \"%{wks.location}deps/Debug-windows-x86_64/dll\" \"%{cfg.targetdir}\"", }
-        prebuildcommands 
-        { 
-            "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/dll/\" \"%{cfg.targetdir}\"", 
-            "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/pdb/\" \"%{cfg.targetdir}\"", 
-        }
+    EditorConfig.FilterConfigurations()
+    EditorConfig.FilterPlatforms()
