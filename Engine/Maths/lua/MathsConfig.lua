@@ -23,10 +23,10 @@ function MathsConfig.IncludeDirs()
     includedirs
     {
         "inc",
-        "../../vendor/glm",
+        --"../../vendor/glm",
         "%{IncludeDirs.spdlog}",
         "%{IncludeDirs.imgui}",
-        "%{IncludeDirs.glm}",
+        --"%{IncludeDirs.glm}",
         "%{IncludeDirs.reflect}",
     }
 end

@@ -3,6 +3,7 @@
 #include "Graphics/RHI/RHI_Texture.h"
 
 #include "Core/Asserts.h"
+#include "Core/Memory.h"
 
 #include "Event/EventSystem.h"
 
@@ -29,6 +30,7 @@ namespace Insight
         FfxFsr2ContextDescription   RHI_FSR::m_ffx_fsr2_context_description;
         FfxFsr2DispatchDescription  RHI_FSR::m_ffx_fsr2_dispatch_description;
         void*                       RHI_FSR::m_scratchBuffer = nullptr;
+        u64                         RHI_FSR::m_scratchBufferSize = 0;
         bool                        RHI_FSR::m_fsr2IsEnabled;
 
         void RHI_FSR::Init()
@@ -204,32 +206,23 @@ namespace Insight
             render_context->GpuWaitForIdle();
             m_ffx_fsr2_context_description = {};
 
+            FfxDevice fsrDevice = nullptr;
+
             if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan)
             {
 #ifdef IS_VULKAN_ENABLED
                 RHI::Vulkan::RenderContext_Vulkan* renderContextVulkan = static_cast<RHI::Vulkan::RenderContext_Vulkan*>(render_context);
 
-                const u64 scratchBufferSize = ffxFsr2GetScratchMemorySizeDX12();
-                if (!m_scratchBuffer)
-                {
-                    m_scratchBuffer = malloc(scratchBufferSize);
-                }
+                CreateScratchBuffer(ffxFsr2GetScratchMemorySizeVK(renderContextVulkan->GetPhysicalDevice()));
 
                 FfxErrorCode errorCode = ffxFsr2GetInterfaceVK(&m_ffx_fsr2_context_description.callbacks
                     , m_scratchBuffer
-                    , scratchBufferSize
+                    , m_scratchBufferSize
                     , renderContextVulkan->GetPhysicalDevice()
                     , vkGetDeviceProcAddr);
                 ASSERT(errorCode == FFX_OK);
 
-                m_ffx_fsr2_context_description.device = ffxGetDeviceVK(renderContextVulkan->GetDevice());
-                m_ffx_fsr2_context_description.maxRenderSize.width = std::max(1u, renderWidth);
-                m_ffx_fsr2_context_description.maxRenderSize.height = std::max(1u, renderHeight);
-                m_ffx_fsr2_context_description.displaySize.width = std::max(1u, displayWidth);
-                m_ffx_fsr2_context_description.displaySize.height = std::max(1u, displayHeight);
-                m_ffx_fsr2_context_description.flags = FFX_FSR2_ENABLE_AUTO_EXPOSURE;
-
-                ffxFsr2ContextCreate(&m_ffx_fsr2_context, &m_ffx_fsr2_context_description);
+                fsrDevice = ffxGetDeviceVK(renderContextVulkan->GetDevice());
 #endif
             }
             if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::DX12)
@@ -237,29 +230,42 @@ namespace Insight
 #ifdef IS_DX12_ENABLED
                 RHI::DX12::RenderContext_DX12* renderContextDX12 = static_cast<RHI::DX12::RenderContext_DX12*>(render_context);
 
-                const u64 scratchBufferSize = ffxFsr2GetScratchMemorySizeDX12();
-                if (!m_scratchBuffer)
-                {
-                    m_scratchBuffer = malloc(scratchBufferSize);
-                }
+                CreateScratchBuffer(ffxFsr2GetScratchMemorySizeDX12());
 
                 FfxErrorCode errorCode = ffxFsr2GetInterfaceDX12(
                     &m_ffx_fsr2_context_description.callbacks
                     , renderContextDX12->GetDevice()
                     , m_scratchBuffer
-                    , scratchBufferSize);
+                    , m_scratchBufferSize);
                 ASSERT(errorCode == FFX_OK);
 
-                m_ffx_fsr2_context_description.device = ffxGetDeviceDX12(renderContextDX12->GetDevice());
-                m_ffx_fsr2_context_description.maxRenderSize.width = std::max(2u, std::min(renderWidth, displayWidth));
-                m_ffx_fsr2_context_description.maxRenderSize.height = std::max(2u, std::min(renderHeight, displayHeight));
-                m_ffx_fsr2_context_description.displaySize.width = std::max(2u, displayWidth);
-                m_ffx_fsr2_context_description.displaySize.height = std::max(2u, displayHeight);
-                //m_ffx_fsr2_context_description.flags = FFX_FSR2_ENABLE_AUTO_EXPOSURE;
-
-                 FfxErrorCode createErrorCode = ffxFsr2ContextCreate(&m_ffx_fsr2_context, &m_ffx_fsr2_context_description);
-                 ASSERT(createErrorCode == FFX_OK);
+                fsrDevice = ffxGetDeviceDX12(renderContextDX12->GetDevice());
 #endif
+            }
+
+            m_ffx_fsr2_context_description.device = fsrDevice;
+            m_ffx_fsr2_context_description.maxRenderSize.width = std::max(2u, renderWidth);
+            m_ffx_fsr2_context_description.maxRenderSize.height = std::max(2u, renderHeight);
+            m_ffx_fsr2_context_description.displaySize.width = std::max(2u, displayWidth);
+            m_ffx_fsr2_context_description.displaySize.height = std::max(2u, displayHeight);
+            m_ffx_fsr2_context_description.flags = FFX_FSR2_ENABLE_AUTO_EXPOSURE;
+
+            FfxErrorCode createErrorCode = ffxFsr2ContextCreate(&m_ffx_fsr2_context, &m_ffx_fsr2_context_description);
+            ASSERT(createErrorCode == FFX_OK);
+        }
+
+        void RHI_FSR::CreateScratchBuffer(const u64 requestedBufferSizeBytes)
+        {
+            if (m_scratchBufferSize != requestedBufferSizeBytes)
+            {
+                m_scratchBufferSize = requestedBufferSizeBytes;
+                DeleteBytes(m_scratchBuffer);
+                m_scratchBuffer = nullptr;
+            }
+
+            if (!m_scratchBuffer)
+            {
+                m_scratchBuffer = NewBytes(m_scratchBufferSize);
             }
         }
 	}

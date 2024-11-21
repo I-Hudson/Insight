@@ -48,5 +48,17 @@ namespace Insight
         //IS_MATHS Matrix4 Matrix4RotationNormal(Vector4 normalAxis, float Angle);
 
         void ScalerSinCos(float* pSin, float* pCos, float  Value);
+
+        template<typename T>
+        T Max(const T a, const T b)
+        {
+            return a < b ? b : a;
+        }
+
+        template<typename T>
+        T Min(const T a, const T b)
+        {
+            return a > b ? a : b;
+        }
 	}
 }

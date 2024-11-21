@@ -1,6 +1,6 @@
 #include "Input/InputStates/InputRumbleState.h"
 
-#include <algorithm>
+#include "Maths/MathsUtils.h"
 
 namespace Insight
 {
@@ -13,7 +13,7 @@ namespace Insight
 
         void InputRumbleState::SetValue(float value)
         {
-            m_value = std::max(0.0f, std::min(c_MaxValue, value));
+            m_value = Maths::Max(0.0f, Maths::Min(c_MaxValue, value));
         }
     }
 }

@@ -4,7 +4,6 @@
 #include "Maths/MathsUtils.h"
 
 #include <cmath>
-#include <algorithm>
 #include <limits>
 
 namespace Insight
@@ -96,7 +95,7 @@ namespace Insight
             // yaw (y-axis rotation)
             {
                 float rY = -2.0f * (x * z - w * y);
-                rY = std::min(std::max(rY, -1.0f), 1.0f);
+                rY = Min(Max(rY, -1.0f), 1.0f);
                 euler[1] = std::asin(rY);
             }
 

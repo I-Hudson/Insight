@@ -44,6 +44,7 @@ namespace Insight
 
         private:
             void CreateContext(u32 renderWidth, u32 renderHeight, u32 displayWidth, u32 displayHeight);
+            void CreateScratchBuffer(const u64 requestedBufferSizeBytes);
 
 		private:
 			static FfxFsr2Context m_ffx_fsr2_context;
@@ -51,6 +52,7 @@ namespace Insight
 			static FfxFsr2DispatchDescription m_ffx_fsr2_dispatch_description;
 
             static void* m_scratchBuffer;
+            static u64 m_scratchBufferSize;
 
             static bool m_fsr2IsEnabled;
 		};
