@@ -3,6 +3,8 @@
 
 #include "Editor/HotReload/HotReloadExportFunctions.h"
 
+#include <Reflect/CodeGenerate/CodeGenerate.h>
+
 #include <filesystem>
 
 namespace InsightReflectTool

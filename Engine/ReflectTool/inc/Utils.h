@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Reflect/Reflect.h>
+#include <Reflect/FileParser/FileParser.h>
 
 #include <fstream>
 #include <vector>

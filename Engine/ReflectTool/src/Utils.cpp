@@ -2,6 +2,9 @@
 
 #include <filesystem>
 #include <Reflect/Reflect.h>
+#include <Reflect/Core/Options.h>
+#include <Reflect/FileParser/FileParser.h>
+#include <Reflect/CodeGenerate/CodeGenerate.h>
 
 namespace InsightReflectTool
 {

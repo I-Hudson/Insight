@@ -13,6 +13,7 @@
 #include <ostream>
 #include <string>
 #include <filesystem>
+#include <iostream>
 
 namespace InsightReflectTool
 {

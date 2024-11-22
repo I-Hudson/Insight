@@ -5,6 +5,7 @@
 #include "ECS/Entity.h"
 
 #include "Maths/Vector3.h"
+#include "Maths/Vector2.h"
 #include "Generated/LightComponent_reflect_generated.h"
 
 namespace Insight
@@ -37,6 +38,8 @@ namespace Insight
 			float GetIntensity() const;
 
 		private:
+			REFLECT_PROPERTY(EditorVisible, Meta(ClampMin(0.0), ClampMax(1.0)))
+			Maths::Vector2 m_lightColour2D = Maths::Vector2::One;
 			REFLECT_PROPERTY(EditorVisible, Meta(ClampMin(0.0), ClampMax(1.0)))
 			Maths::Vector3 m_lightColour = Maths::Vector3::One;
 			REFLECT_PROPERTY(EditorVisible)
