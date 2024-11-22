@@ -10,80 +10,86 @@ namespace Insight
 	namespace Maths
 	{
 		REFLECT_CLASS(REFLECT_LOOKUP_ONLY);
-		class IS_MATHS Vector2 : public Float2
+		template<typename T>
+		class Vec<2, T> : public NumberArray2<T>
 		{
 		public:
-			Vector2();
+			Vec();
 			
-			Vector2(const float x, const float y);
-			Vector2(const float value);
+			Vec(const T x, const T y);
+			Vec(const T value);
 
-			Vector2(const Float2& other);
-			Vector2(Float2&& other);
+			Vec(const NumberArray2<T>& other);
+			Vec(NumberArray2<T>&& other);
 
 #ifdef IS_MATHS_DIRECTX_MATHS
-			Vector2(const DirectX::XMVECTOR& other);
-			Vector2(DirectX::XMVECTOR&& other);
+			Vec(const DirectX::XMVECTOR& other);
+			Vec(DirectX::XMVECTOR&& other);
 #endif
 #if defined(IS_MATHS_GLM) || defined(IS_MATHS_CONSTRUCTOR_GLM) || defined(IS_TESTING)
-			Vector2(const glm::vec2& other);
-			Vector2(glm::vec2&& other);
+			Vec(const glm::vec2& other);
+			Vec(glm::vec2&& other);
 #endif
 
-			~Vector2();
+			~Vec();
 
-			float Length() const;
-			float LengthSquared() const;
+			T Length() const;
+			T LengthSquared() const;
 
-			Vector2& Normalise();
-			Vector2 Normalised() const;
+			Vec<2, T>& Normalise();
+			Vec<2, T> Normalised() const;
 
-			float Dot(const Vector2& other) const;
+			T Dot(const Vec<2, T>& other) const;
 
-			float& operator[](int i);
-			const float& operator[](int i) const;
+			T& operator[](int i);
+			const T& operator[](int i) const;
 
-			bool operator==(const Vector2& other) const;
-			bool operator!=(const Vector2& other) const;
+			bool operator==(const Vec<2, T>& other) const;
+			bool operator!=(const Vec<2, T>& other) const;
 
-			bool Equal(const Vector2& other, const float errorRange) const;
-			bool NotEqual(const Vector2& other, const float errorRange) const;
+			bool Equal(const Vec<2, T>& other, const T errorRange) const;
+			bool NotEqual(const Vec<2, T>& other, const T errorRange) const;
 
-			Vector2 operator-() const;
+			Vec<2, T> operator-() const;
 
-			Vector2& operator=(float scalar);
-			Vector2& operator=(const Vector2& other);
+			Vec<2, T>& operator=(T scalar);
+			Vec<2, T>& operator=(const Vec<2, T>& other);
 
-			Vector2 operator*(float scalar) const;
-			Vector2 operator*(const Vector2& other) const;
+			Vec<2, T> operator*(T scalar) const;
+			Vec<2, T> operator*(const Vec<2, T>& other) const;
 
-			Vector2 operator/(float scalar) const;
-			Vector2 operator/(const Vector2& other) const;
+			Vec<2, T> operator/(T scalar) const;
+			Vec<2, T> operator/(const Vec<2, T>& other) const;
 
-			Vector2 operator+(float scalar) const;
-			Vector2 operator+(const Vector2& other) const;
+			Vec<2, T> operator+(T scalar) const;
+			Vec<2, T> operator+(const Vec<2, T>& other) const;
 
-			Vector2 operator-(float scalar) const;
-			Vector2 operator-(const Vector2& other) const;
+			Vec<2, T> operator-(T scalar) const;
+			Vec<2, T> operator-(const Vec<2, T>& other) const;
 
-			Vector2& operator*=(float scalar);
-			Vector2& operator*=(const Vector2& other);
+			Vec<2, T>& operator*=(T scalar);
+			Vec<2, T>& operator*=(const Vec<2, T>& other);
 
-			Vector2& operator/=(float scalar);
-			Vector2& operator/=(const Vector2& other);
+			Vec<2, T>& operator/=(T scalar);
+			Vec<2, T>& operator/=(const Vec<2, T>& other);
 
-			Vector2& operator+=(float scalar);
-			Vector2& operator+=(const Vector2& other);
+			Vec<2, T>& operator+=(T scalar);
+			Vec<2, T>& operator+=(const Vec<2, T>& other);
 
-			Vector2& operator-=(float scalar);
-			Vector2& operator-=(const Vector2& other);
+			Vec<2, T>& operator-=(T scalar);
+			Vec<2, T>& operator-=(const Vec<2, T>& other);
 
-			const float* Data() const { return &x; }
+			const T* Data() const { return &x; }
 
-			static const Vector2 One;
-			static const Vector2 Zero;
-			static const Vector2 Infinity;
-			static const Vector2 InfinityNeg;
+			static const Vec<2, T> One;
+			static const Vec<2, T> Zero;
+			static const Vec<2, T> Infinity;
+			static const Vec<2, T> InfinityNeg;
 		};
+
+		using Vector2 = Vec<2, float>;
+		using IVector2 = Vec<2, int>;
 	}
 }
+
+#include "Maths/Vector2.inl"

@@ -95,6 +95,7 @@ function RuntimeConfig.FilterConfigurations()
         "meshoptimizer.lib",
         "lz4d.lib",
         "Reflectd.lib",
+        "assimpd.lib",
 
         --"GLFW.lib",
         --"vulkan-1.lib",
@@ -113,11 +114,10 @@ function RuntimeConfig.FilterConfigurations()
         --"SPIRV-Tools.lib",
         --"SPIRV-Tools-opt.lib",
         --"SPVRemapper.lib",
-        "assimpd.lib",
 
-        "ffx_fsr2_api_x64d.lib",
-        "ffx_fsr2_api_vk_x64d.lib",
-        "ffx_fsr2_api_dx12_x64d.lib",
+        --"ffx_fsr2_api_x64d.lib",
+        --"ffx_fsr2_api_vk_x64d.lib",
+        --"ffx_fsr2_api_dx12_x64d.lib",
     }
     prebuildcommands { "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/dll/\" \"%{cfg.targetdir}\"", "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/pdb/\" \"%{cfg.targetdir}\"",  }
 
@@ -139,32 +139,32 @@ buildoptions "/MD"
         "meshoptimizer.lib",
         "lz4.lib",
         "Reflect.lib",
-
-        "GLFW.lib",
-        "vulkan-1.lib",
-        "D3d12.lib",
-        "DXGI.lib",
-        "dxguid.lib",
-        "dxcompiler.lib",
-        "GFSDK_Aftermath_Lib.x64.lib",
-
-        "glslang.lib",
-        "MachineIndependent.lib",
-        "GenericCodeGen.lib",
-        "OGLCompiler.lib",
-        "OSDependent.lib",
         "assimp.lib",
 
-        "ffx_fsr2_api_x64.lib",
-        "ffx_fsr2_api_vk_x64.lib",
-        "ffx_fsr2_api_dx12_x64.lib",
+        --"GLFW.lib",
+        --"vulkan-1.lib",
+        --"D3d12.lib",
+        --"DXGI.lib",
+        --"dxguid.lib",
+        --"dxcompiler.lib",
+        --"GFSDK_Aftermath_Lib.x64.lib",
+
+        --"glslang.lib",
+        --"MachineIndependent.lib",
+        --"GenericCodeGen.lib",
+        --"OGLCompiler.lib",
+        --"OSDependent.lib",
+
+        --"ffx_fsr2_api_x64.lib",
+        --"ffx_fsr2_api_vk_x64.lib",
+        --"ffx_fsr2_api_dx12_x64.lib",
     }
     prebuildcommands { "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/dll/\" \"%{cfg.targetdir}\"", "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/pdb/\" \"%{cfg.targetdir}\"", }
     
     filter "configurations:Testing" 
     links
     {
-        "doctest.lib",
+        --"doctest.lib",
     }
     libdirs
     {

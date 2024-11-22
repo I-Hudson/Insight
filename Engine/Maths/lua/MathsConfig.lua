@@ -26,7 +26,7 @@ function MathsConfig.IncludeDirs()
         --"../../vendor/glm",
         "%{IncludeDirs.spdlog}",
         "%{IncludeDirs.imgui}",
-        --"%{IncludeDirs.glm}",
+        "%{IncludeDirs.glm}",
         "%{IncludeDirs.reflect}",
     }
 end

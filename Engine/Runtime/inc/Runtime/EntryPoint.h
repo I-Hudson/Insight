@@ -1,5 +1,6 @@
 #pragma once
 #include "Engine.h"
+#include "Core/Defines.h"
 #include "Core/MemoryTracker.h"
 #include "Core/Logger.h"
 #include "Core/Profiler.h"
@@ -23,7 +24,7 @@ int main(int argc, char** argv)
 
 #ifdef TEST_ENABLED
 	const char* args[] = { "-d", "--order-by=suite", "--no-breaks=false", "--reporters=console" };
-	doctest::Context context = doctest::Context(ARRAYSIZE(args), args);
+	doctest::Context context = doctest::Context(ARRAY_COUNT(args), args);
 	const int result = context.run();
 	return result;
 #else

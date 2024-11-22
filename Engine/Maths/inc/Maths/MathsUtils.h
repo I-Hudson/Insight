@@ -58,7 +58,7 @@ namespace Insight
         template<typename T>
         T Min(const T a, const T b)
         {
-            return a > b ? a : b;
+            return a > b ? b : a;
         }
 	}
 }

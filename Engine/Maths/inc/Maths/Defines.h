@@ -14,6 +14,14 @@
 #define IS_MATHS
 #endif
 
+namespace Insight
+{
+	namespace Maths
+	{
+		template<int Length, typename T> class Vec;
+	}
+}
+
 #define IS_MATHS_ENABLE_SWIZZLE
 
 //#define IS_MATHS_DIRECTX_MATHS
