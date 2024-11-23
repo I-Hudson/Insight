@@ -441,3 +441,8 @@ vendor/
 /PackageBuild
 Generated/
 *.gen.h
+/Sharpmake/*
+/Win/*
+/compileData.*
+/Debug.cap
+/StructLayoutSettings.json
