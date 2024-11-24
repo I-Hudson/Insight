@@ -151,8 +151,8 @@ namespace Insight
 
 			const u32 width = Window::Instance().GetWidth();
 			const u32 height = Window::Instance().GetHeight();
-			RenderGraph::Instance().SetRenderResolution(Maths::Vector2(width, height));
-			RenderGraph::Instance().SetOutputResolution(Maths::Vector2(width, height));
+			RenderGraph::Instance().SetRenderResolution(Maths::IVector2(width, height));
+			RenderGraph::Instance().SetOutputResolution(Maths::IVector2(width, height));
 
 			pendingRenderResolution[0] = RenderGraph::Instance().GetRenderResolution().x;
 			pendingRenderResolution[1] = RenderGraph::Instance().GetRenderResolution().y;
@@ -202,7 +202,7 @@ namespace Insight
 				ImGui::DragInt2("Render Resolution", pendingRenderResolution);
 				if (ImGui::Button("Apply Render Resolution"))
 				{
-					RenderGraph::Instance().SetRenderResolution(Maths::Vector2(pendingRenderResolution[0], pendingRenderResolution[1]));
+					RenderGraph::Instance().SetRenderResolution(Maths::IVector2(pendingRenderResolution[0], pendingRenderResolution[1]));
 				}
 				ImGui::End();
 			}
@@ -223,7 +223,7 @@ namespace Insight
 				IS_PROFILE_SCOPE("FSR2");
 				if (enableFSR)
 				{
-					Maths::Vector2 const renderResolution = RenderGraph::Instance().GetRenderResolution();
+					Maths::IVector2 const renderResolution = RenderGraph::Instance().GetRenderResolution();
 					RHI_FSR::Instance().GenerateJitterSample(&m_taaJitterX, &m_taaJitterY);
 					m_taaJitterX = (m_taaJitterX / static_cast<float>(renderResolution.x));
 					m_taaJitterY = (m_taaJitterY / static_cast<float>(renderResolution.y));
@@ -339,7 +339,7 @@ namespace Insight
 				ImGui::DragInt2("Render Resolution", pendingRenderResolution);
 				if (ImGui::Button("Apply Render Resolution"))
 				{
-					RenderGraph::Instance().SetRenderResolution(Maths::Vector2(pendingRenderResolution[0], pendingRenderResolution[1]));
+					RenderGraph::Instance().SetRenderResolution(Maths::IVector2(pendingRenderResolution[0], pendingRenderResolution[1]));
 				}
 				ImGui::End();
 			}
@@ -352,7 +352,7 @@ namespace Insight
 
 			if (enableFSR)
 			{
-				Maths::Vector2 const renderResolution = RenderGraph::Instance().GetRenderResolution();
+				Maths::IVector2 const renderResolution = RenderGraph::Instance().GetRenderResolution();
 				RHI_FSR::Instance().GenerateJitterSample(&m_taaJitterX, &m_taaJitterY);
 				m_taaJitterX = (m_taaJitterX / static_cast<float>(renderResolution.x));
 				m_taaJitterY = (m_taaJitterY / static_cast<float>(renderResolution.y));

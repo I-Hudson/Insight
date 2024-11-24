@@ -30,7 +30,7 @@ namespace Insight
 			return nullptr;
 		}
 
-		void RHI_Texture::LoadFromData(Byte* data, u32 width, u32 height, u32 depth, u32 channels, u32 textureSize)
+		void RHI_Texture::LoadFromData(Byte* data, u32 width, u32 height, u32 depth, u32 channels, const u64 textureSize)
 		{
 			IS_PROFILE_FUNCTION();
 

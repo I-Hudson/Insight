@@ -59,7 +59,7 @@ namespace Insight
             ECS::Entity* m_editorCameraEntity;
             ECS::CameraComponent* m_editorCameraComponent;
 
-            Maths::Vector2 m_renderResolution = Maths::Vector2(0, 0);
+            Maths::IVector2 m_renderResolution = Maths::IVector2(0, 0);
             bool m_fsr2Enabled = false;
             Maths::Vector2 m_taaJitterPrevious = Maths::Vector2(0, 0);
 

@@ -388,7 +388,7 @@ namespace Insight
 				if (Window::Instance().GetSize() != m_swapchainBufferSize)
 				{
 					IS_PROFILE_SCOPE("Swapchain resize");
-					SetSwaphchainResolution(Maths::Vector2(static_cast<float>(Window::Instance().GetWidth()), static_cast<float>(Window::Instance().GetHeight())));
+					SetSwaphchainResolution(Maths::IVector2(Window::Instance().GetWidth(), Window::Instance().GetHeight()));
 					return false;
 				}
 
@@ -467,7 +467,7 @@ namespace Insight
 				// Swap chain can not be 0.
 				desc.Width = std::max(1u, desc.Width);
 				desc.Height = std::max(1u, desc.Height);
-				m_swapchainBufferSize = Maths::Vector2(static_cast<float>(desc.Width), static_cast<float>(desc.Height));
+				m_swapchainBufferSize = Maths::IVector2(desc.Width, desc.Height);
 
 				BOOL allowTearing = FALSE;
 				bool tearingSupported = FALSE;
@@ -582,22 +582,22 @@ namespace Insight
 				m_frameIndex = m_swapchain->GetCurrentBackBufferIndex();
 			}
 
-			void RenderContext_DX12::SetSwaphchainResolution(Maths::Vector2 resolution)
+			void RenderContext_DX12::SetSwaphchainResolution(Maths::IVector2 resolution)
 			{
 				m_gpu_defered_manager.Instance().Push([this, resolution](RHI_CommandList* cmdList)
 					{
 						WaitForGpu();
 
 						SwapchainDesc desc = m_swapchainDesc;
-						desc.Width = static_cast<u32>(resolution.x);
-						desc.Height = static_cast<u32>(resolution.y);
+						desc.Width = resolution.x;
+						desc.Height = resolution.y;
 
 						CreateSwapchain(desc);
 						Core::EventSystem::Instance().DispatchEvent(MakeRPtr<Core::GraphcisSwapchainResize>(m_swapchainBufferSize.x, m_swapchainBufferSize.y));
 					});
 			}
 
-			Maths::Vector2 RenderContext_DX12::GetSwaphchainResolution() const
+			Maths::IVector2 RenderContext_DX12::GetSwaphchainResolution() const
 			{
 				return m_swapchainBufferSize;
 			}

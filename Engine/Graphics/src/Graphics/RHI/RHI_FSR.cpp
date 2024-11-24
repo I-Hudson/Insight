@@ -35,9 +35,9 @@ namespace Insight
 
         void RHI_FSR::Init()
         {
-            Maths::Vector2 render_resolution = RenderGraph::Instance().GetRenderResolution();
-            Maths::Vector2 output_resolution = RenderGraph::Instance().GetOutputResolution();
-            CreateContext(static_cast<u32>(render_resolution.x), static_cast<u32>(render_resolution.y), static_cast<u32>(output_resolution.x), static_cast<u32>(output_resolution.y));
+            Maths::IVector2 render_resolution = RenderGraph::Instance().GetRenderResolution();
+            Maths::IVector2 output_resolution = RenderGraph::Instance().GetOutputResolution();
+            CreateContext(render_resolution.x, render_resolution.y, output_resolution.x, output_resolution.y);
 
             //Core::EventSystem::Instance().AddEventListener(this, Core::EventType::Graphics_Swapchain_Resize, [this](const Core::Event& event)
             //    {
@@ -61,9 +61,9 @@ namespace Insight
                             ASSERT(ffxFsr2ContextDestroy(&m_ffx_fsr2_context) == FFX_OK);
 
                             RenderContext* render_context = &RenderContext::Instance();
-                            Maths::Vector2 render_resolution = RenderGraph::Instance().GetRenderResolution();
-                            Maths::Vector2 output_resolution = RenderGraph::Instance().GetOutputResolution();
-                            CreateContext(static_cast<u32>(render_resolution.x), static_cast<u32>(render_resolution.y), static_cast<u32>(output_resolution.x), static_cast<u32>(output_resolution.y));
+                            Maths::IVector2 render_resolution = RenderGraph::Instance().GetRenderResolution();
+                            Maths::IVector2 output_resolution = RenderGraph::Instance().GetOutputResolution();
+                            CreateContext(render_resolution.x, render_resolution.y, output_resolution.x, output_resolution.y);
                         });
                 });
         }

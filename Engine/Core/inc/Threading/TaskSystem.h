@@ -80,7 +80,7 @@ namespace Insight
 			std::mutex startIdxsMutex;
 
 			const u32 taskNum = IntDivideRoundUp(vecSize, workGroupSize);
-			for (size_t taskIdx = 1; taskIdx < taskNum; ++taskIdx)
+			for (u32 taskIdx = 1; taskIdx < taskNum; ++taskIdx)
 			{
 				startIdxs.push(workGroupSize * taskIdx);
 			}

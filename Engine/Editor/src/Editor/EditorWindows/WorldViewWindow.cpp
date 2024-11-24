@@ -104,9 +104,9 @@ namespace Insight
             {
                 // Render in game console window on top of the game viewport.
                 const ImVec2 cursorPos = ImVec2(ImGui::GetCursorPos().x, ImGui::GetCursorPos().y);
-                const u32 consoleWindowHeight = windowSize.y * 0.3f;
-                const u32 consoleWindowHalfHeight = consoleWindowHeight * 0.5f;
-                Core::Console::Instance().Render(cursorPos.x, cursorPos.y - (30), windowSize.x, 120);
+                const u32 consoleWindowHeight = static_cast<u32>(windowSize.y * 0.3f);
+                const u32 consoleWindowHalfHeight = static_cast<u32>(consoleWindowHeight * 0.5f);
+                Core::Console::Instance().Render(static_cast<u32>(cursorPos.x), static_cast<u32>(cursorPos.y) - 30, static_cast<u32>(windowSize.x), 120);
             }
 
             ContentWindowDragTarget();
@@ -881,7 +881,7 @@ namespace Insight
                             PointLightBuffer pointLightBuffer;
                             {
                                 IS_PROFILE_SCOPE("Set point light data");
-                                for (size_t i = 0; i < world.PointLights.size(); ++i)
+                                for (u32 i = 0; i < world.PointLights.size(); ++i)
                                 {
                                     if (i >= 32)
                                     {
@@ -892,7 +892,7 @@ namespace Insight
                                     pointLightBuffer.PointLights[i] = world.PointLights[i];
                                     cmdList->SetTexture(7, 0 + i, world.PointLights[i].DepthTexture);
                                 }
-                                pointLightBuffer.PointLightSize = world.PointLights.size();
+                                pointLightBuffer.PointLightSize = static_cast<u32>(world.PointLights.size());
                             }
 
                             Graphics::RHI_BufferView spotLightRHIBuffer = cmdList->UploadUniform(pointLightBuffer);
@@ -948,7 +948,7 @@ namespace Insight
                             PointLightBuffer pointLightBuffer;
                             {
                                 IS_PROFILE_SCOPE("Set point light data");
-                                for (size_t i = 0; i < world.PointLights.size(); ++i)
+                                for (u32 i = 0; i < world.PointLights.size(); ++i)
                                 {
                                     if (i >= 32)
                                     {
@@ -959,7 +959,7 @@ namespace Insight
                                     pointLightBuffer.PointLights[i] = world.PointLights[i];
                                     cmdList->SetTexture(1, 0 + i, world.PointLights[i].DepthTexture);
                                 }
-                                pointLightBuffer.PointLightSize = world.PointLights.size();
+                                pointLightBuffer.PointLightSize = static_cast<u32>(world.PointLights.size());
                             }
 
                             if (pointLightBuffer.PointLightSize > 0)
@@ -1012,7 +1012,7 @@ namespace Insight
             }
             ImGui::DragFloat("Editor FSR sharpness", &fsrSharpness, 0.05f, 0.0f, 1.0f);
 
-            if (m_renderResolution == Maths::Vector2(0, 0))
+            if (m_renderResolution == Maths::IVector2(0, 0))
             {
                 m_renderResolution = Graphics::RenderGraph::Instance().GetRenderResolution();
             }
@@ -1021,7 +1021,7 @@ namespace Insight
             ImGui::InputInt2("Render Resolution", renderRes);
             if (ImGui::Button("Apply Render Resolution"))
             {
-                m_renderResolution = Maths::Vector2(renderRes[0], renderRes[1]);
+                m_renderResolution = Maths::IVector2(renderRes[0], renderRes[1]);
                 Graphics::RenderGraph::Instance().SetRenderResolution(m_renderResolution);
                 return;
             }

@@ -32,7 +32,7 @@ namespace Insight
 				{
 					const Core::GraphcisSwapchainResize& resizeEvent = static_cast<const Core::GraphcisSwapchainResize&>(event);
 
-					m_output_resolution = Maths::Vector2(resizeEvent.Width, resizeEvent.Height);
+					m_output_resolution = Maths::IVector2(resizeEvent.Width, resizeEvent.Height);
 					if (m_set_render_resolution_to_window_resolution_auto)
 					{
 						SetRenderResolution(m_output_resolution);
@@ -494,8 +494,8 @@ namespace Insight
 				PlaceBarriersInToPipeline(pass.Get(), cmdList);
 				cmdList->EndTimeBlock();
 
-				cmdList->SetViewport(0.0f, 0.0f, (float)pass->m_viewport.x, (float)pass->m_viewport.y, 0.0f, 1.0f, false);
-				cmdList->SetScissor(0, 0, pass->m_viewport.x, pass->m_viewport.y);
+				cmdList->SetViewport(0.0f, 0.0f, pass->m_viewport.x, pass->m_viewport.y, 0.0f, 1.0f, false);
+				cmdList->SetScissor(0, 0, (int)pass->m_viewport.x, (int)pass->m_viewport.y);
 
 				std::string passName = std::string(pass->m_passName.begin(), pass->m_passName.end());
 				cmdList->BeginTimeBlock(passName + "_Execute", Maths::Vector4(0, 1, 0, 1));
@@ -570,7 +570,7 @@ namespace Insight
 			return m_passes.at(m_passesRenderIndex);
 		}
 
-		void RenderGraph::SetRenderResolution(Maths::Vector2 render_resolution)
+		void RenderGraph::SetRenderResolution(Maths::IVector2 render_resolution)
 		{
 			if (m_render_resolution != render_resolution)
 			{
@@ -580,7 +580,7 @@ namespace Insight
 			}
 		}
 
-		void RenderGraph::SetOutputResolution(Maths::Vector2 output_resolution)
+		void RenderGraph::SetOutputResolution(Maths::IVector2 output_resolution)
 		{
 			if (m_output_resolution != output_resolution)
 			{

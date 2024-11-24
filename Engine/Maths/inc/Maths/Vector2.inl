@@ -39,7 +39,7 @@ namespace Insight
 		Vec<2, T>::Vec(const T x, const T y)
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
-			xmvector = DirectX::XMVectorSet(x, y, 0.0f, 0.0f);
+			xmvector = DirectX::XMVectorSet(static_cast<float>(x), static_cast<float>(y), 0.0f, 0.0f);
 #elif defined(IS_MATHS_GLM)
 			vec2 = glm::vec2(x, y);
 #else
@@ -51,7 +51,7 @@ namespace Insight
 		Vec<2, T>::Vec(const T value)
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
-			xmvector = DirectX::XMVectorSet(value, value, 0.0f, 0.0f);
+			xmvector = DirectX::XMVectorSet(static_cast<float>(value), static_cast<float>(value), 0.0f, 0.0f);
 #elif defined(IS_MATHS_GLM)
 			vec2 = glm::vec2(value, value);
 #else
@@ -245,7 +245,7 @@ namespace Insight
 		Vec<2, T>& Vec<2, T>::operator=(T value)
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
-			xmvector = DirectX::XMVectorReplicate(value);
+			xmvector = DirectX::XMVectorReplicate(static_cast<float>(value));
 #elif defined(IS_MATHS_GLM)
 			vec2 = glm::vec2(value, value);
 #else
@@ -272,7 +272,7 @@ namespace Insight
 		Vec<2, T> Vec<2, T>::operator*(T scalar) const
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
-			return Vec<2, T>(DirectX::XMVectorMultiply(xmvector, DirectX::XMVectorReplicate(scalar)));
+			return Vec<2, T>(DirectX::XMVectorMultiply(xmvector, DirectX::XMVectorReplicate(static_cast<float>(scalar))));
 #elif defined(IS_MATHS_GLM)
 			return Vec<2, T>(vec2 * scalar);
 #else
@@ -295,7 +295,7 @@ namespace Insight
 		Vec<2, T> Vec<2, T>::operator/(T scalar) const
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
-			return Vec<2, T>(DirectX::XMVectorDivide(xmvector, DirectX::XMVectorReplicate(scalar)));
+			return Vec<2, T>(DirectX::XMVectorDivide(xmvector, DirectX::XMVectorReplicate(static_cast<float>(scalar))));
 #elif defined(IS_MATHS_GLM)
 			return Vec<2, T>(vec2 / scalar);
 #else
@@ -318,7 +318,7 @@ namespace Insight
 		Vec<2, T> Vec<2, T>::operator+(T scalar) const
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
-			return Vec<2, T>(DirectX::XMVectorAdd(xmvector, DirectX::XMVectorReplicate(scalar)));
+			return Vec<2, T>(DirectX::XMVectorAdd(xmvector, DirectX::XMVectorReplicate(static_cast<float>(scalar))));
 #elif defined(IS_MATHS_GLM)
 			return Vec<2, T>(vec2 + scalar);
 #else
@@ -341,7 +341,7 @@ namespace Insight
 		Vec<2, T> Vec<2, T>::operator-(T scalar) const
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
-			return Vec<2, T>(DirectX::XMVectorSubtract(xmvector, DirectX::XMVectorReplicate(scalar)));
+			return Vec<2, T>(DirectX::XMVectorSubtract(xmvector, DirectX::XMVectorReplicate(static_cast<float>(scalar))));
 #elif defined(IS_MATHS_GLM)
 			return Vec<2, T>(vec2 - scalar);
 #else

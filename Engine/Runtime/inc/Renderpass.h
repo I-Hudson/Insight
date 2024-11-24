@@ -31,8 +31,8 @@ namespace Insight
 			Maths::Matrix4 View_Inverted = { };
 			Maths::Matrix4 Projection_View_Inverted = { };
 
-			float Render_Resolution[2] = { 0.0f };
-			float Ouput_Resolution[2] = { 0.0f };
+			int Render_Resolution[2] = { 0 };
+			int Ouput_Resolution[2] = { 0 };
 
 			float TAA_Jitter_Current[2] = { 0.0f };
 			float TAA_Jitter_Previous[2] = { 0.0f };

@@ -61,8 +61,8 @@ namespace Insight
 				virtual void PostRender(RHI_CommandList* cmdList) override;
 
 				virtual void CreateSwapchain(SwapchainDesc desc) override;
-				virtual void SetSwaphchainResolution(Maths::Vector2 resolution) override;
-				virtual Maths::Vector2 GetSwaphchainResolution() const override;
+				virtual void SetSwaphchainResolution(Maths::IVector2 resolution) override;
+				virtual Maths::IVector2 GetSwaphchainResolution() const override;
 
 				virtual void SetFullScreen() override;
 

@@ -9,6 +9,7 @@ call :DOWNLOAD_AND_UNZIP https://www.nuget.org/api/v2/package/Microsoft.VCRTForw
 call :DOWNLOAD_AND_UNZIP https://www.nuget.org/api/v2/package/Microsoft.Windows.CppWinRT/2.0.221121.5                               %vendorPath%\Microsoft.Windows.CppWinRT
 call :DOWNLOAD_AND_UNZIP https://github.com/microsoft/DirectXShaderCompiler/releases/download/v1.7.2212/dxc_2022_12_16.zip          %vendorPath%\DirectXShaderCompiler
 call :DOWNLOAD_AND_UNZIP https://github.com/glfw/glfw/releases/download/3.4/glfw-3.4.zip                                            %vendorPath%\glfw
+call :DOWNLOAD_AND_UNZIP https://github.com/wolfpld/tracy/releases/download/v0.11.1/windows-0.11.1.zip                              %vendorPath%\tracyProfiler
 robocopy "%vendorPath%\glfw\glfw-3.4" "%vendorPath%\glfw" /E /MOV
 
 echo Generate JoltPhysics solution
@@ -19,7 +20,7 @@ call ../Engine/Build_Solution.bat %vendorPath%/JoltPhysics/Build/VS2022_CL/JoltP
 echo Build JoltPhysics release
 call ../Engine/Build_Solution.bat %vendorPath%/JoltPhysics/Build/VS2022_CL/JoltPhysics.sln vs2022 Build Release x64
 
-rem Genreate FSR2 projects and build them.
+rem Generate FSR2 projects and build them.
 cd "%vendorPath%\FidelityFX-FSR2\build"
 SET FSR2GenerateSolutions="0"
 if not exist "DX12" (

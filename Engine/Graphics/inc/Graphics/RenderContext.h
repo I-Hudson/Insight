@@ -181,8 +181,8 @@ namespace Insight
 			virtual void PostRender(RHI_CommandList* cmdList) = 0;
 
 			virtual void CreateSwapchain(SwapchainDesc desc) = 0;
-			virtual void SetSwaphchainResolution(Maths::Vector2 resolution) = 0;
-			virtual Maths::Vector2 GetSwaphchainResolution() const = 0;
+			virtual void SetSwaphchainResolution(Maths::IVector2 resolution) = 0;
+			virtual Maths::IVector2 GetSwaphchainResolution() const = 0;
 
 			virtual void GpuWaitForIdle() = 0;
 			virtual void SubmitCommandListAndWait(RHI_CommandList* cmdList) = 0;
@@ -319,7 +319,7 @@ namespace Insight
 			RenderStats m_renderStats;
 			RenderDocAPI m_renderDocAPI;
 
-			Maths::Vector2 m_swapchainBufferSize;
+			Maths::IVector2 m_swapchainBufferSize;
 
 			RHI_Texture* m_font_texture = nullptr;
 

@@ -8,8 +8,8 @@ cbuffer BufferFrame : register(b0, FrameSpace)
 	float4x4 bf_Camera_View_Inverted;
 	float4x4 bf_Camera_Projection_View_Inverted;
 
-    float2 Render_Resolution;
-    float2 Output_Resolution;
+    int2 Render_Resolution;
+    int2 Output_Resolution;
 
     float2 bf_TAA_Jitter_Current;
     float2 bf_TAA_Jitter_Previous;
