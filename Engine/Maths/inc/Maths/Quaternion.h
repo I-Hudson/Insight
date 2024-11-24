@@ -24,7 +24,7 @@ namespace Insight
         public:
             Quaternion() = default;
             Quaternion(const Quaternion& quaternion) = default;
-            Quaternion(const Maths::Float3& eulerAnglesRad);
+            Quaternion(const Maths::Vector3& eulerAnglesRad);
             Quaternion(const float eulerXRad, const float eulerYRad, const float eulerZRad);
             Quaternion(const float w, const float x, const float y, const float z);
             ~Quaternion();

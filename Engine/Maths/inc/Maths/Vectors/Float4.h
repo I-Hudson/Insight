@@ -13,6 +13,7 @@ namespace Insight
 {
     namespace Maths
     {
+        /*
         template<typename T>
         struct NumberArray4
         {
@@ -34,5 +35,6 @@ namespace Insight
 
         using Float4 = NumberArray4<float>;
         using Int4 = NumberArray4<int>;
+        */
     }
 }

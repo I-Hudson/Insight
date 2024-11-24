@@ -12,7 +12,7 @@ namespace Insight
     {
         const Quaternion Quaternion::Identity = Quaternion(1, 0, 0, 0);
 
-        Quaternion::Quaternion(const Maths::Float3& eulerAnglesRad)
+        Quaternion::Quaternion(const Maths::Vector3& eulerAnglesRad)
         {
             const float f = 0.5f;
             Maths::Vector3 c = Maths::Vector3(std::cos(eulerAnglesRad.x * f), std::cos(eulerAnglesRad.y * f), std::cos(eulerAnglesRad.z * f));
@@ -482,10 +482,10 @@ namespace test
 			CHECK(eulerQVec.z == glmEulerQ.z);
 
 			Quaternion eulerQVecScaler = eulerQVec;
-			eulerQVecScaler *= 4;
+			eulerQVecScaler *= 4.0f;
 
 			glm::quat glmEulerQScaler = glmEulerQ;
-            glmEulerQScaler *= 4;
+            glmEulerQScaler *= 4.0f;
 
 			CHECK(eulerQVecScaler.w == glmEulerQScaler.w);
 			CHECK(eulerQVecScaler.x == glmEulerQScaler.x);
@@ -543,11 +543,11 @@ namespace test
 			const float eulerZ = -35.0f;
 			Quaternion eulerQVec(Vector3(eulerX, eulerY, eulerZ));
 			Quaternion eulerQVecScaler = eulerQVec;
-			eulerQVecScaler /= 4;
+			eulerQVecScaler /= 4.0f;
 
 			glm::quat glmEulerQ(glm::vec3(eulerX, eulerY, eulerZ));
 			glm::quat glmEulerQScaler = glmEulerQ;
-            glmEulerQScaler /= 4;
+            glmEulerQScaler /= 4.0f;
 
 			CHECK(eulerQVecScaler.w == glmEulerQScaler.w);
 			CHECK(eulerQVecScaler.x == glmEulerQScaler.x);

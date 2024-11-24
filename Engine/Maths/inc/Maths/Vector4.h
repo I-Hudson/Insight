@@ -11,92 +11,110 @@ namespace Insight
 {
 	namespace Maths
 	{
-		class Vector3;
-
 		/// @brief Vector 4 maths class.
-		REFLECT_CLASS(REFLECT_LOOKUP_ONLY);
-		class IS_MATHS Vector4 : public Float4
+		template<typename T>
+		REFLECT_CLASS(REFLECT_LOOKUP_ONLY)
+		class Vec<4, T>
 		{
 		public:
-			Vector4();
-			Vector4(float x, float y, float z, float w);
-			Vector4(float scalar);
+			Vec();
+			Vec(T x, T y, T z, T w);
+			Vec(T scalar);
 
-			Vector4(const Float2& other, float z, float w);
-			Vector4(Float2&& other);
+			Vec(const Vec<2, T>& other, T z, T w);
+			Vec(Vec<2, T>&& other);
 
-			Vector4(const Float3& other, float w);
-			Vector4(Float3&& other);
+			Vec(const Vec<3, T>& other, T w);
+			Vec(Vec<3, T>&& other);
 
-			Vector4(const Float4& other);
-			Vector4(Float4&& other);
+			Vec(const Vec<4, T>& other);
+			Vec(Vec<4, T>&& other);
 
 #ifdef IS_MATHS_DIRECTX_MATHS
-			Vector4(const DirectX::XMVECTOR& other);
-			Vector4(DirectX::XMVECTOR&& other);
+			Vec(const DirectX::XMVECTOR& other);
+			Vec(DirectX::XMVECTOR&& other);
 #endif
 #if defined(IS_MATHS_GLM) || defined(IS_MATHS_CONSTRUCTOR_GLM) || defined(IS_TESTING)
-			Vector4(const glm::vec4& other);
-			Vector4(glm::vec4&& other);
+			Vec(const glm::vec4& other);
+			Vec(glm::vec4&& other);
 #endif
 
-			~Vector4();
+			~Vec();
 
-			float Length() const;
-			float LengthSquared() const;
+			T Length() const;
+			T LengthSquared() const;
 
-			Vector4& Normalise();
-			Vector4 Normalised() const;
+			Vec<4, T>& Normalise();
+			Vec<4, T> Normalised() const;
 
-			float Dot(const Vector4& other) const;
+			T Dot(const Vec<4, T>& other) const;
 
-			float& operator[](int i);
-			const float& operator[](int i) const;
+			T& operator[](int i);
+			const T& operator[](int i) const;
 
-			bool operator==(const Vector4& other) const;
-			bool operator!=(const Vector4& other) const;
+			bool operator==(const Vec<4, T>& other) const;
+			bool operator!=(const Vec<4, T>& other) const;
 
-			bool Equal(const Vector4& other, const float errorRange) const;
-			bool NotEqual(const Vector4& other, const float errorRange) const;
+			bool Equal(const Vec<4, T>& other, const T errorRange) const;
+			bool NotEqual(const Vec<4, T>& other, const T errorRange) const;
 
-			Vector4 Reciprocal() const;
-			Vector4 Cross(const Vector4 vec) const;
+			Vec<4, T> Reciprocal() const;
+			Vec<4, T> Cross(const Vec<4, T> vec) const;
 
-			Vector4 operator-() const;
+			Vec<4, T> operator-() const;
 
-			Vector4& operator=(float scalar);
-			Vector4& operator=(const Vector4& other);
+			Vec<4, T>& operator=(T scalar);
+			Vec<4, T>& operator=(const Vec<4, T>& other);
 
-			Vector4 operator*(float scalar) const;
-			Vector4 operator*(const Vector4& other) const;
+			Vec<4, T> operator*(T scalar) const;
+			Vec<4, T> operator*(const Vec<4, T>& other) const;
 
-			Vector4 operator/(float scalar) const;
-			Vector4 operator/(const Vector4& other) const;
+			Vec<4, T> operator/(T scalar) const;
+			Vec<4, T> operator/(const Vec<4, T>& other) const;
 
-			Vector4 operator+(float scalar) const;
-			Vector4 operator+(const Vector4& other) const;
+			Vec<4, T> operator+(T scalar) const;
+			Vec<4, T> operator+(const Vec<4, T>& other) const;
 
-			Vector4 operator-(float scalar) const;
-			Vector4 operator-(const Vector4& other) const;
+			Vec<4, T> operator-(T scalar) const;
+			Vec<4, T> operator-(const Vec<4, T>& other) const;
 
-			Vector4& operator*=(float scalar);
-			Vector4& operator*=(const Vector4& other);
+			Vec<4, T>& operator*=(T scalar);
+			Vec<4, T>& operator*=(const Vec<4, T>& other);
 							 
-			Vector4& operator/=(float scalar);
-			Vector4& operator/=(const Vector4& other);
+			Vec<4, T>& operator/=(T scalar);
+			Vec<4, T>& operator/=(const Vec<4, T>& other);
 							 
-			Vector4& operator+=(float scalar);
-			Vector4& operator+=(const Vector4& other);
+			Vec<4, T>& operator+=(T scalar);
+			Vec<4, T>& operator+=(const Vec<4, T>& other);
 							 
-			Vector4& operator-=(float scalar);
-			Vector4& operator-=(const Vector4& other);
+			Vec<4, T>& operator-=(T scalar);
+			Vec<4, T>& operator-=(const Vec<4, T>& other);
 
-			const float* Data() const { return &x; }
+			const T* Data() const { return &x; }
 
-			static const Vector4 One;
-			static const Vector4 Zero;
-			static const Vector4 Infinity;
-			static const Vector4 InfinityNeg;
+			static const Vec<4, T> One;
+			static const Vec<4, T> Zero;
+			static const Vec<4, T> Infinity;
+			static const Vec<4, T> InfinityNeg;
+
+			union
+			{
+#ifdef IS_MATHS_DIRECTX_MATHS
+				struct { DirectX::XMVECTOR xmvector; };
+#endif
+#if defined(IS_MATHS_GLM) || defined(IS_MATHS_CONSTRUCTOR_GLM) || defined(IS_TESTING)
+				struct { glm::vec<3, T, glm::defaultp> vec4; };
+#endif
+				struct { T x, y, z, w; };
+				struct { T r, g, b, a; };
+				struct { T data[4]; };
+			};
 		};
+
+		using Vector4 = Vec<4, float>;
+		using DVector4 = Vec<4, double>;
+		using IVector4 = Vec<4, int>;
 	}
 }
+
+#include "Maths/Vector4.inl"

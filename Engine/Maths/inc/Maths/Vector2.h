@@ -11,7 +11,7 @@ namespace Insight
 	{
 		REFLECT_CLASS(REFLECT_LOOKUP_ONLY);
 		template<typename T>
-		class Vec<2, T> : public NumberArray2<T>
+		class Vec<2, T>
 		{
 		public:
 			Vec();
@@ -19,8 +19,8 @@ namespace Insight
 			Vec(const T x, const T y);
 			Vec(const T value);
 
-			Vec(const NumberArray2<T>& other);
-			Vec(NumberArray2<T>&& other);
+			Vec(const Vec<2, T>& other);
+			Vec(Vec<2, T>&& other);
 
 #ifdef IS_MATHS_DIRECTX_MATHS
 			Vec(const DirectX::XMVECTOR& other);
@@ -85,9 +85,23 @@ namespace Insight
 			static const Vec<2, T> Zero;
 			static const Vec<2, T> Infinity;
 			static const Vec<2, T> InfinityNeg;
+
+			union
+			{
+#ifdef IS_MATHS_DIRECTX_MATHS
+				struct { DirectX::XMVECTOR xmvector; };
+#endif
+#if defined(IS_MATHS_GLM) || defined(IS_MATHS_CONSTRUCTOR_GLM) || defined(IS_TESTING)
+				struct { glm::vec<2, T, glm::defaultp> vec2; };
+#endif
+				struct { T x, y; };
+				struct { T r, g; };
+				struct { T data[2]; };
+			};
 		};
 
 		using Vector2 = Vec<2, float>;
+		using DVector2 = Vec<2, double>;
 		using IVector2 = Vec<2, int>;
 	}
 }

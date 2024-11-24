@@ -15,97 +15,126 @@ namespace Insight
 {
 	namespace Maths
 	{
-		class Vector4;
+		template<typename T>
+		class Vec<4, T>;
 
-		REFLECT_CLASS(REFLECT_LOOKUP_ONLY);
-		class IS_MATHS Vector3 : public Float3
+		template<typename T>
+		REFLECT_CLASS(REFLECT_LOOKUP_ONLY)
+		class Vec<3, T>
 		{
 		public:
-			Vector3();
-			Vector3(float x, float y, float z);
-			Vector3(float scalar);
+			Vec();
+			Vec(T x, T y, T z);
+			Vec(T scalar);
 
-			Vector3(const Float2& other, float z);
-			Vector3(Float2&& other);
+			Vec(const Vec<2, T>& other, T z);
+			Vec(Vec<2, T>&& other);
 
-			Vector3(const Float3& other);
-			Vector3(Float3&& other);
+			Vec(const Vec<3, T>& other);
+			Vec(Vec<3, T>&& other);
 
-			Vector3(const Float4& other);
-			Vector3(Float4&& other);
+			Vec(const Vec<4, T>& other);
+			Vec(Vec<4, T>&& other);
 
 #ifdef IS_MATHS_DIRECTX_MATHS
-			Vector3(const DirectX::XMVECTOR& other);
-			Vector3(DirectX::XMVECTOR&& other);
+			Vec(const DirectX::XMVECTOR& other);
+			Vec(DirectX::XMVECTOR&& other);
 #endif
 #if defined(IS_MATHS_GLM) || defined(IS_MATHS_CONSTRUCTOR_GLM) || defined(IS_TESTING)
-			Vector3(const glm::vec3& other);
-			Vector3(glm::vec3&& other);
+			Vec(const glm::vec3& other);
+			Vec(glm::vec3&& other);
 #endif
 
-			~Vector3();
+			~Vec();
 
-			float Length() const;
-			float LengthSquared() const;
+			T Length() const;
+			T LengthSquared() const;
 
-			Vector3& Normalise();
-			Vector3 Normalised() const;
+			Vec<3, T>& Normalise();
+			Vec<3, T> Normalised() const;
 
-			float Dot(const Vector3& other) const;
-			Vector3 Cross(const Vector3& other) const;
+			T Dot(const Vec<3, T>& other) const;
+			Vec<3, T> Cross(const Vec<3, T>& other) const;
 
-			float& operator[](int i);
-			const float& operator[](int i) const;
+			T& operator[](int i);
+			const T& operator[](int i) const;
 
-			bool operator==(const Vector3& other) const;
-			bool operator!=(const Vector3& other) const;
+			bool operator==(const Vec<3, T>& other) const;
+			bool operator!=(const Vec<3, T>& other) const;
 
-			bool Equal(const Vector3& other, const float errorRange) const;
-			bool NotEqual(const Vector3& other, const float errorRange) const;
+			bool Equal(const Vec<3, T>& other, const T errorRange) const;
+			bool NotEqual(const Vec<3, T>& other, const T errorRange) const;
 
-			Vector3 Lerp(const Vector3& vec, const float time) const;
+			Vec<3, T> Lerp(const Vec<3, T>& vec, const T time) const;
 
-			Vector3 operator-() const;
+			Vec<3, T> operator-() const;
 
-			Vector3& operator=(float scalar);
-			Vector3& operator=(const Vector3& other);
+			Vec<3, T>& operator=(T scalar);
+			Vec<3, T>& operator=(const Vec<3, T>& other);
 
-			Vector3 operator*(float scalar) const;
-			Vector3 operator*(const Vector3& other) const;
+			Vec<3, T> operator*(T scalar) const;
+			Vec<3, T> operator*(const Vec<3, T>& other) const;
 
-			Vector3 operator/(float scalar) const;
-			Vector3 operator/(const Vector3& other) const;
+			Vec<3, T> operator/(T scalar) const;
+			Vec<3, T> operator/(const Vec<3, T>& other) const;
 
-			Vector3 operator+(float scalar) const;
-			Vector3 operator+(const Vector3& other) const;
+			Vec<3, T> operator+(T scalar) const;
+			Vec<3, T> operator+(const Vec<3, T>& other) const;
 
-			//Vector3 operator-(float scalar) const;
-			//Vector3 operator-(const Vector3& other) const;
+			//Vec<3, T> operator-(T scalar) const;
+			//Vec<3, T> operator-(const Vec<3, T>& other) const;
 
-			IS_MATHS friend Vector3 operator-(float scalar, const Vector3& vec);
-			IS_MATHS friend Vector3 operator-(const Vector3& vec, float scalar);
-			IS_MATHS friend Vector3 operator-(const Vector3& vec, const Vector3& vec1);
+			//IS_MATHS friend Vec<3, T> operator-(T scalar, const Vec<3, T>& vec);
+			//IS_MATHS friend Vec<3, T> operator-(const Vec<3, T>& vec, T scalar);
+			//IS_MATHS friend Vec<3, T> operator-(const Vec<3, T>& vec, const Vec<3, T>& vec1);
 
-			Vector3& operator*=(float scalar);
-			Vector3& operator*=(const Vector3& other);
+			Vec<3, T>& operator*=(T scalar);
+			Vec<3, T>& operator*=(const Vec<3, T>& other);
 
-			Vector3& operator/=(float scalar);
-			Vector3& operator/=(const Vector3& other);
+			Vec<3, T>& operator/=(T scalar);
+			Vec<3, T>& operator/=(const Vec<3, T>& other);
 
-			Vector3& operator+=(float scalar);
-			Vector3& operator+=(const Vector3& other);
+			Vec<3, T>& operator+=(T scalar);
+			Vec<3, T>& operator+=(const Vec<3, T>& other);
 
-			Vector3& operator-=(float scalar);
-			Vector3& operator-=(const Vector3& other);
+			Vec<3, T>& operator-=(T scalar);
+			Vec<3, T>& operator-=(const Vec<3, T>& other);
 
-			const float* Data() const { return &x; }
+			const T* Data() const { return &x; }
 
-			static const Vector3 One;
-			static const Vector3 Zero;
-			static const Vector3 Infinity;
-			static const Vector3 InfinityNeg;
+			static const Vec<3, T> One;
+			static const Vec<3, T> Zero;
+			static const Vec<3, T> Infinity;
+			static const Vec<3, T> InfinityNeg;
+
+			union
+			{
+#ifdef IS_MATHS_DIRECTX_MATHS
+				struct { DirectX::XMVECTOR xmvector; };
+#endif
+#if defined(IS_MATHS_GLM) || defined(IS_MATHS_CONSTRUCTOR_GLM) || defined(IS_TESTING)
+				struct { glm::vec<3, T, glm::defaultp> vec3; };
+#endif
+				struct { T x, y, z; };
+				struct { T r, g, b; };
+				struct { T data[3]; };
+			};
 		};
 
-		IS_MATHS float Vector3Distance(const Vector3& a, const Vector3& b);
+		template<typename T>
+		Vec<3, T> operator-(T scalar, const Vec<3, T>& vec);
+		template<typename T>
+		Vec<3, T> operator-(const Vec<3, T>& vec, T scalar);
+		template<typename T>
+		Vec<3, T> operator-(const Vec<3, T>& vec, const Vec<3, T>& vec1);
+
+		template<typename T>
+		T Vector3Distance(const Vec<3, T>& a, const Vec<3, T>& b);
+
+		using Vector3 = Vec<3, float>;
+		using DVector3 = Vec<3, double>;
+		using IVector3 = Vec<3, int>;
 	}
 }
+
+#include "Maths/Vector3.inl"
