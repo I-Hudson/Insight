@@ -7,6 +7,7 @@
 #include "Utils.h"
 
 #include <Reflect/Reflect.h>
+#include <Reflect/Instrumentor.h>
 #include <Reflect/CodeGenerate/CodeGenerate.h>
 
 #include <fstream>
@@ -20,6 +21,8 @@ namespace InsightReflectTool
     Reflect::Parser::FileParser ParseFilesInDirectory(const std::vector<std::string>& reflectDirectoies, 
                                                     const std::vector<std::string>& parserDirectoies, const Reflect::ReflectAddtionalOptions& options)
     {
+        Reflect::Profile::Instrumentor::Get().BeginSession();
+
         Reflect::Parser::FileParser parser;
         parser.SetIgnoreStrings(
             {
@@ -42,6 +45,10 @@ namespace InsightReflectTool
         }
         Reflect::CodeGeneration::CodeGenerate codeGenerate;
         codeGenerate.Reflect(parser, &options);
+
+        Reflect::Profile::Instrumentor::Get().EndSession();
+        Reflect::Profile::Instrumentor::Get().SaveSession("./IHT_ReflectProfile");
+
         return parser;
     }
 }

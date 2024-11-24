@@ -8,7 +8,8 @@ if not exist "%InsightReflectToolExe%" (
     call Build_Solution.bat ../../InsightReflectTool.sln vs2019 Build Release win64
 )
 echo Running Insight Reflect Tool to generate files...
-start /d "%cd%\..\..\bin\Release-windows-x86_64\InsightReflectTool" InsightReflectTool.exe Type=Engine ReflectPath=../../../Engine/ GenerateProjectFileOutputPath=../../../Engine
+start /b /d "%cd%\..\..\bin\Release-windows-x86_64\InsightReflectTool" InsightReflectTool.exe Type=Engine ReflectPath=../../../Engine/ GenerateProjectFileOutputPath=../../../Engine
+pause
 
 echo InsightReflectTool has Finished
 

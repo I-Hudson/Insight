@@ -47,6 +47,11 @@ workspace "InsightReflectTool"
         --"Linux",
     }
 
+    defines
+    {
+        "REFLECT_DLL_IMPORT",
+    }
+
     flags
     {
     	"MultiProcessorCompile"
