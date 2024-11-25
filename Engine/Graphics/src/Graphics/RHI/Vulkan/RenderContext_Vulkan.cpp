@@ -521,7 +521,7 @@ namespace Insight
 				if (Window::Instance().GetSize() != m_swapchainBufferSize)
 				{
 					IS_PROFILE_SCOPE("Swapchain resize");
-					SetSwaphchainResolution(Maths::IVector2(Window::Instance().GetWidth(), Window::Instance().GetHeight()));
+					SetSwaphchainResolution(Maths::Vector2(Window::Instance().GetWidth(), Window::Instance().GetHeight()));
 					return false;
 				}
 
@@ -555,7 +555,7 @@ namespace Insight
 
 					if (acquireNextImageResult != VK_SUCCESS)
 					{
-						SetSwaphchainResolution(Maths::IVector2(Window::Instance().GetWidth(),Window::Instance().GetHeight()));
+						SetSwaphchainResolution(Maths::Vector2(Window::Instance().GetWidth(),Window::Instance().GetHeight()));
 						return false;
 					}
 				}
@@ -623,7 +623,7 @@ namespace Insight
 
 							if (presentResult != VK_SUCCESS)
 							{
-								SetSwaphchainResolution(Maths::IVector2(Window::Instance().GetWidth(), Window::Instance().GetHeight()));
+								SetSwaphchainResolution(Maths::Vector2(Window::Instance().GetWidth(), Window::Instance().GetHeight()));
 							}
 							m_currentFrame = (m_currentFrame + 1) % RenderContext::Instance().GetFramesInFligtCount();
 						}
@@ -662,7 +662,7 @@ namespace Insight
 					// If the surface size is defined, the swap chain size must match
 					swapchainExtent = surfaceCapabilites.currentExtent;
 				}
-				m_swapchainBufferSize = Maths::IVector2(swapchainExtent.width, swapchainExtent.height);
+				m_swapchainBufferSize = Maths::Vector2(swapchainExtent.width, swapchainExtent.height);
 
 				// Select a present mode for the swapchain
 
@@ -814,7 +814,7 @@ namespace Insight
 				m_swapchainDesc = desc;
 			}
 
-			void RenderContext_Vulkan::SetSwaphchainResolution(Maths::IVector2 resolution)
+			void RenderContext_Vulkan::SetSwaphchainResolution(Maths::Vector2 resolution)
 			{
 				WaitForGpu();
 
@@ -826,7 +826,7 @@ namespace Insight
 				Core::EventSystem::Instance().DispatchEvent(MakeRPtr<Core::GraphcisSwapchainResize>(m_swapchainBufferSize.x, m_swapchainBufferSize.y));
 			}
 
-			Maths::IVector2 RenderContext_Vulkan::GetSwaphchainResolution() const
+			Maths::Vector2 RenderContext_Vulkan::GetSwaphchainResolution() const
 			{
 				return m_swapchainBufferSize;
 			}

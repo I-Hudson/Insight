@@ -27,8 +27,8 @@ namespace Insight
 
 			void SetRenderpass(RenderpassDescription description);
 
-			Maths::IVector2 GetRenderResolution() const;
-			Maths::IVector2 GetOutputResolution() const;
+			Maths::Vector2 GetRenderResolution() const;
+			Maths::Vector2 GetOutputResolution() const;
 
 			RGTextureHandle CreateTexture(std::string textureName, RHI_TextureInfo desc);
 			RGTextureHandle GetTexture(std::string textureName);

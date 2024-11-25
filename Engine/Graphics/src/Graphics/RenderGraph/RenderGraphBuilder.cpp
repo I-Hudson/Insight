@@ -27,12 +27,12 @@ namespace Insight
 			m_pass->m_renderpassDescription = std::move(description);
 		}
 
-		Maths::IVector2 RenderGraphBuilder::GetRenderResolution() const
+		Maths::Vector2 RenderGraphBuilder::GetRenderResolution() const
 		{
 			return m_rg->GetRenderResolution();
 		}
 
-		Maths::IVector2 RenderGraphBuilder::GetOutputResolution() const
+		Maths::Vector2 RenderGraphBuilder::GetOutputResolution() const
 		{
 			return m_rg->GetOutputResolution();
 		}
@@ -109,7 +109,7 @@ namespace Insight
 
 		void RenderGraphBuilder::SetScissor(u32 width, u32 height)
 		{
-			m_pass->m_scissor = Maths::IVector2(width, height);
+			m_pass->m_scissor = Maths::Vector2(width, height);
 		}
 
 		void RenderGraphBuilder::SkipTextureWriteBarriers()

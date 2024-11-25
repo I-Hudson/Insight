@@ -101,8 +101,8 @@ namespace Insight
 		};
 
 		using Vector2 = Vec<2, float>;
-		using DVector2 = Vec<2, double>;
-		using IVector2 = Vec<2, int>;
+		//using DVector2 = Vec<2, double>;
+		//using Vector2 = Vec<2, int>;
 	}
 }
 

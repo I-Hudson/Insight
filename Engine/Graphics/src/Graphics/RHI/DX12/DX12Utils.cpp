@@ -144,7 +144,10 @@ void ThrowIfFailed(HRESULT hr)
 {
     if (FAILED(hr))
     {
-        Insight::Graphics::RHI_GPUCrashTracker::Instance().DeviceLost();
+        if (Insight::Graphics::RHI_GPUCrashTracker::IsValidInstance())
+        {
+            Insight::Graphics::RHI_GPUCrashTracker::Instance().DeviceLost();
+        }
         HRESULT deviceRemovedReason = static_cast<Insight::Graphics::RHI::DX12::RenderContext_DX12&>(Insight::Graphics::RenderContext::Instance()).GetDevice()->GetDeviceRemovedReason();
         std::string deviceRemovedString = std::system_category().message(deviceRemovedReason);
         IS_LOG_CORE_ERROR("Device removed reason: '{}', str: '{}'.", deviceRemovedReason, deviceRemovedString);

@@ -64,7 +64,7 @@ namespace Insight
 			ComputePipelineStateObject m_computePSO = { };
 
 			Maths::Vector2 m_viewport;
-			Maths::IVector2 m_scissor;
+			Maths::Vector2 m_scissor;
 
 			std::vector<PipelineBarrier> m_textureIncomingBarriers; /// These should be done before rendering.
 
