@@ -15,6 +15,7 @@ namespace Insight
         public:
             static std::string GetTypeName();
             virtual void Draw(void* data, const Reflect::MemberInfo& memberInfo, const std::string_view label = "") const override;
+            virtual void DrawDebug(void* data, const Reflect::MemberInfo& memberInfo, const std::string_view label = "") const override;
         };
     }
 }

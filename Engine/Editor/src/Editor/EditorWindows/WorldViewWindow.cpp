@@ -98,8 +98,39 @@ namespace Insight
                 return;
             }
 
+            const ImVec2 imageCursorPos = ImGui::GetCursorPos();
             const ImVec2 windowSize = ImGui::GetContentRegionAvail();
             ImGui::Image(worldViewTexture, windowSize);
+
+            static ImGuizmo::OPERATION imGuizmoOperation = ImGuizmo::TRANSLATE;
+            {
+                const ImVec2 windowPos = ImVec2(imageCursorPos.x, imageCursorPos.y);
+                
+                ImGui::SetNextWindowPos(windowPos);
+                ImGui::SetNextWindowSizeConstraints(ImVec2(0.0f, 0.0f), windowSize);
+                const ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoDecoration;
+
+                const ImVec4 consoleBackgroundColour(65.0f / 255.0f, 65.0f / 255.0f, 170.0f / 255.0f, 1.0);
+                ImGui::PushStyleColor(ImGuiCol_WindowBg, consoleBackgroundColour);
+                ImGui::SetNextWindowBgAlpha(0.35f); // Transparent background
+                if (ImGui::Begin("WorldViewWindowControls", nullptr, windowFlags))
+                {
+                    if (ImGui::Button("Translate"))
+                    {
+                        imGuizmoOperation = ImGuizmo::TRANSLATE;
+                    }
+                    if (ImGui::Button("Rotate"))
+                    {
+                        imGuizmoOperation = ImGuizmo::ROTATE;
+                    }
+                    if (ImGui::Button("Scale"))
+                    {
+                        imGuizmoOperation = ImGuizmo::SCALE;
+                    }
+                }
+                ImGui::End();
+                ImGui::PopStyleColor();
+            }
 
             {
                 // Render in game console window on top of the game viewport.
@@ -135,7 +166,7 @@ namespace Insight
                     Maths::Matrix4 entityMatrix = transformComponent->GetTransform();
 
                     ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, ImGui::GetWindowSize().x, ImGui::GetWindowSize().y);
-                    ImGuizmo::Manipulate(&viewMatrix[0][0], &projectionMatrix[0][0], ImGuizmo::TRANSLATE, ImGuizmo::LOCAL, &entityMatrix[0][0]);
+                    ImGuizmo::Manipulate(&viewMatrix[0][0], &projectionMatrix[0][0], imGuizmoOperation, ImGuizmo::LOCAL, &entityMatrix[0][0]);
                     if (ImGuizmo::IsUsing())
                     {
                         transformComponent->SetTransform(entityMatrix);

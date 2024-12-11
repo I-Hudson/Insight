@@ -43,6 +43,8 @@ namespace Insight
         {
             IS_PROFILE_FUNCTION();
          
+            ImGui::Checkbox("Show Debug", &m_showTypeDrawerDebug);
+
             if (EditorWindowManager::Instance().IsWindowVisable(WorldEntitiesWindow::WINDOW_NAME))
             {
                 WorldEntitiesWindow const* entitiesWindow = static_cast<WorldEntitiesWindow const*>(EditorWindowManager::Instance().GetActiveWindow(WorldEntitiesWindow::WINDOW_NAME));
@@ -223,7 +225,14 @@ namespace Insight
                     const ITypeDrawer* typeDrawer = TypeDrawerRegister::Instance().GetDrawer(member.GetType().GetTypeName().data());
                     if (typeDrawer)
                     {
-                        typeDrawer->Draw(member.GetMemberPointer(), member, member.GetName());
+                        if (m_showTypeDrawerDebug)
+                        {
+                            typeDrawer->DrawDebug(member.GetMemberPointer(), member, member.GetName());
+                        }
+                        else
+                        {
+                            typeDrawer->Draw(member.GetMemberPointer(), member, member.GetName());
+                        }
                     }
                     else
                     {

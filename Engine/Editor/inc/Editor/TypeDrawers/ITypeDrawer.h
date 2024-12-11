@@ -13,6 +13,7 @@ namespace Insight
         {
         public:
             virtual void Draw(void* data, const Reflect::MemberInfo& memberInfo, const std::string_view label = "") const = 0;
+            virtual void DrawDebug(void* data, const Reflect::MemberInfo& memberInfo, const std::string_view label = "") const { Draw(data, memberInfo, label); }
         };
     }
 }

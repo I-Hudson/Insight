@@ -18,6 +18,32 @@ namespace Insight
 
         void TypeDrawer_Matrix4::Draw(void* data, const Reflect::MemberInfo& memberInfo, const std::string_view label) const
         {
+            Maths::Matrix4* mat4Ptr = static_cast<Maths::Matrix4*>(data);
+            Maths::Matrix4& mat4 = *mat4Ptr;
+
+            Maths::Vector4 translation;
+            Maths::Quaternion rotation;
+            Maths::Vector4 scale;
+
+            mat4.Decompose(translation, rotation, scale);
+
+            ImGui::DragFloat3("Translation", translation.data);
+
+            Maths::Vector3 euler = rotation.ToEulerDeg();
+            ImGui::DragFloat3("Rotation", euler.data);
+
+            ImGui::DragFloat3("Scale", scale.data);
+
+            Maths::Matrix4 newMatrix =
+                Maths::Matrix4::Identity.Scaled(scale)
+                * Maths::Matrix4::Identity.Rotated(Maths::Quaternion::FromEulerDegress(euler.x, euler.y, euler.z))
+                * Maths::Matrix4::Identity.Translated(translation);
+
+            mat4 = newMatrix;
+        }
+
+        void TypeDrawer_Matrix4::DrawDebug(void* data, const Reflect::MemberInfo& memberInfo, const std::string_view label) const
+        {
 #define ARRAY_TO_MATRIX(row, array) mat4[row][0] = array[0]; mat4[row][1] = array[1]; mat4[row][2] = array[2]; mat4[row][3] = array[3];
 
             Maths::Matrix4* mat4Ptr = static_cast<Maths::Matrix4*>(data);
