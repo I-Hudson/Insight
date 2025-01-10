@@ -1,6 +1,7 @@
 @echo off
 
 set vendorPath=%cd%\..\..\vendor
+set currentDirectory=%cd%
 
 :: Download pix
 call :DOWNLOAD_AND_UNZIP https://www.nuget.org/api/v2/package/WinPixEventRuntime/1.0.220810001                                      %vendorPath%\winpixeventruntime
@@ -10,15 +11,19 @@ call :DOWNLOAD_AND_UNZIP https://www.nuget.org/api/v2/package/Microsoft.Windows.
 call :DOWNLOAD_AND_UNZIP https://github.com/microsoft/DirectXShaderCompiler/releases/download/v1.7.2212/dxc_2022_12_16.zip          %vendorPath%\DirectXShaderCompiler
 call :DOWNLOAD_AND_UNZIP https://github.com/glfw/glfw/releases/download/3.4/glfw-3.4.zip                                            %vendorPath%\glfw
 call :DOWNLOAD_AND_UNZIP https://github.com/wolfpld/tracy/releases/download/v0.11.1/windows-0.11.1.zip                              %vendorPath%\tracyProfiler
+call :DOWNLOAD_AND_UNZIP https://github.com/danmar/cppcheck/archive/2.16.0.zip                                                      %vendorPath%\cppcheck
+
 robocopy "%vendorPath%\glfw\glfw-3.4" "%vendorPath%\glfw" /E /MOV
 
 echo Generate JoltPhysics solution
-call ../../vendor/JoltPhysics/Build/cmake_vs2022_cl.bat
+cd "%vendorPath%/JoltPhysics/Build"
+call cmake_vs2022_cl.bat "-D USE_STATIC_MSVC_RUNTIME_LIBRARY=OFF"
+cd "%currentDirectory%"
 echo Build JoltPhysics debug
 
-call ../Engine/Build_Solution.bat %vendorPath%/JoltPhysics/Build/VS2022_CL/JoltPhysics.sln vs2022 Build Debug x64
+call "../Engine/Build_Solution.bat" "%vendorPath%/JoltPhysics/Build/VS2022_CL/JoltPhysics.sln" vs2022 Build Debug x64
 echo Build JoltPhysics release
-call ../Engine/Build_Solution.bat %vendorPath%/JoltPhysics/Build/VS2022_CL/JoltPhysics.sln vs2022 Build Release x64
+call "../Engine/Build_Solution.bat" "%vendorPath%/Jolt Physics/Build/VS2022_CL/JoltPhysics.sln" vs2022 Build Release x64
 
 rem Generate FSR2 projects and build them.
 cd "%vendorPath%\FidelityFX-FSR2\build"
@@ -35,12 +40,12 @@ if %FSR2GenerateSolutions%=="1" (
     call GenerateSolutions.bat
 
     echo Buildiing FSR2 DX12 solutions
-    call ..\..\..\Build\Engine\Build_Solution.bat %vendorPath%\FidelityFX-FSR2\build\DX12\FSR2_Sample_DX12.sln vs2022 Build Release x64
-    call ..\..\..\Build\Engine\Build_Solution.bat %vendorPath%\FidelityFX-FSR2\build\DX12\FSR2_Sample_DX12.sln vs2022 Build Debug x64
+    call "..\..\..\Build\Engine\Build_Solution.bat" "%vendorPath%\FidelityFX-FSR2\build\DX12\FSR2_Sample_DX12.sln" vs2022 Build Release x64
+    call "..\..\..\Build\Engine\Build_Solution.bat" "%vendorPath%\FidelityFX-FSR2\build\DX12\FSR2_Sample_DX12.sln" vs2022 Build Debug x64
 
     echo Buildiing FSR2 Vulkan solutions
-    call ..\..\..\Build\Engine\Build_Solution.bat %vendorPath%\FidelityFX-FSR2\build\VK\FSR2_Sample_VK.sln vs2022 Build Release x64
-    call ..\..\..\Build\Engine\Build_Solution.bat %vendorPath%\FidelityFX-FSR2\build\VK\FSR2_Sample_VK.sln vs2022 Build Debug x64
+    call "..\..\..\Build\Engine\Build_Solution.bat" "%vendorPath%\FidelityFX-FSR2\build\VK\FSR2_Sample_VK.sln" vs2022 Build Release x64
+    call "..\..\..\Build\Engine\Build_Solution.bat" "%vendorPath%\FidelityFX-FSR2\build\VK\FSR2_Sample_VK.sln" vs2022 Build Debug x64
 )
 
 rem Copy all downloaded and unziped lib/dll and built lib/dll into the deps folder. 
@@ -53,7 +58,7 @@ exit 0
 :DOWNLOAD_AND_UNZIP
 set URL=%~1
 set UNZIPLOC=%~2
-set ZIP=%cd%\..\..\vendor\dependencies.zip
+set ZIP="%cd%\..\..\vendor\dependencies.zip"
 echo Download URL: %URL%
 echo Unzip location=%UNZIPLOC%
 
