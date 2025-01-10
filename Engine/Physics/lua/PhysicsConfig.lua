@@ -119,14 +119,14 @@ function PhysicsConfig.PreBuildCommands(OutputDir)
         end
 
     filter "configurations:Release"
-        if enabledJolt == true then
+        if EnabledPhysicsEngine == JoltPhysics then
             prebuildcommands
             {
                 "{COPY} \"%{wks.location}vendor/JoltPhysics/Build/VS2022_CL/Release/Jolt.lib\" \"%{wks.location}deps/".. OutputDir..  "/lib/\"\n",
             }
         end
 
-        if enabledPhysx == true then
+        if EnabledPhysicsEngine == PhysXPhysics then
             prebuildcommands
             {
                 "{COPY} \"%{wks.location}vendor/PhysX/physx/bin/win.x86_64.vc143.md/release/PhysXCommon_64.lib\" \"%{wks.location}deps/".. OutputDir..  "/lib/\"\n",

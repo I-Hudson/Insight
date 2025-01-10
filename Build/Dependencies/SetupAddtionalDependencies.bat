@@ -23,7 +23,7 @@ echo Build JoltPhysics debug
 
 call "../Engine/Build_Solution.bat" "%vendorPath%/JoltPhysics/Build/VS2022_CL/JoltPhysics.sln" vs2022 Build Debug x64
 echo Build JoltPhysics release
-call "../Engine/Build_Solution.bat" "%vendorPath%/Jolt Physics/Build/VS2022_CL/JoltPhysics.sln" vs2022 Build Release x64
+call "../Engine/Build_Solution.bat" "%vendorPath%/JoltPhysics/Build/VS2022_CL/JoltPhysics.sln" vs2022 Build Release x64
 
 rem Generate FSR2 projects and build them.
 cd "%vendorPath%\FidelityFX-FSR2\build"
