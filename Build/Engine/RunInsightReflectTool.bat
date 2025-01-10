@@ -13,4 +13,6 @@ pause
 
 echo InsightReflectTool has Finished
 
+call Generate_Projects_vs2019.bat
+
 pause
