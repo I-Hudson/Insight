@@ -32,6 +32,8 @@
 
 #include "imgui.h"
 
+#include "Core/ProxyAllocator.h"
+
 namespace Insight
 {
 	namespace App
@@ -40,6 +42,12 @@ namespace Insight
 
 		Engine::Engine()
 		{
+			struct Handle : Core::IProxyHandle
+			{
+
+			};
+
+			Core::ProxyAllocator<Handle, int> p;
 		}
 
 		Engine::~Engine()
