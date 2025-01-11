@@ -160,15 +160,15 @@ namespace Insight
 		class IS_RUNTIME ComponentRegistry
 		{
 		public:
-			static void RegisterComponent(std::string_view component_type, std::function<Component* ()> func);
-			static void UnregisterComponent(std::string_view component_type);
-			static Component* CreateComponent(std::string_view component_type);
+			static void RegisterComponent(std::string_view componentType, std::function<Component* ()> func);
+			static void UnregisterComponent(std::string_view componentType);
+			static Component* CreateComponent(std::string_view componentType);
 
-			static bool HasComponent(std::string_view component_type);
+			static bool HasComponent(std::string_view componentType);
 			static std::vector<std::string> GetComponentNames();
 
 		private:
-			static ComponentRegistryMap m_register_funcs;
+			static ComponentRegistryMap m_registerFuncs;
 		};
 
 		class IS_RUNTIME Entity : public Serialisation::ISerialisable
@@ -179,14 +179,14 @@ namespace Insight
 			Entity(ECSWorld* ecs_world, std::string name);
 #else
 			Entity() = default;
-			Entity(EntityManager* entity_manager);
-			Entity(EntityManager* entity_manager, std::string name);
+			Entity(EntityManager* entityManager);
+			Entity(EntityManager* entityManager, std::string name);
 			~Entity();
 #endif
 			Entity* GetParent() const { return m_parent.Get(); }
 
 			Ptr<Entity> AddChild();
-			Ptr<Entity> AddChild(std::string entity_name);
+			Ptr<Entity> AddChild(std::string entityName);
 
 			void RemoveChild(u32 index);
 
@@ -195,13 +195,13 @@ namespace Insight
 			Ptr<Entity> GetLastChild() const;
 			Ptr<Entity> GetChild(u32 index) const;
 
-			Component* AddComponentByName(std::string_view component_type);
+			Component* AddComponentByName(std::string_view componentType);
 
 			void RemoveComponent(const Component* component);
 			void RemoveComponent(const Core::GUID& guid);
-			void RemoveComponent(std::string_view component_type);
+			void RemoveComponent(std::string_view componentType);
 
-			bool HasComponentByName(std::string_view component_type) const;
+			bool HasComponentByName(std::string_view componentType) const;
 			template<typename T>
 			bool HasComponent() const
 			{
@@ -216,12 +216,12 @@ namespace Insight
 			}
 
 			Component* GetComponentByGuid(const Core::GUID& guid) const;
-			Component* GetComponentByName(std::string_view component_type) const;
+			Component* GetComponentByName(std::string_view componentType) const;
 			template<typename T>
-			T* GetComponentByName(std::string_view component_type) const
+			T* GetComponentByName(std::string_view componentType) const
 			{
 				static_assert(std::is_base_of_v<Component, T>);
-				Component* component = GetComponentByName(component_type);
+				Component* component = GetComponentByName(componentType);
 				if (component)
 				{
 					return static_cast<T*>(component);
@@ -269,7 +269,7 @@ namespace Insight
 #ifdef ECS_ENABLED
 			ECSWorld* m_ecs_world = nullptr;
 #else
-			EntityManager* m_entity_manager = nullptr;
+			EntityManager* m_entityManager = nullptr;
 #endif
 			bool m_isEnabled = true;
 

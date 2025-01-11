@@ -70,7 +70,7 @@ namespace Insight
 			return m_entityManager->GetEntityData(*this).GUID;
 		}
 #else 
-		ComponentRegistryMap ComponentRegistry::m_register_funcs;
+		ComponentRegistryMap ComponentRegistry::m_registerFuncs;
 
 		Component::Component()
 			: m_allow_multiple(false)
@@ -84,45 +84,45 @@ namespace Insight
 
 		IS_SERIALISABLE_CPP(Component)
 
-		void ComponentRegistry::RegisterComponent(std::string_view component_type, std::function<Component*()> func)
+		void ComponentRegistry::RegisterComponent(std::string_view componentType, std::function<Component*()> func)
 		{
-			if (auto itr = m_register_funcs.find(std::string(component_type));
-				itr == m_register_funcs.end())
+			if (auto itr = m_registerFuncs.find(std::string(componentType));
+				itr == m_registerFuncs.end())
 			{
-				m_register_funcs[std::string(component_type)] = std::move(func);
+				m_registerFuncs[std::string(componentType)] = std::move(func);
 			}
 		}
 
-		void ComponentRegistry::UnregisterComponent(std::string_view component_type)
+		void ComponentRegistry::UnregisterComponent(std::string_view componentType)
 		{
-			if (auto itr = m_register_funcs.find(std::string(component_type));
-				itr != m_register_funcs.end())
+			if (auto itr = m_registerFuncs.find(std::string(componentType));
+				itr != m_registerFuncs.end())
 			{
-				m_register_funcs.erase(itr);
+				m_registerFuncs.erase(itr);
 			}
 		}
 
-		Component* ComponentRegistry::CreateComponent(std::string_view component_type)
+		Component* ComponentRegistry::CreateComponent(std::string_view componentType)
 		{
-			if (auto itr = m_register_funcs.find(std::string(component_type)); 
-				itr != m_register_funcs.end())
+			if (auto itr = m_registerFuncs.find(std::string(componentType)); 
+				itr != m_registerFuncs.end())
 			{
 				return itr->second();
 			}
-			IS_LOG_CORE_WARN("[ComponentRegistry::CreateComponent] ComponentType: '{0}', is unregistered.", component_type);
+			IS_LOG_CORE_WARN("[ComponentRegistry::CreateComponent] ComponentType: '{0}', is unregistered.", componentType);
 			return nullptr;
 		}
 
-		bool ComponentRegistry::HasComponent(std::string_view component_type)
+		bool ComponentRegistry::HasComponent(std::string_view componentType)
 		{
-			return m_register_funcs.find(std::string(component_type)) != m_register_funcs.end();
+			return m_registerFuncs.find(std::string(componentType)) != m_registerFuncs.end();
 		}
 
 		std::vector<std::string> ComponentRegistry::GetComponentNames()
 		{
 			std::vector<std::string> componentTypeNames;
-			componentTypeNames.reserve(m_register_funcs.size());
-			for (auto& [TypeName, CreateFunc] : m_register_funcs)
+			componentTypeNames.reserve(m_registerFuncs.size());
+			for (auto& [TypeName, CreateFunc] : m_registerFuncs)
 			{
 				componentTypeNames.push_back(TypeName);
 			}
@@ -149,12 +149,12 @@ namespace Insight
 			, m_name(std::move(name))
 		{ }
 #else
-		Entity::Entity(EntityManager* entity_manager)
-			: m_entity_manager(entity_manager)
+		Entity::Entity(EntityManager* entityManager)
+			: m_entityManager(entityManager)
 		{ }
 
-		Entity::Entity(EntityManager* entity_manager, std::string name)
-			: m_entity_manager(entity_manager)
+		Entity::Entity(EntityManager* entityManager, std::string name)
+			: m_entityManager(entityManager)
 			, m_name(std::move(name))
 		{ }
 
@@ -168,12 +168,12 @@ namespace Insight
 			return AddChild("Child");
 		}
 
-		Ptr<Entity> Entity::AddChild(std::string entity_name)
+		Ptr<Entity> Entity::AddChild(std::string entityName)
 		{
 #ifdef ECS_ENABLED
-			Ptr<Entity> entity = m_ecs_world->AddEntity(entity_name);
+			Ptr<Entity> entity = m_ecs_world->AddEntity(entityName);
 #else
-			Ptr<Entity> entity = m_entity_manager->AddNewEntity(entity_name);
+			Ptr<Entity> entity = m_entityManager->AddNewEntity(entityName);
 #endif
 			entity->m_parent = this;
 			m_children.push_back(entity);
@@ -189,14 +189,14 @@ namespace Insight
 			}
 			/// Remove the entity from the ecs world (delete the entity from memory)
 			/// the remove it from this entity's child vector.
-			std::vector<Ptr<Entity>>::iterator entity_itr = m_children.begin() + index;
-			Entity* entity_ptr = entity_itr->Get();
+			std::vector<Ptr<Entity>>::iterator entityIter = m_children.begin() + index;
+			Entity* entityPtr = entityIter->Get();
 #ifdef ECS_ENABLED
-			m_ecs_world->RemoveEntity(entity_ptr);
+			m_ecs_world->RemoveEntity(entityPtr);
 #else
-			m_entity_manager->RemoveEntity(entity_ptr);
+			m_entityManager->RemoveEntity(entityPtr);
 #endif
-			m_children.erase(entity_itr);
+			m_children.erase(entityIter);
 		}
 
 		u32 Entity::GetChildCount() const
@@ -232,18 +232,18 @@ namespace Insight
 			return m_children.at(index);
 		}
 
-		Component* Entity::AddComponentByName(std::string_view component_type)
+		Component* Entity::AddComponentByName(std::string_view componentType)
 		{
-			Component* component = GetComponentByName(component_type);
+			Component* component = GetComponentByName(componentType);
 			if (component && !component->m_allow_multiple)
 			{
-				IS_LOG_CORE_WARN("[Entity::AddComponentByName] Trying to add '{}'. ComponentType can not have multiple attached.", component_type);
+				IS_LOG_CORE_WARN("[Entity::AddComponentByName] Trying to add '{}'. ComponentType can not have multiple attached.", componentType);
 				return component;
 			}
 			
 			if (component == nullptr)
 			{
-				component = ComponentRegistry::CreateComponent(component_type);
+				component = ComponentRegistry::CreateComponent(componentType);
 				if (component)
 				{
 					component->m_ownerEntity = this;
@@ -289,13 +289,13 @@ namespace Insight
 			componentToRemove.Reset();
 		}
 
-		void Entity::RemoveComponent(std::string_view component_type)
+		void Entity::RemoveComponent(std::string_view componentType)
 		{
 			u32 index = 0;
 			for (const RPtr<Component>& component : m_components)
 			{
 				if (component->m_removeable
-					&& component->GetTypeName() == component_type)
+					&& component->GetTypeName() == componentType)
 				{
 					break;
 				}
@@ -308,15 +308,15 @@ namespace Insight
 			}
 			else
 			{
-				IS_LOG_CORE_INFO("[Entity::RemoveComponentByName] Tried to remove component '{}'. Component doesn't exists.", component_type);
+				IS_LOG_CORE_INFO("[Entity::RemoveComponentByName] Tried to remove component '{}'. Component doesn't exists.", componentType);
 			}
 		}
 
-		bool Entity::HasComponentByName(std::string_view component_type) const
+		bool Entity::HasComponentByName(std::string_view componentType) const
 		{
 			for (RPtr<Component> const& component : m_components)
 			{
-				if (component->GetTypeName() == component_type)
+				if (component->GetTypeName() == componentType)
 				{
 					return true;
 				}
@@ -337,11 +337,11 @@ namespace Insight
 		}
 
 
-		Component* Entity::GetComponentByName(std::string_view component_type) const
+		Component* Entity::GetComponentByName(std::string_view componentType) const
 		{
 			for (const RPtr<Component>& component : m_components)
 			{
-				if (component->GetTypeName() == component_type) 
+				if (component->GetTypeName() == componentType) 
 				{
 					return component.Get();
 				}
