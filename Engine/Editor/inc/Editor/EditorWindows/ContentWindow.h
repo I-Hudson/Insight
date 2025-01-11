@@ -8,7 +8,12 @@
 
 #include "Core/Timer.h"
 
+#include <Reflect/ReflectStructs.h>
+
 #include "Editor/EditorWindows/Generated/ContentWindow_reflect_generated.h"
+
+#include <imgui.h>
+#include <imgui_internal.h>
 
 #include <vector>
 #include <string>
@@ -18,10 +23,13 @@ namespace Insight
     namespace Runtime
     {
         class TextureAsset;
+        class Asset;
     }
 
     namespace Editor
     {
+        class ContentWindow;
+
         enum ContentWindowThumbnailType
         {
             Folder,
@@ -31,10 +39,31 @@ namespace Insight
             Mesh
         };
 
-        REFLECT_CLASS()
+        class IContentThumbnail
+        {
+        public:
+            void Draw(const Runtime::Asset* asset, ContentWindow& contentWindow);
+            void DrawButton(const Runtime::Asset* asset, ContentWindow& contentWindow);
+            void DrawImage(const Runtime::Asset* asset, ContentWindow& contentWindow);
+
+            virtual void DrawContent(const Runtime::Asset* asset, ContentWindow& contentWindow) const = 0;
+            virtual Reflect::TypeInfo GetAssetTypeInfo() const = 0;
+
+            ImVec2 ItemSize;
+            ImRect RectSize;
+            bool ItemSelected = false;
+        };
+        class ContentThumbnailModelAsset : public IContentThumbnail
+        {
+        public:
+            virtual void DrawContent(const Runtime::Asset* asset, ContentWindow& contentWindow) const override;
+            virtual Reflect::TypeInfo GetAssetTypeInfo() const override;
+        };
+
+        REFLECT_CLASS();
         class ContentWindow : public IEditorWindow
         {
-            REFLECT_GENERATED_BODY()
+            REFLECT_GENERATED_BODY();
 
         public:
             constexpr static const char* c_ContentWindowResourceDragSource = "ConentWindowResourceDragSource";
@@ -51,6 +80,9 @@ namespace Insight
             virtual void Shutdown() override;
             virtual void OnDraw() override;
             // End - IEditorWindow
+
+            Ref<Runtime::TextureAsset> PathToThumbnail(std::string const& path);
+
         private:
             void TopBar();
             void CentreArea();
@@ -62,13 +94,12 @@ namespace Insight
             void SplitDirectory();
             void SetDirectoryFromParent(u32 parentIndex);
 
-            Ref<Runtime::TextureAsset> PathToThumbnail(std::string const& path);
-
             void DrawGeneralMenu();
 
         private:
             std::unordered_map<ContentWindowThumbnailType, Ref<Runtime::TextureAsset>> m_thumbnailToTexture;
             std::unordered_map<std::string, Ref<Runtime::TextureAsset>> m_fileExtensionToTexture;
+            std::vector<IContentThumbnail*> m_contentThumbnail;
 
             Core::Timer m_lastClickTimer;
             std::string itemClickedId;
@@ -85,6 +116,8 @@ namespace Insight
             bool m_showCreateResourceWindow = false;
 
             bool m_showGeneralMenu = false;
+
+            friend IContentThumbnail;
         };
     }
 }

@@ -69,7 +69,7 @@ float4 PSMain(VertexOutput input) : SV_TARGET
 	const float DepthValue = EditorDepthTexture.Sample(Clamp_Sampler, input.UV).r;
     const float3 worldPosition = reconstruct_position(input.UV, DepthValue, bf_Camera_Projection_View_Inverted);
 	const float3 albedo = (EditorColourTexture.Sample(Clamp_Sampler, input.UV).xyz);
-    const float3 ambientAlbedo = albedo * 0.15;
+    const float3 ambientAlbedo = albedo * 0.4;
 
     float3 currentAlbedo = float3(0, 0, 0);
 

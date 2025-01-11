@@ -8,6 +8,7 @@
 
 #include "Asset/AssetRegistry.h"
 #include "Asset/Assets/Texture.h"
+#include "Asset/Assets/Model.h"
 
 #include "Runtime/ProjectSystem.h"
 
@@ -27,29 +28,138 @@
 
 namespace Insight::Editor
 {
-    ContentWindow::ContentWindow()
-        : IEditorWindow()
+    //==============================
+    // IContentThumbnail
+    //==============================
+    void IContentThumbnail::Draw(const Runtime::Asset* asset, ContentWindow& contentWindow)
+    {
+        const Runtime::AssetInfo* assetInfo = asset->GetAssetInfo();
+        ImGui::PushID(assetInfo->FileName.c_str());
+        ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0, 0, 0, 0));
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 1.0f, 0.25f));
+
+        DrawButton(asset, contentWindow);
+        DrawImage(asset, contentWindow);
+        DrawContent(asset, contentWindow);
+
+        ImGui::PopStyleColor(2);
+        ImGui::PopID();
+    }
+
+    void IContentThumbnail::DrawButton(const Runtime::Asset* asset, ContentWindow& contentWindow)
+    {
+        ItemSelected = false;
+        if (ImGui::Button("##dummy", ItemSize))
+        {
+            contentWindow.m_lastClickTimer.Stop();
+            float elapsedTime = contentWindow.m_lastClickTimer.GetElapsedTimeMillFloat();
+            contentWindow.m_lastClickTimer.Start();
+            const bool isSingleClick = elapsedTime > 0.5f;
+
+            if (isSingleClick)
+            {
+                contentWindow.m_currentItemSelected = asset->GetAssetInfo()->GetFullFilePath();
+                ItemSelected = true;
+            }
+            else
+            {
+                AssetInspectorWindow* assetInspectorWindow = static_cast<AssetInspectorWindow*>(EditorWindowManager::Instance().GetActiveWindow(AssetInspectorWindow::WINDOW_NAME));
+                if (assetInspectorWindow)
+                {
+                    assetInspectorWindow->SetSelectedAssetInfo(asset->GetAssetInfo());
+                }
+            }
+        }
+    }
+
+    void IContentThumbnail::DrawImage(const Runtime::Asset* asset, ContentWindow& contentWindow)
+    {
+        const Runtime::AssetInfo* assetInfo = asset->GetAssetInfo();
+        // Image
+        {
+            IS_PROFILE_SCOPE("Image");
+            // Compute thumbnail size
+            Graphics::RHI_Texture* texture = nullptr;
+            if (texture == nullptr)
+            {
+                Ref<Runtime::Asset> thumbnailTexture = contentWindow.PathToThumbnail(assetInfo->GetFullFilePath());
+                if (thumbnailTexture)
+                {
+                    texture = contentWindow.PathToThumbnail(assetInfo->GetFullFilePath())->GetRHITexture();
+                }
+            }
+
+            const ImGuiContext* context = ImGui::GetCurrentContext();
+            ImGuiStyle style = ImGui::GetStyle();
+            const float fontHeight = context->FontSize;
+
+            ImVec2 image_size_max = ImVec2(RectSize.Max.x - RectSize.Min.x - style.FramePadding.x * 2.0f, RectSize.Max.y - RectSize.Min.y - style.FramePadding.y - fontHeight - 5.0f);
+            ImVec2 image_size = texture ? ImVec2(static_cast<float>(texture->GetWidth()), static_cast<float>(texture->GetHeight())) : image_size_max;
+            ImVec2 image_size_delta = ImVec2(0.0f, 0.0f);
+
+            // Scale the image size to fit the max available size while respecting it's aspect ratio
+            {
+                // Clamp width
+                if (image_size.x != image_size_max.x)
+                {
+                    float scale = image_size_max.x / image_size.x;
+                    image_size.x = image_size_max.x;
+                    image_size.y = image_size.y * scale;
+                }
+                // Clamp height
+                if (image_size.y != image_size_max.y)
+                {
+                    float scale = image_size_max.y / image_size.y;
+                    image_size.x = image_size.x * scale;
+                    image_size.y = image_size_max.y;
+                }
+
+                image_size_delta.x = image_size_max.x - image_size.x;
+                image_size_delta.y = image_size_max.y - image_size.y;
+            }
+
+            // Position the image within the square border
+            ImGui::SetCursorScreenPos(ImVec2(RectSize.Min.x + style.FramePadding.x + image_size_delta.x * 0.5f, RectSize.Min.y + style.FramePadding.y + image_size_delta.y * 0.5f));
+
+            // Draw the image
+            ImGui::Image(texture, image_size);
+        }
+    }
+
+    //==============================
+    // ContentThumbnailModelAsset
+    //==============================
+    void ContentThumbnailModelAsset::DrawContent(const Runtime::Asset* asset, ContentWindow& contentWindow) const
     {
     }
+    Reflect::TypeInfo ContentThumbnailModelAsset::GetAssetTypeInfo() const
+    {
+        return Runtime::ModelAsset::GetStaticTypeInfo();
+    }
+
+    //==============================
+    // ContentWindow
+    //==============================
+    ContentWindow::ContentWindow()
+        : IEditorWindow()
+    { }
 
     ContentWindow::ContentWindow(u32 minWidth, u32 minHeight)
         : IEditorWindow(minWidth, minHeight)
-    {
-    }
+    { }
 
     ContentWindow::ContentWindow(u32 minWidth, u32 minHeight, u32 maxWidth, u32 maxHeight)
         : IEditorWindow(minWidth, minHeight, maxWidth, maxHeight)
-    {
-    }
+    { }
 
     ContentWindow::~ContentWindow()
-    {
-    }
+    { }
 
     void ContentWindow::OnDraw()
     {
         IS_PROFILE_FUNCTION();
-
+        bool s = true;
+        ImGui::ShowDebugLogWindow(&s);
         // Top bar
         TopBar();
         // Centre thumbnails
@@ -76,6 +186,8 @@ namespace Insight::Editor
                 m_currentDirectory = Runtime::ProjectSystem::Instance().GetProjectInfo().GetContentPath();
                 SplitDirectory();
             });
+
+        m_contentThumbnail.push_back(::New<ContentThumbnailModelAsset>());
 
         m_fileExtensionToTexture[".fbx"] = 
             Runtime::AssetRegistry::Instance().LoadAsset(EnginePaths::GetResourcePath() + "/Editor/Icons/FBX_File_Icon.png").As<Runtime::TextureAsset>();
@@ -110,6 +222,11 @@ namespace Insight::Editor
 
     void ContentWindow::Shutdown()
     {
+        for (size_t i = 0; i < m_contentThumbnail.size(); ++i)
+        {
+            ::Delete(m_contentThumbnail[i]);
+        }
+        m_contentThumbnail.clear();
         Core::EventSystem::Instance().RemoveEventListener(this, Core::EventType::Project_Open);
     }
 
@@ -303,105 +420,126 @@ namespace Insight::Editor
 
                             // THUMBNAIL
                             {
-                                IS_PROFILE_SCOPE("THUMBNAIL");
-                                ImGui::PushID(fileName.c_str());
-                                ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0, 0, 0, 0));
-                                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 1.0f, 0.25f));
-
-                                if (ImGui::Button("##dummy", itemSize))
-                                {
-                                    m_lastClickTimer.Stop();
-                                    float elapsedTime = m_lastClickTimer.GetElapsedTimeMillFloat();
-                                    m_lastClickTimer.Start();
-                                    const bool isSingleClick = elapsedTime > 0.5f;
-
-                                    if (isSingleClick)
+                                if (auto thumbNailIter = Algorithm::VectorFindIf(m_contentThumbnail, [&contentResource](const IContentThumbnail* contentThumbnail)
                                     {
-                                        m_currentItemSelected = path;
-                                        itemSelectedThisFrame = true;
-                                    }
-                                    else
-                                    {
-                                        if (iter.is_directory())
+                                        if (contentResource)
                                         {
-                                            m_currentDirectory = path;
-                                            FileSystem::PathToUnix(m_currentDirectory);
-                                            SplitDirectory();
+                                            const Reflect::Type assetType = contentResource->GetTypeInfo().GetType();
+                                            const Reflect::Type thumbnailType = contentThumbnail->GetAssetTypeInfo().GetType();
+                                            return assetType == thumbnailType;
+                                        }
+                                        return false;
+                                    }); thumbNailIter != m_contentThumbnail.end())
+                                {
+                                    IContentThumbnail* contentThumbnail = (*thumbNailIter);
+                                    contentThumbnail->ItemSize = itemSize;
+                                    contentThumbnail->RectSize = rect_button;
+                                    contentThumbnail->Draw(contentResource.Ptr(), *this);
+
+                                    itemSelectedThisFrame = contentThumbnail->ItemSelected;
+                                }
+                                else
+                                {
+                                    IS_PROFILE_SCOPE("THUMBNAIL");
+                                    ImGui::PushID(fileName.c_str());
+                                    ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0, 0, 0, 0));
+                                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 1.0f, 0.25f));
+
+                                    if (ImGui::Button("##dummy", itemSize))
+                                    {
+                                        m_lastClickTimer.Stop();
+                                        float elapsedTime = m_lastClickTimer.GetElapsedTimeMillFloat();
+                                        m_lastClickTimer.Start();
+                                        const bool isSingleClick = elapsedTime > 0.5f;
+
+                                        if (isSingleClick)
+                                        {
+                                            m_currentItemSelected = path;
+                                            itemSelectedThisFrame = true;
                                         }
                                         else
                                         {
-
-                                            AssetInspectorWindow* assetInspectorWindow = static_cast<AssetInspectorWindow*>(EditorWindowManager::Instance().GetActiveWindow(AssetInspectorWindow::WINDOW_NAME));
-                                            if (assetInspectorWindow)
+                                            if (iter.is_directory())
                                             {
-                                                assetInspectorWindow->SetSelectedAssetInfo(assetInfo);
+                                                m_currentDirectory = path;
+                                                FileSystem::PathToUnix(m_currentDirectory);
+                                                SplitDirectory();
                                             }
-
-                                            std::vector<IObject*> objects = Runtime::AssetRegistry::Instance().GetObjectsFromAsset(assetInfo->Guid);
-                                            if (!objects.empty())
+                                            else
                                             {
 
+                                                AssetInspectorWindow* assetInspectorWindow = static_cast<AssetInspectorWindow*>(EditorWindowManager::Instance().GetActiveWindow(AssetInspectorWindow::WINDOW_NAME));
+                                                if (assetInspectorWindow)
+                                                {
+                                                    assetInspectorWindow->SetSelectedAssetInfo(assetInfo);
+                                                }
+
+                                                std::vector<IObject*> objects = Runtime::AssetRegistry::Instance().GetObjectsFromAsset(assetInfo->Guid);
+                                                if (!objects.empty())
+                                                {
+
+                                                }
                                             }
                                         }
                                     }
+
+                                    // Image
+                                    {
+                                        IS_PROFILE_SCOPE("Image");
+                                        // Compute thumbnail size
+                                        Graphics::RHI_Texture* texture = nullptr;
+                                        if (assetInfo != nullptr)
+                                        {
+                                            Ref<Runtime::Asset> asset = Runtime::AssetRegistry::Instance().LoadAsset(path);
+                                            if (Ref<Runtime::TextureAsset> textureAsset = asset.As<Runtime::TextureAsset>())
+                                            {
+                                                texture = textureAsset->GetRHITexture();
+                                            }
+                                        }
+
+                                        if (texture == nullptr)
+                                        {
+                                            Ref<Runtime::Asset> thumbnailTexture = PathToThumbnail(path);
+                                            if (thumbnailTexture)
+                                            {
+                                                texture = PathToThumbnail(path)->GetRHITexture();
+                                            }
+                                        }
+                                        ImVec2 image_size_max = ImVec2(rect_button.Max.x - rect_button.Min.x - style.FramePadding.x * 2.0f, rect_button.Max.y - rect_button.Min.y - style.FramePadding.y - label_height - 5.0f);
+                                        ImVec2 image_size = texture ? ImVec2(static_cast<float>(texture->GetWidth()), static_cast<float>(texture->GetHeight())) : image_size_max;
+                                        ImVec2 image_size_delta = ImVec2(0.0f, 0.0f);
+
+                                        // Scale the image size to fit the max available size while respecting it's aspect ratio
+                                        {
+                                            // Clamp width
+                                            if (image_size.x != image_size_max.x)
+                                            {
+                                                float scale = image_size_max.x / image_size.x;
+                                                image_size.x = image_size_max.x;
+                                                image_size.y = image_size.y * scale;
+                                            }
+                                            // Clamp height
+                                            if (image_size.y != image_size_max.y)
+                                            {
+                                                float scale = image_size_max.y / image_size.y;
+                                                image_size.x = image_size.x * scale;
+                                                image_size.y = image_size_max.y;
+                                            }
+
+                                            image_size_delta.x = image_size_max.x - image_size.x;
+                                            image_size_delta.y = image_size_max.y - image_size.y;
+                                        }
+
+                                        // Position the image within the square border
+                                        ImGui::SetCursorScreenPos(ImVec2(rect_button.Min.x + style.FramePadding.x + image_size_delta.x * 0.5f, rect_button.Min.y + style.FramePadding.y + image_size_delta.y * 0.5f));
+
+                                        // Draw the image
+                                        ImGui::Image(texture, image_size);
+                                    }
+
+                                    ImGui::PopStyleColor(2);
+                                    ImGui::PopID();
                                 }
-
-                                // Image
-                                {
-                                    IS_PROFILE_SCOPE("Image");
-                                    // Compute thumbnail size
-                                    Graphics::RHI_Texture* texture = nullptr;
-                                    if (assetInfo != nullptr)
-                                    {
-                                        Ref<Runtime::Asset> asset = Runtime::AssetRegistry::Instance().LoadAsset(path);
-                                        if (Ref<Runtime::TextureAsset> textureAsset = asset.As<Runtime::TextureAsset>())
-                                        {
-                                            texture = textureAsset->GetRHITexture();
-                                        }
-                                    }
-
-                                    if (texture == nullptr)
-                                    {
-                                        Ref<Runtime::Asset> thumbnailTexture = PathToThumbnail(path);
-                                        if (thumbnailTexture)
-                                        {
-                                            texture = PathToThumbnail(path)->GetRHITexture();
-                                        }
-                                    }
-                                    ImVec2 image_size_max = ImVec2(rect_button.Max.x - rect_button.Min.x - style.FramePadding.x * 2.0f, rect_button.Max.y - rect_button.Min.y - style.FramePadding.y - label_height - 5.0f);
-                                    ImVec2 image_size = texture ? ImVec2(static_cast<float>(texture->GetWidth()), static_cast<float>(texture->GetHeight())) : image_size_max;
-                                    ImVec2 image_size_delta = ImVec2(0.0f, 0.0f);
-
-                                    // Scale the image size to fit the max available size while respecting it's aspect ratio
-                                    {
-                                        // Clamp width
-                                        if (image_size.x != image_size_max.x)
-                                        {
-                                            float scale = image_size_max.x / image_size.x;
-                                            image_size.x = image_size_max.x;
-                                            image_size.y = image_size.y * scale;
-                                        }
-                                        // Clamp height
-                                        if (image_size.y != image_size_max.y)
-                                        {
-                                            float scale = image_size_max.y / image_size.y;
-                                            image_size.x = image_size.x * scale;
-                                            image_size.y = image_size_max.y;
-                                        }
-
-                                        image_size_delta.x = image_size_max.x - image_size.x;
-                                        image_size_delta.y = image_size_max.y - image_size.y;
-                                    }
-
-                                    // Position the image within the square border
-                                    ImGui::SetCursorScreenPos(ImVec2(rect_button.Min.x + style.FramePadding.x + image_size_delta.x * 0.5f, rect_button.Min.y + style.FramePadding.y + image_size_delta.y * 0.5f));
-
-                                    // Draw the image
-                                    ImGui::Image(texture, image_size);
-                                }
-
-                                ImGui::PopStyleColor(2);
-                                ImGui::PopID();
                             }
 
                             // LABEL
