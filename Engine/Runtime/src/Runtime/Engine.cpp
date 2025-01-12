@@ -42,12 +42,20 @@ namespace Insight
 
 		Engine::Engine()
 		{
-			struct Handle : Core::IProxyHandle
-			{
+			ProxyAllocator<int*> p;
 
-			};
+			ProxyHandle<int*> h = p.Allocate(::New<int>(2));
+			h.IsValid();
+			int* i = p.GetType(h);
+			p.Release(h);
+			h.IsValid();
+			
+			
+			h = p.Allocate(::New<int>(42));
+			i = p.GetType(h);
+			p.Release(h);
 
-			Core::ProxyAllocator<Handle, int> p;
+			IS_LOG_INFO("");
 		}
 
 		Engine::~Engine()

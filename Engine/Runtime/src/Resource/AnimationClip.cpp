@@ -28,10 +28,11 @@ namespace Insight
                 const PositionKeyFrame& positionKeyFrame = Positions[posIdx + 1];
                 if (time < positionKeyFrame.TimeStamp)
                 {
-                    return posIdx;
+                    return (u32)posIdx;
                 }
             }
             FAIL_ASSERT();
+            return 0;
         }
 
         const u32 AnimationBoneTrack::GetRotationKeyFrameIndex(const double time) const
@@ -42,10 +43,11 @@ namespace Insight
                 const RotationKeyFrame& rotationKeyFrame = Rotations[rotIdx + 1];
                 if (time < rotationKeyFrame.TimeStamp)
                 {
-                    return rotIdx;
+                    return (u32)rotIdx;
                 }
             }
             FAIL_ASSERT();
+            return 0;
         }
 
         const u32 AnimationBoneTrack::GetScaleKeyFrameIndex(const double time) const
@@ -56,10 +58,11 @@ namespace Insight
                 const ScaleKeyFrame& scaleKeyFrame = Scales[scaleIdx + 1];
                 if (time < scaleKeyFrame.TimeStamp)
                 {
-                    return scaleIdx;
+                    return (u32)scaleIdx;
                 }
             }
             FAIL_ASSERT();
+            return 0;
         }
 
         //=======================================
