@@ -13,15 +13,14 @@ namespace Insight
 {
     namespace Serialisation
     {
-        ISerialiser::ISerialiser(SerialisationTypes type, bool isReadMode)
+        ISerialiser::ISerialiser(SerialisationTypes type, const u32 version, bool isReadMode)
             : m_type(type)
+            , m_version(version)
             , m_isReadMode(isReadMode)
-        {
-        }
+        { }
 
         ISerialiser::~ISerialiser()
-        {
-        }
+        { }
 
         ISerialiser* ISerialiser::Create(SerialisationTypes type, bool isReadMode)
         {
@@ -45,11 +44,6 @@ namespace Insight
         std::string_view ISerialiser::GetName() const
         {
             return m_name;
-        }
-
-        void ISerialiser::SetVersion(u32 currentVersion)
-        {
-            m_version = currentVersion;
         }
 
         u32 ISerialiser::GetVersion() const

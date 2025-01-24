@@ -66,7 +66,7 @@ namespace Insight
         class IS_CORE ISerialiser
         {
         public:
-            ISerialiser(SerialisationTypes type, bool isReadMode);
+            ISerialiser(SerialisationTypes type, const u32 version, bool isReadMode);
             virtual ~ISerialiser();
 
             static ISerialiser* Create(SerialisationTypes type, bool isReadMode);
@@ -74,7 +74,6 @@ namespace Insight
             void SetName(std::string_view tag);
             std::string_view GetName() const;
 
-            void SetVersion(u32 currentVersion);
             u32 GetVersion() const;
             SerialisationTypes GetType() const;
             
@@ -114,6 +113,8 @@ namespace Insight
             virtual void Write(std::string_view tag, std::string const& string) = 0;
 
             virtual void Write(std::string_view tag, const std::vector<Byte>& vector, bool encodeSize = true) = 0;
+
+            //--
 
             virtual void Read(std::string_view tag, bool& data) = 0;
             virtual void Read(std::string_view tag, char& data) = 0;

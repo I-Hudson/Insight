@@ -10,15 +10,19 @@ namespace Insight
 {
     namespace Serialisation
     {
+        //--
+
+        const u32 c_JsonSerialiser_Version = 1;
+
         JsonSerialiser::JsonSerialiser()
-            : ISerialiser(SerialisationTypes::Json, false)
+            : ISerialiser(SerialisationTypes::Json, c_JsonSerialiser_Version, false)
         { 
             m_reader = {};
             m_writer = {};
         }
 
         JsonSerialiser::JsonSerialiser(bool isReadMode)
-            : ISerialiser(SerialisationTypes::Json, isReadMode)
+            : ISerialiser(SerialisationTypes::Json, c_JsonSerialiser_Version, isReadMode)
         {
             m_reader = {};
             m_writer = {};

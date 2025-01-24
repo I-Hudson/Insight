@@ -96,15 +96,18 @@ namespace Insight
             Clear();
         }
 
+        //--
+
+        const u32 c_BinarySerialiser_Version = 1;
 
         BinarySerialiser::BinarySerialiser()
-            : ISerialiser(SerialisationTypes::Binary, false)
+            : ISerialiser(SerialisationTypes::Binary, c_BinarySerialiser_Version, false)
         {
             m_head.Clear();
         }
 
         BinarySerialiser::BinarySerialiser(bool isReadMode)
-            : ISerialiser(SerialisationTypes::Binary, isReadMode)
+            : ISerialiser(SerialisationTypes::Binary, c_BinarySerialiser_Version, isReadMode)
         {
             m_head.Clear();
         }
