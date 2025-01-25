@@ -55,6 +55,7 @@ namespace Insight
             static u64 m_scratchBufferSize;
 
             static bool m_fsr2IsEnabled;
+            static bool m_fsr2IsAvailable;
 		};
 	}
 }

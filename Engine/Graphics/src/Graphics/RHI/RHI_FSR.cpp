@@ -4,6 +4,7 @@
 
 #include "Core/Asserts.h"
 #include "Core/Memory.h"
+#include "Core/Logger.h"
 
 #include "Event/EventSystem.h"
 
@@ -32,9 +33,23 @@ namespace Insight
         void*                       RHI_FSR::m_scratchBuffer = nullptr;
         u64                         RHI_FSR::m_scratchBufferSize = 0;
         bool                        RHI_FSR::m_fsr2IsEnabled;
+        bool                        RHI_FSR::m_fsr2IsAvailable = false;
 
         void RHI_FSR::Init()
         {
+            Core::EventSystem::Instance().AddEventListener(this, Core::EventType::Graphics_Render_Resolution_Change, [this](const Core::Event& event)
+            {
+                GPUDeferedManager::Instance().Push([this](RHI_CommandList* cmdList)
+                    {
+                        RenderContext::Instance().GpuWaitForIdle();
+                        ASSERT(ffxFsr2ContextDestroy(&m_ffx_fsr2_context) == FFX_OK);
+
+                        Maths::Vector2 render_resolution = RenderGraph::Instance().GetRenderResolution();
+                        Maths::Vector2 output_resolution = RenderGraph::Instance().GetOutputResolution();
+                        CreateContext(render_resolution.x, render_resolution.y, output_resolution.x, output_resolution.y);
+                    });
+            });
+
             Maths::Vector2 render_resolution = RenderGraph::Instance().GetRenderResolution();
             Maths::Vector2 output_resolution = RenderGraph::Instance().GetOutputResolution();
             CreateContext(render_resolution.x, render_resolution.y, output_resolution.x, output_resolution.y);
@@ -53,26 +68,14 @@ namespace Insight
             //        Maths::Vector2 output_resolution = RenderGraph::Instance().GetOutputResolution();
             //        CreateContext(render_resolution.x, render_resolution.y, output_resolution.x, output_resolution.y);
             //    });
-            Core::EventSystem::Instance().AddEventListener(this, Core::EventType::Graphics_Render_Resolution_Change, [this](const Core::Event& event)
-                {
-                    GPUDeferedManager::Instance().Push([this](RHI_CommandList* cmdList)
-                        {
-                            RenderContext::Instance().GpuWaitForIdle();
-                            ASSERT(ffxFsr2ContextDestroy(&m_ffx_fsr2_context) == FFX_OK);
-
-                            RenderContext* render_context = &RenderContext::Instance();
-                            Maths::Vector2 render_resolution = RenderGraph::Instance().GetRenderResolution();
-                            Maths::Vector2 output_resolution = RenderGraph::Instance().GetOutputResolution();
-                            CreateContext(render_resolution.x, render_resolution.y, output_resolution.x, output_resolution.y);
-                        });
-                });
         }
 
         void RHI_FSR::Destroy()
         {
-            Core::EventSystem::Instance().RemoveEventListener(this, Core::EventType::Graphics_Swapchain_Resize);
+            Core::EventSystem::Instance().RemoveEventListener(this, Core::EventType::Graphics_Render_Resolution_Change);
             ASSERT(ffxFsr2ContextDestroy(&m_ffx_fsr2_context) == FFX_OK);
             free(m_scratchBuffer);
+            m_scratchBuffer = nullptr;
         }
 
         void RHI_FSR::SetIsEnabled(const bool value) const
@@ -82,7 +85,7 @@ namespace Insight
 
         bool RHI_FSR::IsEnabled() const
         {
-            return m_fsr2IsEnabled;
+            return m_fsr2IsAvailable && m_fsr2IsEnabled;
         }
            
 		void RHI_FSR::GenerateJitterSample(float* x, float* y)
@@ -250,8 +253,15 @@ namespace Insight
             m_ffx_fsr2_context_description.displaySize.height = std::max(2u, displayHeight);
             m_ffx_fsr2_context_description.flags = FFX_FSR2_ENABLE_AUTO_EXPOSURE;
 
-            FfxErrorCode createErrorCode = ffxFsr2ContextCreate(&m_ffx_fsr2_context, &m_ffx_fsr2_context_description);
-            ASSERT(createErrorCode == FFX_OK);
+            const FfxErrorCode createErrorCode = ffxFsr2ContextCreate(&m_ffx_fsr2_context, &m_ffx_fsr2_context_description);
+            if (createErrorCode != FFX_OK)
+            {
+                m_fsr2IsAvailable = false;
+                Destroy();
+                IS_LOG_CORE_ERROR("[RHI_FSR::CreateContext] FSR2 error code '{}'", createErrorCode);
+                return;
+            }
+            m_fsr2IsAvailable = true;
         }
 
         void RHI_FSR::CreateScratchBuffer(const u64 requestedBufferSizeBytes)
