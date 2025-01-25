@@ -2,7 +2,7 @@
 
 #include "Core/RefCount.h"
 
-#include <Reflect/Core/Defines.h>
+//#include <Reflect/Core/Defines.h>
 
 #include <typeinfo>
 
@@ -12,7 +12,6 @@ namespace Insight
     constexpr bool rp_is_convertible_v = std::is_convertible_v<TOther*, T*>;
 
     template<typename T>
-    REFLECT_CLASS(REFLECT_LOOKUP_ONLY)
     class ReferencePtr
     {
         static_assert(std::is_base_of_v<Core::RefCount, T>);

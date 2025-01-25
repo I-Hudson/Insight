@@ -63,7 +63,6 @@ namespace Insight
             }
 
             Serialisation::JsonSerialiser serialiser(false);
-            serialiser.SetVersion(1);
             project.Serialise(&serialiser);
 
             std::vector<Byte> serialisedData = serialiser.GetSerialisedData();
@@ -148,7 +147,6 @@ namespace Insight
             Core::EventSystem::Instance().DispatchEventNow(MakeRPtr<Core::ProjectSaveEvent>(m_projectInfo.ProjectPath));
 
             Serialisation::JsonSerialiser serialiser(false);
-            serialiser.SetVersion(1);
             m_projectInfo.Serialise(&serialiser);
 
             std::vector<Byte> serialisedData = serialiser.GetSerialisedData();
