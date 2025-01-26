@@ -106,12 +106,14 @@ namespace Insight
 			m_context = Graphics::RenderContext::New(graphicsAPI);
 
 			Graphics::RenderContextDesc renderContextDesc = {};
+			renderContextDesc.GPUValidation = true;
+			renderContextDesc.MultithreadContext = true;
+
 			if (Core::CommandLineArgs::CommandListExists(CMD_GPU_VALIDATION))
 			{
 				renderContextDesc.GPUValidation = Core::CommandLineArgs::GetCommandLineValue(CMD_GPU_VALIDATION)->GetBool();
 			}
-			renderContextDesc.GPUValidation = false;
-			renderContextDesc.MultithreadContext = true;
+
 			if (!m_context->Init(renderContextDesc))
 			{
 				m_context->Destroy();

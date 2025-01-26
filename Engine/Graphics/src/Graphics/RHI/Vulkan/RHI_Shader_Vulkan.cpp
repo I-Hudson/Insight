@@ -38,12 +38,15 @@ namespace Insight
 			void RHI_Shader_Vulkan::Create(RenderContext* context, ShaderDesc desc)
 			{
 				m_context = static_cast<RenderContext_Vulkan*>(context);
+				m_shaderDesc = desc;
 
-				if (desc.Stages & ShaderStageFlagBits::ShaderStage_Vertex) { CompileStage(ShaderStageFlagBits::ShaderStage_Vertex, desc.ShaderName, desc.ShaderData, 0); }
-				if (desc.Stages & ShaderStageFlagBits::ShaderStage_TessControl) { CompileStage(ShaderStageFlagBits::ShaderStage_TessControl, desc.ShaderName, desc.ShaderData, 1); }
-				if (desc.Stages & ShaderStageFlagBits::ShaderStage_TessEval) { CompileStage(ShaderStageFlagBits::ShaderStage_TessEval, desc.ShaderName, desc.ShaderData, 2); }
-				if (desc.Stages & ShaderStageFlagBits::ShaderStage_Geometry) { CompileStage(ShaderStageFlagBits::ShaderStage_Geometry, desc.ShaderName, desc.ShaderData, 3); }
-				if (desc.Stages & ShaderStageFlagBits::ShaderStage_Pixel) { CompileStage(ShaderStageFlagBits::ShaderStage_Pixel, desc.ShaderName, desc.ShaderData, 4); }
+				ASSERT(m_shaderDesc.IsValid());
+				if (m_shaderDesc.Stages & ShaderStageFlagBits::ShaderStage_Vertex) { CompileStage(ShaderStageFlagBits::ShaderStage_Vertex, m_shaderDesc.ShaderData, 0); }
+				if (m_shaderDesc.Stages & ShaderStageFlagBits::ShaderStage_TessControl) { CompileStage(ShaderStageFlagBits::ShaderStage_TessControl, m_shaderDesc.ShaderData, 1); }
+				if (m_shaderDesc.Stages & ShaderStageFlagBits::ShaderStage_TessEval) { CompileStage(ShaderStageFlagBits::ShaderStage_TessEval, m_shaderDesc.ShaderData, 2); }
+				if (m_shaderDesc.Stages & ShaderStageFlagBits::ShaderStage_Geometry) { CompileStage(ShaderStageFlagBits::ShaderStage_Geometry, m_shaderDesc.ShaderData, 3); }
+				if (m_shaderDesc.Stages & ShaderStageFlagBits::ShaderStage_Pixel) { CompileStage(ShaderStageFlagBits::ShaderStage_Pixel, m_shaderDesc.ShaderData, 4); }
+				if (m_shaderDesc.Stages & ShaderStageFlagBits::ShaderStage_Compute) { CompileStage(ShaderStageFlagBits::ShaderStage_Compute, m_shaderDesc.ShaderData, 5); }
 
 				CreateVertexInputLayout(desc);
 			}
@@ -73,10 +76,10 @@ namespace Insight
 				CreateShaderModule(code, moduleIndex, compiler, stage);
 			}
 
-			void RHI_Shader_Vulkan::CompileStage(ShaderStageFlagBits stage, std::string_view name, const std::vector<Byte>& shaderData, int moduleIndex)
+			void RHI_Shader_Vulkan::CompileStage(ShaderStageFlagBits stage, const std::vector<Byte>& shaderData, int moduleIndex)
 			{
 				ShaderCompiler compiler;
-				IDxcBlob* code = compiler.Compile(stage, std::string(name), shaderData, ShaderCompilerLanguage::Spirv);
+				IDxcBlob* code = compiler.Compile(stage, m_shaderDesc.ShaderName, shaderData, ShaderCompilerLanguage::Spirv);
 				if (!code)
 				{
 					return;
@@ -88,6 +91,11 @@ namespace Insight
 
 			void RHI_Shader_Vulkan::CreateVertexInputLayout(const ShaderDesc& desc)
 			{
+				if (desc.Stages & ShaderStageFlagBits::ShaderStage_Compute)
+				{
+					return;
+				}
+
 				if (!desc.InputLayout.empty())
 				{
 					m_shaderInputLayout = desc.InputLayout;
@@ -95,7 +103,7 @@ namespace Insight
 				else
 				{
 					ShaderCompiler compiler;
-					compiler.Compile(ShaderStage_Vertex, desc.ShaderName, desc.ShaderData, ShaderCompilerLanguage::Spirv);
+					compiler.Compile(ShaderStage_Vertex, desc.ShaderName, desc.ShaderData, ShaderCompilerLanguage::Hlsl);
 					m_shaderInputLayout = compiler.GetInputLayout();
 				}
 

@@ -64,7 +64,7 @@ namespace Insight
 			{
 				IS_PROFILE_FUNCTION();
 
-				ASSERT(Platform::IsMainThread());
+				//ASSERT(Platform::IsMainThread());
 				std::lock_guard lock(m_mutex);
 
 				if (data == nullptr)

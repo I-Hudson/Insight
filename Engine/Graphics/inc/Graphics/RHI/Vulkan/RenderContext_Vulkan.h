@@ -59,9 +59,9 @@ namespace Insight
 				virtual void GpuWaitForIdle() override;
 				virtual void SubmitCommandListAndWait(RHI_CommandList* cmdList) override;
 
-				virtual void MarkTimeStamp(RHI_CommandList* cmdList) { FAIL_ASSERT(); }
-				virtual std::vector<u64> ResolveTimeStamps(RHI_CommandList* cmdList) { FAIL_ASSERT(); return {}; }
-				virtual u64 GetTimeStampFrequency() { FAIL_ASSERT(); return 0; }
+				virtual void MarkTimeStamp(RHI_CommandList* cmdList) { /*FAIL_ASSERT();*/ }
+				virtual std::vector<u64> ResolveTimeStamps(RHI_CommandList* cmdList) { /*FAIL_ASSERT();*/ return {}; }
+				virtual u64 GetTimeStampFrequency() { /*FAIL_ASSERT();*/ return 0; }
 
 				virtual void ExecuteAsyncJobs(RHI_CommandList* cmdList) override;
 

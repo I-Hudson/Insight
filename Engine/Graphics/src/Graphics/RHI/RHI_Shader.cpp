@@ -344,28 +344,31 @@ namespace Insight
 
 			if (argDebugData)
 			{
-				IDxcBlob* pDebugData;
-				IDxcBlobUtf16* pDebugDataPath;
+				IDxcBlob* pDebugData = nullptr;
+				IDxcBlobUtf16* pDebugDataPath = nullptr;
 				ShaderCompileResults->GetOutput(DXC_OUT_PDB, IID_PPV_ARGS(&pDebugData), &pDebugDataPath);
-				std::string debugPath = shaderPDBFolderPath + Platform::StringFromWString(pDebugDataPath->GetStringPointer());
-
-				shaderDisk.open(debugPath.c_str(), std::ios::trunc);
-				if (shaderDisk.is_open())
+				if (pDebugData && pDebugDataPath)
 				{
-					shaderDisk.write((const char*)pDebugData->GetBufferPointer(), pDebugData->GetBufferSize());
-					shaderDisk.close();
-				}
+					std::string debugPath = shaderPDBFolderPath + Platform::StringFromWString(pDebugDataPath->GetStringPointer());
 
-				debugPath = shaderPDBFolderPath + name + "_" + StageToFuncName(stage) + "_" + StageToProfileTarget(stage) + ".pdb";
-				shaderDisk.open(debugPath.c_str(), std::ios::trunc);
-				if (shaderDisk.is_open())
-				{
-					shaderDisk.write((const char*)pDebugData->GetBufferPointer(), pDebugData->GetBufferSize());
-					shaderDisk.close();
-				}
+					shaderDisk.open(debugPath.c_str(), std::ios::trunc);
+					if (shaderDisk.is_open())
+					{
+						shaderDisk.write((const char*)pDebugData->GetBufferPointer(), pDebugData->GetBufferSize());
+						shaderDisk.close();
+					}
 
-				pDebugData->Release();
-				pDebugDataPath->Release();
+					debugPath = shaderPDBFolderPath + name + "_" + StageToFuncName(stage) + "_" + StageToProfileTarget(stage) + ".pdb";
+					shaderDisk.open(debugPath.c_str(), std::ios::trunc);
+					if (shaderDisk.is_open())
+					{
+						shaderDisk.write((const char*)pDebugData->GetBufferPointer(), pDebugData->GetBufferSize());
+						shaderDisk.close();
+					}
+
+					pDebugData->Release();
+					pDebugDataPath->Release();
+				}
 				//ComPtr<IDxcBlob> pReflectData;
 				//ShaderReflectionResults->GetOutput(DXC_OUT_REFLECTION, IID_PPV_ARGS(pReflectData.GetAddressOf()), nullptr);
 

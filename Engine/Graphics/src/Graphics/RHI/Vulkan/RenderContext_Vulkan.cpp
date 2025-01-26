@@ -333,6 +333,11 @@ namespace Insight
 
 				m_uploadQueue.Init();
 
+				if (desc.MultithreadContext)
+				{
+					StartRenderThread();
+				}
+
 				return true;
 			}
 
@@ -507,11 +512,6 @@ namespace Insight
 			{
 				IS_PROFILE_FUNCTION();
 				std::lock_guard lock(m_lock);
-
-				{
-					IS_PROFILE_SCOPE("ImGui Render");
-					ImGuiRender();
-				}
 
 				if (Window::Instance().GetWidth() == 0 || Window::Instance().GetHeight() == 0)
 				{

@@ -15,8 +15,8 @@ float2 GetUVsForAPI(float2 uv)
 {
 #ifdef DX12
 	return uv;
-#elif defined(Vulkan)
-    return float2(ux, 1.0 - uv.y)
+#elif defined(VULKAN)
+    return float2(uv.x, 1.0 - uv.y);
 #endif
 }
 
