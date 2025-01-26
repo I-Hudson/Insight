@@ -16,7 +16,7 @@ namespace Insight
             void SetValue(float value);
 
         private:
-            float m_value;
+            float m_value = 0.0f;
             static constexpr float c_MaxValue = 1.0f;
         };
     }

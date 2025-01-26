@@ -337,7 +337,7 @@ namespace Insight
 			InputDevice_Controller* device = m_inputSystem->GetController(controllerIndex);
 			if (!device)
 			{
-				IS_LOG_CORE_ERROR("[XInputManager::ProcessVibration] Trying to process controller index '{}', controller at index is not valid.", controllerIndex);
+				IS_LOG_CORE_ERROR("[WindowsGamingManager::ProcessVibration] Trying to process controller index '{}', controller at index is not valid.", controllerIndex);
 				return;
 			}
 
