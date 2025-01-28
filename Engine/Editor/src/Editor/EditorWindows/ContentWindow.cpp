@@ -158,8 +158,7 @@ namespace Insight::Editor
     void ContentWindow::OnDraw()
     {
         IS_PROFILE_FUNCTION();
-        bool s = true;
-        ImGui::ShowDebugLogWindow(&s);
+
         // Top bar
         TopBar();
         // Centre thumbnails

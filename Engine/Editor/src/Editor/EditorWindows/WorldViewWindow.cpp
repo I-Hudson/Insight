@@ -81,8 +81,8 @@ namespace Insight
 
             const char* editorOutputItems[] =
             {
-                "EditorWorldLightRT",
                 "EditorWorldColourRT",
+                "EditorWorldLightRT",
                 "EditorFSR_Output",
             };
             static int editorOutput = 0;
@@ -98,7 +98,7 @@ namespace Insight
                 return;
             }
 
-            const ImVec2 imageCursorPos = ImGui::GetCursorPos();
+            const ImVec2 imageCursorPos = ImGui::GetCursorScreenPos();
             const ImVec2 windowSize = ImGui::GetContentRegionAvail();
             ImGui::Image(worldViewTexture, windowSize);
 
@@ -107,7 +107,8 @@ namespace Insight
                 const ImVec2 windowPos = ImVec2(imageCursorPos.x, imageCursorPos.y);
                 
                 ImGui::SetNextWindowPos(windowPos);
-                ImGui::SetNextWindowSizeConstraints(ImVec2(0.0f, 0.0f), windowSize);
+                ImGui::SetNextWindowSize(ImVec2(windowSize.x, 36));
+
                 const ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoDecoration;
 
                 const ImVec4 consoleBackgroundColour(65.0f / 255.0f, 65.0f / 255.0f, 170.0f / 255.0f, 1.0);
@@ -119,10 +120,14 @@ namespace Insight
                     {
                         imGuizmoOperation = ImGuizmo::TRANSLATE;
                     }
+                    ImGui::SameLine();
+
                     if (ImGui::Button("Rotate"))
                     {
                         imGuizmoOperation = ImGuizmo::ROTATE;
                     }
+                    ImGui::SameLine();
+
                     if (ImGui::Button("Scale"))
                     {
                         imGuizmoOperation = ImGuizmo::SCALE;
