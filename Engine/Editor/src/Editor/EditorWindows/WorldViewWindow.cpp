@@ -27,7 +27,6 @@
 #include "Core/Profiler.h"
 
 #include <imgui.h>
-#include <ImGuizmo.h>
 
 namespace Insight
 {
@@ -102,40 +101,7 @@ namespace Insight
             const ImVec2 windowSize = ImGui::GetContentRegionAvail();
             ImGui::Image(worldViewTexture, windowSize);
 
-            static ImGuizmo::OPERATION imGuizmoOperation = ImGuizmo::TRANSLATE;
-            {
-                const ImVec2 windowPos = ImVec2(imageCursorPos.x, imageCursorPos.y);
-                
-                ImGui::SetNextWindowPos(windowPos);
-                ImGui::SetNextWindowSize(ImVec2(windowSize.x, 36));
-
-                const ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoDecoration;
-
-                const ImVec4 consoleBackgroundColour(65.0f / 255.0f, 65.0f / 255.0f, 170.0f / 255.0f, 1.0);
-                ImGui::PushStyleColor(ImGuiCol_WindowBg, consoleBackgroundColour);
-                ImGui::SetNextWindowBgAlpha(0.35f); // Transparent background
-                if (ImGui::Begin("WorldViewWindowControls", nullptr, windowFlags))
-                {
-                    if (ImGui::Button("Translate"))
-                    {
-                        imGuizmoOperation = ImGuizmo::TRANSLATE;
-                    }
-                    ImGui::SameLine();
-
-                    if (ImGui::Button("Rotate"))
-                    {
-                        imGuizmoOperation = ImGuizmo::ROTATE;
-                    }
-                    ImGui::SameLine();
-
-                    if (ImGui::Button("Scale"))
-                    {
-                        imGuizmoOperation = ImGuizmo::SCALE;
-                    }
-                }
-                ImGui::End();
-                ImGui::PopStyleColor();
-            }
+            DrawViewButtons(imageCursorPos, ImVec2(windowSize.x, 0.0f));
 
             {
                 // Render in game console window on top of the game viewport.
@@ -171,7 +137,7 @@ namespace Insight
                     Maths::Matrix4 entityMatrix = transformComponent->GetTransform();
 
                     ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, ImGui::GetWindowSize().x, ImGui::GetWindowSize().y);
-                    ImGuizmo::Manipulate(&viewMatrix[0][0], &projectionMatrix[0][0], imGuizmoOperation, ImGuizmo::LOCAL, &entityMatrix[0][0]);
+                    ImGuizmo::Manipulate(&viewMatrix[0][0], &projectionMatrix[0][0], m_imGuizmoOperation, ImGuizmo::LOCAL, &entityMatrix[0][0]);
                     if (ImGuizmo::IsUsing())
                     {
                         transformComponent->SetTransform(entityMatrix);
@@ -206,6 +172,46 @@ namespace Insight
                     modelAsset->CreateEntityHierarchy();
                 }
             }
+        }
+
+        void WorldViewWindow::DrawViewButtons(const ImVec2& cursorPos, const ImVec2& size)
+        {
+            const ImVec2 windowPos = ImVec2(cursorPos.x, cursorPos.y);
+
+            ImGui::SetNextWindowPos(windowPos);
+            ImGui::SetNextWindowSize(size);
+
+            const ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoDecoration;
+
+            const ImVec4 consoleBackgroundColour(65.0f / 255.0f, 65.0f / 255.0f, 170.0f / 255.0f, 1.0);
+            ImGui::SetNextWindowBgAlpha(0.0f); // Transparent background
+
+            ImGui::PushStyleColor(ImGuiCol_WindowBg, consoleBackgroundColour);
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+
+            if (ImGui::Begin("WorldViewWindowControls", nullptr, windowFlags))
+            {
+                if (ImGui::Button("Translate"))
+                {
+                    m_imGuizmoOperation = ImGuizmo::TRANSLATE;
+                }
+                ImGui::SameLine();
+
+                if (ImGui::Button("Rotate"))
+                {
+                    m_imGuizmoOperation = ImGuizmo::ROTATE;
+                }
+                ImGui::SameLine();
+
+                if (ImGui::Button("Scale"))
+                {
+                    m_imGuizmoOperation = ImGuizmo::SCALE;
+                }
+            }
+            ImGui::End();
+
+            ImGui::PopStyleVar();
+            ImGui::PopStyleColor();
         }
 
         void WorldViewWindow::SetupRenderGraphPasses()

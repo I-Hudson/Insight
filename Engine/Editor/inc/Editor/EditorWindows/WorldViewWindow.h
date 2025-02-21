@@ -10,6 +10,8 @@
 
 #include "Editor/EditorWindows/Generated/WorldViewWindow_reflect_generated.h"
 
+#include <ImGuizmo.h>
+
 namespace Insight
 {
     namespace Editor
@@ -41,6 +43,8 @@ namespace Insight
         private:
             void ContentWindowDragTarget();
             
+            void DrawViewButtons(const ImVec2& cursorPos, const ImVec2& size);
+
             void SetupRenderGraphPasses();
             void LightShadowPass();
             void GBufferDepthPrepass();
@@ -67,6 +71,8 @@ namespace Insight
 
             bool m_enableDepthPrepass = false;
             DoubleBufferVector<RenderData> m_renderingData;
+
+            ImGuizmo::OPERATION m_imGuizmoOperation;
         };
     }
 }
