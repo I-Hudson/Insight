@@ -1175,6 +1175,7 @@ namespace Insight
 				m_deviceExtensions[(u8)DeviceExtension::BindlessDescriptors] = deviceExts.find(VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME) != deviceExts.end();
 				m_deviceExtensions[(u8)DeviceExtension::ExclusiveFullScreen] = deviceExts.find(VK_EXT_FULL_SCREEN_EXCLUSIVE_EXTENSION_NAME) != deviceExts.end();
 				m_deviceExtensions[(u8)DeviceExtension::VulkanDynamicRendering] = deviceExts.find(VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME) != deviceExts.end();
+				m_deviceExtensions[(u8)DeviceExtension::FormatTypeCasting] = true;
 			}
 
 			bool RenderContext_Vulkan::CheckInstanceExtension(const char* extension)

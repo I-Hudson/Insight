@@ -80,43 +80,41 @@ namespace Insight
 				IS_PROFILE_FUNCTION();
 
 				m_context = static_cast<RenderContext_DX12*>(context);
-				for (size_t i = 0; i < createInfo.Mip_Count; ++i)
-				{
-					// Clamp textures to 1x1.
-					createInfo.Width = std::max(createInfo.Width, 1);
-					createInfo.Height = std::max(createInfo.Height, 1);
-					m_infos.push_back(createInfo);
-				}
-
-				CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Tex2D(
-					PixelFormatToDX12(m_infos[0].Format),
-					m_infos[0].Width,
-					m_infos[0].Height,
-					m_infos[0].Layer_Count,
-					m_infos[0].Mip_Count,
-					1,
-					0,
-					ImageUsageFlagsToDX12(m_infos[0].ImageUsage),
-					D3D12_TEXTURE_LAYOUT_UNKNOWN,
-					0);
 
 				D3D12_CLEAR_VALUE clearColour = {};
-				clearColour.Format = resourceDesc.Format;
+				clearColour.Format = PixelFormatToDX12(createInfo.Format);
 
-				if (m_infos[0].ImageUsage & ImageUsageFlagsBits::DepthStencilAttachment)
+				if (createInfo.ImageUsage & ImageUsageFlagsBits::DepthStencilAttachment)
 				{
 					clearColour.DepthStencil.Depth = RenderContext::Instance().IsRenderOptionsEnabled(RenderOptions::ReverseZ) ? 0.0f : 1.0f;
 					clearColour.DepthStencil.Stencil = 0;
+
+					if (!m_context->HasExtension(DeviceExtension::FormatTypeCasting))
+					{
+						createInfo.Format = PixelFormatExtensions::MakeTypeless(createInfo.Format);
+					}
 				}
-				if (m_infos[0].ImageUsage & ImageUsageFlagsBits::ColourAttachment)
+				if (createInfo.ImageUsage & ImageUsageFlagsBits::ColourAttachment)
 				{
 					const Maths::Vector4 textureClearColour = GetClearColour();
 					ASSERT(sizeof(clearColour.Color) == sizeof(textureClearColour));
 					Platform::MemCopy(clearColour.Color, &textureClearColour[0], sizeof(clearColour.Color));
 				}
 
-				bool optimiseClearColourEnabled = m_infos[0].ImageUsage & ImageUsageFlagsBits::DepthStencilAttachment
-					|| m_infos[0].ImageUsage & ImageUsageFlagsBits::ColourAttachment;
+				CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Tex2D(
+					PixelFormatToDX12(createInfo.Format),
+					createInfo.Width,
+					createInfo.Height,
+					createInfo.Layer_Count,
+					createInfo.Mip_Count,
+					1,
+					0,
+					ImageUsageFlagsToDX12(createInfo.ImageUsage),
+					D3D12_TEXTURE_LAYOUT_UNKNOWN,
+					0);
+
+				bool optimiseClearColourEnabled = createInfo.ImageUsage & ImageUsageFlagsBits::DepthStencilAttachment
+					|| createInfo.ImageUsage & ImageUsageFlagsBits::ColourAttachment;
 
 				D3D12MA::ALLOCATION_DESC allocationDesc = {};
 				allocationDesc.HeapType = D3D12_HEAP_TYPE_DEFAULT;
@@ -125,47 +123,55 @@ namespace Insight
 				ThrowIfFailed(m_context->GetAllocator()->CreateResource(
 					&allocationDesc,
 					&resourceDesc,
-					ImageLayoutToDX12ResouceState(m_infos[0].Layout),
+					ImageLayoutToDX12ResouceState(createInfo.Layout),
 					optimiseClearColourEnabled ? &clearColour : nullptr,
 					&m_allocation,
 					IID_NULL, NULL));
 				SetName(m_name);
 				ASSERT(m_allocation);
 
-				if (m_infos[0].ImageUsage & ImageUsageFlagsBits::Sampled)
+				for (size_t i = 0; i < createInfo.Mip_Count; ++i)
 				{
-					m_allLayerDescriptorHandle = CreateSharderResouceView(0, 1, m_infos[0].Layer_Count, 0, DescriptorHeapTypes::CBV_SRV_UAV, ImageUsageFlagsBits::Sampled);
+					// Clamp textures to 1x1.
+					createInfo.Width = std::max(createInfo.Width, 1);
+					createInfo.Height = std::max(createInfo.Height, 1);
+					m_infos.push_back(createInfo);
 				}
-				if (m_infos[0].ImageUsage & ImageUsageFlagsBits::DepthStencilAttachment)
+
+				if (createInfo.ImageUsage & ImageUsageFlagsBits::Sampled)
 				{
-					m_allLayerDepthStencilHandle = CreateSharderResouceView(0, 1, m_infos[0].Layer_Count, 0, DescriptorHeapTypes::DepthStencilView, ImageUsageFlagsBits::DepthStencilAttachment);
+					m_allLayerDescriptorHandle = CreateSharderResouceView(0, 1, createInfo.Layer_Count, 0, DescriptorHeapTypes::CBV_SRV_UAV, ImageUsageFlagsBits::Sampled);
 				}
-				if (m_infos[0].ImageUsage & ImageUsageFlagsBits::ColourAttachment)
+				if (createInfo.ImageUsage & ImageUsageFlagsBits::DepthStencilAttachment)
 				{
-					m_allLayerRenderTargetHandle= CreateSharderResouceView(0, 1, m_infos[0].Layer_Count, 0, DescriptorHeapTypes::RenderTargetView, ImageUsageFlagsBits::ColourAttachment);
+					m_allLayerDepthStencilHandle = CreateSharderResouceView(0, 1, createInfo.Layer_Count, 0, DescriptorHeapTypes::DepthStencilView, ImageUsageFlagsBits::DepthStencilAttachment);
 				}
-				if (m_infos[0].ImageUsage & ImageUsageFlagsBits::Storage)
+				if (createInfo.ImageUsage & ImageUsageFlagsBits::ColourAttachment)
 				{
-					m_allLayerUAVHandle = CreateSharderResouceView(0, 1, m_infos[0].Layer_Count, 0, DescriptorHeapTypes::CBV_SRV_UAV, ImageUsageFlagsBits::Storage);
+					m_allLayerRenderTargetHandle= CreateSharderResouceView(0, 1, createInfo.Layer_Count, 0, DescriptorHeapTypes::RenderTargetView, ImageUsageFlagsBits::ColourAttachment);
+				}
+				if (createInfo.ImageUsage & ImageUsageFlagsBits::Storage)
+				{
+					m_allLayerUAVHandle = CreateSharderResouceView(0, 1, createInfo.Layer_Count, 0, DescriptorHeapTypes::CBV_SRV_UAV, ImageUsageFlagsBits::Storage);
 				}
 
 
 				// Create a image view for each layer. (Use image views when rendering to different layers).
 				for (u32 i = 0; i < createInfo.Layer_Count; ++i)
 				{
-					if (m_infos[0].ImageUsage & ImageUsageFlagsBits::Sampled)
+					if (createInfo.ImageUsage & ImageUsageFlagsBits::Sampled)
 					{
 						m_singleLayerDescriptorHandle.push_back(CreateSharderResouceView(0, 1, 1, i, DescriptorHeapTypes::CBV_SRV_UAV, ImageUsageFlagsBits::Sampled));
 					}
-					if (m_infos[0].ImageUsage & ImageUsageFlagsBits::DepthStencilAttachment)
+					if (createInfo.ImageUsage & ImageUsageFlagsBits::DepthStencilAttachment)
 					{
 						m_singleLayerDepthStencilHandle.push_back(CreateSharderResouceView(0, 1, 1, i, DescriptorHeapTypes::DepthStencilView, ImageUsageFlagsBits::DepthStencilAttachment));
 					}
-					if (m_infos[0].ImageUsage & ImageUsageFlagsBits::ColourAttachment)
+					if (createInfo.ImageUsage & ImageUsageFlagsBits::ColourAttachment)
 					{
 						m_singleLayerRenderTargetHandle.push_back(CreateSharderResouceView(0, 1, 1, i, DescriptorHeapTypes::RenderTargetView, ImageUsageFlagsBits::ColourAttachment));
 					}
-					if (m_infos[0].ImageUsage & ImageUsageFlagsBits::Storage)
+					if (createInfo.ImageUsage & ImageUsageFlagsBits::Storage)
 					{
 						m_singleLayerUAVHandle.push_back(CreateSharderResouceView(0, 1, 1, i, DescriptorHeapTypes::CBV_SRV_UAV, ImageUsageFlagsBits::Storage));
 					}
@@ -276,22 +282,12 @@ namespace Insight
 
 				if (heap == DescriptorHeapTypes::CBV_SRV_UAV)
 				{
-					PixelFormat format = GetFormat();
-					if (format == PixelFormat::D32_Float)
-					{
-						format = PixelFormat::R32_Float;
-					}
-					else if (format == PixelFormat::D16_UNorm)
-					{
-						format = PixelFormat::R16_UNorm;
-					}
-
-
+					PixelFormat viewFormat = PixelFormatExtensions::FindShaderResourceFormat(GetFormat(), false);
 
 					if (imageUsage & ImageUsageFlagsBits::Sampled)
 					{
 						D3D12_SHADER_RESOURCE_VIEW_DESC shaderResouceViewDesc = {};
-						shaderResouceViewDesc.Format = PixelFormatToDX12(format);
+						shaderResouceViewDesc.Format = PixelFormatToDX12(viewFormat);
 						shaderResouceViewDesc.ViewDimension = TextureTypeToDX12(GetType());
 						shaderResouceViewDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 
@@ -330,7 +326,7 @@ namespace Insight
 					else if (imageUsage & ImageUsageFlagsBits::Storage)
 					{
 						D3D12_UNORDERED_ACCESS_VIEW_DESC shaderUAVViewDesc = {};
-						shaderUAVViewDesc.Format = PixelFormatToDX12(format);
+						shaderUAVViewDesc.Format = PixelFormatToDX12(viewFormat);
 						shaderUAVViewDesc.ViewDimension = TextureTypeToDX12UAVDimension(GetType());
 
 						if (GetType() == TextureType::Tex2D)
@@ -353,8 +349,10 @@ namespace Insight
 				}
 				else if (heap == DescriptorHeapTypes::DepthStencilView)
 				{
+					PixelFormat viewFormat = PixelFormatExtensions::FindDepthStencilFormat(GetFormat());
+
 					D3D12_DEPTH_STENCIL_VIEW_DESC desc = {};
-					desc.Format = PixelFormatToDX12(GetFormat());
+					desc.Format = PixelFormatToDX12(viewFormat);
 					desc.ViewDimension = TextureTypeToDX12DSVDimension(GetType());
 					desc.Flags = D3D12_DSV_FLAG_NONE;
 

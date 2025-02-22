@@ -110,6 +110,8 @@ namespace Insight
 					}
 				}
 
+				SetDeviceExtenstions();
+
 				m_d3d12maAllocationCallbacks.pAllocate = D3D12Allocate;
 				m_d3d12maAllocationCallbacks.pFree = D3D12Free;
 
@@ -793,6 +795,17 @@ namespace Insight
 				}
 
 				*ppAdapter = adapter.Detach();
+			}
+
+			void RenderContext_DX12::SetDeviceExtenstions()
+			{
+				D3D12_FEATURE_DATA_D3D12_OPTIONS3 options3{};
+				ThrowIfFailed(m_device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS3, &options3, sizeof(options3)));
+
+				m_deviceExtensions[(u8)DeviceExtension::BindlessDescriptors] = false;
+				m_deviceExtensions[(u8)DeviceExtension::ExclusiveFullScreen] = true;
+				m_deviceExtensions[(u8)DeviceExtension::VulkanDynamicRendering] = false;
+				m_deviceExtensions[(u8)DeviceExtension::FormatTypeCasting] = options3.CastingFullyTypedFormatSupported;
 			}
 
 			void RenderContext_DX12::ResizeSwapchainBuffers()
