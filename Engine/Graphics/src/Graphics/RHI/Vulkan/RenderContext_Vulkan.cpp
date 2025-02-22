@@ -1019,11 +1019,12 @@ namespace Insight
 				///validation_features_enabled.push_back(VkValidationFeatureEnableEXT::eSynchronizationValidation);
 				///validation_features_enabled.push_back(VkValidationFeatureEnableEXT::eGpuAssisted);
 
-				VkValidationFeaturesEXT validation_features;
+				VkValidationFeaturesEXT validation_features{};
+				validation_features.pNext = nullptr;
 				validation_features.sType = VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT;
 				validation_features.enabledValidationFeatureCount = static_cast<u32>(validation_features_enabled.size());
 				validation_features.pEnabledValidationFeatures = validation_features_enabled.data();
-				//instanceCreateInfo.setPNext(&validation_features);
+				instanceCreateInfo.pNext = &validation_features;
 #endif
 				ThrowIfFailed(vkCreateInstance(&instanceCreateInfo, nullptr, &m_instnace));
 			}

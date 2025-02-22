@@ -572,6 +572,7 @@ namespace Insight
             case ShaderStage_TessEval:    return VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
             case ShaderStage_Geometry:    return VK_SHADER_STAGE_GEOMETRY_BIT;
             case ShaderStage_Pixel:       return VK_SHADER_STAGE_FRAGMENT_BIT;
+            case ShaderStage_Compute:     return VK_SHADER_STAGE_COMPUTE_BIT;
             default:
                 break;
             }
