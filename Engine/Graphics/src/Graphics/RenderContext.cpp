@@ -365,6 +365,7 @@ namespace Insight
 			if (prepareRenderer)
 			{
 				cmdList->m_descriptorAllocator = &m_frameDescriptorAllocator.Get();
+				cmdList->m_descriptorAllocator->SetRenderContext(this);
 				cmdList->m_descriptorAllocator->Reset();
 
 				PreRender(cmdList);
@@ -380,6 +381,27 @@ namespace Insight
 			else
 			{
 				ExecuteAsyncJobs(cmdList);
+			}
+
+			// If our swap chain image is not in the 'PresentSrc' layout then transition it.
+			if (GetSwaphchainIamge()->GetLayout() != ImageLayout::PresentSrc)
+			{
+				PipelineBarrier barrier = { };
+				barrier.SrcStage = static_cast<u32>(PipelineStageFlagBits::ColourAttachmentOutput);
+				barrier.DstStage = static_cast<u32>(PipelineStageFlagBits::BottomOfPipe);
+
+				ImageBarrier imageBarrier = { };
+				imageBarrier.SrcAccessFlags = AccessFlagBits::ColorAttachmentWrite;
+				imageBarrier.DstAccessFlags = AccessFlagBits::None;
+				imageBarrier.Image = GetSwaphchainIamge();
+				imageBarrier.OldLayout = ImageLayout::ColourAttachment;
+				imageBarrier.NewLayout = ImageLayout::PresentSrc;
+				imageBarrier.SubresourceRange = ImageSubresourceRange::SingleMipAndLayer(ImageAspectFlagBits::Colour);
+
+				barrier.ImageBarriers.push_back(std::move(imageBarrier));
+				cmdList->BeginTimeBlock("Transition swapchain image, common");
+				cmdList->PipelineBarrier(barrier);
+				cmdList->EndTimeBlock();
 			}
 
 			m_gpuProfiler.EndFrame(cmdList);

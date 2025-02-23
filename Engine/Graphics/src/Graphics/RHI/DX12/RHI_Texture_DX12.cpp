@@ -96,7 +96,7 @@ namespace Insight
 				}
 				if (createInfo.ImageUsage & ImageUsageFlagsBits::ColourAttachment)
 				{
-					const Maths::Vector4 textureClearColour = GetClearColour();
+					const Maths::Vector4 textureClearColour = createInfo.ClearColour;
 					ASSERT(sizeof(clearColour.Color) == sizeof(textureClearColour));
 					Platform::MemCopy(clearColour.Color, &textureClearColour[0], sizeof(clearColour.Color));
 				}

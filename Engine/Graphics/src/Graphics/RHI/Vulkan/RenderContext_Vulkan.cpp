@@ -535,7 +535,7 @@ namespace Insight
 						VkResult waitResult = vkWaitForFences(m_device, 1, &m_submitFrameContexts.Get().SubmitFences, 1, INFINITE);
 						ASSERT(waitResult == VK_SUCCESS);
 					}
-
+					m_frameIndexCompleted.store(m_frameIndex.load());
 				}
 
 				{
@@ -626,6 +626,7 @@ namespace Insight
 								SetSwaphchainResolution(Maths::Vector2(Window::Instance().GetWidth(), Window::Instance().GetHeight()));
 							}
 							m_currentFrame = (m_currentFrame + 1) % RenderContext::Instance().GetFramesInFligtCount();
+							m_frameIndex = m_currentFrame;
 						}
 					}
 				}
@@ -1024,7 +1025,7 @@ namespace Insight
 				validation_features.sType = VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT;
 				validation_features.enabledValidationFeatureCount = static_cast<u32>(validation_features_enabled.size());
 				validation_features.pEnabledValidationFeatures = validation_features_enabled.data();
-				instanceCreateInfo.pNext = &validation_features;
+				//instanceCreateInfo.pNext = &validation_features;
 #endif
 				ThrowIfFailed(vkCreateInstance(&instanceCreateInfo, nullptr, &m_instnace));
 			}

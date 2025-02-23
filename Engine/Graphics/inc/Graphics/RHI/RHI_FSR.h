@@ -48,6 +48,7 @@ namespace Insight
 
 		private:
 			static FfxFsr2Context m_ffx_fsr2_context;
+            static bool m_ffxValidContext;
 			static FfxFsr2ContextDescription m_ffx_fsr2_context_description;
 			static FfxFsr2DispatchDescription m_ffx_fsr2_dispatch_description;
 
