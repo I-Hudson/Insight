@@ -71,4 +71,15 @@ function CommonConfig.GitClone(branchTag, url, repoDestination)
     CommonConfig.OpenCMD(gitCommand)
 end
 
+function CommonConfig.PathExists(path)
+    local ok, err, code = os.rename(path, path)
+    if not ok then
+        if code == 13 or code == 5 then
+         -- Permission denied, but it exists
+         return true
+      end
+    end
+    return ok
+end
+
 return CommonConfig

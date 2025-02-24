@@ -169,7 +169,10 @@ function GraphicsConfig.FilterPlatforms(AMD_Ryzen_Master_SDK, OutputDir)
 
     filter "platforms:Win64"
         local renderDocPath = "C:/Program Files/RenderDoc"
-        if os.rename(renderDocPath, renderDocPath) then
+        local renderDocExists = CommonConfig.PathExists(renderDocPath)
+            print(renderDocExists)
+        if renderDocExists then
+            print("RenderDoc")
             defines
             {
                 "RENDER_DOC_API",
