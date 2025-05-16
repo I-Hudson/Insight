@@ -14,4 +14,9 @@ function InsightEngineIncludes.AddIncludes(includeMap, prefix)
     includeMap["InsightEditor"] = prefix .. "Engine/Editor/inc"
 end
 
+function InsightEngineIncludes.AddToolsIncludes(includeMap, prefix)
+    includeMap["InsightToolAssetPacker"] = prefix .. "Engine/Core/inc"
+    includeMap["InsightToolShaderCompiler"] = prefix .. "Engine/Tools/ShaderCompiler/inc"
+end
+
 return InsightEngineIncludes

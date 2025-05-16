@@ -65,6 +65,7 @@ function GraphicsConfig.IncludeDirs()
         "%{IncludeDirs.DirectXAgilityHeaders}",
         "%{IncludeDirs.DirectXShaderCompiler}",
         "%{IncludeDirs.D3D12MemoryAllocator}",
+        "%{IncludeDirs.nvrhi}",
     }
 end
 
@@ -92,6 +93,7 @@ function GraphicsConfig.LibraryLinks()
         "dxguid.lib",
         "dxcompiler.lib",
         "meshoptimizer.lib",
+        "nvrhi.lib",
     }
 
     if VULKAN_SDK == nil then

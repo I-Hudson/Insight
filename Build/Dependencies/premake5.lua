@@ -64,4 +64,5 @@ group "Dependices"
         include "../../premakeFiles/reflect.lua"
         include "../../premakeFiles/zip.lua"
         include "../../premakeFiles/efsw.lua"
+        include "../../premakeFiles/nvrhi.lua"
 

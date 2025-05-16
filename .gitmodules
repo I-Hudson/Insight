@@ -82,3 +82,6 @@
 [submodule "vendor/Sharpmake"]
 	path = vendor/Sharpmake
 	url = https://github.com/ubisoft/Sharpmake
+[submodule "vendor/NVRHI"]
+	path = vendor/NVRHI
+	url = https://github.com/NVIDIA-RTX/NVRHI.git
