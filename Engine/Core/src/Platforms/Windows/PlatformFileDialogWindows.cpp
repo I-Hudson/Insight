@@ -14,46 +14,47 @@ namespace Insight
 {
     namespace Platforms::Windows
     {
-        bool PlatformFileDialogWindows::ShowSave(std::string* selectedItem, bool appendExtension)
+        bool PlatformFileDialogWindows::ShowSave(std::string* selectedItem, std::string_view folder, bool appendExtension)
         {
-            return ShowSave(selectedItem, {}, appendExtension);
+            return ShowSave(selectedItem, folder, {}, appendExtension);
         }
 
-        bool PlatformFileDialogWindows::ShowLoad(std::string* selectedItem)
+        bool PlatformFileDialogWindows::ShowLoad(std::string* selectedItem, std::string_view folder)
         {
-            return ShowLoad(selectedItem, {});
+            return ShowLoad(selectedItem, folder, {});
         }
 
-        bool PlatformFileDialogWindows::ShowSave(std::string* selectedItem, const std::vector<FileDialogFilter>& fileFilters, bool appendExtension)
+
+        bool PlatformFileDialogWindows::ShowSave(std::string* selectedItem, std::string_view folder, const std::vector<FileDialogFilter>& fileFilters, bool appendExtension)
         {
-            return Show(PlatformFileDialogOperations::SaveFile, selectedItem, fileFilters, appendExtension);
+            return Show(PlatformFileDialogOperations::SaveFile, selectedItem, folder, fileFilters, appendExtension);
         }
 
-        bool PlatformFileDialogWindows::ShowLoad(std::string* selectedItem, const std::vector<FileDialogFilter>& fileFilters)
+        bool PlatformFileDialogWindows::ShowLoad(std::string* selectedItem, std::string_view folder, const std::vector<FileDialogFilter>& fileFilters)
         {
-            return Show(PlatformFileDialogOperations::LoadFile, selectedItem, fileFilters);
+            return Show(PlatformFileDialogOperations::LoadFile, selectedItem, folder, fileFilters, true);
         }
 
-        bool PlatformFileDialogWindows::Show(PlatformFileDialogOperations operation, std::string* selectedItem, bool appendExtension)
+        bool PlatformFileDialogWindows::Show(PlatformFileDialogOperations operation, std::string* selectedItem, std::string_view folder, bool appendExtension)
         {
-            return Show(operation, selectedItem, {}, appendExtension);
+            return Show(operation, selectedItem, folder, {}, appendExtension);
         }
 
-        bool PlatformFileDialogWindows::Show(PlatformFileDialogOperations operation, std::string* selectedItem, const std::vector<FileDialogFilter>& fileFilters, bool appendExtension)
+        bool PlatformFileDialogWindows::Show(PlatformFileDialogOperations operation, std::string* selectedItem, std::string_view folder, const std::vector<FileDialogFilter>& fileFilters, bool appendExtension)
         {
             if (operation == PlatformFileDialogOperations::LoadFile 
                 || operation == PlatformFileDialogOperations::SelectFile 
                 || operation == PlatformFileDialogOperations::SelectFolder
                 || operation == PlatformFileDialogOperations::SelectAll)
             {
-                if (OpenDialog(operation, selectedItem, fileFilters))
+                if (OpenDialog(operation, selectedItem, folder, fileFilters))
                 {
                     return true;
                 }
             }
             else if (operation == PlatformFileDialogOperations::SaveFile)
             {
-                if (SaveDialog(operation, selectedItem, fileFilters, appendExtension))
+                if (SaveDialog(operation, selectedItem, folder, fileFilters, appendExtension))
                 {
                     return true;
                 }
@@ -88,73 +89,33 @@ namespace Insight
             return 0;
         }
 
-        bool PlatformFileDialogWindows::OpenDialog(PlatformFileDialogOperations operation, std::string* selectedItem, const std::vector<FileDialogFilter>& fileFilters)
+        bool PlatformFileDialogWindows::OpenDialog(PlatformFileDialogOperations operation, std::string* selectedItem, std::string_view folder, const std::vector<FileDialogFilter>& fileFilters)
         {
             IFileOpenDialog* openDialogHandle;
             HRESULT hr = CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_ALL, IID_IFileDialog, reinterpret_cast<void**>(&openDialogHandle));
             ASSERT(SUCCEEDED(hr));
 
-            openDialogHandle->SetOptions(PlatformFileDialogOperationsToFileDialogOptions(operation));
+            const bool result = ShowDialog(openDialogHandle, operation, selectedItem, folder, fileFilters, false);
 
-            if (!fileFilters.empty())
-            {
-                std::vector<COMDLG_FILTERSPEC> fileTypes;
-                fileTypes.resize(fileFilters.size());
-                for (size_t i = 0; i < fileTypes.size(); ++i)
-                {
-                    fileTypes.at(i).pszName = fileFilters.at(i).Name;
-                    fileTypes.at(i).pszSpec = fileFilters.at(i).Extension;
-                }
-
-                hr = openDialogHandle->SetFileTypes(static_cast<unsigned int>(fileTypes.size()), fileTypes.data());
-                if (hr != S_OK)
-                {
-                    openDialogHandle->Release();
-                    return false;
-                }
-            }
-
-            hr = openDialogHandle->Show(NULL);
-            if (hr != S_OK)
-            {
-                openDialogHandle->Release();
-                return false;
-            }
-
-            IShellItem* item;
-            hr = openDialogHandle->GetResult(&item);
-            if (hr != S_OK)
-            {
-                IS_LOG_CORE_ERROR("[PlatformFileDialogWindows::OpenDialog] Unable to get selected item.");
-                item->Release();
-                openDialogHandle->Release();
-                return false;
-            }
-
-            PWSTR filePath;
-            hr = item->GetDisplayName(SIGDN_FILESYSPATH, &filePath);
-            if (hr != S_OK)
-            {
-                IS_LOG_CORE_ERROR("[PlatformFileDialogWindows::OpenDialog] Unable to get selected item display name.");
-                item->Release();
-                openDialogHandle->Release();
-                return false;
-            }
-
-            *selectedItem = Platform::StringFromWString(filePath);
-            if ((*selectedItem).back() == '\0')
-            {
-                (*selectedItem).pop_back();
-            }
-            FileSystem::PathToUnix(*selectedItem);
-
-            item->Release();
             openDialogHandle->Release();
 
-            return true;
+            return result;
         }
 
-        bool PlatformFileDialogWindows::SaveDialog(PlatformFileDialogOperations operation, std::string* selectedItem, const std::vector<FileDialogFilter>& fileFilters, bool appendExtension)
+        bool PlatformFileDialogWindows::SaveDialog(PlatformFileDialogOperations operation, std::string* selectedItem, const std::string_view folder, const std::vector<FileDialogFilter>& fileFilters, bool appendExtension)
+        {
+            IFileSaveDialog* saveDialogHandle;
+            HRESULT hr = CoCreateInstance(CLSID_FileSaveDialog, NULL, CLSCTX_ALL, IID_IFileDialog, reinterpret_cast<void**>(&saveDialogHandle));
+            ASSERT(SUCCEEDED(hr));
+
+            bool result = ShowDialog(saveDialogHandle, operation, selectedItem, folder, fileFilters, appendExtension);
+
+            saveDialogHandle->Release();
+
+            return result;
+        }
+
+        bool PlatformFileDialogWindows::ShowDialog(IFileDialog* dialog, PlatformFileDialogOperations operation, std::string* selectedItem, const std::string_view folder, const std::vector<FileDialogFilter>& fileFilters, bool appendExtension)
         {
             IFileSaveDialog* saveDialogHandle;
             HRESULT hr = CoCreateInstance(CLSID_FileSaveDialog, NULL, CLSCTX_ALL, IID_IFileDialog, reinterpret_cast<void**>(&saveDialogHandle));
@@ -185,6 +146,23 @@ namespace Insight
                 }
             }
 
+            if (!folder.empty())
+            {
+                IShellItem* pCurFolder = NULL;
+                std::wstring folderPath = Platform::WStringFromStringView(folder);
+                FileSystem::PathToWindows(folderPath);
+                hr = SHCreateItemFromParsingName(folderPath.c_str(), NULL, IID_PPV_ARGS(&pCurFolder));
+
+                if (FAILED(hr))
+                {
+                    saveDialogHandle->Release();
+                    return false;
+                }
+
+                saveDialogHandle->SetFolder(pCurFolder);
+                pCurFolder->Release();
+            }
+
             hr = saveDialogHandle->Show(NULL);
             if (hr != S_OK)
             {
@@ -196,7 +174,7 @@ namespace Insight
             hr = saveDialogHandle->GetResult(&item);
             if (hr != S_OK)
             {
-                IS_LOG_CORE_ERROR("[PlatformFileDialogWindows::OpenDialog] Unable to get selected item.");
+                IS_LOG_CORE_ERROR("[PlatformFileDialogWindows::ShowDialog] Unable to get selected item.");
                 item->Release();
                 saveDialogHandle->Release();
                 return false;
@@ -206,7 +184,7 @@ namespace Insight
             hr = item->GetDisplayName(SIGDN_FILESYSPATH, &filePath);
             if (hr != S_OK)
             {
-                IS_LOG_CORE_ERROR("[PlatformFileDialogWindows::OpenDialog] Unable to get selected item display name.");
+                IS_LOG_CORE_ERROR("[PlatformFileDialogWindows::ShowDialog] Unable to get selected item display name.");
                 item->Release();
                 saveDialogHandle->Release();
                 return false;
@@ -228,7 +206,7 @@ namespace Insight
                     extension = extension.substr(1);
                 }
 
-                std::string newPath =FileSystem::ReplaceExtension(*selectedItem, extension);
+                std::string newPath = FileSystem::ReplaceExtension(*selectedItem, extension);
                 if (!newPath.empty())
                 {
                     *selectedItem = std::move(newPath);

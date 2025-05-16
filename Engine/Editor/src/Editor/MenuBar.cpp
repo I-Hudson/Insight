@@ -52,7 +52,7 @@ namespace Insight
                     {
                         std::string item;
                         PlatformFileDialog fileDialog;
-                        fileDialog.ShowSave(&item,
+                        fileDialog.ShowSave(&item, Runtime::ProjectSystem::Instance().GetProjectInfo().GetProjectFilePath(),
                             {
                                 FileDialogFilter{ L"Project", L"*.isproject"},
                             });
@@ -67,7 +67,7 @@ namespace Insight
                     {
                         std::string item;
                         PlatformFileDialog fileDialog;
-                        fileDialog.ShowLoad(&item,
+                        fileDialog.ShowLoad(&item, Runtime::ProjectSystem::Instance().GetProjectInfo().GetProjectFilePath(),
                             { 
                                 FileDialogFilter{ L"Project", L"*.isproject"},
                             });
@@ -174,7 +174,7 @@ namespace Insight
             {
                 std::string item;
                 PlatformFileDialog fileDialog;
-                if (fileDialog.ShowSave(&item,
+                if (fileDialog.ShowSave(&item, Runtime::ProjectSystem::Instance().GetProjectInfo().GetContentPath(),
                     {
                         FileDialogFilter { L"World", L"*.isworld"},
                     }))
@@ -194,7 +194,7 @@ namespace Insight
             {
                 std::string item;
                 PlatformFileDialog fileDialog;
-                if (fileDialog.ShowLoad(&item,
+                if (fileDialog.ShowLoad(&item, Runtime::ProjectSystem::Instance().GetProjectInfo().GetContentPath(),
                     {
                         FileDialogFilter{ L"World", L"*.isworld"},
                     }))
