@@ -74,7 +74,7 @@ namespace Insight
         {
             Core::EventSystem::Instance().RemoveEventListener(this, Core::EventType::Graphics_Render_Resolution_Change);
             ASSERT(ffxFsr2ContextDestroy(&m_ffx_fsr2_context) == FFX_OK);
-            free(m_scratchBuffer);
+            DeleteBytes(m_scratchBuffer);
             m_scratchBuffer = nullptr;
         }
 

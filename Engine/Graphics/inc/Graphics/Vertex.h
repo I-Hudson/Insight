@@ -368,7 +368,7 @@ namespace Insight
 #ifdef VERTEX_BONE_ID_PACKED
 			int BoneIds = 0;
 #else
-			int BoneIds[MAX_BONE_COUNT] = { 0 };
+			int BoneIds[Vertex::MAX_BONE_COUNT] = { 0 };
 #endif
 #ifdef VERTEX_BONE_WEIGHT_PACKED
 			int BoneWeights[MAX_BONE_COUNT / 2] = { 0 };

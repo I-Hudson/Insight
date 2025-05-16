@@ -686,6 +686,7 @@ namespace Insight
 		void ModelImporter::ProcessMesh(const aiScene* aiScene, const aiNode* aiNode, const aiMesh* aiMesh, ModelAsset* modelAsset) const
 		{
 			Mesh* mesh = ::New<Mesh>();
+			mesh->m_assetInfo = modelAsset->GetAssetInfo();
 			modelAsset->m_meshes.push_back(mesh);
 
 			MeshData meshData = { };

@@ -123,7 +123,6 @@ namespace Insight
                     break;
                 }
 
-                const Maths::Vector3 lightDirection = lightCentre - position;
                 const Maths::Matrix4 lightView = Maths::Matrix4::LookAt(position, lightCentre, upDirection);
                 View[i] = lightView;
             }
