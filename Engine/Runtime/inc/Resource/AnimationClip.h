@@ -15,6 +15,7 @@ namespace Insight
     namespace Runtime
     {
         class ModelImporter;
+        class AssetInfo;
 
         /// @brief Store all the key frame data for a specific bone
         struct AnimationBoneTrack
@@ -75,12 +76,16 @@ namespace Insight
         {
         public:
             AnimationClip();
+            AnimationClip(const AssetInfo* assetInfo, Ref<Skeleton> skeleton, std::string name);
             virtual ~AnimationClip() override;
 
             const AnimationBoneTrack* GetBoneTrack(const std::string_view boneName) const;
             const AnimationBoneTrack* GetBoneTrack(const u32 boneId) const;
             double GetDuration() const;
             double GetTickPerSecond() const;
+
+            std::string_view GetName() const { return m_name; }
+            const AssetInfo* GetAssetInfo() const { return m_assetInfo; }
 
 #if ANIMATION_NODE_TRANSFORMS
             const AnimationNode& GetRootNode() const { return m_rootNode; }
@@ -91,15 +96,16 @@ namespace Insight
 
         private:
             std::unordered_map<u32, u32> m_boneIdToBoneTrack;
+            std::string m_name;
             std::vector<AnimationBoneTrack> m_boneTracks;
             // Reference the skeleton this animation is for.
             Ref<Skeleton> m_skeleton;
+            const AssetInfo* m_assetInfo;
 
 #if ANIMATION_NODE_TRANSFORMS
             std::map<std::string, SkeletonBone> m_BoneInfoMap;
             AnimationNode m_rootNode;
 #endif
-
 
             double m_duration = 0.0f;
             double m_ticksPerSecond = 0;

@@ -13,6 +13,7 @@ namespace Insight
     namespace Runtime
     {
         class ModelImporter;
+        class AssetInfo;
 
         struct SkeletonBone
         {
@@ -51,7 +52,11 @@ namespace Insight
             const static u32 c_MaxBoneCount = 72;
 
             Skeleton();
+            Skeleton(const AssetInfo* assetInfo, const std::string name);
             virtual ~Skeleton() override;
+
+            const AssetInfo* GetAssetInfo() const { return m_assetInfo; }
+            std::string_view GetName() const { return m_name; }
 
             bool HasBone(const std::string_view boneName) const;
 
@@ -78,6 +83,8 @@ namespace Insight
             std::map<std::string, SkeletonBone> m_boneMaps;
             u32 m_rootBoneIdx = -1;
 
+            std::string m_name;
+            const AssetInfo* m_assetInfo;
             std::vector<SkeletonNode> m_skeletonNodes;
 
             friend ModelImporter;

@@ -43,7 +43,7 @@ namespace Insight
 					}
 					else
 					{
-						IS_LOG_CORE_ERROR("[ComplexSerialiser<MaterialToGuid>] Unable to load model with Guid '{}'.", assetGuid.ToString());
+						IS_LOG_CORE_ERROR("[ComplexSerialiser<MeshToGuid>] Unable to load model with Guid '{}'.", assetGuid.ToString());
 					}
 				}
 			}

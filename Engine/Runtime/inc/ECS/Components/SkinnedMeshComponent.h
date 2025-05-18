@@ -14,7 +14,7 @@ namespace Insight
 	namespace ECS
 	{
 		REFLECT_CLASS();
-		class IS_RUNTIME SkinnedMeshComponent : public Component
+		class IS_RUNTIME SkinnedMeshComponent : public MeshComponent
 		{
 			REFLECT_GENERATED_BODY();
 		public:
@@ -25,25 +25,27 @@ namespace Insight
 
 			IS_SERIALISABLE_H(SkinnedMeshComponent);
 
-			void SetMesh(Ref<Runtime::Mesh> mesh);
-			Ref<Runtime::Mesh> GetMesh() const;
-
-			void SetMaterial(Ref<Runtime::MaterialAsset> material);
-			Ref<Runtime::MaterialAsset> GetMaterial() const;
-
 			void SetSkeleton(Ref<Runtime::Skeleton> skeleton);
 			Ref<Runtime::Skeleton> GetSkeleton() const;
 
 		private:
-			Ref<Runtime::Mesh> m_mesh;
-			Ref<Runtime::MaterialAsset> m_material;
 			Ref<Runtime::Skeleton> m_skeleton;
 		};
 	}
 
-	OBJECT_SERIALISER(ECS::SkinnedMeshComponent, 1,
-		SERIALISE_BASE(ECS::Component, 1, 0)
-		//SERIALISE_COMPLEX(Serialisation::MeshToGuid, m_mesh, 1, 0)
-		//SERIALISE_COMPLEX(Serialisation::MaterialToGuid, m_material, 1, 0)
+	namespace Serialisation
+	{
+		struct SkeletonToGuid {};
+		template<>
+		struct ComplexSerialiser<SkeletonToGuid, Ref<Runtime::Skeleton>, ECS::SkinnedMeshComponent>
+		{
+			void operator()(ISerialiser* serialiser, Ref<Runtime::Skeleton>& skelton, ECS::SkinnedMeshComponent* component) const;
+		};
+	}
+
+	OBJECT_SERIALISER(ECS::SkinnedMeshComponent, 2,
+		SERIALISE_BASE_REMOVED(ECS::Component, 1, 2)
+		SERIALISE_BASE(ECS::MeshComponent, 2, 0)
+		SERIALISE_COMPLEX(Serialisation::SkeletonToGuid, m_skeleton, 2, 0)
 	);
 }

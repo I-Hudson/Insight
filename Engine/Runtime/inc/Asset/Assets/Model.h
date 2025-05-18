@@ -33,14 +33,19 @@ namespace Insight
             virtual ~ModelAsset() override;
 
             Ref<Mesh> GetMesh() const;
-            Ref<Mesh> GetMeshByIndex(u32 index) const;
+            Ref<Mesh> GetMeshByIndex(const u32 index) const;
             u32 GetMeshCount() const;
 
             Ref<MaterialAsset> GetMaterial() const;
-            Ref<MaterialAsset> GetMaterialByIndex(u32 index) const;
+            Ref<MaterialAsset> GetMaterialByIndex(const u32 index) const;
             u32 GetMaterialCount() const;
 
+            Ref<AnimationClip> GetAnimationByIndex(const u32 index) const;
+            Ref<AnimationClip> GetAnimationByName(const std::string_view name) const;
+            u32 GetAnimationCount() const;
+
             Ref<Skeleton> GetSkeleton(const u32 index) const;
+            Ref<Skeleton> GetSkeletonByName(const std::string_view name) const;
 
             ECS::Entity* CreateEntityHierarchyStaticMesh() const;
             //--ECS::ICreateEntityHierarchy

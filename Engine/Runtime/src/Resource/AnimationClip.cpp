@@ -1,6 +1,8 @@
 #include "Resource/AnimationClip.h"
 #include "Core/Asserts.h"
 
+#include "Asset/AssetInfo.h"
+
 namespace Insight
 {
     namespace Runtime
@@ -68,6 +70,11 @@ namespace Insight
         //=======================================
         // AnimationClip
         //=======================================
+        AnimationClip::AnimationClip(const AssetInfo* assetInfo, Ref<Skeleton> skeleton, std::string name)
+            : m_assetInfo(std::move(assetInfo))
+            , m_skeleton(std::move(skeleton))
+            , m_name(std::move(name))
+        { }
         AnimationClip::AnimationClip()
         { }
         AnimationClip::~AnimationClip()

@@ -1,4 +1,5 @@
 #include "ECS/Components/AnimationClipComponent.h"
+#include "ECS/Components/AnimationClipComponent.inl"
 #include "Animation/AnimationSystem.h"
 
 namespace Insight
