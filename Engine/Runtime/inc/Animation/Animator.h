@@ -23,6 +23,8 @@ namespace Insight
             void SetAnimationClip(Ref<AnimationClip> animationClip);
 
             void Update(const float deltaTime);
+            void Play(const bool resetClip = false);
+            void Stop();
 
             const std::vector<Maths::Matrix4>& GetBoneTransforms() const;
 
@@ -59,6 +61,7 @@ namespace Insight
         
             double m_currentAnimationTime = 0.0f;
             float m_deltaTime = 0.0f;
+            bool m_isPlaying = false;
         };
     }
 }

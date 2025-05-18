@@ -25,6 +25,9 @@ namespace Insight
 
             IS_SERIALISABLE_H(AnimationClipComponent);
 
+            void Play(const bool restClip = false);
+            void Stop();
+
             void SetAnimationClip(Ref<Runtime::AnimationClip> animationClip);
             Ref<Runtime::AnimationClip> GetAnimationClip() const;
 

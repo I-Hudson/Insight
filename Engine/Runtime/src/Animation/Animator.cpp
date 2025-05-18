@@ -45,7 +45,9 @@ namespace Insight
         {
             IS_PROFILE_FUNCTION();
 
-            if (m_skelton && m_animationClip)
+            if (m_isPlaying 
+                && m_skelton 
+                && m_animationClip)
             {
                 m_currentAnimationTime += m_animationClip->GetTickPerSecond() * static_cast<double>(deltaTime);
                 m_currentAnimationTime = fmod(m_currentAnimationTime, m_animationClip->GetDuration());
@@ -54,6 +56,20 @@ namespace Insight
                 //CalculateBoneTransform(&m_animationClip->GetRootNode(), Maths::Matrix4::Identity);
 #endif
             }
+        }
+
+        void Animator::Play(const bool resetClip)
+        {
+            if (resetClip)
+            {
+                Reset();
+            }
+            m_isPlaying = true;
+        }
+
+        void Animator::Stop()
+        {
+            m_isPlaying = false;
         }
 
         const std::vector<Maths::Matrix4>& Animator::GetBoneTransforms() const

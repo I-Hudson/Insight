@@ -12,6 +12,16 @@ namespace Insight
 
         IS_SERIALISABLE_CPP(AnimationClipComponent);
 
+        void AnimationClipComponent::Play(const bool resetClip)
+        {
+            GetAnimator()->Play(resetClip);
+        }
+
+        void AnimationClipComponent::Stop()
+        {
+            GetAnimator()->Stop();
+        }
+
         void AnimationClipComponent::SetAnimationClip(Ref<Runtime::AnimationClip> animationClip)
         {
             m_animationClip = animationClip;
