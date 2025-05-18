@@ -292,9 +292,6 @@ namespace Insight
                 {
                     IS_PROFILE_SCOPE("LightShadowPass pass setup");
 
-                    const u32 renderResolutionX = builder.GetRenderResolution().x;
-                    const u32 renderResolutionY = builder.GetRenderResolution().y;
-
                     Graphics::ShaderDesc shaderDesc("LightShadowPass", {}, Graphics::ShaderStageFlagBits::ShaderStage_Vertex);
                     shaderDesc.InputLayout = Graphics::ShaderDesc::GetDefaultShaderInputLayout();
                     builder.SetShader(shaderDesc);
@@ -308,8 +305,13 @@ namespace Insight
                         pso.DepthWrite = true;
                         pso.DepthClampEnabled = false;
                         pso.DepthBaisEnabled = true;
-                        pso.DepthConstantBaisValue = Graphics::RenderContext::Instance().IsRenderOptionsEnabled(Graphics::RenderOptions::ReverseZ) ? -4.0f : 4.0f;
-                        pso.DepthSlopeBaisValue = Graphics::RenderContext::Instance().IsRenderOptionsEnabled(Graphics::RenderOptions::ReverseZ) ? -1.5f : 1.5f;
+
+                        const float depthConstantBias = 0.05f;
+                        const float depthSlopetBias = 1.0f;
+
+                        pso.DepthConstantBaisValue = Graphics::RenderContext::Instance().IsRenderOptionsEnabled(Graphics::RenderOptions::ReverseZ) ? -depthConstantBias : depthConstantBias;
+                        pso.DepthSlopeBaisValue = Graphics::RenderContext::Instance().IsRenderOptionsEnabled(Graphics::RenderOptions::ReverseZ) ? -depthSlopetBias : depthSlopetBias;
+
                         pso.ShaderDescription = shaderDesc;
                         pso.DepthStencilFormat = PixelFormat::D32_Float;
                         if (Graphics::RenderContext::Instance().IsRenderOptionsEnabled(Graphics::RenderOptions::ReverseZ))
@@ -328,8 +330,9 @@ namespace Insight
                     renderpassDescription.Attachments.back().InitalLayout = Graphics::ImageLayout::DepthStencilAttachment;
                     builder.SetRenderpass(renderpassDescription);
 
-                    builder.SetViewport(1024, 1024);
-                    builder.SetScissor(1024, 1024);
+                    const int renderResolution = 1024;
+                    builder.SetViewport(renderResolution, renderResolution);
+                    builder.SetScissor(renderResolution, renderResolution);
                 },
                 [this](WorldTransparentGBufferData& data, Graphics::RenderGraph& render_graph, Graphics::RHI_CommandList* cmdList)
                 {
@@ -337,6 +340,11 @@ namespace Insight
 
                     Graphics::PipelineStateObject pso = render_graph.GetPipelineStateObject("EditorWorldLightShadowPass");
                     cmdList->BindPipeline(pso, nullptr);
+
+                    {
+                        IS_PROFILE_SCOPE("Set Buffer Frame Uniform");
+                        BindCommonResources(cmdList, m_renderingData.GetCurrent());
+                    }
 
                     const RenderFrame& renderFrame = m_renderingData.GetCurrent().RenderFrame;
                     for (size_t worldIdx = 0; worldIdx < renderFrame.RenderWorlds.size(); ++worldIdx)
@@ -364,7 +372,7 @@ namespace Insight
                                 };
                                 {
                                     IS_PROFILE_SCOPE("SetUniform");
-                                    cmdList->SetUniform(0, 0, lightBuffer);
+                                    cmdList->SetUniform(0, 1, lightBuffer);
                                 }
 
                                 for (const u64 meshIndex : renderWorld.OpaqueMeshIndexs)
@@ -383,16 +391,25 @@ namespace Insight
 
                                     struct alignas(16) Object
                                     {
-                                        Maths::Matrix4 Transform;
+                                        Maths::Matrix4 Transform = Maths::Matrix4::Identity;
+                                        int SkinnedMesh = 0;
                                     };
                                     Object object =
                                     {
                                         mesh.Transform,
+                                        mesh.SkinnedMesh,
                                     };
+
                                     {
                                         IS_PROFILE_SCOPE("SetUniform");
                                         cmdList->SetUniform(1, 0, object);
                                     }
+
+                                    if (mesh.SkinnedMesh)
+                                    {
+                                        RenderSetSkinnedMeshesBonesUniform(mesh, cmdList);
+                                    }
+
                                     const Runtime::MeshLOD& renderMeshLod = mesh.GetLOD(0);
                                     cmdList->SetVertexBuffer(renderMeshLod.Vertex_buffer);
                                     cmdList->SetIndexBuffer(renderMeshLod.Index_buffer, Graphics::IndexType::Uint32);
@@ -642,23 +659,9 @@ namespace Insight
                             }
 
                             object.SkinnedMesh = mesh.SkinnedMesh;
-                            if (object.SkinnedMesh)
+                            if (mesh.SkinnedMesh)
                             {
-                                struct SkinnedBonesMatrices
-                                {
-                                    Maths::Matrix4 BoneMatrices[Runtime::Skeleton::c_MaxBoneCount];
-                                };
-                                ASSERT(mesh.BoneTransforms.size() <= Runtime::Skeleton::c_MaxBoneCount);
-
-                                SkinnedBonesMatrices skinnedBonesMatrices;
-                                if (mesh.BoneTransforms.size() > 0)
-                                {
-                                    Platform::MemCopy(
-                                        &skinnedBonesMatrices.BoneMatrices[0],
-                                        mesh.BoneTransforms.data(),
-                                        mesh.BoneTransforms.size() * sizeof(mesh.BoneTransforms[0]));
-                                }
-                                cmdList->SetUniform(2, 2, skinnedBonesMatrices);
+                                RenderSetSkinnedMeshesBonesUniform(mesh, cmdList);
                             }
 
                             cmdList->SetUniform(2, 0, object);
@@ -826,7 +829,7 @@ namespace Insight
                 }, std::move(passData));
         }
 
-        bool ComputePassForLight = true;
+        bool ComputePassForLight = false;
         void WorldViewWindow::LightPass()
         {
             IS_PROFILE_FUNCTION();
@@ -1115,6 +1118,32 @@ namespace Insight
                     , fsrSharpness
                     , reset);
                 }, std::move(passData));
+        }
+
+        void WorldViewWindow::RenderSetSkinnedMeshesBonesUniform(const RenderMesh& mesh, Graphics::RHI_CommandList* cmdList) const
+        {
+            if (mesh.SkinnedMesh)
+            {
+                struct SkinnedBonesMatrices
+                {
+                    Maths::Matrix4 BoneMatrices[Runtime::Skeleton::c_MaxBoneCount];
+                };
+                ASSERT(mesh.BoneTransforms.size() <= Runtime::Skeleton::c_MaxBoneCount);
+
+                SkinnedBonesMatrices skinnedBonesMatrices;
+                if (mesh.BoneTransforms.size() > 0)
+                {
+                    Platform::MemCopy(
+                        &skinnedBonesMatrices.BoneMatrices[0],
+                        mesh.BoneTransforms.data(),
+                        mesh.BoneTransforms.size() * sizeof(mesh.BoneTransforms[0]));
+                }
+                cmdList->SetUniform(2, 2, skinnedBonesMatrices);
+            }
+            else
+            {
+                FAIL_ASSERT_MSG("[WorldViewWindow::RenderSetSkinnedMeshesBonesUniform] Trying to set the uniform for a skinned mesh, when mesh is not skinned.");
+            }
         }
 
         void WorldViewWindow::BindCommonResources(Graphics::RHI_CommandList* cmd_list, RenderData& renderData)

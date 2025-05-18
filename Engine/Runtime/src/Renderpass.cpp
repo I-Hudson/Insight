@@ -146,6 +146,8 @@ namespace Insight
 			m_buffer_samplers.Repeat_Sampler = sampler_manager.GetOrCreateSampler(sampler_create_info);
 			sampler_create_info.AddressMode = SamplerAddressMode::ClampToEdge;
 			m_buffer_samplers.Clamp_Sampler = sampler_manager.GetOrCreateSampler(sampler_create_info);
+			sampler_create_info.AddressMode = SamplerAddressMode::ClampToBoarder;
+			m_buffer_samplers.ClampToBoarder_Sampler = sampler_manager.GetOrCreateSampler(sampler_create_info);
 			sampler_create_info.AddressMode = SamplerAddressMode::MirroredRepeat;
 			m_buffer_samplers.MirroredRepeat_Sampler = sampler_manager.GetOrCreateSampler(sampler_create_info);
 

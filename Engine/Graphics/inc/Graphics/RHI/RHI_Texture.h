@@ -63,7 +63,7 @@ namespace Insight
 			static RHI_TextureInfo Cubemap(const u32 width, const u32 height, const PixelFormat format, const ImageUsageFlags usage)
 			{
 				RHI_TextureInfo info = { };
-				info.TextureType = TextureType::Tex2DArray;
+				info.TextureType = TextureType::TexCube;
 				info.Width = width;
 				info.Height = height;
 				info.Depth = 1;

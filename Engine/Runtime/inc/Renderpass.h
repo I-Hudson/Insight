@@ -57,6 +57,7 @@ namespace Insight
 			RHI_Sampler* Shadow_Sampler;
 			RHI_Sampler* Repeat_Sampler;
 			RHI_Sampler* Clamp_Sampler;
+			RHI_Sampler* ClampToBoarder_Sampler;
 			RHI_Sampler* MirroredRepeat_Sampler;
 		};
 
