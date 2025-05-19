@@ -1,7 +1,9 @@
 #include "Common.hlsl"
 
-Texture2D EditorColourTexture : register(t0, space6);
-Texture2D EditorDepthTexture : register(t1, space6);
+Texture2D DepthTexture : register(t0, space6);
+Texture2D ColourTexture : register(t1, space6);
+Texture2D WorldNormalTexture : register(t2, space6);
+
 TextureCube PointLightShadowMap[32] : register(t0, space7);
 
 struct RenderPointLight
@@ -35,6 +37,15 @@ struct VertexOutput
 	float2 UV : TEXCOORD0;
 };
 
+float3 LightPixel(const float3 colour, const float3 worldNormal, const float3 worldPosition, const RenderPointLight light)
+{
+    float3 diffuse = float3(0, 0, 0);
+
+    float3 lightDirection = normalize(light.Position - worldPosition);
+    float diffuseMultiplier = max(dot(lightDirection, worldNormal), 0.0);
+    return colour * diffuseMultiplier;
+}
+
 float PointShadowCalculation(TextureCube depthTexture, const float3 worldPosition, const RenderPointLight light)
 {
     float3 wPosToLightPos = worldPosition - light.Position;
@@ -66,11 +77,14 @@ VertexOutput VSMain(uint id : SV_VertexID)
 	return o;
 }
 
+
+
 float4 PSMain(VertexOutput input) : SV_TARGET
 {
-	const float DepthValue = EditorDepthTexture.Sample(Clamp_Sampler, input.UV).r;
+	const float DepthValue = DepthTexture.Sample(Clamp_Sampler, input.UV).r;
+	const float3 albedo = (ColourTexture.Sample(Clamp_Sampler, input.UV).xyz);
+	const float3 worldNormal = (WorldNormalTexture.Sample(Clamp_Sampler, input.UV).xyz);
     const float3 worldPosition = reconstruct_position(input.UV, DepthValue, bf_Camera_Projection_View_Inverted);
-	const float3 albedo = (EditorColourTexture.Sample(Clamp_Sampler, input.UV).xyz);
     const float3 ambientAlbedo = albedo * 0.4;
 
     float3 currentAlbedo = float3(0, 0, 0);
@@ -92,8 +106,12 @@ float4 PSMain(VertexOutput input) : SV_TARGET
                 const float3 albedoLightColour = albedo * light.LightColour;
                 const float3 albedoAttenuation = albedoLightColour * attenuation;
 
+                float3 pixelColour = LightPixel(albedo, worldNormal, worldPosition, light);
+                float3 pixelLightColour = pixelColour * light.LightColour;
+                pixelColour = pixelLightColour * attenuation;
+
                 const float shadow = PointShadowCalculation(PointLightShadowMap[lightIdx], worldPosition, light);
-                currentAlbedo += (albedoAttenuation * light.Intensity) * shadow;
+                currentAlbedo += (pixelColour * light.Intensity) * shadow;
             }
         }
     }

@@ -111,24 +111,26 @@ namespace Insight
 
                     if (ImGui::MenuItem("Skeletal Animations"))
                     {
-                        Ref<Runtime::ModelAsset> model = Runtime::AssetRegistry::Instance().LoadAsset("dancing_stormtrooper/gltf/scene.gltf").As<Runtime::ModelAsset>();
-
-                        for (size_t z = 0; z < gridSize; ++z)
+                        Ref<Runtime::ModelAsset> model = Runtime::AssetRegistry::Instance().LoadAsset("Base/Models/New folder/dancing_stormtrooper/gltf/scene.gltf").As<Runtime::ModelAsset>();
+                        if (model)
                         {
-                            for (size_t x = 0; x < gridSize; ++x)
+                            for (size_t z = 0; z < gridSize; ++z)
                             {
-                                const float xPos = offsetX + ((0.0f - (gridSize * 0.5f)) + (space * x));
-                                const float zPos = offsetZ + ((0.0f - (gridSize * 0.5f)) + (space * z));
-                                Maths::Vector3 position(xPos, 0.0f, zPos);
-                                ECS::Entity* e = model->CreateEntityHierarchy();
-                                e->GetComponent<ECS::TransformComponent>()->SetPosition(position);
+                                for (size_t x = 0; x < gridSize; ++x)
+                                {
+                                    const float xPos = offsetX + ((0.0f - (gridSize * 0.5f)) + (space * x));
+                                    const float zPos = offsetZ + ((0.0f - (gridSize * 0.5f)) + (space * z));
+                                    Maths::Vector3 position(xPos, 0.0f, zPos);
+                                    ECS::Entity* e = model->CreateEntityHierarchy();
+                                    e->GetComponent<ECS::TransformComponent>()->SetPosition(position);
+                                }
                             }
+                            ++benchmarkIndex;
                         }
-                        ++benchmarkIndex;
                     }
                     else if (ImGui::MenuItem("Static Mesh"))
                     {
-                        Ref<Runtime::ModelAsset> model = Runtime::AssetRegistry::Instance().LoadAsset("dancing_stormtrooper/gltf/scene.gltf").As<Runtime::ModelAsset>();
+                        Ref<Runtime::ModelAsset> model = Runtime::AssetRegistry::Instance().LoadAsset("Base/Models/New folder/dancing_stormtrooper/gltf/scene.gltf").As<Runtime::ModelAsset>();
                         const float space = 2;
                         const i64 gridSize = 10;
                         for (size_t z = 0; z < gridSize; ++z)

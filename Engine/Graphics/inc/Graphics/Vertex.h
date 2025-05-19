@@ -47,16 +47,19 @@ namespace Insight
 				Position[2] = pos[2];
 
 #ifdef VERTEX_NORMAL_PACKED
-				const u32 bitshiftInterval = 8;
-				const u32 normalMaxValue = 1 << bitshiftInterval;
+				const u32 bitShift = c_PackedNormalSignBit + 1;
 
-				PackNormal(nor.x, normalMaxValue, 0);
-				PackNormal(nor.y, normalMaxValue, bitshiftInterval);
-				PackNormal(nor.z, normalMaxValue, bitshiftInterval * 2);
+				PackNormal(nor.x, 0);
+				PackNormal(nor.y, bitShift);
+				PackNormal(nor.z, bitShift * 2);
 
-				const float fX = UnpackNormal(Normal, normalMaxValue, 0);
-				const float fY = UnpackNormal(Normal, normalMaxValue, bitshiftInterval);
-				const float fZ = UnpackNormal(Normal, normalMaxValue, bitshiftInterval * 2);
+				const float fX = UnpackNormal(Normal, 0);
+				const float fY = UnpackNormal(Normal, bitShift);
+				const float fZ = UnpackNormal(Normal, bitShift * 2);
+
+				ASSERT(Maths::Equals(fX, nor.x, 0.01f));
+				ASSERT(Maths::Equals(fY, nor.y, 0.01f));
+				ASSERT(Maths::Equals(fZ, nor.z, 0.01f));
 #else
 				Normal[0] = nor[0];
 				Normal[1] = nor[1];
@@ -189,32 +192,36 @@ namespace Insight
 
 		private:
 #ifdef VERTEX_NORMAL_PACKED
-			const static u32 c_NormapPackBits = 0x3FE;//0b0000'0000'0000'0000'0000'0011'1111'1110;
-				//const static u32 c_NormapPackBits = 0xFF;//0b0000'0000'0000'0000'0000'0000'1111'1110;
+			const static u32 c_NormapPackBits = 0x1FF;		//0b0000'0000'0000'0000'0000'0001'1111'1111;
+			const static u32 c_PackedNormalSignBit = 0x9;	//0b0000'0000'0000'0000'0000'0010'0000'0000;
 			
-			void PackNormal(const float value, const u32 maxValue, const u8 bitshift)
+			void PackNormal(const float value, const u8 bitshift)
 				{
 					ASSERT(std::abs(value) >= 0.0f && std::abs(value) <= 1.0f);
-					ASSERT(bitshift < 21);
-				
+					ASSERT(bitshift <= 20);
+					u32 normalData = 0;
+
 					if (value < 0.0f)
 					{
-						Normal |= 1 << bitshift;
+						normalData |= 1 << c_PackedNormalSignBit;
 					}
 				
-					const u32 normalData = static_cast<u32>(std::abs(value) * maxValue);
-					Normal |= (normalData & c_NormapPackBits) << bitshift;
+					const u32 normalValue = static_cast<u32>(std::abs(value) * c_NormapPackBits);
+					normalData |= normalValue & c_NormapPackBits;
+					Normal |= normalData << bitshift;
 				}
 			
-			float UnpackNormal(const int normal, const u32 maxValue, const u8 bitshift) const
+			float UnpackNormal(const int normal,  const u8 bitshift) const
 				{
-					ASSERT(bitshift < 21);
+					ASSERT(bitshift <= 20);
 					const u32 normalData = normal >> bitshift;
-					const u32 normalValue = normalData & c_NormapPackBits;
 				
-					const int sign = (normalData & 0x1) == 0 ? 1 : -1;
+					const u32 signBit = (normalData >> c_PackedNormalSignBit) & 0x1;
+					const u32 normalPackedValue = normalData & c_NormapPackBits;
+
+					const int sign = signBit == 0 ? 1 : -1;
 				
-					const float fValue = (static_cast<float>(normalValue) / static_cast<float>(maxValue)) * sign;
+					const float fValue = (static_cast<float>(normalPackedValue) / static_cast<float>(c_NormapPackBits)) * sign;
 					return fValue;
 				}
 #endif

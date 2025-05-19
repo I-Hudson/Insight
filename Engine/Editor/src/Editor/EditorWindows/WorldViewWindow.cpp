@@ -908,8 +908,9 @@ namespace Insight
                             BindCommonResources(cmdList, m_renderingData.GetCurrent());
                         }
 
-                        cmdList->SetTexture(6, 0, render_graph.GetRHITexture(render_graph.GetTexture("EditorWorldColourRT")));
-                        cmdList->SetTexture(6, 1, render_graph.GetRHITexture(render_graph.GetTexture("EditorWorldDepthStencilRT")));
+                        cmdList->SetTexture(6, 0, render_graph.GetRHITexture(render_graph.GetTexture("EditorWorldDepthStencilRT")));
+                        cmdList->SetTexture(6, 1, render_graph.GetRHITexture(render_graph.GetTexture("EditorWorldColourRT")));
+                        cmdList->SetTexture(6, 2, render_graph.GetRHITexture(render_graph.GetTexture("EditorWorldNormalRT")));
                         //cmdList->SetTexture(1, 7, render_graph.GetRHITexture(""));
 
                         const RenderFrame& renderFrame = m_renderingData.GetCurrent().RenderFrame;
