@@ -6,29 +6,52 @@ Texture2D WorldNormalTexture : register(t2, space6);
 
 TextureCube PointLightShadowMap[32] : register(t0, space7);
 
+#define DirectionLightCascadeCount 4
+struct RenderDirectionalLight
+{
+    float4x4 ProjectionView[DirectionLightCascadeCount];
+    float SplitDepth[DirectionLightCascadeCount];
+    float3 LightDirection;
+    float __rdlPad0;
+    float3 LightColour;
+    float __rdlPad1;
+
+    float __rdlPad2_pTex1;
+    float __rdlPad2_pTex2;
+};
+
 struct RenderPointLight
 {
     float4x4 Projection;
     float4x4 View[6];
     float3 LightColour;
-    float __pad1;
+    float __rplPad1;
     float3 Position;
-    float __pad2;
+    float __rplPad2;
 
     float Intensity;
     float Radius;
 
-    float __pad5_pTex1;
-    float __pad5_pTex2;
+    float __rplPad5_pTex1;
+    float __rplPad5_pTex2;
 };
 
-cbuffer PointLightBuffers : register(b0, space6)
+cbuffer DirectionalLightBuffers : register(b0, space6)
+{
+    RenderDirectionalLight DirectionalLights[8];
+    int DirectionalLightSize;
+    float __dlbPad0;
+    float __dlbPad1;
+    float __dlbPad2;
+}
+
+cbuffer PointLightBuffers : register(b1, space6)
 {
     RenderPointLight PointLights[32];
     int PointLightSize;
-    float __pad0;
-    float __pad1;
-    float __pad2;
+    float __plbPad0;
+    float __plbPad1;
+    float __plbPad2;
 }
 
 struct VertexOutput

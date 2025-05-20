@@ -350,74 +350,155 @@ namespace Insight
                     for (size_t worldIdx = 0; worldIdx < renderFrame.RenderWorlds.size(); ++worldIdx)
                     {
                         const RenderWorld& renderWorld = renderFrame.RenderWorlds[worldIdx];
-                        for (size_t pointLightIdx = 0; pointLightIdx < renderWorld.PointLights.size(); ++pointLightIdx)
+                        
                         {
-                            const RenderPointLight& pointLight = renderWorld.PointLights[pointLightIdx];
-                            for (size_t arrayIdx = 0; arrayIdx < 6; ++arrayIdx)
+                            IS_PROFILE_SCOPE("Shader Directional Lights");
+                            for (size_t dirLightIdx = 0; dirLightIdx < renderWorld.DirectionalLights.size(); ++dirLightIdx)
                             {
-                                IS_PROFILE_SCOPE("PointLight Side");
+                                const RenderDirectionalLight& directionalLight = renderWorld.DirectionalLights[dirLightIdx];
+                                for (size_t cascadeIdx = 0; cascadeIdx < ECS::DirectionalLightComponent::c_cascadeCount; ++cascadeIdx)
+                                {
+                                    IS_PROFILE_SCOPE("DirectionalLight Side");
 
-                                Graphics::RenderpassDescription renderpassDescription = render_graph.GetRenderpassDescription("EditorWorldLightShadowPass");
-                                renderpassDescription.DepthStencil = pointLight.DepthTexture;
-                                renderpassDescription.DepthStencilAttachment.Layer_Array_Index = static_cast<u32>(arrayIdx);
-                                cmdList->BeginRenderpass(renderpassDescription);
+                                    Graphics::RenderpassDescription renderpassDescription = render_graph.GetRenderpassDescription("EditorWorldLightShadowPass");
+                                    renderpassDescription.DepthStencil = directionalLight.DepthTexture;
+                                    renderpassDescription.DepthStencilAttachment.Layer_Array_Index = static_cast<u32>(cascadeIdx);
+                                    cmdList->BeginRenderpass(renderpassDescription);
 
-                                struct alignas(16) LightBuffer
-                                {
-                                    Maths::Matrix4 ProjectionView;
-                                };
-                                LightBuffer lightBuffer =
-                                {
-                                    pointLight.Projection * pointLight.View[arrayIdx]
-                                };
-                                {
-                                    IS_PROFILE_SCOPE("SetUniform");
-                                    cmdList->SetUniform(0, 1, lightBuffer);
-                                }
-
-                                for (const u64 meshIndex : renderWorld.OpaqueMeshIndexs)
-                                {
-                                    bool isVisable = false; 
-                                    const RenderMesh& mesh = renderWorld.Meshes[meshIndex];
+                                    struct alignas(16) LightBuffer
                                     {
-                                        IS_PROFILE_SCOPE("Frustum Culling");
-                                        Graphics::Frustum pointLightFrustum(pointLight.View[arrayIdx], pointLight.Projection, pointLight.Radius);
-                                        isVisable = pointLightFrustum.IsVisible(Maths::Vector3(mesh.Transform[3]), mesh.BoudingBox.GetRadius());
-                                    }
-                                    if (!isVisable)
-                                    {
-                                        //continue;
-                                    }
-
-                                    struct alignas(16) Object
-                                    {
-                                        Maths::Matrix4 Transform = Maths::Matrix4::Identity;
-                                        int SkinnedMesh = 0;
+                                        Maths::Matrix4 ProjectionView;
                                     };
-                                    Object object =
+                                    LightBuffer lightBuffer =
                                     {
-                                        mesh.Transform,
-                                        mesh.SkinnedMesh,
+                                        directionalLight.ProjectionView[cascadeIdx]
                                     };
-
                                     {
                                         IS_PROFILE_SCOPE("SetUniform");
-                                        cmdList->SetUniform(1, 0, object);
+                                        cmdList->SetUniform(0, 1, lightBuffer);
                                     }
 
-                                    if (mesh.SkinnedMesh)
+                                    for (const u64 meshIndex : renderWorld.OpaqueMeshIndexs)
                                     {
-                                        RenderSetSkinnedMeshesBonesUniform(mesh, cmdList);
+                                        const RenderMesh& mesh = renderWorld.Meshes[meshIndex];
+                                        /*
+                                        bool isVisable = false;
+                                        {
+                                            IS_PROFILE_SCOPE("Frustum Culling");
+                                            Graphics::Frustum pointLightFrustum(pointLight.View[arrayIdx], pointLight.Projection, pointLight.Radius);
+                                            isVisable = pointLightFrustum.IsVisible(Maths::Vector3(mesh.Transform[3]), mesh.BoudingBox.GetRadius());
+                                        }
+
+                                        if (!isVisable)
+                                        {
+                                            //continue;
+                                        }
+                                        */
+
+                                        struct alignas(16) Object
+                                        {
+                                            Maths::Matrix4 Transform = Maths::Matrix4::Identity;
+                                            int SkinnedMesh = 0;
+                                        };
+                                        Object object =
+                                        {
+                                            mesh.Transform,
+                                            mesh.SkinnedMesh,
+                                        };
+
+                                        {
+                                            IS_PROFILE_SCOPE("SetUniform");
+                                            cmdList->SetUniform(1, 0, object);
+                                        }
+
+                                        if (mesh.SkinnedMesh)
+                                        {
+                                            RenderSetSkinnedMeshesBonesUniform(mesh, cmdList);
+                                        }
+
+                                        const Runtime::MeshLOD& renderMeshLod = mesh.GetLOD(0);
+                                        cmdList->SetVertexBuffer(renderMeshLod.Vertex_buffer);
+                                        cmdList->SetIndexBuffer(renderMeshLod.Index_buffer, Graphics::IndexType::Uint32);
+                                        cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
+                                        ++Graphics::RenderStats::Instance().MeshCount;
                                     }
 
-                                    const Runtime::MeshLOD& renderMeshLod = mesh.GetLOD(0);
-                                    cmdList->SetVertexBuffer(renderMeshLod.Vertex_buffer);
-                                    cmdList->SetIndexBuffer(renderMeshLod.Index_buffer, Graphics::IndexType::Uint32);
-                                    cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
-                                    ++Graphics::RenderStats::Instance().MeshCount;
+                                    cmdList->EndRenderpass();
                                 }
+                            }
+                        }
+                        
+                        {
+                            IS_PROFILE_SCOPE("Shader Point Lights");
+                            for (size_t pointLightIdx = 0; pointLightIdx < renderWorld.PointLights.size(); ++pointLightIdx)
+                            {
+                                const RenderPointLight& pointLight = renderWorld.PointLights[pointLightIdx];
+                                for (size_t arrayIdx = 0; arrayIdx < 6; ++arrayIdx)
+                                {
+                                    IS_PROFILE_SCOPE("PointLight Side");
 
-                                cmdList->EndRenderpass();
+                                    Graphics::RenderpassDescription renderpassDescription = render_graph.GetRenderpassDescription("EditorWorldLightShadowPass");
+                                    renderpassDescription.DepthStencil = pointLight.DepthTexture;
+                                    renderpassDescription.DepthStencilAttachment.Layer_Array_Index = static_cast<u32>(arrayIdx);
+                                    cmdList->BeginRenderpass(renderpassDescription);
+
+                                    struct alignas(16) LightBuffer
+                                    {
+                                        Maths::Matrix4 ProjectionView;
+                                    };
+                                    LightBuffer lightBuffer =
+                                    {
+                                        pointLight.Projection * pointLight.View[arrayIdx]
+                                    };
+                                    {
+                                        IS_PROFILE_SCOPE("SetUniform");
+                                        cmdList->SetUniform(0, 1, lightBuffer);
+                                    }
+
+                                    for (const u64 meshIndex : renderWorld.OpaqueMeshIndexs)
+                                    {
+                                        bool isVisable = false;
+                                        const RenderMesh& mesh = renderWorld.Meshes[meshIndex];
+                                        {
+                                            IS_PROFILE_SCOPE("Frustum Culling");
+                                            Graphics::Frustum pointLightFrustum(pointLight.View[arrayIdx], pointLight.Projection, pointLight.Radius);
+                                            isVisable = pointLightFrustum.IsVisible(Maths::Vector3(mesh.Transform[3]), mesh.BoudingBox.GetRadius());
+                                        }
+                                        if (!isVisable)
+                                        {
+                                            //continue;
+                                        }
+
+                                        struct alignas(16) Object
+                                        {
+                                            Maths::Matrix4 Transform = Maths::Matrix4::Identity;
+                                            int SkinnedMesh = 0;
+                                        };
+                                        Object object =
+                                        {
+                                            mesh.Transform,
+                                            mesh.SkinnedMesh,
+                                        };
+
+                                        {
+                                            IS_PROFILE_SCOPE("SetUniform");
+                                            cmdList->SetUniform(1, 0, object);
+                                        }
+
+                                        if (mesh.SkinnedMesh)
+                                        {
+                                            RenderSetSkinnedMeshesBonesUniform(mesh, cmdList);
+                                        }
+
+                                        const Runtime::MeshLOD& renderMeshLod = mesh.GetLOD(0);
+                                        cmdList->SetVertexBuffer(renderMeshLod.Vertex_buffer);
+                                        cmdList->SetIndexBuffer(renderMeshLod.Index_buffer, Graphics::IndexType::Uint32);
+                                        cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
+                                        ++Graphics::RenderStats::Instance().MeshCount;
+                                    }
+
+                                    cmdList->EndRenderpass();
+                                }
                             }
                         }
                     }
@@ -916,7 +997,35 @@ namespace Insight
                         const RenderFrame& renderFrame = m_renderingData.GetCurrent().RenderFrame;
                         for (const RenderWorld& world : renderFrame.RenderWorlds)
                         {
+                            const u32 c_MaxDirectionalLights = 8;
                             const u32 c_MaxPointLights = 32;
+
+                            struct DirectionalLightBuffer
+                            {
+                                RenderDirectionalLight DirectionalLights[c_MaxDirectionalLights];
+                                u32 DirectionalLightSize;
+                            };
+                            DirectionalLightBuffer directionalLightBuffer;
+                            {
+                                IS_PROFILE_SCOPE("Set directional light data");
+                                for (u32 i = 0; i < world.DirectionalLights.size(); ++i)
+                                {
+                                    if (i >= c_MaxDirectionalLights)
+                                    {
+                                        FAIL_ASSERT_MSG("Only '%d' directional lights are supported.", c_MaxDirectionalLights);
+                                        break;
+                                    }
+
+                                    directionalLightBuffer.DirectionalLights[i] = world.DirectionalLights[i];
+                                    cmdList->SetTexture(7, 0 + i, world.DirectionalLights[i].DepthTexture);
+                                }
+                                directionalLightBuffer.DirectionalLightSize = static_cast<u32>(world.DirectionalLights.size());
+                            }
+                            Graphics::RHI_BufferView directionalLightRHIBuffer = cmdList->UploadUniform(directionalLightBuffer);
+                            {
+                                IS_PROFILE_SCOPE("SetUniform");
+                                cmdList->SetUniform(6, 0, directionalLightRHIBuffer);
+                            }
 
                             struct PointLightBuffer
                             {
@@ -944,8 +1053,9 @@ namespace Insight
                             Graphics::RHI_BufferView spotLightRHIBuffer = cmdList->UploadUniform(pointLightBuffer);
                             {
                                 IS_PROFILE_SCOPE("SetUniform");
-                                cmdList->SetUniform(6, 0, spotLightRHIBuffer);
+                                cmdList->SetUniform(6, 1, spotLightRHIBuffer);
                             }
+
                             cmdList->Draw(3, 1, 0, 0);
 
                             break;

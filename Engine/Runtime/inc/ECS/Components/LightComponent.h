@@ -14,12 +14,12 @@ namespace Insight
 	{
 		enum class LightComponentShadowMapResolutions
 		{
-			_64 = 64,
-			_128 = 128,
-			_256 = 256,
-			_512 = 512,
+			//_64 = 64,
+			//_128 = 128,
+			//_256 = 256,
+			//_512 = 512,
 			_1024 = 1024,
-			_2048 = 2048,
+			//_2048 = 2048,
 		};
 
 		REFLECT_CLASS(IHT_ABSTRACT_COMPONENT)
@@ -47,9 +47,9 @@ namespace Insight
 		};
 	}
 
-	OBJECT_SERIALISER(ECS::LightComponent, 1,
-		SERIALISE_PROPERTY(Maths::Vector3, m_lightColour, 1, 0)
+	OBJECT_SERIALISER(ECS::LightComponent, 2,
 		SERIALISE_PROPERTY(float, m_intensity, 1, 0)
 		SERIALISE_BASE(ECS::Component, 1, 0)
+		SERIALISE_PROPERTY(Maths::Vector3, m_lightColour, 2, 0)
 	);
 }

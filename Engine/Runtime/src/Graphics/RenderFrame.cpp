@@ -288,6 +288,26 @@ namespace Insight
                         renderWorld.PointLights.push_back(std::move(pointLight));
                     }
                 }
+                if (entity->HasComponent<ECS::DirectionalLightComponent>())
+                {
+                    const ECS::DirectionalLightComponent* directionalLightComponent = entity->GetComponent<ECS::DirectionalLightComponent>();
+                    const ECS::TransformComponent* transformComponent = directionalLightComponent->GetOwnerEntity()->GetComponent<ECS::TransformComponent>();
+                    
+                    RenderDirectionalLight directionalLight(
+                        Maths::Vector3(transformComponent->GetTransform()[2]), directionalLightComponent->GetLightColour(), directionalLightComponent->GetShadowMap());
+
+                    directionalLight.CreateCascasdes(
+                        MainCamera.Camera.GetProjectionViewMatrix()
+                        , MainCamera.Camera.GetNearPlane()
+                        , MainCamera.Camera.GetFarPlane()
+                        , ECS::DirectionalLightComponent::c_cascadeCount
+                        , 0.95f);
+
+                    {
+                        std::lock_guard l(renderWorldMutex);
+                        renderWorld.DirectionalLights.push_back(std::move(directionalLight));
+                    }
+                }
 #if PARALLEL_FOR
                 });
 #else
