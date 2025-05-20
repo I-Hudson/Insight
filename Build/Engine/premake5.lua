@@ -48,6 +48,7 @@ function tprint (tbl, indent)
 
   IncludeDirs = {}
   InsightEngineIncludes.AddIncludes(IncludeDirs, "%{wks.location}")
+  InsightEngineIncludes.AddToolsIncludes(IncludeDirs, "%{wks.location}")
   InsightVendorIncludes.AddIncludes(IncludeDirs, "%{wks.location}")
   
   LibDirs = {}

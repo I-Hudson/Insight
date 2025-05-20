@@ -18,14 +18,11 @@ project "ShaderCompiler"
     includedirs
     {
         "inc",
-        "%{IncludeDirs.InsightCore}",
-        "%{IncludeDirs.InsightGraphics}",
+        "%{IncludeDirs.DirectXShaderCompiler}",
     }
-    GraphicsConfig.IncludeDirs()
 
     files 
     { 
-
         "inc/**.hpp", 
         "inc/**.h", 
         "inc/**.inl", 
@@ -40,7 +37,6 @@ project "ShaderCompiler"
 
     links
     {
-        "Insight_Core.lib",
         "dxcompiler.lib",
     }
 

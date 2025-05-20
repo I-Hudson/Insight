@@ -63,28 +63,24 @@ workspace "InsightTools"
     if (profileTool == "tracy") then
         defines { "IS_PROFILE_ENABLED", "IS_PROFILE_TRACY", "TRACY_IMPORTS", "TRACY_ON_DEMAND", "TRACY_CALLSTACK", }
         includedirs { "%{IncludeDirs.tracy}", }
+        links
+        {
+            "tracy.lib",
+        }
     end
     if (profileTool == "pix") then
         defines { "IS_PROFILE_ENABLED", "IS_PROFILE_PIX", "USE_PIX" }
         includedirs { "%{IncludeDirs.pix}", }
+        links
+        {
+            "WinPixEventRuntime.lib"
+        }
     end 
 
     libdirs
     {
         "%{LibDirs.deps_lib}",
     }
-
-    links
-    {
-        "tracy.lib",
-    }
-
-    if (profileTool == "pix") then
-        links
-        {
-            "WinPixEventRuntime.lib"
-        }
-    end
 
     filter "configurations:Debug or configurations:Testing"
         buildoptions "/MDd"
@@ -155,6 +151,6 @@ workspace "InsightTools"
         }
 
 
-include "../../Engine/Tools/AssetPacker/premake.lua"
+--include "../../Engine/Tools/AssetPacker/premake.lua"
 include "../../Engine/Tools/ShaderCompiler/premake.lua"
 include "../../Engine/Tools/ShaderCompilerExe/premake.lua"

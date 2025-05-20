@@ -43,6 +43,8 @@ function GraphicsConfig.IncludeDirs()
         "%{IncludeDirs.InsightCore}",
         "%{IncludeDirs.InsightMaths}",
         "%{IncludeDirs.InsightInput}",
+        
+        "%{IncludeDirs.InsightToolShaderCompiler}",
 
         "%{IncludeDirs.glfw}",
         "%{IncludeDirs.glm}",
@@ -94,6 +96,7 @@ function GraphicsConfig.LibraryLinks()
         "dxcompiler.lib",
         "meshoptimizer.lib",
         "nvrhi.lib",
+        "ShaderCompiler.lib"
     }
 
     if VULKAN_SDK == nil then

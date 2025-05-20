@@ -1,3 +1,5 @@
+local RuntimeConfig = require "../../Runtime/lua/RuntimeConfig"
+
 project "AssetPacker"  
     configurations { "Debug", "Release" } 
     location "./"
@@ -15,6 +17,7 @@ project "AssetPacker"
     includedirs
     {
         "inc",
+        "%{IncludeDirs.InsightRuntime}",
     }
 
     files 
@@ -26,6 +29,15 @@ project "AssetPacker"
         "src/**.cpp",
         "src/**.inl",
     }
+
+    links
+    {
+        "Insight_Runtime.lib",
+    }
+
+    RuntimeConfig.IncludeDirs()
+    RuntimeConfig.LibraryDirs()
+    RuntimeConfig.LibraryLinks()
 
     filter "system:Windows"
 
