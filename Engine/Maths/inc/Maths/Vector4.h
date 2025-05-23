@@ -49,6 +49,8 @@ namespace Insight
 
 			T Dot(const Vec<4, T>& other) const;
 
+			Vec<4, T> Floor() const;
+
 			T& operator[](int i);
 			const T& operator[](int i) const;
 
@@ -111,6 +113,19 @@ namespace Insight
 			};
 		};
 
+		template<typename T>
+		Vec<3, T> Lerp(const Vec<3, T> vec1, const Vec<3, T> vec2, const float f);
+		template<typename T>
+		Vec<4, T> Lerp(const Vec<4, T> vec1, const Vec<4, T> vec2, const float f);
+
+		template<typename T>
+		Vec<4, T> Select(const Vec<4, T> vec1, const Vec<4, T> vec2, const Vec<4, T> control);
+
+		template<typename T>
+		Vec<4, T> Min(const Vec<4, T> vec1, const Vec<4, T> vec2);		
+		template<typename T>
+		Vec<4, T> Max(const Vec<4, T> vec1, const Vec<4, T> vec2);
+		
 		using Vector4 = Vec<4, float>;
 		using DVector4 = Vec<4, double>;
 		using IVector4 = Vec<4, int>;

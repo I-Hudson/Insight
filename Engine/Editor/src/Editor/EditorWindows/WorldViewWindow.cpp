@@ -1000,7 +1000,7 @@ namespace Insight
                             const u32 c_MaxDirectionalLights = 8;
                             const u32 c_MaxPointLights = 32;
 
-                            struct DirectionalLightBuffer
+                            struct alignas(16) DirectionalLightBuffer
                             {
                                 RenderDirectionalLight DirectionalLights[c_MaxDirectionalLights];
                                 u32 DirectionalLightSize;
@@ -1027,7 +1027,7 @@ namespace Insight
                                 cmdList->SetUniform(6, 0, directionalLightRHIBuffer);
                             }
 
-                            struct PointLightBuffer
+                            struct alignas(16) PointLightBuffer
                             {
                                 RenderPointLight PointLights[c_MaxPointLights];
                                 int PointLightSize;
@@ -1045,7 +1045,7 @@ namespace Insight
                                     }
 
                                     pointLightBuffer.PointLights[i] = world.PointLights[i];
-                                    cmdList->SetTexture(7, 0 + i, world.PointLights[i].DepthTexture);
+                                    cmdList->SetTexture(7, c_MaxDirectionalLights + i, world.PointLights[i].DepthTexture);
                                 }
                                 pointLightBuffer.PointLightSize = static_cast<u32>(world.PointLights.size());
                             }

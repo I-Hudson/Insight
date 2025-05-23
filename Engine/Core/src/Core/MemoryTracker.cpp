@@ -227,7 +227,7 @@ namespace Insight
             return m_totalAllocatedInBytes;
         }
 
-//#define MEMORY_TRACK_CALLSTACK
+#define MEMORY_TRACK_CALLSTACK
         std::array<char[c_CallstackStringSize], c_CallStackCount> MemoryTracker::GetCallStack()
         {
             IS_PROFILE_FUNCTION();

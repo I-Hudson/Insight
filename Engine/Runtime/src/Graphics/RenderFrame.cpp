@@ -297,9 +297,8 @@ namespace Insight
                         Maths::Vector3(transformComponent->GetTransform()[2]), directionalLightComponent->GetLightColour(), directionalLightComponent->GetShadowMap());
 
                     directionalLight.CreateCascasdes(
-                        MainCamera.Camera.GetProjectionViewMatrix()
-                        , MainCamera.Camera.GetNearPlane()
-                        , MainCamera.Camera.GetFarPlane()
+                        MainCamera.Camera
+                        , transformComponent->GetTransform()
                         , ECS::DirectionalLightComponent::c_cascadeCount
                         , 0.95f);
 

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Core/Memory.h"
 #include "Core/TypeAlias.h"
 #include "Graphics/Enums.h"
 #include "Graphics/Defines.h"

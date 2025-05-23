@@ -13,6 +13,8 @@ namespace Insight
         {
             u32 operator()(T const& v)
             {
+                static_assert(std::is_enum_v<T>);
+
                 if constexpr (std::is_enum_v<T>)
                 {
                     return static_cast<u32>(const_cast<T&>(v));

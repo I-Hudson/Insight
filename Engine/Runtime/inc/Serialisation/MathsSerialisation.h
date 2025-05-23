@@ -120,7 +120,11 @@ namespace Insight
             {
                 const char c = data.at(i);
 
-                if (c == ',')
+                if (c == '(' || c == ')')
+                {
+                    continue;
+                }
+                else if (c == ',')
                 {
                     vec[idx] = std::stof(numString);
                     numString.clear();

@@ -715,6 +715,8 @@ namespace Insight
 
 				ASSERT(mesh);
 
+#if VERTEX_SPLIT_STREAMS
+#else
 				if (!meshData.RHI_VertexBuffer)
 				{
 					Graphics::RHI_Buffer_Overrides vertexOverrides;
@@ -730,7 +732,7 @@ namespace Insight
 					// We already have a buffer, just upload out data.
 					FAIL_ASSERT();
 				}
-
+#endif
 				if (!meshData.RHI_IndexBuffer)
 				{
 					meshData.RHI_IndexBuffer = Renderer::CreateIndexBuffer(meshData.Indices.size() * sizeof(u32));
@@ -845,6 +847,7 @@ namespace Insight
 				}
 
 				//Graphics::VertexOptomised vertexOptomised(vertex);
+				Graphics::Vertex vertex(position, normal, colour, uv);
 				meshData.Vertices.push_back(Graphics::Vertex(position, normal, colour, uv));
 				meshData.VerticesBoneInfluence.push_back(Graphics::VertexBoneInfluence());
 			}
@@ -1577,6 +1580,7 @@ namespace Insight
 			return material;
 		}
 #endif
+		/*
 		void ModelImporter::ProcessMesh(MeshData& meshData, ModelAsset* modelAsset) const
 		{
 			Mesh* mesh = ::New<Mesh>();
@@ -1596,6 +1600,23 @@ namespace Insight
 
 				ASSERT(mesh);
 
+#if 0
+				if (!meshData.VertexBuffersCreated)
+				{
+					Graphics::RHI_Buffer_Overrides vertexOverrides;
+					vertexOverrides.AllowUnorderedAccess = true;
+
+					meshData.RHI_VertexBuffer = Renderer::CreateVertexBuffer(meshData.Vertices.size() * sizeof(Graphics::Vertex), sizeof(Graphics::Vertex), vertexOverrides);
+					// TODO: Look into why when using the Sponza model and QueueUpload if the editor camera is in certain positions then the mesh disappears.
+					//meshData.RHI_VertexBuffer->QueueUpload(meshData.Vertices.data(), meshData.RHI_VertexBuffer->GetSize());
+					meshData.RHI_VertexBuffer->Upload(meshData.Vertices.data(), meshData.RHI_VertexBuffer->GetSize());
+				}
+				else
+				{
+					// We already have a buffer, just upload out data.
+					FAIL_ASSERT();
+				}
+#else
 				if (!meshData.RHI_VertexBuffer)
 				{
 					Graphics::RHI_Buffer_Overrides vertexOverrides;
@@ -1612,6 +1633,7 @@ namespace Insight
 					FAIL_ASSERT();
 				}
 
+#endif
 				if (!meshData.RHI_IndexBuffer)
 				{
 					meshData.RHI_IndexBuffer = Renderer::CreateIndexBuffer(meshData.Indices.size() * sizeof(u32));
@@ -1646,7 +1668,7 @@ namespace Insight
 				}
 			}
 		}
-
+*/
 		void ModelImporter::SetVertexBoneData(Graphics::Vertex& vertex, Graphics::VertexBoneInfluence& vertexBoneInfluence, const u32 boneId, const float boneWeight) const
 		{
 			IS_PROFILE_FUNCTION();

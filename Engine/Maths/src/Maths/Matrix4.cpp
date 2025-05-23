@@ -1,4 +1,5 @@
 ﻿#include "Maths/Matrix4.h"
+#include "Maths/Matrix3.h"
 #include "Maths/Vector4.h"
 
 #include "Maths/MathsUtils.h"
