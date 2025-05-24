@@ -61,6 +61,10 @@ namespace Insight
 				#if VK_KHR_dynamic_rendering && VK_VERSION_1_3 == 0
 				VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME,
 				#endif
+
+				#if VK_KHR_shader_float16_int8 && VK_VERSION_1_2 == 0
+				VK_KHR_SHADER_FLOAT16_INT8_EXTENSION_NAME,
+				#endif
 			};
 
 			std::vector<const char*> StringVectorToConstChar(const std::vector<std::string>& vec)
@@ -535,7 +539,7 @@ namespace Insight
 						VkResult waitResult = vkWaitForFences(m_device, 1, &m_submitFrameContexts.Get().SubmitFences, 1, INFINITE);
 						ASSERT(waitResult == VK_SUCCESS);
 					}
-
+					m_frameIndexCompleted.store(m_frameIndex.load());
 				}
 
 				{
@@ -626,6 +630,7 @@ namespace Insight
 								SetSwaphchainResolution(Maths::Vector2(Window::Instance().GetWidth(), Window::Instance().GetHeight()));
 							}
 							m_currentFrame = (m_currentFrame + 1) % RenderContext::Instance().GetFramesInFligtCount();
+							m_frameIndex = m_currentFrame;
 						}
 					}
 				}
@@ -1019,11 +1024,12 @@ namespace Insight
 				///validation_features_enabled.push_back(VkValidationFeatureEnableEXT::eSynchronizationValidation);
 				///validation_features_enabled.push_back(VkValidationFeatureEnableEXT::eGpuAssisted);
 
-				VkValidationFeaturesEXT validation_features;
+				VkValidationFeaturesEXT validation_features{};
+				validation_features.pNext = nullptr;
 				validation_features.sType = VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT;
 				validation_features.enabledValidationFeatureCount = static_cast<u32>(validation_features_enabled.size());
 				validation_features.pEnabledValidationFeatures = validation_features_enabled.data();
-				//instanceCreateInfo.setPNext(&validation_features);
+				//instanceCreateInfo.pNext = &validation_features;
 #endif
 				ThrowIfFailed(vkCreateInstance(&instanceCreateInfo, nullptr, &m_instnace));
 			}
@@ -1171,9 +1177,20 @@ namespace Insight
 				std::set<std::string> layerExts;
 				GetDeviceExtensionAndLayers(deviceExts, layerExts, true);
 
+				VkPhysicalDeviceFeatures features{};
+				vkGetPhysicalDeviceFeatures(m_adapter, &features);
+
+				VkPhysicalDeviceShaderFloat16Int8Features native16Bit{};
+
+				VkPhysicalDeviceFeatures2 features2{};
+				features2.pNext = &native16Bit;
+				vkGetPhysicalDeviceFeatures2(m_adapter, &features2);
+
 				m_deviceExtensions[(u8)DeviceExtension::BindlessDescriptors] = deviceExts.find(VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME) != deviceExts.end();
 				m_deviceExtensions[(u8)DeviceExtension::ExclusiveFullScreen] = deviceExts.find(VK_EXT_FULL_SCREEN_EXCLUSIVE_EXTENSION_NAME) != deviceExts.end();
 				m_deviceExtensions[(u8)DeviceExtension::VulkanDynamicRendering] = deviceExts.find(VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME) != deviceExts.end();
+				m_deviceExtensions[(u8)DeviceExtension::FormatTypeCasting] = true;
+				m_deviceExtensions[(u8)DeviceExtension::Native16BitOps] = native16Bit.shaderFloat16;
 			}
 
 			bool RenderContext_Vulkan::CheckInstanceExtension(const char* extension)

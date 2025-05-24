@@ -690,6 +690,9 @@ namespace Insight
 
 			VulkanDynamicRendering,
 
+			FormatTypeCasting,
+			Native16BitOps,
+
 			Size
 		};
 		constexpr const char* DeviceExtensionToString[] =
@@ -697,6 +700,8 @@ namespace Insight
 			"BindlessDescriptors",
 			"ExclusiveFullScreen",
 			"VulkanDynamicRendering",
+			"FormatTypeCasting",
+			"Native16BitOps",
 		};
 		static_assert(ARRAY_COUNT(DeviceExtensionToString) == static_cast<u64>(DeviceExtension::Size));
 

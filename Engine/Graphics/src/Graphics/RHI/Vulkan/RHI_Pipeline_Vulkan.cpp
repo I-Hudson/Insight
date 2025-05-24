@@ -222,7 +222,7 @@ namespace Insight
 				RHI_Shader_Vulkan* shaderVulkan = static_cast<RHI_Shader_Vulkan*>(m_context->GetShaderManager().GetOrCreateShader(pso.ShaderDescription));
 				VkShaderModule shaderModule = shaderVulkan->GetStage(ShaderStage_Compute);
 
-				VkPipelineShaderStageCreateInfo computeShaderStage;
+				VkPipelineShaderStageCreateInfo computeShaderStage{};
 				computeShaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 				computeShaderStage.stage = ShaderStageFlagBitsToVulkan(ShaderStage_Compute);
 				computeShaderStage.module = shaderModule;

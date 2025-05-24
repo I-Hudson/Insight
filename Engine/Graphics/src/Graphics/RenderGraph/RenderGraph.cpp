@@ -509,27 +509,6 @@ namespace Insight
 			{
 				pass->Post(*this, cmdList);
 			}
-
-			// If our swap chain image is not in the 'PresentSrc' layout then transition it.
-			if (m_context->GetSwaphchainIamge()->GetLayout() != ImageLayout::PresentSrc)
-			{
-				PipelineBarrier barrier = { };
-				barrier.SrcStage =  static_cast<u32>(PipelineStageFlagBits::ColourAttachmentOutput);
-				barrier.DstStage =  static_cast<u32>(PipelineStageFlagBits::BottomOfPipe);
-
-				ImageBarrier imageBarrier = { };
-				imageBarrier.SrcAccessFlags = AccessFlagBits::ColorAttachmentWrite;
-				imageBarrier.DstAccessFlags = AccessFlagBits::None;
-				imageBarrier.Image = m_context->GetSwaphchainIamge();
-				imageBarrier.OldLayout = ImageLayout::ColourAttachment;
-				imageBarrier.NewLayout = ImageLayout::PresentSrc;
-				imageBarrier.SubresourceRange = ImageSubresourceRange::SingleMipAndLayer(ImageAspectFlagBits::Colour);
-
-				barrier.ImageBarriers.push_back(std::move(imageBarrier));
-				cmdList->PipelineBarrier(barrier);
-				cmdList->BeginTimeBlock("Transition swapchain image, common");
-				cmdList->EndTimeBlock();
-			}
 		}
 
 		void RenderGraph::Clear()

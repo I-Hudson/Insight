@@ -511,12 +511,12 @@ namespace Insight
 				}
 			}
 
-			void RHI_CommandList_DX12::BindPipeline(PipelineStateObject pso, RHI_DescriptorLayout* layout)
+			void RHI_CommandList_DX12::BindPipeline(const PipelineStateObject& pso, RHI_DescriptorLayout* layout)
 			{
 				BindPipeline(pso, true);
 			}
 
-			void RHI_CommandList_DX12::BindPipeline(PipelineStateObject pso, bool clearDescriptors)
+			void RHI_CommandList_DX12::BindPipeline(const PipelineStateObject& pso, bool clearDescriptors)
 			{
 				IS_PROFILE_FUNCTION();
 
@@ -539,7 +539,7 @@ namespace Insight
 				}
 			}
 
-			void RHI_CommandList_DX12::BindPipeline(ComputePipelineStateObject pso)
+			void RHI_CommandList_DX12::BindPipeline(const ComputePipelineStateObject& pso)
 			{
 				m_activeComputePSO = pso;
 
