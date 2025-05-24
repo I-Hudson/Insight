@@ -54,8 +54,8 @@ namespace Insight
 			Maths::Matrix4 m_previous_transform = Maths::Matrix4::Identity;
 		};
 	}
-	OBJECT_SERIALISER(ECS::TransformComponent, 3,
-		//SERIALISE_PROPERTY(Maths::Matrix4, m_transform, 2, 0)
+	OBJECT_SERIALISER(ECS::TransformComponent, 4,
+		SERIALISE_PROPERTY(Maths::Matrix4, m_transform, 4, 0)
 		SERIALISE_BASE(ECS::Component, 3, 0)
 	);
 }

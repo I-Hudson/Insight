@@ -38,6 +38,7 @@ function EditorConfig.IncludeDirs()
         "%{IncludeDirs.zip}",
         "%{IncludeDirs.splash}",
         "%{IncludeDirs.efsw}",
+        "%{IncludeDirs.nvrhi}",
     }
 end
 

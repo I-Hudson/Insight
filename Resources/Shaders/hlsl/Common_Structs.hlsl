@@ -34,16 +34,18 @@ struct GeoVertexInput
 };
 
 #ifdef VERTEX_NORMAL_PACKED
-float UnpackNormal(const in int normal, const in uint maxValue, const in uint bitshift)
+float UnpackNormal(const in int normal, const in uint bitshift)
 {
-	//const uint NormalPackedValueBits = 0x3FE;
-	const uint NormalPackedValueBits = 0xFF;
+	const uint c_normalPackedValueBits = 0x1FF;
+	const uint c_PackedNormalSignBit = 0x9;
 
 	const uint normalData = normal >> bitshift;
-	const uint normalValue = normalData & NormalPackedValueBits;
+	const uint signBit = (normalData >> c_PackedNormalSignBit) & 0x1;
 
-	const float sign = (normalData & 0x1) == 1 ? -1.0 : 1.0;
-	const float v = ((float)normalValue / (float)maxValue) * sign;
+	const uint normalPackedValue = normalData & c_normalPackedValueBits;
+
+	const float sign = signBit == 0 ? 1.0 : -1.0;
+	const float v = ((float)normalPackedValue / (float)c_normalPackedValueBits) * sign;
 	return v;
 }
 
@@ -52,9 +54,9 @@ float4 GetVertexNormal(const in GeoVertexInput vertex)
 	const uint NormalPackedBitShiftInterval = 10;
 	const uint NormalPackedMaxValue = 1U << NormalPackedBitShiftInterval;
 
-	const float x = UnpackNormal(vertex.Normal, NormalPackedMaxValue, 0);
-	const float y = UnpackNormal(vertex.Normal, NormalPackedMaxValue, NormalPackedBitShiftInterval);
-	const float z = UnpackNormal(vertex.Normal, NormalPackedMaxValue, NormalPackedBitShiftInterval * 2);
+	const float x = UnpackNormal(vertex.Normal, 0);
+	const float y = UnpackNormal(vertex.Normal, NormalPackedBitShiftInterval);
+	const float z = UnpackNormal(vertex.Normal, NormalPackedBitShiftInterval * 2);
 
 	return float4(x, y, z, 0.0);
 }

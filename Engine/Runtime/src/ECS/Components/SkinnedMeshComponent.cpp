@@ -1,4 +1,5 @@
 #include "ECS/Components/SkinnedMeshComponent.h"
+#include "ECS/Components/SkinnedMeshComponent.inl"
 
 namespace Insight
 {
@@ -10,24 +11,6 @@ namespace Insight
 		{ }
 
 		IS_SERIALISABLE_CPP(SkinnedMeshComponent);
-
-		void SkinnedMeshComponent::SetMesh(Ref<Runtime::Mesh> mesh)
-		{
-			m_mesh = mesh;
-		}
-		Ref<Runtime::Mesh> SkinnedMeshComponent::GetMesh() const
-		{
-			return m_mesh;
-		}
-
-		void SkinnedMeshComponent::SetMaterial(Ref<Runtime::MaterialAsset> material)
-		{
-			m_material = material;
-		}
-		Ref<Runtime::MaterialAsset> SkinnedMeshComponent::GetMaterial() const
-		{
-			return m_material;
-		}
 
 		void SkinnedMeshComponent::SetSkeleton(Ref<Runtime::Skeleton> skeleton)
 		{

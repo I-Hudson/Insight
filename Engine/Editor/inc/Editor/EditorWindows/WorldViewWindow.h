@@ -53,6 +53,7 @@ namespace Insight
             void LightPass();
             void FSR2Pass();
 
+            void RenderSetSkinnedMeshesBonesUniform(const RenderMesh& mesh, Graphics::RHI_CommandList* cmdList) const;
             void BindCommonResources(Graphics::RHI_CommandList* cmd_list, RenderData& renderData);
 
             Graphics::BufferFrame GetBufferFrame();

@@ -394,12 +394,30 @@ namespace Insight
             path.pop_back();
         }
     }
+    void FileSystem::PathToUnix(std::wstring& path)
+    {
+        IS_PROFILE_FUNCTION();
+        std::replace(path.begin(), path.end(), L'\\', L'/');
+        if (!path.empty() && path.back() == L'/')
+        {
+            path.pop_back();
+        }
+    }
 
     void FileSystem::PathToWindows(std::string& path)
     {
         IS_PROFILE_FUNCTION();
         std::replace(path.begin(), path.end(), '/', '\\');
         if (!path.empty() && path.back() == '\\')
+        {
+            path.pop_back();
+        }
+    }
+    void FileSystem::PathToWindows(std::wstring& path)
+    {
+        IS_PROFILE_FUNCTION();
+        std::replace(path.begin(), path.end(), L'/', L'\\');
+        if (!path.empty() && path.back() == L'\\')
         {
             path.pop_back();
         }

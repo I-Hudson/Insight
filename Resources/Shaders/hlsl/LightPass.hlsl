@@ -1,8 +1,10 @@
 #include "Common.hlsl"
 
-Texture2D<float4> EditorColourTexture : register(t0, space6);
-Texture2D<float4> EditorDepthTexture : register(t1, space6);
-TextureCube<float4> PointLightShadowMap[32] : register(t0, space7);
+Texture2D DepthTexture : register(t0, space6);
+Texture2D ColourTexture : register(t1, space6);
+Texture2D WorldNormalTexture : register(t2, space6);
+
+TextureCube PointLightShadowMap[32] : register(t0, space7);
 
 struct RenderPointLight
 {
@@ -35,17 +37,28 @@ struct VertexOutput
 	float2 UV : TEXCOORD0;
 };
 
-float PointShadowCalculation(TextureCube<float4> depthTexture, const float3 worldPosition, const RenderPointLight light)
+float3 LightPixel(const float3 colour, const float3 worldNormal, const float3 worldPosition, const RenderPointLight light)
+{
+    float3 diffuse = float3(0, 0, 0);
+
+    float3 lightDirection = normalize(light.Position - worldPosition);
+    float diffuseMultiplier = max(dot(lightDirection, worldNormal), 0.0);
+    return colour * diffuseMultiplier;
+}
+
+float PointShadowCalculation(TextureCube depthTexture, const float3 worldPosition, const RenderPointLight light)
 {
     float3 wPosToLightPos = worldPosition - light.Position;
 
-    float shadowDepth = depthTexture.Sample(Clamp_Sampler, wPosToLightPos).r;
+    float shadowDepth = depthTexture.Sample(ClampToBoarder_Sampler, wPosToLightPos).r;
 
     const uint shadowSliceIndex = DirectionToCubeFaceIndex(wPosToLightPos);
     float4x4 shadowProjectionView = mul(light.Projection, light.View[shadowSliceIndex]);
     float3 shadowNDC = world_to_ndc(worldPosition, shadowProjectionView);
 
-    if (shadowDepth < shadowNDC.z)
+    [branch]
+    if (shadowDepth < shadowNDC.z
+        || shadowNDC.z > 1.0)
     {
         return 0;
     }
@@ -64,11 +77,14 @@ VertexOutput VSMain(uint id : SV_VertexID)
 	return o;
 }
 
+
+
 float4 PSMain(VertexOutput input) : SV_TARGET
 {
-	const float DepthValue = EditorDepthTexture.Sample(Clamp_Sampler, input.UV).r;
+	const float DepthValue = DepthTexture.Sample(Clamp_Sampler, input.UV).r;
+	const float3 albedo = (ColourTexture.Sample(Clamp_Sampler, input.UV).xyz);
+	const float3 worldNormal = (WorldNormalTexture.Sample(Clamp_Sampler, input.UV).xyz);
     const float3 worldPosition = reconstruct_position(input.UV, DepthValue, bf_Camera_Projection_View_Inverted);
-	const float3 albedo = (EditorColourTexture.Sample(Clamp_Sampler, input.UV).xyz);
     const float3 ambientAlbedo = albedo * 0.4;
 
     float3 currentAlbedo = float3(0, 0, 0);
@@ -90,9 +106,12 @@ float4 PSMain(VertexOutput input) : SV_TARGET
                 const float3 albedoLightColour = albedo * light.LightColour;
                 const float3 albedoAttenuation = albedoLightColour * attenuation;
 
+                float3 pixelColour = LightPixel(albedo, worldNormal, worldPosition, light);
+                float3 pixelLightColour = pixelColour * light.LightColour;
+                pixelColour = pixelLightColour * attenuation;
+
                 const float shadow = PointShadowCalculation(PointLightShadowMap[lightIdx], worldPosition, light);
-                currentAlbedo += (albedoAttenuation * light.Intensity) * shadow;
-                //currentAlbedo = shadow;
+                currentAlbedo += (pixelColour * light.Intensity) * shadow;
             }
         }
     }

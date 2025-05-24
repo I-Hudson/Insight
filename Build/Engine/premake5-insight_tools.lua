@@ -57,16 +57,8 @@ workspace "InsightTools"
 
     includedirs
     {
-        "%{IncludeDirs.InsightCore}",
-        "%{IncludeDirs.InsightMaths}",
-        "%{IncludeDirs.InsightGraphics}",
-        "%{IncludeDirs.InsightInput}",
-        "%{IncludeDirs.InsightRuntime}",
-
         "%{IncludeDirs.tracy}",
-        "%{IncludeDirs.doctest}",
     }
-    InsightVendorIncludes.AddIncludesToIncludeDirs(includedirs)
 
     if (profileTool == "tracy") then
         defines { "IS_PROFILE_ENABLED", "IS_PROFILE_TRACY", "TRACY_IMPORTS", "TRACY_ON_DEMAND", "TRACY_CALLSTACK", }
@@ -84,14 +76,7 @@ workspace "InsightTools"
 
     links
     {
-        "Insight_Core.lib",
-        "Insight_Maths.lib",
-        "Insight_Graphics.lib",
-        "Insight_Input.lib",
-        "Insight_Runtime.lib",
-
         "tracy.lib",
-
     }
 
     if (profileTool == "pix") then
@@ -108,12 +93,7 @@ workspace "InsightTools"
             "_DEBUG",
             "IS_DEBUG",
         }
-        links
-        {
-            "Reflectd.lib",
-        }
-        prebuildcommands { "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/dll/Reflectd.dll\" \"%{cfg.targetdir}\"" }
-        prebuildcommands { "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/dll/\" \"%{cfg.targetdir}\"", "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/pdb/\" \"%{cfg.targetdir}\"",  }
+
 
     filter "configurations:Release"
         buildoptions "/MD"
@@ -124,13 +104,6 @@ workspace "InsightTools"
             "IS_RELEASE",
             "DOCTEST_CONFIG_DISABLE",
         }
-        links
-        {
-            "Reflect.lib",
-        }
-        prebuildcommands { "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/dll/Reflect.dll\" \"%{cfg.targetdir}\"" }
-        prebuildcommands { "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/dll/\" \"%{cfg.targetdir}\"", "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/pdb/\" \"%{cfg.targetdir}\"", }
-
 
         filter "system:Windows"
     	system "windows"
@@ -183,3 +156,5 @@ workspace "InsightTools"
 
 
 include "../../Engine/Tools/AssetPacker/premake.lua"
+include "../../Engine/Tools/ShaderCompiler/premake.lua"
+include "../../Engine/Tools/ShaderCompilerExe/premake.lua"

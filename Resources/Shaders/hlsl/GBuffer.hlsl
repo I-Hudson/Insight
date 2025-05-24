@@ -14,19 +14,6 @@ struct VertexOutput
 	float2 UV 						: TEXCOORD0;
 };
 
-#define IDENTITY_MATRIX float4x4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
-#define ZERO_MATRIX float4x4(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-
-float4x4 SkinnedBoneMatrix(const in GeoVertexInput input)
-{
-	float4x4 BoneTransform = ZERO_MATRIX; 
-	BoneTransform += bpo_BoneMatrices[GetVertexBondId(input.BoneIds, 0)] * GetVertexBoneWeight(input.BoneWeights, 0);
-    BoneTransform += bpo_BoneMatrices[GetVertexBondId(input.BoneIds, 1)] * GetVertexBoneWeight(input.BoneWeights, 1);
-    BoneTransform += bpo_BoneMatrices[GetVertexBondId(input.BoneIds, 2)] * GetVertexBoneWeight(input.BoneWeights, 2);
-    BoneTransform += bpo_BoneMatrices[GetVertexBondId(input.BoneIds, 3)] * GetVertexBoneWeight(input.BoneWeights, 3);
-	return BoneTransform;
-}
-
 VertexOutput VSMain(const GeoVertexInput input, uint vertexID : SV_VertexID)
 {
 	VertexOutput vsOut;
@@ -35,12 +22,9 @@ VertexOutput VSMain(const GeoVertexInput input, uint vertexID : SV_VertexID)
 	vsOut.WorldNormal = GetVertexNormal(input);
 
 	[branch]
-	if (bpo_SkinnedMesh == 1 && !GPUSkinningEnabled())
+	if (bpo_SkinnedMesh && !GPUSkinningEnabled())
 	{
-		const float4x4 BoneTransform = SkinnedBoneMatrix(input);
-		
-		vsOut.Pos = mul(BoneTransform, float4(vsOut.Pos.xyz, 1));
-		vsOut.WorldNormal = mul(BoneTransform, float4(vsOut.WorldNormal.xyz, 1));
+		SkinMesh(input, vsOut.Pos, vsOut.WorldNormal);
 	}
 
 	vsOut.WorldPos = mul(bpo_Transform, vsOut.Pos);

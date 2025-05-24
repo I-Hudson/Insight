@@ -64,7 +64,8 @@ namespace Insight
         static bool PathIsSubPathOf(std::string_view path, std::string_view basePath);
 
         static void PathToUnix(std::string& path);
-
+        static void PathToUnix(std::wstring& path);
         static void PathToWindows(std::string& path);
+        static void PathToWindows(std::wstring& path);
     };
 }

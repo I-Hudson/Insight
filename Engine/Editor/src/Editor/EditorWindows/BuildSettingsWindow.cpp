@@ -49,7 +49,7 @@ namespace Insight
 			{
 				std::string folderSelcted;
 				PlatformFileDialog fileDialog;
-				if (fileDialog.Show(PlatformFileDialogOperations::SelectFolder, &folderSelcted))
+				if (fileDialog.Show(PlatformFileDialogOperations::SelectFolder, &folderSelcted, Runtime::ProjectSystem::Instance().GetProjectInfo().GetProjectPath(), true))
 				{
 					PackageBuild build;
 					PackageBuildOptions options;

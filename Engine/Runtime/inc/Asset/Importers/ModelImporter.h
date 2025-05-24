@@ -73,11 +73,7 @@ namespace Insight
 
         struct MeshNode
         {
-            ~MeshNode()
-            {
-                Delete(MeshData);
-                Delete(Mesh);
-            }
+            ~MeshNode();
 
             const aiScene* AssimpScene = nullptr;
             const aiNode* AssimpNode = nullptr;

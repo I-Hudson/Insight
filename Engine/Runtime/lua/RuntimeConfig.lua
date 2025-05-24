@@ -44,6 +44,7 @@ function RuntimeConfig.IncludeDirs()
         "%{IncludeDirs.meshoptimizer}",
         "%{IncludeDirs.simplygon}",
         "%{IncludeDirs.reflect}",
+        "%{IncludeDirs.nvrhi}",
     }
 end
 

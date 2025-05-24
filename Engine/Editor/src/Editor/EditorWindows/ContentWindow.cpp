@@ -237,7 +237,7 @@ namespace Insight::Editor
         {
             // Import a new asset.
             PlatformFileDialog importDialog;
-            if (importDialog.ShowLoad(&m_importFilePath))
+            if (importDialog.ShowLoad(&m_importFilePath, Runtime::ProjectSystem::Instance().GetProjectInfo().GetContentPath()))
             {
                 m_showImportWindow = true;
             }

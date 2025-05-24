@@ -3,6 +3,8 @@
 #include "Core/Logger.h"
 #include "Core/Asserts.h"
 
+#include "Asset/AssetInfo.h"
+
 namespace Insight
 {
     namespace Runtime
@@ -32,6 +34,10 @@ namespace Insight
         // Skeleton
         //========================
         Skeleton::Skeleton()
+        { }
+        Skeleton::Skeleton(const AssetInfo * assetInfo, const std::string name)
+            : m_assetInfo(std::move(assetInfo))
+            , m_name(std::move(name))
         { }
         Skeleton::~Skeleton()
         { }

@@ -65,6 +65,7 @@ function GraphicsConfig.IncludeDirs()
         "%{IncludeDirs.DirectXAgilityHeaders}",
         "%{IncludeDirs.DirectXShaderCompiler}",
         "%{IncludeDirs.D3D12MemoryAllocator}",
+        "%{IncludeDirs.nvrhi}",
     }
 end
 
@@ -92,6 +93,7 @@ function GraphicsConfig.LibraryLinks()
         "dxguid.lib",
         "dxcompiler.lib",
         "meshoptimizer.lib",
+        "nvrhi.lib",
     }
 
     if VULKAN_SDK == nil then
@@ -169,7 +171,10 @@ function GraphicsConfig.FilterPlatforms(AMD_Ryzen_Master_SDK, OutputDir)
 
     filter "platforms:Win64"
         local renderDocPath = "C:/Program Files/RenderDoc"
-        if os.rename(renderDocPath, renderDocPath) then
+        local renderDocExists = CommonConfig.PathExists(renderDocPath)
+            print(renderDocExists)
+        if renderDocExists then
+            print("RenderDoc")
             defines
             {
                 "RENDER_DOC_API",

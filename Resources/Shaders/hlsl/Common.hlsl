@@ -20,6 +20,26 @@ float2 GetUVsForAPI(float2 uv)
 #endif
 }
 
+#define IDENTITY_MATRIX float4x4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
+#define ZERO_MATRIX float4x4(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+
+float4x4 SkinnedBoneMatrix(const in GeoVertexInput input)
+{
+	float4x4 BoneTransform = ZERO_MATRIX; 
+	BoneTransform += bpo_BoneMatrices[GetVertexBondId(input.BoneIds, 0)] * GetVertexBoneWeight(input.BoneWeights, 0);
+    BoneTransform += bpo_BoneMatrices[GetVertexBondId(input.BoneIds, 1)] * GetVertexBoneWeight(input.BoneWeights, 1);
+    BoneTransform += bpo_BoneMatrices[GetVertexBondId(input.BoneIds, 2)] * GetVertexBoneWeight(input.BoneWeights, 2);
+    BoneTransform += bpo_BoneMatrices[GetVertexBondId(input.BoneIds, 3)] * GetVertexBoneWeight(input.BoneWeights, 3);
+	return BoneTransform;
+}
+
+void SkinMesh(const in GeoVertexInput input, inout float4 position, inout float4 worldNormal)
+{
+	const float4x4 BoneTransform = SkinnedBoneMatrix(input);
+	position = mul(BoneTransform, float4(position.xyz, 1));
+	worldNormal = mul(BoneTransform, float4(worldNormal.xyz, 1));
+}
+
 float LineariseFloat(const float v, const float min, const float max)
 {
 	return min * max / (max + v * (min - max));
@@ -44,7 +64,44 @@ uint DirectionToCubeFaceIndex(float3 direction)
     if (max_component == abs_direction.z)
         return (direction.z > 0.0f) ? 4 : 5;
 
-    return 0;
+    return -1;
+}
+
+float3 DirectionToCubeFaceIndexColour(float3 direction)
+{
+    direction = normalize(direction);
+    uint cubeFaceIndex = DirectionToCubeFaceIndex(direction);
+    switch(cubeFaceIndex)
+    {
+        case 0:
+        return float3(1, 0, 0);
+        break;
+
+        case 1:
+        return float3(1, 1, 0);
+        break;
+
+        case 2:
+        return float3(1, 1, 1);
+        break;
+
+        case 3:
+        return float3(0, 1, 1);
+        break;
+
+        case 4:
+        return float3(0, 0, 1);
+        break;
+
+        case 5:
+        return float3(1, 0, 1);
+        break;
+
+        case 6:
+        return float3(0, 1, 0);
+        break;
+    }
+    return float3(1, 1, 1);
 }
 
 //================================================================

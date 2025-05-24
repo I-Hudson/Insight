@@ -15,8 +15,7 @@ cbuffer BufferFrame : register(b0, FrameSpace)
     float2 bf_TAA_Jitter_Previous;
 
     float Delta_Time;
-    int bf_RenderOptions;
-    // bit0 - GPUSkinning Enabled
+    int bf_RenderOptions; // bit0 - GPUSkinning Enabled
     float bf__pad0;
     float bf__pad1;
 }

@@ -27,7 +27,7 @@ namespace Insight::Runtime
 		return GetMeshByIndex(0);
 	}
 
-	Ref<Mesh> ModelAsset::GetMeshByIndex(u32 index) const
+	Ref<Mesh> ModelAsset::GetMeshByIndex(const u32 index) const
 	{
 		if (index >= static_cast<u32>(m_meshes.size()))
 		{
@@ -47,7 +47,7 @@ namespace Insight::Runtime
 		return m_materials.empty() ? nullptr : m_materials[0];
 	}
 
-	Ref<MaterialAsset> ModelAsset::GetMaterialByIndex(u32 index) const
+	Ref<MaterialAsset> ModelAsset::GetMaterialByIndex(const u32 index) const
 	{
 		if (index >= static_cast<u32>(m_materials.size()))
 		{
@@ -62,6 +62,34 @@ namespace Insight::Runtime
 		return static_cast<u32>(m_materials.size());
 	}
 
+	Ref<AnimationClip> ModelAsset::GetAnimationByIndex(const u32 index) const
+	{
+		if (index >= static_cast<u32>(m_animationClips.size()))
+		{
+			IS_LOG_CORE_WARN("[ModelAsset::GetAnimationByIndex] Index '{}' is out of range.", index);
+			return Ref<AnimationClip>();
+		}
+		return m_animationClips[index];
+	}
+
+	Ref<AnimationClip> ModelAsset::GetAnimationByName(const std::string_view name) const
+	{
+		for (size_t i = 0; i < m_animationClips.size(); ++i)
+		{
+			const Ref<AnimationClip>& clip = m_animationClips[i];
+			if (clip->GetName() == name)
+			{
+				return clip;
+			}
+		}
+		return Ref<AnimationClip>();
+	}
+
+	u32 ModelAsset::GetAnimationCount() const
+	{
+		return static_cast<u32>(m_animationClips.size());
+	}
+
 	Ref<Skeleton> ModelAsset::GetSkeleton(const u32 index) const
 	{
 		if (index >= static_cast<u32>(m_skeletons.size()))
@@ -70,6 +98,19 @@ namespace Insight::Runtime
 			return Ref<Skeleton>();
 		}
 		return m_skeletons[index];
+	}
+
+	Ref<Skeleton> ModelAsset::GetSkeletonByName(const std::string_view name) const
+	{
+		for (size_t i = 0; i < m_skeletons.size(); ++i)
+		{
+			const Ref<Skeleton>& skeleton = m_skeletons[i];
+			if (skeleton->GetName() == name)
+			{
+				return skeleton;
+			}
+		}
+		return Ref<Skeleton>();
 	}
 
 	ECS::Entity* ModelAsset::CreateEntityHierarchyStaticMesh() const

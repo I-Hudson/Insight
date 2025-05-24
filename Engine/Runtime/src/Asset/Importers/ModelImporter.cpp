@@ -156,6 +156,15 @@ namespace Insight
 		//};
 
 		//=============================================
+		// MeshNode
+		//=============================================
+		MeshNode::~MeshNode()
+		{
+			Delete(MeshData);
+			Delete(Mesh);
+		}
+
+		//=============================================
 		// MeshData
 		//=============================================
 		void MeshData::Optimise()
@@ -574,7 +583,7 @@ namespace Insight
 
 			if (!modelAsset->GetSkeleton(0))
 			{
-				modelAsset->m_skeletons.push_back(Ref<Skeleton>(::New<Skeleton>()));
+				modelAsset->m_skeletons.push_back(Ref<Skeleton>(::New<Skeleton>(modelAsset->GetAssetInfo())));
 			}
 
 			Ref<Skeleton> skeleton = modelAsset->GetSkeleton(0);
@@ -686,6 +695,7 @@ namespace Insight
 		void ModelImporter::ProcessMesh(const aiScene* aiScene, const aiNode* aiNode, const aiMesh* aiMesh, ModelAsset* modelAsset) const
 		{
 			Mesh* mesh = ::New<Mesh>();
+			mesh->m_assetInfo = modelAsset->GetAssetInfo();
 			modelAsset->m_meshes.push_back(mesh);
 
 			MeshData meshData = { };
@@ -961,7 +971,8 @@ namespace Insight
 				
 				if (aiMesh->HasBones() && !modelAsset->GetSkeleton(0))
 				{
-					modelAsset->m_skeletons.push_back(Ref<Skeleton>(::New<Skeleton>()));
+					const aiBone* bone = aiMesh->mBones[0];
+					modelAsset->m_skeletons.push_back(Ref<Skeleton>(::New<Skeleton>(modelAsset->GetAssetInfo(), bone->mName.C_Str())));
 				}
 
 				Ref<Skeleton> skeleton = aiMesh->HasBones() ? modelAsset->GetSkeleton(0) : nullptr;
@@ -1056,7 +1067,8 @@ namespace Insight
 
 			if (aiMesh->HasBones() && !modelAsset->GetSkeleton(0))
 			{
-				modelAsset->m_skeletons.push_back(Ref<Skeleton>(::New<Skeleton>()));
+				const aiBone* bone = aiMesh->mBones[0];
+				modelAsset->m_skeletons.push_back(Ref<Skeleton>(::New<Skeleton>(modelAsset->GetAssetInfo(), bone->mName.C_Str())));
 			}
 
 			Ref<Skeleton> skeleton = aiMesh->HasBones() ? modelAsset->GetSkeleton(0) : nullptr;
@@ -1136,11 +1148,11 @@ namespace Insight
 
 			for (size_t animIdx = 0; animIdx < aiScene->mNumAnimations; ++animIdx)
 			{
-				Ref<AnimationClip> animationClip = Ref<AnimationClip>(::New<AnimationClip>());
-				animationClip->m_skeleton = skeleton;
+				const aiAnimation* aiAnimation = aiScene->mAnimations[animIdx];
+
+				Ref<AnimationClip> animationClip = Ref<AnimationClip>(::New<AnimationClip>(modelAsset->GetAssetInfo(), skeleton, aiAnimation->mName.C_Str()));
 				modelAsset->m_animationClips.push_back(animationClip);
 
-				const aiAnimation* aiAnimation = aiScene->mAnimations[animIdx];
 				for (size_t animChannelIdx = 0; animChannelIdx < aiAnimation->mNumChannels; ++animChannelIdx)
 				{
 					auto channel = aiAnimation->mChannels[animChannelIdx];

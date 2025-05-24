@@ -126,7 +126,7 @@ namespace Insight
 			{
 				PlatformFileDialog dialog;
 				std::string buildPath;
-				if (dialog.ShowSave(&buildPath, { FileDialogFilter(L"AssetPackage", L".isassetpackage") }))
+				if (dialog.ShowSave(&buildPath, Runtime::ProjectSystem::Instance().GetProjectInfo().GetProjectPath(), { FileDialogFilter(L"AssetPackage", L".isassetpackage") }))
 				{
 					assetPackage->BuildPackage(buildPath);
 				}

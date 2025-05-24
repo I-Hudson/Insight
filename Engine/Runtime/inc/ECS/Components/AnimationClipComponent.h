@@ -25,6 +25,9 @@ namespace Insight
 
             IS_SERIALISABLE_H(AnimationClipComponent);
 
+            void Play(const bool restClip = false);
+            void Stop();
+
             void SetAnimationClip(Ref<Runtime::AnimationClip> animationClip);
             Ref<Runtime::AnimationClip> GetAnimationClip() const;
 
@@ -51,10 +54,19 @@ namespace Insight
         };
     }
 
-    OBJECT_SERIALISER(ECS::AnimationClipComponent, 1,
+    namespace Serialisation
+    {
+        struct AnimationClipToGuid {};
+        template<>
+        struct ComplexSerialiser<AnimationClipToGuid, Ref<Runtime::AnimationClip>, ECS::AnimationClipComponent>
+        {
+            void operator()(ISerialiser* serialiser, Ref<Runtime::AnimationClip>& animationClip, ECS::AnimationClipComponent* component) const;
+        };
+    }
+
+    OBJECT_SERIALISER(ECS::AnimationClipComponent, 2,
         SERIALISE_BASE(ECS::Component, 1, 0)
-        //SERIALISE_COMPLEX(Serialisation::AnimationClipToGuid, m_animationClip, 1, 0)
-        //SERIALISE_COMPLEX(Serialisation::AnimationClipToGuid, m_animationClip, 1, 0)
+        SERIALISE_COMPLEX(Serialisation::AnimationClipToGuid, m_animationClip, 2, 0)
         SERIALISE_PROPERTY(float, m_playbackScale, 1, 0)
     );
 }

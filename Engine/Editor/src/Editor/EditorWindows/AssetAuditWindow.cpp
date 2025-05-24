@@ -7,6 +7,8 @@
 
 #include "Serialisation/Serialisers/BinarySerialiser.h"
 
+#include "Runtime/ProjectSystem.h"
+
 #include "Core/Profiler.h"
 #include "Platforms/Platform.h"
 
@@ -117,7 +119,7 @@ namespace Insight
                 {
                     PlatformFileDialog dialog;
                     std::string path;
-                    if (dialog.ShowSave(&path, { FileDialogFilter(L"AssetPackage", L"*.isassetpackage") }))
+                    if (dialog.ShowSave(&path, Runtime::ProjectSystem::Instance().GetProjectInfo().GetProjectPath(), { FileDialogFilter(L"AssetPackage", L"*.isassetpackage") }))
                     {
                         Serialisation::BinarySerialiser serialiser(false);
                         m_selectedAssetPackage->Serialise(&serialiser);
