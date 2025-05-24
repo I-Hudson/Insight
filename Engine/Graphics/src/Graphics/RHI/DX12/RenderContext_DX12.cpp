@@ -718,6 +718,9 @@ namespace Insight
 				ComPtr<IDXGIFactory6> factory6;
 				if (SUCCEEDED(factory->QueryInterface(IID_PPV_ARGS(&factory6))))
 				{
+					u32 adapterIdx = 0;
+					u32 vram = 0;
+
 					for (
 						UINT adapterIndex = 0;
 						SUCCEEDED(factory6->EnumAdapterByGpuPreference(
@@ -735,25 +738,29 @@ namespace Insight
 							continue;
 						}
 
-						/// Check to see whether the adapter supports Direct3D 12, but don't create the
-						/// actual device yet.
-						if (SUCCEEDED(D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_12_0, __uuidof(ID3D12Device), nullptr)))
-						{
-							m_d3dFeatureLevel = D3D_FEATURE_LEVEL_12_0;
-							break;
-						}
+						const auto findDXFeatureLevel = [&](const D3D_FEATURE_LEVEL featureLevel)
+							{
+								/// Check to see whether the adapter supports Direct3D 12, but don't create the
+								/// actual device yet.
+								if (SUCCEEDED(D3D12CreateDevice(nullptr, featureLevel, __uuidof(ID3D12Device), nullptr))
+									&& m_d3dFeatureLevel <= featureLevel
+									&& desc.DedicatedVideoMemory > vram)
+								{
+									m_d3dFeatureLevel = featureLevel;
+									adapterIdx = adapterIndex;
+									vram = desc.DedicatedVideoMemory;
+								}
+							};
 
-						if (SUCCEEDED(D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_11_0, __uuidof(ID3D12Device), nullptr)))
-						{
-							m_d3dFeatureLevel = D3D_FEATURE_LEVEL_11_0;
-							break;
-						}
-
-						if (m_d3dFeatureLevel == D3D_FEATURE_LEVEL_1_0_CORE)
-						{
-							FAIL_ASSERT();
-						}
+						findDXFeatureLevel(D3D_FEATURE_LEVEL_12_0);
+						findDXFeatureLevel(D3D_FEATURE_LEVEL_11_0);
+						findDXFeatureLevel(D3D_FEATURE_LEVEL_1_0_CORE);
 					}
+
+					SUCCEEDED(factory6->EnumAdapterByGpuPreference(
+						adapterIdx,
+						DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE,
+						IID_PPV_ARGS(&adapter)));
 				}
 
 				ASSERT(m_d3dFeatureLevel != D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_1_0_CORE);
@@ -799,6 +806,15 @@ namespace Insight
 
 			void RenderContext_DX12::SetDeviceExtenstions()
 			{
+				D3D12_FEATURE_DATA_D3D12_OPTIONS options{};
+				ThrowIfFailed(m_device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS, &options, sizeof(options)));
+
+				D3D12_FEATURE_DATA_D3D12_OPTIONS1 options1{};
+				ThrowIfFailed(m_device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS1, &options1, sizeof(options1)));
+
+				D3D12_FEATURE_DATA_D3D12_OPTIONS2 options2{};
+				ThrowIfFailed(m_device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS2, &options2, sizeof(options2)));
+
 				D3D12_FEATURE_DATA_D3D12_OPTIONS3 options3{};
 				ThrowIfFailed(m_device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS3, &options3, sizeof(options3)));
 
@@ -806,6 +822,7 @@ namespace Insight
 				m_deviceExtensions[(u8)DeviceExtension::ExclusiveFullScreen] = true;
 				m_deviceExtensions[(u8)DeviceExtension::VulkanDynamicRendering] = false;
 				m_deviceExtensions[(u8)DeviceExtension::FormatTypeCasting] = options3.CastingFullyTypedFormatSupported;
+				m_deviceExtensions[(u8)DeviceExtension::Native16BitOps] = options.MinPrecisionSupport == D3D12_SHADER_MIN_PRECISION_SUPPORT_16_BIT;
 			}
 
 			void RenderContext_DX12::ResizeSwapchainBuffers()

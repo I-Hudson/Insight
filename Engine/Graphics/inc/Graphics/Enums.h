@@ -691,6 +691,7 @@ namespace Insight
 			VulkanDynamicRendering,
 
 			FormatTypeCasting,
+			Native16BitOps,
 
 			Size
 		};
@@ -700,6 +701,7 @@ namespace Insight
 			"ExclusiveFullScreen",
 			"VulkanDynamicRendering",
 			"FormatTypeCasting",
+			"Native16BitOps",
 		};
 		static_assert(ARRAY_COUNT(DeviceExtensionToString) == static_cast<u64>(DeviceExtension::Size));
 

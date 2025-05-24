@@ -61,6 +61,10 @@ namespace Insight
 				#if VK_KHR_dynamic_rendering && VK_VERSION_1_3 == 0
 				VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME,
 				#endif
+
+				#if VK_KHR_shader_float16_int8 && VK_VERSION_1_2 == 0
+				VK_KHR_SHADER_FLOAT16_INT8_EXTENSION_NAME,
+				#endif
 			};
 
 			std::vector<const char*> StringVectorToConstChar(const std::vector<std::string>& vec)
@@ -1173,10 +1177,20 @@ namespace Insight
 				std::set<std::string> layerExts;
 				GetDeviceExtensionAndLayers(deviceExts, layerExts, true);
 
+				VkPhysicalDeviceFeatures features{};
+				vkGetPhysicalDeviceFeatures(m_adapter, &features);
+
+				VkPhysicalDeviceShaderFloat16Int8Features native16Bit{};
+
+				VkPhysicalDeviceFeatures2 features2{};
+				features2.pNext = &native16Bit;
+				vkGetPhysicalDeviceFeatures2(m_adapter, &features2);
+
 				m_deviceExtensions[(u8)DeviceExtension::BindlessDescriptors] = deviceExts.find(VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME) != deviceExts.end();
 				m_deviceExtensions[(u8)DeviceExtension::ExclusiveFullScreen] = deviceExts.find(VK_EXT_FULL_SCREEN_EXCLUSIVE_EXTENSION_NAME) != deviceExts.end();
 				m_deviceExtensions[(u8)DeviceExtension::VulkanDynamicRendering] = deviceExts.find(VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME) != deviceExts.end();
 				m_deviceExtensions[(u8)DeviceExtension::FormatTypeCasting] = true;
+				m_deviceExtensions[(u8)DeviceExtension::Native16BitOps] = native16Bit.shaderFloat16;
 			}
 
 			bool RenderContext_Vulkan::CheckInstanceExtension(const char* extension)
