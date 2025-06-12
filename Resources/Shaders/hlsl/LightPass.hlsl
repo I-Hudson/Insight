@@ -158,7 +158,7 @@ float4 PSMain(VertexOutput input) : SV_TARGET
         const float currentDepth = projCoords.z;
 */
 
-        const float3 ndc = world_to_ndc(worldPosition, inverse(light.ProjectionView[cascadeLayer]));
+        const float3 ndc = world_to_ndc(worldPosition, light.ProjectionView[cascadeLayer]);
         const float2 ndcUV = ndc_to_uv(ndc);
         const float currentDepth = ndc.z;
         return float4(ndc, cascadeLayer);

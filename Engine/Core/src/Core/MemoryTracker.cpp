@@ -227,15 +227,18 @@ namespace Insight
             return m_totalAllocatedInBytes;
         }
 
-#define MEMORY_TRACK_CALLSTACK
+//#define MEMORY_TRACK_CALLSTACK
         std::array<char[c_CallstackStringSize], c_CallStackCount> MemoryTracker::GetCallStack()
         {
             IS_PROFILE_FUNCTION();
             ///std::vector<std::string> callStackVector = Platform::GetCallStack(c_CallStackCount);
-            std::array<char[c_CallstackStringSize], c_CallStackCount> callStack;
-            for (size_t i = 0; i < c_CallStackCount; ++i)
+            static std::array<char[c_CallstackStringSize], c_CallStackCount> callStack;
             {
-                callStack[i][0] = '\0';
+                IS_PROFILE_SCOPE("Clear static callstack");
+                for (size_t i = 0; i < c_CallStackCount; ++i)
+                {
+                    Platform::MemClear(&callStack[i][0], c_CallstackStringSize);
+                }
             }
 
 #ifndef MEMORY_TRACK_CALLSTACK
@@ -280,7 +283,10 @@ namespace Insight
                 , &backTraceHash
             );
 
-            symbol = (SYMBOL_INFO*)calloc(sizeof(SYMBOL_INFO) + 256 * sizeof(char), 1);
+            {
+                IS_PROFILE_SCOPE("calloc symbol");
+                symbol = (SYMBOL_INFO*)calloc(sizeof(SYMBOL_INFO) + 256 * sizeof(char), 1);
+            }
             if (symbol)
             {
                 symbol->MaxNameLen = 255;
@@ -288,10 +294,14 @@ namespace Insight
 
                 for (int i = 0; i < nFrame; ++i)
                 {
-                    if (!SymFromAddr(process, (DWORD64)(backTrace[i]), 0, symbol))
+                    IS_PROFILE_SCOPE("Walk Stack Frame");
                     {
-                        Platform::MemSet(callStack[i], '\0', c_CallstackStringSize);
-                        continue;
+                        IS_PROFILE_SCOPE("SymFromAddr");
+                        if (!SymFromAddr(process, (DWORD64)(backTrace[i]), 0, symbol))
+                        {
+                            Platform::MemSet(callStack[i], '\0', c_CallstackStringSize);
+                            continue;
+                        }
                     }
 
                     //std::stringstream hexAddressStream;

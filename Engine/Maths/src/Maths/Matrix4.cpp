@@ -313,7 +313,7 @@ namespace Insight
 		void Matrix4::Decompose(Vector4& position, Quaternion& rotation, Vector4& scale) const
 		{
 
-#if defined(IS_MATHS_DIRECTX_MATHS) && defined(SOMETHING)
+#if defined(IS_MATHS_DIRECTX_MATHS)
 			DirectX::XMVECTOR quat;
 			DirectX::XMMatrixDecompose(&scale.xmvector, &quat, &position.xmvector, xmmatrix);
 			rotation = Quaternion(quat.m128_f32[3], quat.m128_f32[0], quat.m128_f32[1], quat.m128_f32[2]);
