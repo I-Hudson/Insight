@@ -8,6 +8,18 @@
 #include <array>
 #include <mutex>
 
+#ifdef IS_PLATFORM_WINDOWS
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN             /// Exclude rarely-used stuff from Windows headers.
+#endif
+#include <Windows.h>
+#pragma warning(push)
+#pragma warning(disable : 4091)
+#include "DbgHelp.h"
+#pragma comment(lib, "DbgHelp.lib")
+#pragma warning(pop)
+#endif
+
 //#undef IS_MEMORY_TRACKING
 
 namespace Insight
@@ -28,7 +40,24 @@ namespace Insight
 			Single
 		};
 
+		struct LRUCacheAddressNames
+		{
+			using Value = std::pair<const void*, std::string>;
 
+		public:
+			LRUCacheAddressNames() = delete;
+			LRUCacheAddressNames(const u32 capacity);
+			~LRUCacheAddressNames();
+
+			void Put(const void* address, const std::string& addressName);
+			bool Get(const void* address, std::string& addressName);
+
+		private:
+			std::unordered_map<const void*, std::list<Value>::iterator> m_lookup;
+			std::list<Value> m_resolvedAddresses;
+
+			u32 m_capacity = 0;
+		};
 
 		/// @brief Copy of STL allocator but doesn't track memory allocations.
 		/// Currently used for the internal map within MemoryTracker as if the map tracks it's own allocations
@@ -145,6 +174,7 @@ namespace Insight
 		{
 			THREAD_SAFE;
 		public:
+			MemoryTracker();
 			~MemoryTracker();
 
 			static MemoryTracker& Instance()
@@ -181,6 +211,8 @@ namespace Insight
 			std::array<char[c_CallstackStringSize], c_CallStackCount> GetCallStack();
 
 		private:
+			LRUCacheAddressNames m_lruAddressNames;
+
 			std::unordered_map<void*, MemoryTrackedAlloc, std::hash<void*>, std::equal_to<void*>, STLNonTrackingAllocator<std::pair<void* const, MemoryTrackedAlloc>>> m_allocations;
 			std::unordered_map<void*, std::string> m_allocationToName;
 			mutable std::mutex m_allocationToNameLock;
