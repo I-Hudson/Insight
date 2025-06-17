@@ -81,9 +81,7 @@ namespace Insight
         // MemoryTracker
         //===========================================================
         MemoryTracker::MemoryTracker()
-            : m_lruAddressNames(2048)
-        {
-        }
+        { }
 
         MemoryTracker::~MemoryTracker()
         {
@@ -168,12 +166,12 @@ namespace Insight
 #endif // IS_MEMORY_TRACKING
         }
 
-        void MemoryTracker::Track(void* ptr, u64 size, MemoryTrackAllocationType type)
+        void MemoryTracker::Track(void* ptr, const u64 size, const MemoryTrackAllocationType type, const MemoryAllocCategory category)
         {
-            Track(ptr, size, MemoryAllocCategory::General, type);
+            Track(ptr, size, category, type);
         }
 
-        void MemoryTracker::Track(void* ptr, u64 size, MemoryAllocCategory category, MemoryTrackAllocationType type)
+        void MemoryTracker::Track(void* ptr, const u64 size, const MemoryAllocCategory category, const MemoryTrackAllocationType type)
         {
             IS_PROFILE_FUNCTION();
 

@@ -12,7 +12,7 @@ void* operator new(const size_t size)
 
     if (void* ptr = std::malloc(size))
     {
-        Insight::Core::MemoryTracker::Instance().Track(ptr, size, Insight::Core::MemoryTrackAllocationType::Single);
+        Insight::Core::MemoryTracker::Instance().Track(ptr, size, Insight::Core::MemoryTrackAllocationType::Single, Insight::Core::MemoryAllocCategory::Unknown);
         return ptr;
     }
     return nullptr;
@@ -27,7 +27,7 @@ void* operator new[](const size_t size)
 
     if (void* ptr = std::malloc(size))
     {
-        Insight::Core::MemoryTracker::Instance().Track(ptr, size, Insight::Core::MemoryTrackAllocationType::Array);
+        Insight::Core::MemoryTracker::Instance().Track(ptr, size, Insight::Core::MemoryTrackAllocationType::Array, Insight::Core::MemoryAllocCategory::Unknown);
         return ptr;
     }
     return nullptr;

@@ -18,6 +18,8 @@ namespace Insight::Core
 		Serialiser,
 		Editor,
 
+		Unknown,
+
 		Size
 	};
 	constexpr const char* MemoryAllocCategoryToString[] =
@@ -32,6 +34,7 @@ namespace Insight::Core
 		"World",
 		"Serialiser",
 		"Editor",
+		"Unknown",
 	};
 	static_assert(ARRAY_COUNT(MemoryAllocCategoryToString) == static_cast<u64>(MemoryAllocCategory::Size));
 }

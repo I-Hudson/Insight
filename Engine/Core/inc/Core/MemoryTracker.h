@@ -2,7 +2,10 @@
 
 #include "Defines.h"
 #include "Core/TypeAlias.h"
+#include "Core/Memory.h"
 #include "Memory/MemoryAllocCategory.h"
+
+#include "Core/Collections/LRUCache.h"
 
 #include <unordered_map>
 #include <array>
@@ -186,8 +189,8 @@ namespace Insight
 			void Initialise();
 			void Destroy();
 
-			void Track(void* ptr, u64 size, MemoryTrackAllocationType type);
-			void Track(void* ptr, u64 size, MemoryAllocCategory category, MemoryTrackAllocationType type);
+			void Track(void* ptr, const u64 size, const MemoryTrackAllocationType type, const MemoryAllocCategory category = MemoryAllocCategory::General);
+			void Track(void* ptr, const u64 size, const MemoryAllocCategory category, MemoryTrackAllocationType type);
 
 			void UnTrack(void* ptr);
 
@@ -211,7 +214,7 @@ namespace Insight
 			std::array<char[c_CallstackStringSize], c_CallStackCount> GetCallStack();
 
 		private:
-			LRUCacheAddressNames m_lruAddressNames;
+			LRUCache<const void*, std::string, 1024> m_lruAddressNames;
 
 			std::unordered_map<void*, MemoryTrackedAlloc, std::hash<void*>, std::equal_to<void*>, STLNonTrackingAllocator<std::pair<void* const, MemoryTrackedAlloc>>> m_allocations;
 			std::unordered_map<void*, std::string> m_allocationToName;
