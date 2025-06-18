@@ -10,7 +10,7 @@ Texture2D ColourTexture : register(t1, space6);
 Texture2D WorldNormalTexture : register(t2, space6);
 
 Texture2DArray DirectionalLightShadowMap[MaxDirectionLightCount] : register(t0, space7);
-TextureCube PointLightShadowMap[MaxPointLightCount] : register(t32, space7);
+TextureCube PointLightShadowMap[MaxPointLightCount] : register(t8, space7);
 
 struct RenderDirectionalLight
 {
