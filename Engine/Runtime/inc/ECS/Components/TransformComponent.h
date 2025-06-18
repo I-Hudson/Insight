@@ -64,8 +64,30 @@ namespace Insight
 			Maths::Matrix4 m_previous_transform = Maths::Matrix4::Identity;
 		};
 	}
+
+	namespace Serialisation
+	{
+		struct TransformComponentMatrixToSplit
+		{ };
+		template<>
+		struct MigrationDeserialiser<TransformComponentMatrixToSplit, ECS::TransformComponent, Maths::Matrix4>
+		{
+			void operator()(ECS::TransformComponent* component, Maths::Matrix4* matrix)
+			{
+				Maths::Vector4 position;
+				Maths::Quaternion rotation;
+				Maths::Vector4 scale;
+				matrix->Decompose(position, rotation, scale);
+
+				component->SetPosition(position);
+				component->SetRotation(rotation);
+				component->SetScale(scale);
+			}
+		};
+	}
+
 	OBJECT_SERIALISER(ECS::TransformComponent, 5,
-		SERIALISE_PROPERTY_REMOVED(Maths::Matrix4, m_transform, 4, 5)
+		SERIALISE_PROPERTY_REMOVED_MIGRATE(Maths::Matrix4, m_transform, 4, 5, Serialisation::TransformComponentMatrixToSplit)
 		SERIALISE_PROPERTY(Maths::Quaternion, m_rotation, 5, 0)
 		SERIALISE_PROPERTY(Maths::Vector3, m_position, 5, 0)
 		SERIALISE_PROPERTY(Maths::Vector3, m_scale, 5, 0)

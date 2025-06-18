@@ -44,5 +44,16 @@ namespace Insight
                 }
             }
         };
+
+        template<typename Type, typename Class, typename Object>
+        struct MigrationDeserialiser
+        {
+            bool IsVoid = std::is_same_v<Type, void>;
+
+            void operator()(Class* inClass, Object* inObject)
+            {
+                assert(false);
+            }
+        };
     }
 }
