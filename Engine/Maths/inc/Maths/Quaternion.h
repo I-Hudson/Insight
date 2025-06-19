@@ -30,6 +30,7 @@ namespace Insight
             ~Quaternion();
 
             static Quaternion FromEulerDegress(const float eulerX, const float eulerY, const float eulerZ);
+            static Quaternion FromEulerDegress(const Maths::Vector3 eularAngles);
 
             float& operator[](const int index);
             const float& operator[](const int index) const;

@@ -163,5 +163,112 @@ namespace Insight
 		};
 
 		IS_MATHS Matrix4 AxisAngleMatrix(const Vector3& axis, const float angle);
+
+		template<typename T>
+		Vec<3, T> Vector3TransformCoord(const Vec<4, T> v, const Matrix4 m)
+		{
+			const Vec<4, T> z = Vec<4, T>(v.z);
+			const Vec<4, T> y = Vec<4, T>(v.y);
+			const Vec<4, T> x = Vec<4, T>(v.x);
+
+			Vec<4, T> result = (z * m[2]) + m[3];
+			result = (y * m[1]) + result;
+			result = (x * m[0]) + result;
+
+			const Vec<4, T> w = Vec<4, T>(result.w);
+			result = result / w;
+
+#ifdef IS_MATHS_DIRECTX_MATHS
+			DirectX::XMVECTOR dxVector = DirectX::XMVector3TransformCoord(v.xmvector, m.xmmatrix);
+			assert(dxVector.m128_f32[0] == result[0]);
+			assert(dxVector.m128_f32[1] == result[1]);
+			assert(dxVector.m128_f32[2] == result[2]);
+			assert(dxVector.m128_f32[3] == result[3]);
+#endif
+			return Maths::Vector3(result);
+		}
+
+		template<typename T>
+		Vec<3, T> Vector3Transform(const Vec<3, T> v, const Matrix4 m)
+		{
+			Vec<4, T> z = Vec<3, T>(v.z);
+			Vec<4, T> y = Vec<3, T>(v.y);
+			Vec<4, T> x = Vec<3, T>(v.x);
+
+			Vec<3, T> result = (z * m[2]) + m[3];
+			result = Maths::Vec<3, T>((y * m[1])) + result;
+			result = Maths::Vec<3, T>((x * m[0])) + result;
+
+#ifdef IS_MATHS_DIRECTX_MATHS
+			DirectX::XMVECTOR dxVector = DirectX::XMVector3Transform(v.xmvector, m.xmmatrix);
+			assert(dxVector.m128_f32[0] == result[0]);
+			assert(dxVector.m128_f32[1] == result[1]);
+			assert(dxVector.m128_f32[2] == result[2]);
+#endif
+			return result;
+		}
+
+		template<typename T>
+		Vec<3, T> Vector3TransformFromNormal(const Maths::Matrix4 m, const Vec<3, T> vec)
+		{
+#ifdef IS_MATHS_DIRECTX_MATHS
+			return DirectX::XMVector3TransformNormal(vec.xmvector, m.xmmatrix);
+#else
+			XMVECTOR Z = XMVectorSplatZ(V);
+			XMVECTOR Y = XMVectorSplatY(V);
+			XMVECTOR X = XMVectorSplatX(V);
+
+			XMVECTOR Result = XMVectorMultiply(Z, M.r[2]);
+			Result = XMVectorMultiplyAdd(Y, M.r[1], Result);
+			Result = XMVectorMultiplyAdd(X, M.r[0], Result);
+
+			return Result;
+#endif
+		}
+
+		template<typename T>
+		Vec<4, T> Vector4TransofrmCoord(const Vec<4, T> v, const Matrix4 m)
+		{
+			Vec<4, T> z = Vec<4, T>(v.z);
+			Vec<4, T> y = Vec<4, T>(v.y);
+			Vec<4, T> x = Vec<4, T>(v.x);
+
+			Vec<4, T> result = (z * m[2]) + m[3];
+			result = (y * m[1]) + result;
+			result = (x * m[0]) + result;
+
+			const Vec<4, T> w = Vec<4, T>(result.w);
+			result = result / w;
+
+#ifdef IS_MATHS_DIRECTX_MATHS
+			DirectX::XMVECTOR dxVector = DirectX::XMVector3TransformCoord(v.xmvector, m.xmmatrix);
+			assert(dxVector.m128_f32[0] == result[0]);
+			assert(dxVector.m128_f32[1] == result[1]);
+			assert(dxVector.m128_f32[2] == result[2]);
+			assert(dxVector.m128_f32[3] == result[3]);
+#endif
+			return result;
+		}
+
+		template<typename T>
+		Vec<4, T> Vector4Transform(const Vec<4, T> v, const Matrix4 m)
+		{
+			Vec<4, T> z = Vec<4, T>(v.z);
+			Vec<4, T> y = Vec<4, T>(v.y);
+			Vec<4, T> x = Vec<4, T>(v.x);
+
+			Vec<4, T> result = (z * m[2]) + m[3];
+			result = (y * m[1]) + result;
+			result = (x * m[0]) + result;
+
+#ifdef IS_MATHS_DIRECTX_MATHS
+			DirectX::XMVECTOR dxVector = DirectX::XMVector3Transform(v.xmvector, m.xmmatrix);
+			assert(dxVector.m128_f32[0] == result[0]);
+			assert(dxVector.m128_f32[1] == result[1]);
+			assert(dxVector.m128_f32[2] == result[2]);
+			assert(dxVector.m128_f32[3] == result[3]);
+#endif
+			return result;
+		}
 	}
 }

@@ -45,6 +45,11 @@ namespace Insight
             return Quaternion(DegreesToRadians(eulerX), DegreesToRadians(eulerY), DegreesToRadians(eulerZ));
         }
 
+        Quaternion Quaternion::FromEulerDegress(const Maths::Vector3 eularAngles)
+        {
+            return FromEulerDegress(eularAngles.x, eularAngles.y, eularAngles.z);
+        }
+
         float& Quaternion::operator[](const int index)
         {
             return data[index];

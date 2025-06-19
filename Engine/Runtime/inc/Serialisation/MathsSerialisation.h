@@ -24,6 +24,21 @@ namespace Insight
         // PropertySerialiser
         //================================================================
         template<>
+        struct PropertySerialiser<Maths::Quaternion>
+        {
+            std::string operator()(Maths::Quaternion const& v)
+            {
+                std::string str;
+                str += "(" + std::to_string(v.w);
+                str += "," + std::to_string(v.x);
+                str += "," + std::to_string(v.y);
+                str += "," + std::to_string(v.z);           
+                str += ")";
+                return str;
+            }
+        };
+
+        template<>
         struct PropertySerialiser<Maths::Vector2>
         {
             std::string operator()(Maths::Vector2 const& v)
@@ -120,7 +135,11 @@ namespace Insight
             {
                 const char c = data.at(i);
 
-                if (c == ',')
+                if (c == '(' || c == ')')
+                {
+                    continue;
+                }
+                else if (c == ',')
                 {
                     vec[idx] = std::stof(numString);
                     numString.clear();
@@ -139,6 +158,17 @@ namespace Insight
             vec[idx] = std::stof(numString);
             return vec;
         }
+
+        template<>
+        struct PropertyDeserialiser<Maths::Quaternion>
+        {
+            using InType = std::string;
+            Maths::Quaternion operator()(std::string const& data) const
+            {
+                Maths::Vector4 vec = GetVectorComponents(data);
+                return Maths::Quaternion(vec[0], vec[1], vec[2], vec[3]);
+            }
+        };
 
         template<>
         struct PropertyDeserialiser<Maths::Vector2>

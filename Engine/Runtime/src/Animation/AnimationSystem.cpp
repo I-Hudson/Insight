@@ -71,7 +71,7 @@ namespace Insight
                     });
             }
 #elif PARALLEL_FOR
-            Threading::ParallelFor<AnimationInstance>(16, m_animations, [deltaTime](AnimationInstance& instance)
+            Threading::ParallelFor<AnimationInstance>("AnimationUpdate", 16, m_animations, [deltaTime](AnimationInstance& instance)
             {
                 instance.Animator.Update(deltaTime);
             });

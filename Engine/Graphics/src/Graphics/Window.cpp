@@ -260,7 +260,10 @@ namespace Insight
 				inputs.second.Clear();
 			}
 
-			glfwPollEvents();
+			{
+				IS_PROFILE_SCOPE("Poll Events");
+				glfwPollEvents();
+			}
 
 			for (auto& inputs : m_windowInputs)
 			{

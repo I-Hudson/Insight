@@ -9,17 +9,6 @@
 #include <utility>
 #include <cassert>
 
-/// Helper macro for making a new pointer with tracking.
-#define NewTracked(Type)			::New<Type>()
-/// Helper macro for making a new pointer with args and tracking.
-#define NewArgsTracked(Type, ...)	::New<Type>(__VA_ARGS__)
-/// /// Helper macro for tracking a exists pointer.
-#define TrackPtr(Ptr)				Insight::Memory::MemoryTrackPtr(Ptr)
-
-#define DeleteTracked(Ptr)			Delete(Ptr);
-
-#define UntrackPtr(Ptr)				Insight::Memory::MemoryUnTrack(Ptr)
-
 namespace Insight::Memory
 {
 	IS_CORE void MemoryTrackPtr(void* ptr, const u64 size);
@@ -32,6 +21,17 @@ namespace Insight::Memory
 
 	IS_CORE void MemoryUnTrackPtr(void* ptr);
 }
+
+/// Helper macro for making a new pointer with tracking.
+#define NewTracked(Type)			::New<Type>()
+/// Helper macro for making a new pointer with args and tracking.
+#define NewArgsTracked(Type, ...)	::New<Type>(__VA_ARGS__)
+/// /// Helper macro for tracking a exists pointer.
+#define TrackPtr(Ptr)				::Insight::Memory::MemoryTrackPtr(Ptr)
+
+#define DeleteTracked(Ptr)			Delete(Ptr);
+
+#define UntrackPtr(Ptr)				::Insight::Memory::MemoryUnTrack(Ptr)
 
 NO_DISCARD IS_CORE void* NewBytes(u64 bytes, Insight::Core::MemoryAllocCategory memoryAllocCategory);
 
@@ -1199,3 +1199,40 @@ template<typename T>
 constexpr bool is_stl_smart_pointer_v = is_stl_unique_pointer_v<T> 
 									 || is_stl_shared_pointer_v<T> 
 									 || is_stl_weak_pointer_v<T>;
+
+
+namespace Insight
+{
+	template<typename T>
+	struct STLAllocator : public std::allocator<T>
+	{
+		NO_DISCARD __declspec(allocator) T* allocate(_CRT_GUARDOVERFLOW const size_t count)
+		{
+			T* ptr = m_allocator.allocate(count);
+			TrackPtr(ptr);
+		}
+
+		template <class Obj, class... Types>
+		void construct(Obj* const ptr, Types&&... args) 
+		{
+			 m_allocator.construct(ptr, std::forward<Types>(args)...);
+			 TrackPtr(ptr);
+		}
+
+		INLINE void deallocate(T* const ptr, const size_t count) noexcept
+		{
+			m_allocator.deallocate(ptr, count);
+			UntrackPtr(ptr);
+		}
+
+		template <class UTy>
+		void destroy(UTy* const ptr) 
+		{
+			m_allocator.destroy(ptr);
+			UntrackPtr(ptr);
+		}
+
+	private:
+		std::allocator<T> m_allocator;
+	};
+}

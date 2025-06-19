@@ -61,7 +61,7 @@ namespace Insight
         
             double m_currentAnimationTime = 0.0f;
             float m_deltaTime = 0.0f;
-            bool m_isPlaying = false;
+            bool m_isPlaying = true;
         };
     }
 }

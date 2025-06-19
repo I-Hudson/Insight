@@ -67,7 +67,7 @@ namespace Insight
 		};
 
 		template<typename T>
-		void ParallelFor(const u32 workGroupSize, std::vector<T>& vec, std::function<void(T&)> func)
+		void ParallelFor(std::string_view name, const u32 workGroupSize, std::vector<T>& vec, std::function<void(T&)> func)
 		{
 			const u32 vecSize = static_cast<u32>(vec.size());
 			if (vecSize == 0)
@@ -117,7 +117,7 @@ namespace Insight
 								}
 								const u32 endIdx = std::min(startIdx + workGroupSize, vecSize);
 								IS_PROFILE_SCOPE("ParallelFor");
-								ZoneTextF("ParallelFor (%d)", endIdx - startIdx);
+								ZoneTextF("ParallelFor - %s (%d)", name.data(), endIdx - startIdx);
 
 								for (size_t i = startIdx; i < endIdx; ++i)
 								{
@@ -148,7 +148,8 @@ namespace Insight
 				completedIndexZero = true;
 				const u32 endIdx = std::min(startIdx + workGroupSize, vecSize);
 				IS_PROFILE_SCOPE("ParallelFor");
-				ZoneTextF("ParallelFor (%d)", endIdx - startIdx);
+				ZoneNameF("ParallelFor - %s (%d)", name.data(), endIdx - startIdx);
+				ZoneTextF("ParallelFor - %s (%d)", name.data(), endIdx - startIdx);
 
 				for (size_t i = startIdx; i < endIdx; ++i)
 				{
@@ -162,6 +163,12 @@ namespace Insight
 				IS_PROFILE_SCOPE("Wait");
 				tasks[taskIdx]->Wait();
 			}
+		}
+
+		template<typename T>
+		void ParallelFor(const u32 workGroupSize, std::vector<T>& vec, std::function<void(T&)> func)
+		{
+			ParallelFor("", workGroupSize, vec, std::move(func));
 		}
 	}
 }

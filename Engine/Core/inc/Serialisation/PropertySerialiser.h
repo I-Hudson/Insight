@@ -13,6 +13,8 @@ namespace Insight
         {
             u32 operator()(T const& v)
             {
+                static_assert(std::is_enum_v<T>);
+
                 if constexpr (std::is_enum_v<T>)
                 {
                     return static_cast<u32>(const_cast<T&>(v));
@@ -40,6 +42,17 @@ namespace Insight
                     assert(false);
                     return 0;
                 }
+            }
+        };
+
+        template<typename Type, typename Class, typename Object>
+        struct MigrationDeserialiser
+        {
+            bool IsVoid = std::is_same_v<Type, void>;
+
+            void operator()(Class* inClass, Object* inObject)
+            {
+                assert(false);
             }
         };
     }

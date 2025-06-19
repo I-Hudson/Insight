@@ -29,6 +29,60 @@ namespace Insight
 {
     namespace Core
     {
+        //===========================================================
+        // LRUCacheMemoryAddress
+        //===========================================================
+        LRUCacheAddressNames::LRUCacheAddressNames(const u32 capacity)
+            : m_capacity(capacity)
+        {
+        }
+
+        LRUCacheAddressNames::~LRUCacheAddressNames()
+        {
+        }
+
+        void LRUCacheAddressNames::Put(const void* address, const std::string& addressName)
+        {
+            if (auto& iter = m_lookup.find(address);
+                iter != m_lookup.end())
+            {
+                m_resolvedAddresses.erase(iter->second);
+                m_resolvedAddresses.push_front({ address, addressName });
+                iter->second = m_resolvedAddresses.begin();
+            }
+            else
+            {
+                if (m_resolvedAddresses.size() == m_capacity)
+                {
+                    m_lookup.erase(m_resolvedAddresses.back().first);
+                    m_resolvedAddresses.pop_back();
+                }
+
+                ASSERT(!addressName.empty());
+                m_resolvedAddresses.push_front({ address, addressName });
+                m_lookup[address] = m_resolvedAddresses.begin();
+            }
+        }
+
+        bool LRUCacheAddressNames::Get(const void* address, std::string& addressName)
+        {
+            if (auto iter = m_lookup.find(address);
+                iter != m_lookup.end())
+            {
+                ASSERT(!iter->second->second.empty());
+                addressName = iter->second->second;
+                return true;
+            }
+            return false;
+        }
+
+
+        //===========================================================
+        // MemoryTracker
+        //===========================================================
+        MemoryTracker::MemoryTracker()
+        { }
+
         MemoryTracker::~MemoryTracker()
         {
             Destroy();
@@ -112,12 +166,12 @@ namespace Insight
 #endif // IS_MEMORY_TRACKING
         }
 
-        void MemoryTracker::Track(void* ptr, u64 size, MemoryTrackAllocationType type)
+        void MemoryTracker::Track(void* ptr, const u64 size, const MemoryTrackAllocationType type, const MemoryAllocCategory category)
         {
-            Track(ptr, size, MemoryAllocCategory::General, type);
+            Track(ptr, size, category, type);
         }
 
-        void MemoryTracker::Track(void* ptr, u64 size, MemoryAllocCategory category, MemoryTrackAllocationType type)
+        void MemoryTracker::Track(void* ptr, const u64 size, const MemoryAllocCategory category, const MemoryTrackAllocationType type)
         {
             IS_PROFILE_FUNCTION();
 
@@ -138,7 +192,7 @@ namespace Insight
 
                 lock.lock();
                 m_allocations[ptr] = memoryTrackedAlloc;
-                
+
                 m_totalAllocatedInBytes += size;
                 m_categoryAllocationSizeBytes.at(static_cast<u64>(category)) += size;
                 ++m_categoryAllocationCount.at(static_cast<u64>(category));
@@ -227,15 +281,18 @@ namespace Insight
             return m_totalAllocatedInBytes;
         }
 
-//#define MEMORY_TRACK_CALLSTACK
+#define MEMORY_TRACK_CALLSTACK
         std::array<char[c_CallstackStringSize], c_CallStackCount> MemoryTracker::GetCallStack()
         {
             IS_PROFILE_FUNCTION();
             ///std::vector<std::string> callStackVector = Platform::GetCallStack(c_CallStackCount);
-            std::array<char[c_CallstackStringSize], c_CallStackCount> callStack;
-            for (size_t i = 0; i < c_CallStackCount; ++i)
+            static std::array<char[c_CallstackStringSize], c_CallStackCount> callStack;
             {
-                callStack[i][0] = '\0';
+                IS_PROFILE_SCOPE("Clear static callstack");
+                for (size_t i = 0; i < c_CallStackCount; ++i)
+                {
+                    Platform::MemClear(&callStack[i][0], c_CallstackStringSize);
+                }
             }
 
 #ifndef MEMORY_TRACK_CALLSTACK
@@ -261,7 +318,6 @@ namespace Insight
             void* backTrace[framesToCapture]{};
             ULONG backTraceHash = 0;
 
-            SYMBOL_INFO* symbol = nullptr;
             static HANDLE process = nullptr;
             if (!process)
             {
@@ -280,27 +336,45 @@ namespace Insight
                 , &backTraceHash
             );
 
-            symbol = (SYMBOL_INFO*)calloc(sizeof(SYMBOL_INFO) + 256 * sizeof(char), 1);
-            if (symbol)
+
+            SYMBOL_INFO* symbol = nullptr;
+
+            for (int i = 0; i < nFrame; ++i)
             {
-                symbol->MaxNameLen = 255;
-                symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
-
-                for (int i = 0; i < nFrame; ++i)
+                std::string addressName;
+                IS_PROFILE_SCOPE("Walk Stack Frame");
                 {
-                    if (!SymFromAddr(process, (DWORD64)(backTrace[i]), 0, symbol))
-                    {
-                        Platform::MemSet(callStack[i], '\0', c_CallstackStringSize);
-                        continue;
-                    }
+                    IS_PROFILE_SCOPE("SymFromAddr");
 
-                    //std::stringstream hexAddressStream;
-                    //hexAddressStream << std::hex << symbol->Address;
-                    //std::string hexAddress = hexAddressStream.str();
-                    //std::transform(hexAddress.begin(), hexAddress.end(), hexAddress.begin(), [](const char c)
-                    //    {
-                    //        return std::toupper(c);
-                    //    });
+                    const void* address = backTrace[i];
+                    if (!m_lruAddressNames.Get(address, addressName))
+                    {
+                        if (!symbol)
+                        {
+                            symbol = (SYMBOL_INFO*)calloc(sizeof(SYMBOL_INFO) + 256 * sizeof(char), 1);
+                            ASSERT(symbol);
+                            symbol->MaxNameLen = 255;
+                            symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
+                        }
+
+                        if (!SymFromAddr(process, (DWORD64)(address), 0, symbol))
+                        {
+                            Platform::MemSet(callStack[i], '\0', c_CallstackStringSize);
+                            continue;
+                        }
+
+                        addressName = symbol->Name;
+                        m_lruAddressNames.Put(backTrace[i], addressName);
+                    }
+                }
+
+                //std::stringstream hexAddressStream;
+                //hexAddressStream << std::hex << symbol->Address;
+                //std::string hexAddress = hexAddressStream.str();
+                //std::transform(hexAddress.begin(), hexAddress.end(), hexAddress.begin(), [](const char c)
+                //    {
+                //        return std::toupper(c);
+                //    });
 
 #define ADVANCE_CHAR(cPtr, lPtr) \
 if (cPtr == lPtr) \
@@ -313,46 +387,49 @@ else \
 { \
     ++cPtr; \
 } 
-                    char* firstChar = callStack[i];
-                    char* lastChar = callStack[i] + (c_CallstackStringSize - 1ull);
-                    char* currentChar = callStack[i];
+#if 1
+                const u64 addressNameLen = std::min(c_CallstackStringSize - 1ull, addressName.size());
+                Platform::MemCopy(callStack[i], addressName.c_str(), addressNameLen);
+#else
+                char* firstChar = callStack[i];
+                char* lastChar = callStack[i] + (c_CallstackStringSize - 1ull);
+                char* currentChar = callStack[i];
 
-                    currentChar = std::to_chars(currentChar, lastChar, nFrame - i).ptr;
-                    *currentChar = ':';
-                    ADVANCE_CHAR(currentChar, lastChar);
-                    *currentChar = ' ';
-                    ADVANCE_CHAR(currentChar, lastChar);
-                    
-                    u64 strlen = strnlen_s(symbol->Name, lastChar - currentChar);
-                    Platform::MemCopy(currentChar, symbol->Name, strlen);
-                    currentChar += strlen;
+                currentChar = std::to_chars(currentChar, lastChar, nFrame - i).ptr;
+                *currentChar = ':';
+                ADVANCE_CHAR(currentChar, lastChar);
+                *currentChar = ' ';
+                ADVANCE_CHAR(currentChar, lastChar);
 
-                    *currentChar = ' ';
-                    ADVANCE_CHAR(currentChar, lastChar);
-                    *currentChar = '-';
-                    ADVANCE_CHAR(currentChar, lastChar);
-                    *currentChar = ' ';
-                    ADVANCE_CHAR(currentChar, lastChar);
+                u64 strlen = strnlen_s(symbol->Name, lastChar - currentChar);
+                Platform::MemCopy(currentChar, symbol->Name, strlen);
+                currentChar += strlen;
 
-                    currentChar = std::to_chars(currentChar, lastChar, symbol->Address).ptr;
+                *currentChar = ' ';
+                ADVANCE_CHAR(currentChar, lastChar);
+                *currentChar = '-';
+                ADVANCE_CHAR(currentChar, lastChar);
+                *currentChar = ' ';
+                ADVANCE_CHAR(currentChar, lastChar);
 
-                    if (currentChar < lastChar)
-                    {
-                        *currentChar = '\0';
-                    }
-                    else
-                    {
-                        lastChar = '\0';
-                    }
+                currentChar = std::to_chars(currentChar, lastChar, symbol->Address).ptr;
 
-                    //callStack[i - 1] = (std::to_string(nFrame - i - 1) +
-                    //    ": " +
-                    //    std::string(symbol->Name) +
-                    //    " - 0x" +
-                    //    hexAddress);
-#undef OUT_OF_BOUNDS_CHECK
+                if (currentChar < lastChar)
+                {
+                    *currentChar = '\0';
                 }
-                free(symbol);
+                else
+                {
+                    lastChar = '\0';
+                }
+
+                //callStack[i - 1] = (std::to_string(nFrame - i - 1) +
+                //    ": " +
+                //    std::string(symbol->Name) +
+                //    " - 0x" +
+                //    hexAddress);
+#endif
+#undef OUT_OF_BOUNDS_CHECK
             }
 #endif
 #endif // IS_MEMORY_TRACKING

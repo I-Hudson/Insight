@@ -247,6 +247,12 @@ namespace Insight
 		}
 
 		template<typename T>
+		Vec<4, T> Vec<4, T>::Floor() const
+		{
+			return Maths::Vector4(floorf(x), floorf(y), floorf(z), floorf(w));
+		}
+
+		template<typename T>
 		T& Vec<4, T>::operator[](int i)
 		{
 			return data[i];
@@ -499,6 +505,66 @@ namespace Insight
 		{
 			*this = Vec<4, T>(*this) - other;
 			return *this;
+		}
+
+		template<typename T>
+		Vec<3, T> Lerp(const Vec<3, T> vec1, const Vec<3, T> vec2, const float f)
+		{
+#ifdef IS_MATHS_DIRECTX_MATHS
+			return DirectX::XMVectorLerp(vec1.xmvector, vec2.xmvector, f);
+#else
+			const Vec<3, T> scale(f);
+			const Vec<3, T> length(vec2 - vec1);
+			return (length * scale) + v0;
+#endif
+		}
+
+		template<typename T>
+		Vec<4, T> Lerp(const Vec<4, T> vec1, const Vec<4, T> vec2, const float f)
+		{
+#ifdef IS_MATHS_DIRECTX_MATHS
+			return DirectX::XMVectorLerp(vec1.xmvector, vec2.xmvector, f);
+#else
+			const Vec<4, T> scale(f);
+			const Vec<4, T> length(vec2 - vec1);
+			return (length * scale) + v0;
+#endif
+		}
+
+		template<typename T>
+		Vec<4, T> Select(const Vec<4, T> vec1, const Vec<4, T> vec2, const Vec<4, T> control)
+		{
+#ifdef IS_MATHS_DIRECTX_MATHS
+			return DirectX::XMVectorSelect(vec1.xmvector, vec2.xmvector, control.xmvector);
+#else
+			Maths::Vector4 Result = {
+					(vec1.data[0] & ~control.data[0]) | (vec2.data[0] & control.data[0]),
+					(vec1.data[1] & ~control.data[1]) | (vec2.data[1] & control.data[1]),
+					(vec1.data[2] & ~control.data[2]) | (vec2.data[2] & control.data[2]),
+					(vec1.data[3] & ~control.data[3]) | (vec2.data[3] & control.data[3]),
+					};
+			return Result.v
+#endif
+		}
+
+		template<typename T>
+		Vec<4, T> Min(const Vec<4, T> vec1, const Vec<4, T> vec2)
+		{
+			return Maths::Vector4(
+				vec1.x < vec2.x ? vec1.x : vec2.x
+				, vec1.y < vec2.y ? vec1.y : vec2.y
+				, vec1.z < vec2.z ? vec1.z : vec2.z
+				, vec1.w < vec2.w ? vec1.w : vec2.w);
+		}
+
+		template<typename T>
+		Vec<4, T> Max(const Vec<4, T> vec1, const Vec<4, T> vec2)
+		{
+			return Maths::Vector4(
+				vec1.x > vec2.x ? vec1.x : vec2.x
+				, vec1.y > vec2.y ? vec1.y : vec2.y
+				, vec1.z > vec2.z ? vec1.z : vec2.z
+				, vec1.w > vec2.w ? vec1.w : vec2.w);
 		}
 	}
 }
