@@ -86,8 +86,7 @@ namespace Insight
 
             if (m_scratchBuffer)
             {
-                free(m_scratchBuffer);
-                m_scratchBuffer = nullptr;
+                DeleteBytes(m_scratchBuffer);
             }
         }
 
