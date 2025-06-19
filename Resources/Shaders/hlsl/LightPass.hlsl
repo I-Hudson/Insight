@@ -29,8 +29,7 @@ struct RenderDirectionalLight
 
 struct RenderPointLight
 {
-    float4x4 Projection;
-    float4x4 View[6];
+    float4x4 ProjectionView[6];
     float3 LightColour;
     float __rplPad1;
     float3 Position;
@@ -82,8 +81,7 @@ float PointShadowCalculation(TextureCube depthTexture, const float3 worldPositio
     float shadowDepth = depthTexture.Sample(ClampToBoarder_Sampler, wPosToLightPos).r;
 
     const uint shadowSliceIndex = DirectionToCubeFaceIndex(wPosToLightPos);
-    float4x4 shadowProjectionView = mul(light.Projection, light.View[shadowSliceIndex]);
-    float3 shadowNDC = world_to_ndc(worldPosition, shadowProjectionView);
+    float3 shadowNDC = world_to_ndc(worldPosition, light.ProjectionView[shadowSliceIndex]);
 
     [branch]
     if (shadowDepth < shadowNDC.z
@@ -161,12 +159,12 @@ float4 PSMain(VertexOutput input) : SV_TARGET
         const float3 ndc = world_to_ndc(worldPosition, light.ProjectionView[cascadeLayer]);
         const float2 ndcUV = ndc_to_uv(ndc);
         const float currentDepth = ndc.z;
-        return float4(ndc, cascadeLayer);
 
         [branch]
         if (currentDepth <= 1.0)
         {
             const float shadowDepth = DirectionalLightShadowMap[directionalLightIdx].Sample(ClampToBoarder_Sampler, float3(ndcUV, cascadeLayer)).r;
+
             const float shadow = shadowDepth < currentDepth|| currentDepth > 1.0 ? 0 : 1;
 
             const float3 pixelColour = LightPixel(albedo, worldNormal, worldPosition, light.LightDirection);

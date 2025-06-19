@@ -41,6 +41,11 @@ namespace Insight
 			return m_shadowMapResolution;
 		}
 
+		float DirectionalLightComponent::GetCascadeSplitLambda() const
+		{
+			return m_cascadeSplitLambda;
+		}
+
 		Graphics::RHI_Texture* DirectionalLightComponent::GetShadowMap() const
 		{
 			return m_shadowCascadeMap;

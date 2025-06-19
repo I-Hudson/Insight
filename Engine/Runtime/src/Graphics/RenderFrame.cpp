@@ -272,9 +272,13 @@ namespace Insight
                     const float nearPlane = 0.01f;
                     const float shadowMapResolution = static_cast<float>(pointLightComponent->GetShadowResolution());
 
-                    pointLight.Projection = Maths::Matrix4::CreatePerspective(Maths::DegreesToRadians(90.0f), shadowMapResolution / shadowMapResolution, nearPlane, std::max(0.1f, pointLightComponent->GetRadius()));
+                    const Maths::Matrix4 projection = Maths::Matrix4::CreatePerspective(
+                        Maths::DegreesToRadians(90.0f)
+                        , shadowMapResolution / shadowMapResolution
+                        , nearPlane
+                        , std::max(0.1f, pointLightComponent->GetRadius()));
 
-                    pointLight.CreateViewMatrixs(Maths::Vector3(transformComponent->GetPosition()));
+                    pointLight.CreateViewMatrixs(projection, Maths::Vector3(transformComponent->GetPosition()));
 
                     pointLight.LightColour = pointLightComponent->GetLightColour();
                     pointLight.Position = Maths::Vector3(transformComponent->GetPosition());
@@ -300,7 +304,7 @@ namespace Insight
                         MainCamera.Camera
                         , transformComponent->GetTransform()
                         , ECS::DirectionalLightComponent::c_cascadeCount
-                        , 0.95f);
+                        , directionalLightComponent->GetCascadeSplitLambda());
 
                     {
                         std::lock_guard l(renderWorldMutex);

@@ -448,7 +448,7 @@ namespace Insight
                                     };
                                     LightBuffer lightBuffer =
                                     {
-                                        pointLight.Projection * pointLight.View[arrayIdx]
+                                        pointLight.ProjectionView[arrayIdx]
                                     };
                                     {
                                         IS_PROFILE_SCOPE("SetUniform");
@@ -461,8 +461,8 @@ namespace Insight
                                         const RenderMesh& mesh = renderWorld.Meshes[meshIndex];
                                         {
                                             IS_PROFILE_SCOPE("Frustum Culling");
-                                            Graphics::Frustum pointLightFrustum(pointLight.View[arrayIdx], pointLight.Projection, pointLight.Radius);
-                                            isVisable = pointLightFrustum.IsVisible(Maths::Vector3(mesh.Transform[3]), mesh.BoudingBox.GetRadius());
+                                            //Graphics::Frustum pointLightFrustum(pointLight.View[arrayIdx], pointLight.Projection, pointLight.Radius);
+                                            //isVisable = pointLightFrustum.IsVisible(Maths::Vector3(mesh.Transform[3]), mesh.BoudingBox.GetRadius());
                                         }
                                         if (!isVisable)
                                         {

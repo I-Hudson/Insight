@@ -252,7 +252,6 @@ namespace Insight
         void CreateCascasdes(const ECS::Camera& mainCamera, const Maths::Matrix4& ligthViewMatrix, u32 cascadeCount, const float splitLambda)
         {
 #if 1
-
             const float nearClip = mainCamera.GetNearPlane();
             const float farClip = mainCamera.GetFarPlane();
             const float clipRange = farClip - nearClip;
@@ -699,15 +698,14 @@ namespace Insight
 
     struct RenderPointLight
     {
-        Maths::Matrix4 Projection;
-        Maths::Matrix4 View[6];
+        Maths::Matrix4 ProjectionView[6];
         Maths::Vector3 LightColour;
         Maths::Vector3 Position;
         float Intensity;
         float Radius;
         Graphics::RHI_Texture* DepthTexture; // In HLSL this is just 8 bytes worth of padding.
 
-        void CreateViewMatrixs(const Maths::Vector3& position)
+        void CreateViewMatrixs(const Maths::Matrix4 projection, const Maths::Vector3& position)
         {
             for (size_t i = 0; i < 6; i++)
             {
@@ -758,7 +756,7 @@ namespace Insight
                 }
 
                 const Maths::Matrix4 lightView = Maths::Matrix4::LookAt(position, lightCentre, upDirection);
-                View[i] = lightView;
+                ProjectionView[i] = projection * lightView;
             }
         }
     };
