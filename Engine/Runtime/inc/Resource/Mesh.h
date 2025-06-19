@@ -34,9 +34,13 @@ namespace Insight
 			u32 First_index = 0;
 			u32 Index_count = 0;
 
+#ifdef VERTEX_SPLIT_STREAMS
+
+#else
 			Graphics::RHI_Buffer* Vertex_buffer = nullptr;
 			Graphics::RHI_BufferView VertexBufferView;
 			Graphics::RHI_Buffer* Index_buffer = nullptr;
+#endif
 		};
 
 		/// @brief Contain vertex and index buffers for use when rendering this mesh.

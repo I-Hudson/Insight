@@ -16,10 +16,13 @@ namespace Insight
 
 		Mesh::~Mesh()
 		{
+#ifdef VERTEX_SPLIT_STREAMS
+#else
 			Renderer::FreeVertexBuffer(m_lods.at(0).Vertex_buffer);
 			Renderer::FreeIndexBuffer(m_lods.at(0).Index_buffer);
 			m_lods.at(0).Vertex_buffer = nullptr;
 			m_lods.at(0).Index_buffer = nullptr;
+#endif
 		}
 
 		//IS_SERIALISABLE_CPP(Mesh)
@@ -29,9 +32,12 @@ namespace Insight
 			const u32 lodIndex = std::min(lod_index, static_cast<u32>(m_lods.size()));
 			const MeshLOD& meshLOD = m_lods[lodIndex];
 
+#ifdef VERTEX_SPLIT_STREAMS
+#else
 			cmd_list->SetVertexBuffer(meshLOD.Vertex_buffer);
 			cmd_list->SetIndexBuffer(meshLOD.Index_buffer, Graphics::IndexType::Uint32);
 			cmd_list->DrawIndexed(meshLOD.Index_count, 1, meshLOD.First_index, meshLOD.Vertex_offset, 0);
+#endif
 		}
 
 		const std::string_view Mesh::GetName() const
