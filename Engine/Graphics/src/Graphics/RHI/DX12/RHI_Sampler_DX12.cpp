@@ -36,7 +36,7 @@ namespace Insight
 				desc.AddressW = SamplerAddressModelToDX12(info.AddressMode);
 				desc.MipLODBias = info.MipLoadBias;
 				desc.MaxAnisotropy = static_cast<UINT>(info.MaxAnisotropy);
-				desc.ComparisonFunc = CompareOpToDX12(info.CompareOp);
+				desc.ComparisonFunc = info.CompareEnabled ? CompareOpToDX12(info.CompareOp) : D3D12_COMPARISON_FUNC_NONE;
 				Platform::MemCopy(&desc.BorderColor, borderColour.data(), sizeof(desc.BorderColor));
 				desc.MinLOD = info.MinLod;
 				desc.MaxLOD = info.MaxLod;

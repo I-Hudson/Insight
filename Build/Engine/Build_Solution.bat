@@ -27,13 +27,17 @@ call :ValididateInput %MSPlatformTypes% "%platform%" "Invalid platform type, val
 SET vsDevCmd2022="C:\Program Files\Microsoft Visual Studio\2022\Preview\Common7\Tools\VsDevCmd.bat"
 SET vsDevCmd2019="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\Tools\VsDevCmd.bat"
 
+set platformToolSet="v143"
+
 if exist %vsDevCmd2022% ( 
     echo Found vs 2022 dev cmd.
+    set platformToolSet="v143"
     call %vsDevCmd2022%
     GOTO MSBUILD
     )
 if exist %vsDevCmd2019% (
     echo Found vs 2019 dev cmd.
+    set platformToolSet="v142"
     call %vsDevCmd2019%
     GOTO MSBUILD
 )
@@ -60,7 +64,7 @@ if not "%outDirectory%" == "" (
     set msbuildOutDirectory=/p:OutDir=%outDirectory% 
     echo Out directory '%outDirectory%'
 )
-msbuild -maxCpuCount /t:%msBuildType% /p:Configuration=%configuration% /p:Platform=%platform% %msbuildOutDirectory% %solution% 
+msbuild -maxCpuCount /t:%msBuildType% /p:Configuration=%configuration% /p:Platform=%platform% /p:PlatformToolset=%platformToolSet% %msbuildOutDirectory% %solution% 
 GOTO END
 
 :ValididateInput

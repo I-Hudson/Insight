@@ -127,7 +127,9 @@ namespace Insight
 				if (pso.DepthStencil)
 				{
 					RHI_Texture_DX12* depthTargetDX12 = static_cast<RHI_Texture_DX12*>(pso.DepthStencil);
-					psoDesc.DSVFormat = PixelFormatToDX12(depthTargetDX12->GetFormat());
+					PixelFormat depthFormat = depthTargetDX12->GetFormat();
+					depthFormat = PixelFormatExtensions::FindDepthStencilFormat(depthFormat);
+					psoDesc.DSVFormat = PixelFormatToDX12(depthFormat);
 				}
 				else if (pso.DepthStencilFormat != PixelFormat::Unknown)
 				{

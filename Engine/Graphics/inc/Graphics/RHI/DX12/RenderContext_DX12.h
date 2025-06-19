@@ -104,6 +104,7 @@ namespace Insight
 
 			private:
 				void FindPhysicalDevice(IDXGIAdapter1** ppAdapter);
+				void SetDeviceExtenstions();
 				void ResizeSwapchainBuffers();
 
 			private:

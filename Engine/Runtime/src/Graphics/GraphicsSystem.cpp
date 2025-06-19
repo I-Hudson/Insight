@@ -106,7 +106,7 @@ namespace Insight
 			m_context = Graphics::RenderContext::New(graphicsAPI);
 
 			Graphics::RenderContextDesc renderContextDesc = {};
-			renderContextDesc.GPUValidation = false;
+			renderContextDesc.GPUValidation = true;// graphicsAPI == Graphics::GraphicsAPI::Vulkan;
 			renderContextDesc.MultithreadContext = true;
 
 			if (Core::CommandLineArgs::CommandListExists(CMD_GPU_VALIDATION))

@@ -28,6 +28,7 @@ namespace Insight
 	namespace Graphics
 	{
         FfxFsr2Context              RHI_FSR::m_ffx_fsr2_context;
+        bool                        RHI_FSR::m_ffxValidContext = false;
         FfxFsr2ContextDescription   RHI_FSR::m_ffx_fsr2_context_description;
         FfxFsr2DispatchDescription  RHI_FSR::m_ffx_fsr2_dispatch_description;
         void*                       RHI_FSR::m_scratchBuffer = nullptr;
@@ -43,6 +44,7 @@ namespace Insight
                     {
                         RenderContext::Instance().GpuWaitForIdle();
                         ASSERT(ffxFsr2ContextDestroy(&m_ffx_fsr2_context) == FFX_OK);
+                        m_ffxValidContext = false;
 
                         Maths::Vector2 render_resolution = RenderGraph::Instance().GetRenderResolution();
                         Maths::Vector2 output_resolution = RenderGraph::Instance().GetOutputResolution();
@@ -73,9 +75,20 @@ namespace Insight
         void RHI_FSR::Destroy()
         {
             Core::EventSystem::Instance().RemoveEventListener(this, Core::EventType::Graphics_Render_Resolution_Change);
-            ASSERT(ffxFsr2ContextDestroy(&m_ffx_fsr2_context) == FFX_OK);
-            DeleteBytes(m_scratchBuffer);
-            m_scratchBuffer = nullptr;
+
+            if (m_ffxValidContext)
+            {
+                RenderContext::Instance().GpuWaitForIdle();
+                ASSERT(ffxFsr2ContextDestroy(&m_ffx_fsr2_context) == FFX_OK);
+                m_ffxValidContext = false;
+                m_ffx_fsr2_context = {};
+            }
+
+            if (m_scratchBuffer)
+            {
+                free(m_scratchBuffer);
+                m_scratchBuffer = nullptr;
+            }
         }
 
         void RHI_FSR::SetIsEnabled(const bool value) const
@@ -261,6 +274,7 @@ namespace Insight
                 IS_LOG_CORE_ERROR("[RHI_FSR::CreateContext] FSR2 error code '{}'", createErrorCode);
                 return;
             }
+            m_ffxValidContext = true;
             m_fsr2IsAvailable = true;
         }
 

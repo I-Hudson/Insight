@@ -226,7 +226,6 @@ bool PixelFormatExtensions::IsDepthStencil(const PixelFormat format)
     case PixelFormat::D32_Float_S8X24_UInt:
     case PixelFormat::R32_Float_X8X24_Typeless:
     case PixelFormat::X32_Typeless_G8X24_UInt:
-    case PixelFormat::D32_Float:
     case PixelFormat::R24G8_Typeless:
     case PixelFormat::D24_UNorm_S8_UInt:
     case PixelFormat::R24_UNorm_X8_Typeless:
@@ -243,6 +242,7 @@ bool PixelFormatExtensions::IsDepth(PixelFormat format)
     switch (format)
     {
         case PixelFormat::D32_Float:
+        case PixelFormat::R32_Typeless:
         case PixelFormat::D16_UNorm:
             return true;
         default:
@@ -906,6 +906,7 @@ PixelFormat PixelFormatExtensions::FindShaderResourceFormat(const PixelFormat fo
             return PixelFormat::BC7_UNorm;
         }
     }
+
     switch (format)
     {
     case PixelFormat::R24G8_Typeless:

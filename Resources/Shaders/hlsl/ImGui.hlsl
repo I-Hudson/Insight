@@ -11,6 +11,7 @@ struct VertexOutput
     float4 Color : COLOR0;
     float2 UV : TEXCOORD0;
 };
+
 #ifdef VULKAN
 cbuffer UBO : register(b0, space0)
 {
@@ -23,6 +24,7 @@ cbuffer UBO : register(b0, space0)
      float4x4 ProjectionMatrix;
  }
  #endif
+
 Texture2D<float4> sTexture : register(t0, space1);
 SamplerState sSampler : register(s0, space2);
 

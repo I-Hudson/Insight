@@ -115,9 +115,9 @@ namespace Insight
 
 			virtual void Dispatch(const u32 threadGroupX, const u32 threadGroupY) = 0;
 
-			virtual void BindPipeline(PipelineStateObject pso, RHI_DescriptorLayout* layout) = 0;
-			virtual void BindPipeline(PipelineStateObject pso, bool clearDescriptors) = 0;
-			virtual void BindPipeline(ComputePipelineStateObject pso) = 0;
+			virtual void BindPipeline(const PipelineStateObject& pso, RHI_DescriptorLayout* layout) = 0;
+			virtual void BindPipeline(const PipelineStateObject& pso, bool clearDescriptors) = 0;
+			virtual void BindPipeline(const ComputePipelineStateObject& pso) = 0;
 
 			virtual void BeginTimeBlock(const std::string& blockName);
 			virtual void BeginTimeBlock(const std::string& blockName, Maths::Vector4 colour);
