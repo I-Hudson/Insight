@@ -60,20 +60,22 @@ namespace Insight
             }
         }
 
-        BoundingBox::BoundingBox(const Vertex* vertices, const uint32_t vertex_count)
+        BoundingBox::BoundingBox(float* positions, const int positionsStride, const uint64_t positionsCount)
         {
             m_min = Maths::Vector3((float)UINT32_MAX);
             m_max = Maths::Vector3((float)INT32_MIN);
 
-            for (uint32_t i = 0; i < vertex_count; ++i)
+            for (uint32_t i = 0; i < positionsCount; ++i)
             {
-                m_max.x = std::max(m_max.x, vertices[i].Position[0]);
-                m_max.y = std::max(m_max.y, vertices[i].Position[1]);
-                m_max.z = std::max(m_max.z, vertices[i].Position[2]);
+                m_max.x = std::max(m_max.x, positions[0]);
+                m_max.y = std::max(m_max.y, positions[1]);
+                m_max.z = std::max(m_max.z, positions[2]);
 
-                m_min.x = std::min(m_min.x, vertices[i].Position[0]);
-                m_min.y = std::min(m_min.y, vertices[i].Position[1]);
-                m_min.z = std::min(m_min.z, vertices[i].Position[2]);
+                m_min.x = std::min(m_min.x, positions[0]);
+                m_min.y = std::min(m_min.y, positions[1]);
+                m_min.z = std::min(m_min.z, positions[2]);
+
+                positions = (float*)((unsigned char*)positions + positionsStride);
             }
         }
 

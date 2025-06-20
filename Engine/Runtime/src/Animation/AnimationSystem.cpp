@@ -22,8 +22,13 @@ namespace Insight
         const u64 c_SkeletonBoneDataIncrementSize = sizeof(Maths::Matrix4) * Skeleton::c_MaxBoneCount;
         const u64 c_SkeletonBoneDataByteSize = c_SkeletonBoneDataIncrementSize * c_MaxGPUSkinnedObjects;
 
-        const u64 c_MaxVertexCount = 256_MB / sizeof(Graphics::Vertex);
-        const u64 c_VertexByteSize = sizeof(Graphics::Vertex) * c_MaxVertexCount;
+#ifdef VERTEX_SPLIT_STREAMS
+        const u64 c_MaxVertexCount = 256_MB / Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Position);
+        const u64 c_VertexByteSize = Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Position) * c_MaxVertexCount;
+#else
+        const u64 c_MaxVertexCount = 256_MB / Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Interleaved);
+        const u64 c_VertexByteSize = Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Interleaved) * c_MaxVertexCount;
+#endif
 
         AnimationSystem::AnimationSystem()
         { }
@@ -204,11 +209,19 @@ namespace Insight
                 RenderMesh& skinnedMesh = renderFrame.GetRenderMesh(animInstance.Entity);
                 const Graphics::RHI_BufferView skinnedVertexBuffer = AllocateMeshVertexBuffer(animInstance, skinnedMesh);
                 
-                Graphics::RHI_BufferView inputSkinnedVertexBuffer(skinnedMesh.GetLOD(0).Vertex_buffer, skinnedMesh.GetLOD(0).Vertex_offset, skinnedMesh.GetLOD(0).Vertex_count * sizeof(Graphics::Vertex));
+#ifdef VERTEX_SPLIT_STREAMS
+                Graphics::RHI_BufferView inputSkinnedVertexBuffer(skinnedMesh.GetLOD(0).Vertex_buffer, skinnedMesh.GetLOD(0).Vertex_offset
+                    , skinnedMesh.GetLOD(0).Vertex_count * Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Position));
                 inputSkinnedVertexBuffer.UAVStartIndex = skinnedMesh.GetLOD(0).Vertex_offset;
                 inputSkinnedVertexBuffer.UAVNumOfElements = skinnedMesh.GetLOD(0).Vertex_count;
-                inputSkinnedVertexBuffer.Stride = sizeof(Graphics::Vertex);
-
+                inputSkinnedVertexBuffer.Stride = Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Position);
+#else
+                Graphics::RHI_BufferView inputSkinnedVertexBuffer(skinnedMesh.GetLOD(0).Vertex_buffer, skinnedMesh.GetLOD(0).Vertex_offset
+                    , skinnedMesh.GetLOD(0).Vertex_count * Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Interleaved));
+                inputSkinnedVertexBuffer.UAVStartIndex = skinnedMesh.GetLOD(0).Vertex_offset;
+                inputSkinnedVertexBuffer.UAVNumOfElements = skinnedMesh.GetLOD(0).Vertex_count;
+                inputSkinnedVertexBuffer.Stride = Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Interleaved);
+#endif
                 AnimationGPUSkinning animGPUSkinning =
                 {
                     skeleton,
@@ -251,7 +264,11 @@ namespace Insight
                 Graphics::RHI_Buffer_Overrides gpuSkinningVertexBufferOverrides;
                 gpuSkinningVertexBufferOverrides.AllowUnorderedAccess = true;
                 gpuSkinningVertexBufferOverrides.InitialUploadState = Graphics::DeviceUploadStatus::Completed;
-                m_GPUSkinnedVertexBuffer = Renderer::CreateVertexBuffer(c_VertexByteSize, sizeof(Graphics::Vertex), gpuSkinningVertexBufferOverrides);
+#ifdef VERTEX_SPLIT_STREAMS
+                m_GPUSkinnedVertexBuffer = Renderer::CreateVertexBuffer(c_VertexByteSize, Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Position), gpuSkinningVertexBufferOverrides);
+#else
+                m_GPUSkinnedVertexBuffer = Renderer::CreateVertexBuffer(c_VertexByteSize, Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Interleaved), gpuSkinningVertexBufferOverrides);
+#endif
                 m_GPUSkinnedVertexBuffer->SetName("GPUSkinnedVertexBuffer");
             }
 
@@ -311,15 +328,27 @@ namespace Insight
 
             u64 vertexCount = skinnedMesh.MeshLods[0].Vertex_count;
 
-            const u64 vertexByteSize = sizeof(Graphics::Vertex) * vertexCount;
+#ifdef VERTEX_SPLIT_STREAMS
+            const u64 vertexByteSize = Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Position) * vertexCount;
             ASSERT(m_gpuVertexOffset + vertexByteSize < c_VertexByteSize);
 
             Graphics::RHI_BufferView gpuVertexData(m_GPUSkinnedVertexBuffer, m_gpuVertexBaseOffset + m_gpuVertexOffset, vertexByteSize);
-            gpuVertexData.UAVStartIndex = m_gpuVertexOffset > 0 ? m_gpuVertexOffset / sizeof(Graphics::Vertex) : 0;
+            gpuVertexData.UAVStartIndex = m_gpuVertexOffset > 0 ? m_gpuVertexOffset / Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Position) : 0;
             gpuVertexData.UAVNumOfElements = vertexCount;
-            gpuVertexData.Stride = sizeof(Graphics::Vertex);
+            gpuVertexData.Stride = Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Position);
 
             skinnedMesh.MeshLods[0].VertexBufferView = gpuVertexData;
+#else
+            const u64 vertexByteSize = Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Interleaved) * vertexCount;
+            ASSERT(m_gpuVertexOffset + vertexByteSize < c_VertexByteSize);
+
+            Graphics::RHI_BufferView gpuVertexData(m_GPUSkinnedVertexBuffer, m_gpuVertexBaseOffset + m_gpuVertexOffset, vertexByteSize);
+            gpuVertexData.UAVStartIndex = m_gpuVertexOffset > 0 ? m_gpuVertexOffset / Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Interleaved) : 0;
+            gpuVertexData.UAVNumOfElements = vertexCount;
+            gpuVertexData.Stride = Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Interleaved);
+
+            skinnedMesh.MeshLods[0].VertexBufferView = gpuVertexData;
+#endif
             m_vertexBuffers[anim.Entity->GetGUID()] = gpuVertexData;
 
             m_gpuVertexOffset += vertexByteSize;

@@ -54,7 +54,7 @@ namespace Insight
 			BoundingBox(const Maths::Vector3* vertices, const uint32_t point_count);
 
 			/// Construct from vertices
-			BoundingBox(const Vertex* vertices, const uint32_t vertex_count);
+			BoundingBox(float* positions, const int positionsStride, const uint64_t positionsCount);
 
 			~BoundingBox() = default;
 

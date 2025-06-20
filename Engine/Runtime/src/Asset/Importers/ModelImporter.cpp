@@ -175,25 +175,29 @@ namespace Insight
 
 			const u32 vertexCount = LODs[0].Vertex_count;
 			const u32 indexCount = LODs[0].Index_count;
-			const u32 vertexSize = sizeof(Vertices[0]);
+#ifdef VERTEX_SPLIT_STREAMS
+			const u32 vertexSize = Vertices.GetStride(Graphics::Vertices::Stream::Position);
+#else
+			const u32 vertexSize = Vertices.GetStride(Graphics::Vertices::Stream::Interleaved);
+#endif
 
 			std::vector<u32> remap(indexCount);
 			const u64 optimisedVertexCount = meshopt_generateVertexRemap(remap.data(), 
 				Indices.data(),
 				indexCount, 
-				Vertices.data(), 
+				Vertices.GetData(Graphics::Vertices::Stream::Position),
 				vertexCount,
 				vertexSize);
 
 			std::vector<u32> optimisedIndices;
 			optimisedIndices.resize(indexCount);
 
-			std::vector<Graphics::Vertex> optimisedVertices;
-			optimisedVertices.resize(optimisedVertexCount);
+			Graphics::Vertices optimisedVertices;
+			optimisedVertices.Resize(optimisedVertexCount);
 
 			// Optimisation 1: Remove all duplicate vertices
 			meshopt_remapIndexBuffer(optimisedIndices.data(), Indices.data(), indexCount, remap.data());
-			meshopt_remapVertexBuffer(optimisedVertices.data(), Vertices.data(), vertexCount, vertexSize, remap.data());
+			meshopt_remapVertexBuffer(optimisedVertices.GetData(Graphics::Vertices::Stream::Position), Vertices.GetData(Graphics::Vertices::Stream::Position), vertexCount, vertexSize, remap.data());
 
 			// Vertex cache optimization - reordering triangles to maximize cache locality
 			IS_LOG_INFO("Optimizing vertex cache...");
@@ -201,11 +205,15 @@ namespace Insight
 
 			// Overdraw optimizations - reorders triangles to minimize overdraw from all directions
 			IS_LOG_INFO("Optimizing overdraw...");
-			meshopt_optimizeOverdraw(optimisedIndices.data(), optimisedIndices.data(), indexCount, &(Vertices[0].Position[0]), optimisedVertexCount, vertexSize, 1.05f);
+			meshopt_optimizeOverdraw(optimisedIndices.data(), optimisedIndices.data(), indexCount, (float*)Vertices.GetData(Graphics::Vertices::Stream::Position), optimisedVertexCount, vertexSize, 1.05f);
 
 			// Vertex fetch optimization - reorders triangles to maximize memory access locality
 			IS_LOG_INFO("Optimizing vertex fetch...");
-			meshopt_optimizeVertexFetch(optimisedVertices.data(), optimisedIndices.data(), indexCount, optimisedVertices.data(), optimisedVertexCount, vertexSize);
+			meshopt_optimizeVertexFetch(optimisedVertices.GetData(Graphics::Vertices::Stream::Position)
+				, optimisedIndices.data()
+				, indexCount
+				, optimisedVertices.GetData(Graphics::Vertices::Stream::Position)
+				, optimisedVertexCount, vertexSize);
 		}
 
 		void MeshData::GenerateLODs()
@@ -244,14 +252,24 @@ namespace Insight
 				std::vector<u32> result_lod;
 				result_lod.resize(LOD0_IndicesCount);
 
+#ifdef VERTEX_SPLIT_STREAMS
+				const u32 vertexSize = Vertices.GetStride(Graphics::Vertices::Stream::Position);
+#else
+				const u32 vertexSize = Vertices.GetStride(Graphics::Vertices::Stream::Interleaved);
+#endif
+
 				// Try and simplify the mesh, try and preserve mesh topology.
 				u64 resultIndexCount = meshopt_simplify(
 					result_lod.data()
 					, &*indices_begin
 					, static_cast<u64>(LOD0_IndicesCount)
-					, &(Vertices.data() + LOD0_VertexStart)->Position[0]
+#ifdef VERTEX_SPLIT_STREAMS
+					, (float*)Vertices.GetData(Graphics::Vertices::Stream::Position) + (LOD0_VertexStart * vertexSize)
+#else
+					, (float*)Vertices.GetData(Graphics::Vertices::Stream::Interleaved) + (LOD0_VertexStart * vertexSize)
+#endif
 					, LOD0_VertexCount
-					, sizeof(Graphics::Vertex)
+					, vertexSize
 					, target_index_count
 					, error_rate);
 
@@ -274,9 +292,13 @@ namespace Insight
 						  result_lod.data()
 						, &*indices_begin
 						, static_cast<u64>(LOD0_IndicesCount)
-						, &(Vertices.data() + LOD0_VertexStart)->Position[0]
+#ifdef VERTEX_SPLIT_STREAMS
+						, (float*)Vertices.GetData(Graphics::Vertices::Stream::Position) + (LOD0_VertexStart * vertexSize)
+#else
+						, (float*)Vertices.GetData(Graphics::Vertices::Stream::Interleaved) + (LOD0_VertexStart * vertexSize)
+#endif
 						, LOD0_VertexCount
-						, sizeof(Graphics::Vertex)
+						, vertexSize
 						, target_index_count
 						, error_rate);
 				}
@@ -692,6 +714,22 @@ namespace Insight
 			}
 		}
 
+		template<typename Member>
+		void UploadData(const Graphics::Vertex& vertex, Member Graphics::Vertex::*member, Graphics::RHI_Buffer*& buffer, const u64 verticesCount, const u64 index)
+			{
+				if (!buffer)
+				{
+					Graphics::RHI_Buffer_Overrides vertexOverrides;
+					vertexOverrides.AllowUnorderedAccess = true;
+
+					const u64 bufferSize = sizeof(vertex.*member) * verticesCount;
+					buffer = Renderer::CreateVertexBuffer(bufferSize, sizeof(vertex.*member), vertexOverrides);
+				}
+				const u64 offset = sizeof(vertex.*member) * index;
+				const auto& data = vertex.*member;
+				buffer->Upload(&data, sizeof(vertex.*member), offset, 0);
+			};
+
 		void ModelImporter::ProcessMesh(const aiScene* aiScene, const aiNode* aiNode, const aiMesh* aiMesh, ModelAsset* modelAsset) const
 		{
 			Mesh* mesh = ::New<Mesh>();
@@ -703,12 +741,21 @@ namespace Insight
 
 			mesh->m_mesh_name = aiMesh->mName.C_Str();
 			mesh->m_transform_offset = AssimpToInsightMatrix4(aiNode->mTransformation);
-			mesh->m_boundingBox = Graphics::BoundingBox(meshData.Vertices.data(), static_cast<u32>(meshData.Vertices.size()));
+#ifdef VERTEX_SPLIT_STREAMS
+			mesh->m_boundingBox = Graphics::BoundingBox((float*)meshData.Vertices.GetData(Graphics::Vertices::Stream::Position)
+				, meshData.Vertices.GetStride(Graphics::Vertices::Stream::Position),
+				meshData.Vertices.VerticesCount());
+#else
+			mesh->m_boundingBox = Graphics::BoundingBox((float*)meshData.Vertices.GetData(Graphics::Vertices::Stream::Position)
+				, meshData.Vertices.GetStride(Graphics::Vertices::Stream::Interleaved),
+				meshData.Vertices.VerticesCount());
+#endif
+
 			mesh->m_boundingBox = Graphics::BoundingBox(
 				Maths::Vector3(aiMesh->mAABB.mMin.x, aiMesh->mAABB.mMin.y, aiMesh->mAABB.mMin.z),
 				Maths::Vector3(aiMesh->mAABB.mMax.x, aiMesh->mAABB.mMax.y, aiMesh->mAABB.mMax.z));
 
-			if (!meshData.Vertices.empty() && !meshData.Indices.empty())
+			if (!meshData.Vertices.IsEmpty() && !meshData.Indices.empty())
 			{
 				//meshData.Optimise();
 				//meshData.GenerateLODs();
@@ -716,16 +763,41 @@ namespace Insight
 				ASSERT(mesh);
 
 #if VERTEX_SPLIT_STREAMS
+				for (size_t i = 0; i < meshData.Vertices.size(); ++i)
+				{
+					const Graphics::Vertex& v = meshData.Vertices[i];
+
+					UploadData(v, &Graphics::Vertex::Position,		meshData.RHI_VertexBuffer_Position, meshData.Vertices.size(), i);
+					meshData.RHI_VertexBuffer_Position->SetName("Position");
+
+					UploadData(v, &Graphics::Vertex::Normal,		meshData.RHI_VertexBuffer_Normal, meshData.Vertices.size(), i);
+					meshData.RHI_VertexBuffer_Normal->SetName("Normal");
+
+					UploadData(v, &Graphics::Vertex::Colour,		meshData.RHI_VertexBuffer_Colour, meshData.Vertices.size(), i);
+					meshData.RHI_VertexBuffer_Colour->SetName("Colour");
+
+					UploadData(v, &Graphics::Vertex::UV,			meshData.RHI_VertexBuffer_UV, meshData.Vertices.size(), i);
+					meshData.RHI_VertexBuffer_UV->SetName("UV");
+
+					UploadData(v, &Graphics::Vertex::BoneIds,		meshData.RHI_VertexBuffer_BoneIds, meshData.Vertices.size(), i);
+					meshData.RHI_VertexBuffer_BoneIds->SetName("BoneIds");
+
+					UploadData(v, &Graphics::Vertex::BoneWeights,	meshData.RHI_VertexBuffer_BoneWeights, meshData.Vertices.size(), i);
+					meshData.RHI_VertexBuffer_BoneWeights->SetName("BoneWeights");
+
+				}
+
 #else
 				if (!meshData.RHI_VertexBuffer)
 				{
 					Graphics::RHI_Buffer_Overrides vertexOverrides;
 					vertexOverrides.AllowUnorderedAccess = true;
 
-					meshData.RHI_VertexBuffer = Renderer::CreateVertexBuffer(meshData.Vertices.size() * sizeof(Graphics::Vertex), sizeof(Graphics::Vertex), vertexOverrides);
+					meshData.RHI_VertexBuffer = Renderer::CreateVertexBuffer(meshData.Vertices.VerticesCount() * meshData.Vertices.GetStride(Graphics::Vertices::Stream::Interleaved)
+						, meshData.Vertices.GetStride(Graphics::Vertices::Stream::Interleaved), vertexOverrides);
 					// TODO: Look into why when using the Sponza model and QueueUpload if the editor camera is in certain positions then the mesh disappears.
 					//meshData.RHI_VertexBuffer->QueueUpload(meshData.Vertices.data(), meshData.RHI_VertexBuffer->GetSize());
-					meshData.RHI_VertexBuffer->Upload(meshData.Vertices.data(), meshData.RHI_VertexBuffer->GetSize());
+					meshData.RHI_VertexBuffer->Upload(meshData.Vertices.GetData(Graphics::Vertices::Stream::Interleaved), meshData.RHI_VertexBuffer->GetSize());
 				}
 				else
 				{
@@ -757,12 +829,14 @@ namespace Insight
 					meshLod.First_index = static_cast<u32>(meshDataLod.First_index);
 					meshLod.Index_count = static_cast<u32>(meshDataLod.Index_count);
 
+#ifdef VERTEX_SPLIT_STREAMS
+#else
 					meshLod.Vertex_buffer = meshData.RHI_VertexBuffer;
-					meshLod.Index_buffer = meshData.RHI_IndexBuffer;
-
 					const std::string vertexBufferName = std::string(aiNode->mName.C_Str()) + "_" + aiMesh->mName.C_Str() + "_Veretx";
-					const std::string indexBufferName = std::string(aiNode->mName.C_Str()) + "_" + aiMesh->mName.C_Str() + "_Index";
 					meshLod.Vertex_buffer->SetName(vertexBufferName);
+#endif
+					meshLod.Index_buffer = meshData.RHI_IndexBuffer;
+					const std::string indexBufferName = std::string(aiNode->mName.C_Str()) + "_" + aiMesh->mName.C_Str() + "_Index";
 					meshLod.Index_buffer->SetName(indexBufferName);
 				}
 			}
@@ -847,8 +921,7 @@ namespace Insight
 				}
 
 				//Graphics::VertexOptomised vertexOptomised(vertex);
-				Graphics::Vertex vertex(position, normal, colour, uv);
-				meshData.Vertices.push_back(Graphics::Vertex(position, normal, colour, uv));
+				meshData.Vertices.AddVertex(position, normal, colour, uv, 0, Maths::Vector4::Zero);
 				meshData.VerticesBoneInfluence.push_back(Graphics::VertexBoneInfluence());
 			}
 
@@ -870,7 +943,7 @@ namespace Insight
 				MeshData::LOD(
 					0,
 					0,
-					static_cast<u32>(meshData.Vertices.size()),
+					static_cast<u32>(meshData.Vertices.VerticesCount()),
 					0,
 					static_cast<u32>(meshData.Indices.size())));
 		}
@@ -1110,8 +1183,8 @@ namespace Insight
 				{
 					int vertexId = weights[weightIndex].mVertexId;
 					float weight = weights[weightIndex].mWeight;
-					assert(vertexId <= meshData->Vertices.size());
-					SetVertexBoneData(meshData->Vertices[vertexId], meshData->VerticesBoneInfluence[vertexId], boneId, weight);
+					assert(vertexId <= meshData->Vertices.VerticesCount());
+					SetVertexBoneData(meshData->Vertices, vertexId, meshData->VerticesBoneInfluence[vertexId], boneId, weight);
 				}
 				/*
 				const aiVertexWeight* aiBonewights = aiBone->mWeights;
@@ -1669,18 +1742,18 @@ namespace Insight
 			}
 		}
 */
-		void ModelImporter::SetVertexBoneData(Graphics::Vertex& vertex, Graphics::VertexBoneInfluence& vertexBoneInfluence, const u32 boneId, const float boneWeight) const
+		void ModelImporter::SetVertexBoneData(Graphics::Vertices& vertices, const u64 vertexId, Graphics::VertexBoneInfluence& vertexBoneInfluence, const u32 boneId, const float boneWeight) const
 		{
 			IS_PROFILE_FUNCTION();
 
-			for (int i = 0; i < Graphics::Vertex::MAX_BONE_COUNT; ++i)
+			for (int i = 0; i < Graphics::Vertices::MAX_BONE_COUNT; ++i)
 			{
-				const float currentBoneWeight = vertex.GetBoneWeight(i);
+				const float currentBoneWeight = vertices.GetBoneWeight(vertexId, i);
 				if (currentBoneWeight == 0.0f)
 				{
 					ASSERT(boneId < 72);
-					vertex.SetBoneId(boneId, i);
-					vertex.SetBoneWeight(boneWeight, i);
+					vertices.SetBoneId(vertexId, boneId, i);
+					vertices.SetBoneWeight(vertexId, boneWeight, i);
 
 					vertexBoneInfluence.SetBoneId(boneId, i);
 					vertexBoneInfluence.SetBoneWeight(boneWeight, i);

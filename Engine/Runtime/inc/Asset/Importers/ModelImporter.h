@@ -56,12 +56,13 @@ namespace Insight
                 u32 Index_count = 0;
             };
 
-            std::vector<Graphics::Vertex> Vertices;
+            Graphics::Vertices Vertices;
             std::vector<Graphics::VertexBoneInfluence> VerticesBoneInfluence;
             std::vector<u32> Indices;
             std::vector<LOD> LODs;
 
 #if VERTEX_SPLIT_STREAMS
+
             Graphics::RHI_Buffer* RHI_VertexBuffer_Position = nullptr;
             Graphics::RHI_Buffer* RHI_VertexBuffer_Normal = nullptr;
             Graphics::RHI_Buffer* RHI_VertexBuffer_Colour = nullptr;
@@ -156,7 +157,7 @@ namespace Insight
             void ProcessMesh(const aiScene* aiScene, const aiMesh* aiMesh, MeshData* meshData, MeshNode* meshNode) const;
             Ref<MaterialAsset> ProcessMaterial(MeshNode* meshNode) const;
 #endif
-            void SetVertexBoneData(Graphics::Vertex& vertex, Graphics::VertexBoneInfluence& vertexBoneInfluence, const u32 boneId, const float boneWeight) const;
+            void SetVertexBoneData(Graphics::Vertices& vertices, const u64 vertexId, Graphics::VertexBoneInfluence& vertexBoneInfluence, const u32 boneId, const float boneWeight) const;
             //void ProcessMesh(MeshData& meshData, ModelAsset* modelAsset) const;
 
             /// @brief Returns the texture path from the model directory.

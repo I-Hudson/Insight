@@ -37,10 +37,10 @@ namespace Insight
 #ifdef VERTEX_SPLIT_STREAMS
 
 #else
+#endif
 			Graphics::RHI_Buffer* Vertex_buffer = nullptr;
 			Graphics::RHI_BufferView VertexBufferView;
 			Graphics::RHI_Buffer* Index_buffer = nullptr;
-#endif
 		};
 
 		/// @brief Contain vertex and index buffers for use when rendering this mesh.
