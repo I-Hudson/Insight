@@ -216,7 +216,7 @@ namespace Insight
                 inputSkinnedVertexBuffer.UAVNumOfElements = skinnedMesh.GetLOD(0).Vertex_count;
                 inputSkinnedVertexBuffer.Stride = Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Position);
 #else
-                Graphics::RHI_BufferView inputSkinnedVertexBuffer(skinnedMesh.GetLOD(0).Vertex_buffer, skinnedMesh.GetLOD(0).Vertex_offset
+                Graphics::RHI_BufferView inputSkinnedVertexBuffer(skinnedMesh.GetLOD(0).VertexBuffer, skinnedMesh.GetLOD(0).Vertex_offset
                     , skinnedMesh.GetLOD(0).Vertex_count * Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Interleaved));
                 inputSkinnedVertexBuffer.UAVStartIndex = skinnedMesh.GetLOD(0).Vertex_offset;
                 inputSkinnedVertexBuffer.UAVNumOfElements = skinnedMesh.GetLOD(0).Vertex_count;
@@ -355,7 +355,7 @@ namespace Insight
 
             return gpuVertexData;
         }
-#pragma optimize("",off)
+
         void AnimationSystem::SetupComputeSkinningPass()
         {
             struct AnimationSkinnedData
@@ -465,6 +465,6 @@ namespace Insight
                 cmdList->PipelineBarrier(afterBarreir);
             }, [](AnimationSkinnedData&, Graphics::RenderGraph&, Graphics::RHI_CommandList*) { }, std::move(animationSkinnedData));
         }
-#pragma optimize("",on)
+
     }
 }

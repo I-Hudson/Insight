@@ -15,6 +15,8 @@ namespace Insight
 {
 	namespace Graphics
 	{
+		class RHI_Buffer;
+
 		static bool is_big_endian(void)
 		{
 			union {
@@ -24,6 +26,16 @@ namespace Insight
 
 			return bint.c[0] == 1;
 		}
+
+		struct IS_GRAPHICS VerticesSplitRHIBuffers
+		{
+			Graphics::RHI_Buffer* Position = nullptr;
+			Graphics::RHI_Buffer* Normal = nullptr;
+			Graphics::RHI_Buffer* Colour = nullptr;
+			Graphics::RHI_Buffer* UV = nullptr;
+			Graphics::RHI_Buffer* BoneIds = nullptr;
+			Graphics::RHI_Buffer* BoneWeights = nullptr;
+		};
 
 		struct IS_GRAPHICS Vertices
 		{
@@ -43,37 +55,143 @@ namespace Insight
 
 			struct Vertex
 			{
+#ifdef VERTEX_SPLIT_STREAMS
+				std::vector<float> Positons;
+#else
 				float Position[3] = { 0 };
+#endif
+
+#ifdef VERTEX_SPLIT_STREAMS
+#ifdef VERTEX_NORMAL_PACKED
+				std::vector<int> Normals;
+#else
+				std::vector<float> Normals;
+#endif
+#else
 #ifdef VERTEX_NORMAL_PACKED
 				int Normal = 0;
 #else
 				float Normal[3] = { 0 };
 #endif
+#endif
+
+#ifdef VERTEX_SPLIT_STREAMS
+#ifdef VERTEX_COLOUR_PACKED
+				std::vector<int> Colours;
+#else
+				std::vector<float> Colours;
+#endif
+#else
 #ifdef VERTEX_COLOUR_PACKED
 				int Colour = 0;
 #else
 				float Colour[3] = { 0 };
 #endif
+#endif
+
+#ifdef VERTEX_SPLIT_STREAMS
+#ifdef VERTEX_UV_PACKED
+				std::vector<int> UVs;
+#else
+				std::vector<float> UVs;
+#endif
+#else
 #ifdef VERTEX_UV_PACKED
 				int UV = 0;
 #else
 				float UV[2] = { 0 };
 #endif
+#endif
+
+#ifdef VERTEX_SPLIT_STREAMS
+				std::vector<int> BoneIds;
+#else
 #ifdef VERTEX_BONE_ID_PACKED
 				int BoneIds = 0;
 #else
 				int BoneIds[MAX_BONE_COUNT] = { 0 };
 #endif
+#endif
+
+#ifdef VERTEX_SPLIT_STREAMS
+#ifdef VERTEX_BONE_WEIGHT_PACKED
+				std::vector<int> BoneWeights;
+#else
+				std::vector<float> BoneWeights;
+#endif
+#else
 #ifdef VERTEX_BONE_WEIGHT_PACKED
 				int BoneWeights[MAX_BONE_COUNT / 2] = { 0 };
 #else
 				float BoneWeights[MAX_BONE_COUNT] = { 0 };
+#endif
 #endif
 			};
 
 			void AddVertex(const Maths::Vector3& position, const Maths::Vector3& normal, const Maths::Vector4& colour, const Maths::Vector2& uv, const int boneId, const Maths::Vector4& boneWeights)
 			{
 #ifdef VERTEX_SPLIT_STREAMS
+				Vertices.Positons.push_back(position[0]);
+				Vertices.Positons.push_back(position[1]);
+				Vertices.Positons.push_back(position[2]);
+
+#ifdef VERTEX_NORMAL_PACKED
+				const u32 bitShift = c_PackedNormalSignBit + 1;
+
+				int& packedNormal = Vertices.Normals.emplace_back();
+				PackNormal(packedNormal, normal.x, 0);
+				PackNormal(packedNormal, normal.y, bitShift);
+				PackNormal(packedNormal, normal.z, bitShift * 2);
+
+				const float fX = UnpackNormal(packedNormal, 0);
+				const float fY = UnpackNormal(packedNormal, bitShift);
+				const float fZ = UnpackNormal(packedNormal, bitShift * 2);
+
+				ASSERT(Maths::Equals(fX, normal.x, 0.01f));
+				ASSERT(Maths::Equals(fY, normal.y, 0.01f));
+				ASSERT(Maths::Equals(fZ, normal.z, 0.01f));
+#else
+				Vertices.Normals.emplace_back(normal[0]);
+				Vertices.Normals.emplace_back(normal[1]);
+				Vertices.Normals.emplace_back(normal[2]);
+#endif
+
+#ifdef VERTEX_COLOUR_PACKED
+				int& packedColour = Vertices.Colours.emplace_back();
+				packedColour |= static_cast<u8>(colour.x * 255);
+				packedColour |= static_cast<u8>(colour.y * 255) << 8;
+				packedColour |= static_cast<u8>(colour.z * 255) << 16;
+#else
+				Vertices.Colours.emplace_back(colour[0]);
+				Vertices.Colours.emplace_back(colour[1]);
+				Vertices.Colours.emplace_back(colour[2]);
+#endif
+
+#ifdef VERTEX_UV_PACKED
+				const u16 xUVInt = PackNormalisedFloatToU16(uv.x, _UI16_MAX);
+				const u16 yUVInt = PackNormalisedFloatToU16(uv.y, _UI16_MAX);
+
+				int& packedUV = Vertices.UVs.emplace_back();
+				packedUV |= xUVInt;
+				packedUV |= yUVInt << 16;
+#else
+				Vertices.UVs.emplace_back(uv[0]);
+				Vertices.UVs.emplace_back(uv[1]);
+#endif
+
+#ifdef VERTEX_BONE_ID_PACKED
+				Vertices.BoneIds.emplace_back() = 0;
+#else
+				for (size_t i = 0; i < MAX_BONE_COUNT; i++)
+				{
+					Vertices.BoneIds.emplace_back() = 0;
+				}
+#endif
+				for (size_t i = 0; i < MAX_BONE_COUNT; i++)
+				{
+					Vertices.BoneWeights.emplace_back() = 0.0f;
+				}
+
 #else
 				Vertex& vertex = Vertices.emplace_back();
 				vertex.Position[0] = position[0];
@@ -151,7 +269,25 @@ namespace Insight
 
 			float GetBoneWeight(const u64 vertexId, const u8 idx) const
 			{
+#ifdef VERTEX_SPLIT_STREAMS
+				const u64 boneWeightStartIdx = vertexId * MAX_BONE_COUNT;
+
+#ifdef VERTEX_BONE_WEIGHT_PACKED
+				int* boneWeights = nullptr;
+				FAIL_ASSERT();
+#else
+				const float* boneWeights = Vertices.BoneWeights.data() + boneWeightStartIdx;
+#endif
+#else
 				const Vertex& vertex = Vertices[vertexId];
+#ifdef VERTEX_BONE_WEIGHT_PACKED
+				int* boneWeights = nullptr;
+				FAIL_ASSERT();
+#else
+				const float* boneWeights = vertex.BoneWeights;
+#endif
+
+#endif
 
 #ifdef VERTEX_BONE_WEIGHT_PACKED
 				const u32 bitShiftStep = 16;
@@ -161,25 +297,25 @@ namespace Insight
 				case 0:
 				{
 					const u32 bitShift = bitShiftStep * 0;
-					packedWeight |= (vertex.BoneWeights[0] >> bitShift) & 0xFFFF;
+					packedWeight |= (boneWeights[0] >> bitShift) & 0xFFFF;
 					break;
 				}
 				case 1:
 				{
 					const u32 bitShift = bitShiftStep * 1;
-					packedWeight |= (vertex.BoneWeights[0] >> bitShift) & 0xFFFF;
+					packedWeight |= (boneWeights[0] >> bitShift) & 0xFFFF;
 					break;
 				}
 				case 2:
 				{
 					const u32 bitShift = bitShiftStep * 0;
-					packedWeight |= (vertex.BoneWeights[1] >> bitShift) & 0xFFFF;
+					packedWeight |= (boneWeights[1] >> bitShift) & 0xFFFF;
 					break;
 				}
 				case 3:
 				{
 					const u32 bitShift = bitShiftStep * 1;
-					packedWeight |= (vertex.BoneWeights[1] >> bitShift) & 0xFFFF;
+					packedWeight |= (boneWeights[1] >> bitShift) & 0xFFFF;
 					break;
 				}
 				default:
@@ -189,13 +325,31 @@ namespace Insight
 				const float weight = (float)packedWeight / (float)_UI16_MAX;
 				return weight;
 #else
-				return vertex.BoneWeights[idx];
+				return boneWeights[idx];
 #endif
 			}
 
 			void SetBoneWeight(const u64 vertexId, const float boneWeight, const u8 idx)
 			{
+#ifdef VERTEX_SPLIT_STREAMS
+				const u64 boneWeightStartIdx = vertexId * MAX_BONE_COUNT;
+
+#ifdef VERTEX_BONE_WEIGHT_PACKED
+				int* boneWeights = nullptr;
+				FAIL_ASSERT();
+#else
+				float* boneWeights = Vertices.BoneWeights.data() + boneWeightStartIdx;
+#endif
+#else
 				Vertex& vertex = Vertices[vertexId];
+#ifdef VERTEX_BONE_WEIGHT_PACKED
+				int* boneWeights = nullptr;
+				FAIL_ASSERT();
+#else
+				float* boneWeights = vertex.BoneWeights;
+#endif
+
+#endif
 
 #ifdef VERTEX_BONE_WEIGHT_PACKED
 				const int weight = static_cast<u16>(boneWeight * _UI16_MAX);
@@ -206,32 +360,32 @@ namespace Insight
 				case 0:
 				{
 					const u32 bitShift = bitShiftStep * 0;
-					vertex.BoneWeights[0] |= weight << bitShift;
+					boneWeights[0] |= weight << bitShift;
 					break;
 				}
 				case 1:
 				{
 					const u32 bitShift = bitShiftStep * 1;
-					vertex.BoneWeights[0] |= weight << bitShift;
+					boneWeights[0] |= weight << bitShift;
 					break;
 				}
 				case 2:
 				{
 					const u32 bitShift = bitShiftStep * 0;
-					vertex.BoneWeights[1] |= weight << bitShift;
+					boneWeights[1] |= weight << bitShift;
 					break;
 				}
 				case 3:
 				{
 					const u32 bitShift = bitShiftStep * 1;
-					vertex.BoneWeights[1] |= weight << bitShift;
+					boneWeights[1] |= weight << bitShift;
 					break;
 				}
 				default:
 					break;
 				}
 #else
-				vertex.BoneWeights[idx] = boneWeight;
+				boneWeights[idx] = boneWeight;
 #endif
 			}
 
@@ -242,6 +396,7 @@ namespace Insight
 				case Stream::Position:
 				{
 #ifdef VERTEX_SPLIT_STREAMS
+					return Vertices.Positons.data();
 #else
 					return Vertices[0].Position;
 #endif
@@ -249,6 +404,8 @@ namespace Insight
 				case Stream::Normal:
 				{
 #ifdef VERTEX_SPLIT_STREAMS
+					return Vertices.Normals.data();
+
 #else
 #ifdef VERTEX_NORMAL_PACKED
 					return &Vertices[0].Normal;
@@ -260,6 +417,8 @@ namespace Insight
 				case Stream::Colour:
 				{
 #ifdef VERTEX_SPLIT_STREAMS
+					return Vertices.Colours.data();
+
 #else
 #ifdef VERTEX_COLOUR_PACKED
 					return &Vertices[0].Colour;
@@ -271,6 +430,8 @@ namespace Insight
 				case Stream::UV:
 				{
 #ifdef VERTEX_SPLIT_STREAMS
+					return Vertices.UVs.data();
+
 #else
 #ifdef VERTEX_UV_PACKED
 					return &Vertices[0].UV;
@@ -282,6 +443,8 @@ namespace Insight
 				case Stream::BoneId:
 				{
 #ifdef VERTEX_SPLIT_STREAMS
+					return Vertices.BoneIds.data();
+
 #else
 #ifdef VERTEX_BONE_ID_PACKED
 					return &Vertices[0].BoneIds;
@@ -293,6 +456,7 @@ namespace Insight
 				case Stream::BoneWeight:
 				{
 #ifdef VERTEX_SPLIT_STREAMS
+					return Vertices.BoneWeights.data();
 #else
 					return Vertices[0].BoneWeights;
 #endif
@@ -301,6 +465,7 @@ namespace Insight
 				case Stream::Interleaved:
 				{
 #ifdef VERTEX_SPLIT_STREAMS
+					return Vertices.Positons.data();
 #else
 					return Vertices[0].Position;
 #endif
@@ -323,31 +488,79 @@ namespace Insight
 				{
 				case Stream::Position:
 				{
+#ifdef VERTEX_SPLIT_STREAMS
+					return sizeof(decltype(Vertex::Positons)::value_type) * 3;
+#else
 					return sizeof(Vertex::Position);
+#endif
 				}
 				case Stream::Normal:
 				{
+#ifdef VERTEX_SPLIT_STREAMS
+#ifdef VERTEX_NORMAL_PACKED
+					return sizeof(decltype(Vertex::Normals)::value_type);
+#else
+					return sizeof(decltype(Vertex::Normals)::value_type) * 3;
+#endif
+#else
 					return sizeof(Vertex::Normal);
+#endif
 				}
 				case Stream::Colour:
 				{
+#ifdef VERTEX_SPLIT_STREAMS
+#ifdef VERTEX_COLOUR_PACKED
+					return sizeof(decltype(Vertex::Colours)::value_type);
+#else
+					return sizeof(decltype(Vertex::Colours)::value_type) * 3;
+#endif
+#else
 					return sizeof(Vertex::Colour);
+#endif
 				}
 				case Stream::UV:
 				{
+#ifdef VERTEX_SPLIT_STREAMS
+#ifdef VERTEX_UV_PACKED
+					return sizeof(decltype(Vertex::UVs)::value_type);
+#else
+					return sizeof(decltype(Vertex::UVs)::value_type) * 2;
+#endif
+#else
 					return sizeof(Vertex::UV);
+#endif
 				}
 				case Stream::BoneId:
 				{
+#ifdef VERTEX_SPLIT_STREAMS
+#ifdef VERTEX_BONE_ID_PACKED
+					return sizeof(decltype(Vertex::BoneIds)::value_type);
+#else
+					return sizeof(decltype(Vertex::BoneIds)::value_type) * MAX_BONE_COUNT;
+#endif
+#else
 					return sizeof(Vertex::BoneIds);
+#endif
 				}
 				case Stream::BoneWeight:
 				{
+#ifdef VERTEX_SPLIT_STREAMS
+#ifdef VERTEX_BONE_WEIGHT_PACKED
+					return sizeof(decltype(Vertex::BoneWeights)::value_type) * (MAX_BONE_COUNT / 2);
+#else
+					return sizeof(decltype(Vertex::BoneWeights)::value_type) * MAX_BONE_COUNT;
+#endif
+#else
 					return sizeof(Vertex::BoneWeights);
+#endif
 				}
 				case Stream::Interleaved:
 				{
+#ifdef VERTEX_SPLIT_STREAMS
+					FAIL_ASSERT();
+#else
 					return sizeof(Vertex);
+#endif
 				}
 
 				default:
@@ -358,6 +571,7 @@ namespace Insight
 			u64 VerticesCount() const 
 			{ 
 #ifdef VERTEX_SPLIT_STREAMS
+				return Vertices.Positons.size() / 3;
 #else
 				return Vertices.size();
 #endif
@@ -366,6 +580,7 @@ namespace Insight
 			bool IsEmpty() const
 			{
 #ifdef VERTEX_SPLIT_STREAMS
+				return Vertices.Positons.empty();
 #else
 				return Vertices.empty();
 #endif
@@ -374,6 +589,38 @@ namespace Insight
 			void Resize(const int size)
 			{
 #ifdef VERTEX_SPLIT_STREAMS
+				Vertices.Positons.resize(size * 3);
+
+#ifdef VERTEX_NORMAL_PACKED
+				Vertices.Normals.resize(size);
+#else
+				Vertices.Normals.resize(size * 3);
+#endif
+
+#ifdef VERTEX_COLOUR_PACKED
+				Vertices.Colours.resize(size);
+#else
+				Vertices.Colours.resize(size * 3);
+#endif
+
+#ifdef VERTEX_UV_PACKED
+				Vertices.UVs.resize(size);
+#else
+				Vertices.UVs.resize(size * 2);
+#endif
+
+#ifdef VERTEX_BONE_ID_PACKED
+				Vertices.BoneIds.resize(size);
+#else
+				Vertices.Normals.resize(size * 4);
+#endif
+
+#ifdef VERTEX_BONE_WEIGHT_PACKED
+				Vertices.BoneWeights.resize(size);
+#else
+				Vertices.BoneWeights.resize(size * 4);
+#endif
+
 #else
 				Vertices.resize(size);
 #endif
@@ -422,6 +669,7 @@ namespace Insight
 				}
 
 #ifdef VERTEX_SPLIT_STREAMS
+			Vertex Vertices;
 #else
 			std::vector<Vertex> Vertices;
 #endif

@@ -25,6 +25,7 @@ namespace Insight
 		{
 		public:
 			RHI_BufferView();
+			RHI_BufferView(RHI_Buffer* buffer);
 			RHI_BufferView(RHI_Buffer* buffer, u64 offset, u64 size);
 			//RHI_BufferView(const RHI_BufferView& other);
 			//RHI_BufferView(RHI_BufferView&& other);

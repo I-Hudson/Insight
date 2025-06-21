@@ -417,8 +417,8 @@ namespace Insight
                                         }
 
                                         const Runtime::MeshLOD& renderMeshLod = mesh.GetLOD(0);
-                                        cmdList->SetVertexBuffer(renderMeshLod.Vertex_buffer);
-                                        cmdList->SetIndexBuffer(renderMeshLod.Index_buffer, Graphics::IndexType::Uint32);
+                                        cmdList->SetVertexBuffer(renderMeshLod.VertexBufferView);
+                                        cmdList->SetIndexBuffer(renderMeshLod.IndexBufferView, Graphics::IndexType::Uint32);
                                         cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
                                         ++Graphics::RenderStats::Instance().MeshCount;
                                     }
@@ -491,8 +491,8 @@ namespace Insight
                                         }
 
                                         const Runtime::MeshLOD& renderMeshLod = mesh.GetLOD(0);
-                                        cmdList->SetVertexBuffer(renderMeshLod.Vertex_buffer);
-                                        cmdList->SetIndexBuffer(renderMeshLod.Index_buffer, Graphics::IndexType::Uint32);
+                                        cmdList->SetVertexBuffer(renderMeshLod.VertexBufferView);
+                                        cmdList->SetIndexBuffer(renderMeshLod.IndexBufferView, Graphics::IndexType::Uint32);
                                         cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
                                         ++Graphics::RenderStats::Instance().MeshCount;
                                     }
@@ -599,8 +599,8 @@ namespace Insight
                         cmdList->SetUniform(2, 0, object);
 
                         const Runtime::MeshLOD& renderMeshLod = mesh.GetLOD(0);
-                        cmdList->SetVertexBuffer(renderMeshLod.Vertex_buffer);
-                        cmdList->SetIndexBuffer(renderMeshLod.Index_buffer, Graphics::IndexType::Uint32);
+                        cmdList->SetVertexBuffer(renderMeshLod.VertexBufferView);
+                        cmdList->SetIndexBuffer(renderMeshLod.IndexBufferView, Graphics::IndexType::Uint32);
                         cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
                         ++Graphics::RenderStats::Instance().MeshCount;
                     }
@@ -750,14 +750,14 @@ namespace Insight
                             const Runtime::MeshLOD& renderMeshLod = mesh.GetLOD(0);
                             if (renderMeshLod.VertexBufferView.IsValid())
                             {
-                                cmdList->SetVertexBuffer(renderMeshLod.VertexBufferView.GetBuffer());
+                                cmdList->SetVertexBuffer(renderMeshLod.VertexBufferView);
                             }
                             else
                             {
-                                cmdList->SetVertexBuffer(renderMeshLod.Vertex_buffer);
+                                //cmdList->SetVertexBuffer(renderMeshLod.Vertex_buffer);
                             }
 
-                            cmdList->SetIndexBuffer(renderMeshLod.Index_buffer, Graphics::IndexType::Uint32);
+                            cmdList->SetIndexBuffer(renderMeshLod.IndexBufferView, Graphics::IndexType::Uint32);
                             cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
 
                             ++Graphics::RenderStats::Instance().MeshCount;
@@ -899,8 +899,8 @@ namespace Insight
                             cmdList->SetUniform(2, 0, object);
 
                             const Runtime::MeshLOD& renderMeshLod = mesh.GetLOD(0);
-                            cmdList->SetVertexBuffer(renderMeshLod.Vertex_buffer);
-                            cmdList->SetIndexBuffer(renderMeshLod.Index_buffer, Graphics::IndexType::Uint32);
+                            cmdList->SetVertexBuffer(renderMeshLod.VertexBufferView);
+                            cmdList->SetIndexBuffer(renderMeshLod.IndexBufferView, Graphics::IndexType::Uint32);
                             cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
                             ++Graphics::RenderStats::Instance().MeshCount;
                         }

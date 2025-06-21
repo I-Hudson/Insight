@@ -5,6 +5,8 @@
 
 #include "Asset/Assets/Material.h"
 
+#include "Graphics/Vertex.h"
+
 #include "Generated/Mesh_reflect_generated.h"
 
 namespace Insight
@@ -35,12 +37,13 @@ namespace Insight
 			u32 Index_count = 0;
 
 #ifdef VERTEX_SPLIT_STREAMS
-
+			Graphics::VerticesSplitRHIBuffers VertexBuffers;
 #else
-#endif
-			Graphics::RHI_Buffer* Vertex_buffer = nullptr;
+			Graphics::RHI_Buffer* VertexBuffer = nullptr;
 			Graphics::RHI_BufferView VertexBufferView;
-			Graphics::RHI_Buffer* Index_buffer = nullptr;
+#endif
+			Graphics::RHI_Buffer* IndexBuffer = nullptr;
+			Graphics::RHI_BufferView IndexBufferView;
 		};
 
 		/// @brief Contain vertex and index buffers for use when rendering this mesh.

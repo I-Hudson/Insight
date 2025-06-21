@@ -62,13 +62,7 @@ namespace Insight
             std::vector<LOD> LODs;
 
 #if VERTEX_SPLIT_STREAMS
-
-            Graphics::RHI_Buffer* RHI_VertexBuffer_Position = nullptr;
-            Graphics::RHI_Buffer* RHI_VertexBuffer_Normal = nullptr;
-            Graphics::RHI_Buffer* RHI_VertexBuffer_Colour = nullptr;
-            Graphics::RHI_Buffer* RHI_VertexBuffer_UV = nullptr;
-            Graphics::RHI_Buffer* RHI_VertexBuffer_BoneIds = nullptr;
-            Graphics::RHI_Buffer* RHI_VertexBuffer_BoneWeights = nullptr;
+            Graphics::VerticesSplitRHIBuffers RHI_VertexBuffers;
             bool VertexBuffersCreated = false;
 #else
             Graphics::RHI_Buffer* RHI_VertexBuffer = nullptr;

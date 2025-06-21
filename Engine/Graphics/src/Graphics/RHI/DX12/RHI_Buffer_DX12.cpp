@@ -74,7 +74,9 @@ namespace Insight
 					&m_d3d12maAllocation,
 					IID_PPV_ARGS(&m_resource)));
 
-				ASSERT(m_resource == m_d3d12maAllocation->GetResource())
+				ASSERT(m_resource == m_d3d12maAllocation->GetResource());
+
+				SetName("UnknownBuffer");
 
 				if (m_bufferType == BufferType::Uniform
 					|| m_bufferType == BufferType::Storage

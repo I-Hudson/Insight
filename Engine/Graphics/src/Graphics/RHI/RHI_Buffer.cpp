@@ -52,6 +52,10 @@ namespace Insight
 		RHI_BufferView::RHI_BufferView()
 		{ }
 
+		RHI_BufferView::RHI_BufferView(RHI_Buffer* buffer)
+			: m_buffer(buffer), m_offset(0), m_size(buffer->GetSize())
+		{ }
+
 		//// <summary>
 		//// RHI_BufferView
 		//// </summary>

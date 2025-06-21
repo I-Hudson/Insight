@@ -818,7 +818,7 @@ namespace Insight
 				D3D12_FEATURE_DATA_D3D12_OPTIONS3 options3{};
 				ThrowIfFailed(m_device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS3, &options3, sizeof(options3)));
 
-				m_deviceExtensions[(u8)DeviceExtension::BindlessDescriptors] = false;
+				m_deviceExtensions[(u8)DeviceExtension::BindlessDescriptors] = options.ResourceBindingTier == D3D12_RESOURCE_BINDING_TIER_3;
 				m_deviceExtensions[(u8)DeviceExtension::ExclusiveFullScreen] = true;
 				m_deviceExtensions[(u8)DeviceExtension::VulkanDynamicRendering] = false;
 				m_deviceExtensions[(u8)DeviceExtension::FormatTypeCasting] = options3.CastingFullyTypedFormatSupported;

@@ -714,20 +714,17 @@ namespace Insight
 			}
 		}
 
-		template<typename Member>
-		void UploadData(const Graphics::Vertex& vertex, Member Graphics::Vertex::*member, Graphics::RHI_Buffer*& buffer, const u64 verticesCount, const u64 index)
+		void UploadData(const void* data, const u64 stride, Graphics::RHI_Buffer*& buffer, const u64 verticesCount)
 			{
 				if (!buffer)
 				{
 					Graphics::RHI_Buffer_Overrides vertexOverrides;
 					vertexOverrides.AllowUnorderedAccess = true;
 
-					const u64 bufferSize = sizeof(vertex.*member) * verticesCount;
-					buffer = Renderer::CreateVertexBuffer(bufferSize, sizeof(vertex.*member), vertexOverrides);
+					const u64 bufferSize = stride * verticesCount;
+					buffer = Renderer::CreateVertexBuffer(bufferSize, stride, vertexOverrides);
 				}
-				const u64 offset = sizeof(vertex.*member) * index;
-				const auto& data = vertex.*member;
-				buffer->Upload(&data, sizeof(vertex.*member), offset, 0);
+				buffer->Upload(&data, stride);
 			};
 
 		void ModelImporter::ProcessMesh(const aiScene* aiScene, const aiNode* aiNode, const aiMesh* aiMesh, ModelAsset* modelAsset) const
@@ -763,30 +760,36 @@ namespace Insight
 				ASSERT(mesh);
 
 #if VERTEX_SPLIT_STREAMS
-				for (size_t i = 0; i < meshData.Vertices.size(); ++i)
-				{
-					const Graphics::Vertex& v = meshData.Vertices[i];
+					UploadData(meshData.Vertices.GetData(Graphics::Vertices::Stream::Position)
+						, meshData.Vertices.GetStride(Graphics::Vertices::Stream::Position)
+						, meshData.RHI_VertexBuffers.Position, meshData.Vertices.VerticesCount());
+					meshData.RHI_VertexBuffers.Position->SetName(std::string(aiNode->mName.C_Str()) + "_" + aiMesh->mName.C_Str() + "_Position");
 
-					UploadData(v, &Graphics::Vertex::Position,		meshData.RHI_VertexBuffer_Position, meshData.Vertices.size(), i);
-					meshData.RHI_VertexBuffer_Position->SetName("Position");
+					UploadData(meshData.Vertices.GetData(Graphics::Vertices::Stream::Normal)
+						, meshData.Vertices.GetStride(Graphics::Vertices::Stream::Normal)
+						, meshData.RHI_VertexBuffers.Normal, meshData.Vertices.VerticesCount());
+					meshData.RHI_VertexBuffers.Normal->SetName(std::string(aiNode->mName.C_Str()) + "_" + aiMesh->mName.C_Str() + "_Normal");
 
-					UploadData(v, &Graphics::Vertex::Normal,		meshData.RHI_VertexBuffer_Normal, meshData.Vertices.size(), i);
-					meshData.RHI_VertexBuffer_Normal->SetName("Normal");
+					UploadData(meshData.Vertices.GetData(Graphics::Vertices::Stream::Colour)
+						, meshData.Vertices.GetStride(Graphics::Vertices::Stream::Colour)
+						, meshData.RHI_VertexBuffers.Colour, meshData.Vertices.VerticesCount());
+					meshData.RHI_VertexBuffers.Colour->SetName(std::string(aiNode->mName.C_Str()) + "_" + aiMesh->mName.C_Str() + "_Colour");
 
-					UploadData(v, &Graphics::Vertex::Colour,		meshData.RHI_VertexBuffer_Colour, meshData.Vertices.size(), i);
-					meshData.RHI_VertexBuffer_Colour->SetName("Colour");
 
-					UploadData(v, &Graphics::Vertex::UV,			meshData.RHI_VertexBuffer_UV, meshData.Vertices.size(), i);
-					meshData.RHI_VertexBuffer_UV->SetName("UV");
+					UploadData(meshData.Vertices.GetData(Graphics::Vertices::Stream::UV)
+						, meshData.Vertices.GetStride(Graphics::Vertices::Stream::UV)
+						, meshData.RHI_VertexBuffers.UV, meshData.Vertices.VerticesCount());
+					meshData.RHI_VertexBuffers.UV->SetName(std::string(aiNode->mName.C_Str()) + "_" + aiMesh->mName.C_Str() + "_UV");
 
-					UploadData(v, &Graphics::Vertex::BoneIds,		meshData.RHI_VertexBuffer_BoneIds, meshData.Vertices.size(), i);
-					meshData.RHI_VertexBuffer_BoneIds->SetName("BoneIds");
+					UploadData(meshData.Vertices.GetData(Graphics::Vertices::Stream::BoneId)
+						, meshData.Vertices.GetStride(Graphics::Vertices::Stream::BoneId)
+						, meshData.RHI_VertexBuffers.BoneIds, meshData.Vertices.VerticesCount());
+					meshData.RHI_VertexBuffers.BoneIds->SetName(std::string(aiNode->mName.C_Str()) + "_" + aiMesh->mName.C_Str() + "_BoneId");
 
-					UploadData(v, &Graphics::Vertex::BoneWeights,	meshData.RHI_VertexBuffer_BoneWeights, meshData.Vertices.size(), i);
-					meshData.RHI_VertexBuffer_BoneWeights->SetName("BoneWeights");
-
-				}
-
+					UploadData(meshData.Vertices.GetData(Graphics::Vertices::Stream::BoneWeight)
+						, meshData.Vertices.GetStride(Graphics::Vertices::Stream::BoneWeight)
+						, meshData.RHI_VertexBuffers.BoneWeights, meshData.Vertices.VerticesCount());
+					meshData.RHI_VertexBuffers.BoneWeights->SetName(std::string(aiNode->mName.C_Str()) + "_" + aiMesh->mName.C_Str() + "_BoneWeight");
 #else
 				if (!meshData.RHI_VertexBuffer)
 				{
@@ -810,6 +813,7 @@ namespace Insight
 					meshData.RHI_IndexBuffer = Renderer::CreateIndexBuffer(meshData.Indices.size() * sizeof(u32));
 					//meshData.RHI_IndexBuffer->QueueUpload(meshData.Indices.data(), meshData.RHI_IndexBuffer->GetSize());
 					meshData.RHI_IndexBuffer->Upload(meshData.Indices.data(), meshData.RHI_IndexBuffer->GetSize());
+					meshData.RHI_IndexBuffer->SetName(std::string(aiNode->mName.C_Str()) + "_" + aiMesh->mName.C_Str() + "_Index");
 				}
 				else
 				{
@@ -830,14 +834,18 @@ namespace Insight
 					meshLod.Index_count = static_cast<u32>(meshDataLod.Index_count);
 
 #ifdef VERTEX_SPLIT_STREAMS
+					meshLod.VertexBuffers = meshData.RHI_VertexBuffers;
 #else
-					meshLod.Vertex_buffer = meshData.RHI_VertexBuffer;
+					meshLod.VertexBuffer = meshData.RHI_VertexBuffer;
+					meshLod.VertexBufferView = meshLod.VertexBuffer;
 					const std::string vertexBufferName = std::string(aiNode->mName.C_Str()) + "_" + aiMesh->mName.C_Str() + "_Veretx";
-					meshLod.Vertex_buffer->SetName(vertexBufferName);
+					meshLod.VertexBuffer->SetName(vertexBufferName);
 #endif
-					meshLod.Index_buffer = meshData.RHI_IndexBuffer;
-					const std::string indexBufferName = std::string(aiNode->mName.C_Str()) + "_" + aiMesh->mName.C_Str() + "_Index";
-					meshLod.Index_buffer->SetName(indexBufferName);
+					meshLod.IndexBuffer = meshData.RHI_IndexBuffer;
+					meshLod.IndexBufferView = meshLod.IndexBuffer;
+
+					//const std::string indexBufferName = std::string(aiNode->mName.C_Str()) + "_" + aiMesh->mName.C_Str() + "_Index";
+					//meshLod.Index_buffer->SetName(indexBufferName);
 				}
 			}
 
