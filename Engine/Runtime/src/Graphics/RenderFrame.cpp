@@ -11,6 +11,8 @@
 #include "ECS/Components/AnimationClipComponent.h"
 #include "ECS/Components/PointLightComponent.h"
 
+#include "Animation/AnimationSystem.h"
+
 #include "Maths/Utils.h"
 #include "Maths/Vector3.h"
 
@@ -221,7 +223,13 @@ namespace Insight
                                     }
 #else
                                     // This should just be a RHI_BufferView instead of copying all this data.
-                                    renderMesh.BoneTransforms = animationClipComponent->GetAnimator()->GetBoneTransforms();
+                                    {
+                                        IS_PROFILE_SCOPE("BoneTransformCopy");
+                                        renderMesh.BoneTransforms = animationClipComponent->GetAnimator()->GetBoneTransforms();
+                                    }
+#endif
+#ifdef RENDER_FRAME_ALLOCATE_GPU_SKINNED_MESHES
+                                    Runtime::AnimationSystem::Instance().AllocateGPUSkinnedMesh(renderMesh);
 #endif
                                 }
                             }

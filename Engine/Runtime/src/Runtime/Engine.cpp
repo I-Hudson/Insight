@@ -222,6 +222,7 @@ namespace Insight
 
 				{
 					IS_PROFILE_SCOPE("Render Update");
+
 					m_graphicsSystem.CreateRenderFrame();
 					Graphics::RenderStats::Instance().Draw();
 

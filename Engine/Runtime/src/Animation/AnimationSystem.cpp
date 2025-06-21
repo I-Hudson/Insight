@@ -18,9 +18,9 @@ namespace Insight
 #define PARALLEL_FOR 1
 #define ANIMATION_THREADING 1
 
-        const u64 c_MaxGPUSkinnedObjects = 1024;
-        const u64 c_SkeletonBoneDataIncrementSize = sizeof(Maths::Matrix4) * Skeleton::c_MaxBoneCount;
-        const u64 c_SkeletonBoneDataByteSize = c_SkeletonBoneDataIncrementSize * c_MaxGPUSkinnedObjects;
+        constexpr static u64 c_MaxGPUSkinnedObjects = 1024 * 5;
+        constexpr static u64 c_SkeletonBoneDataIncrementSize = sizeof(Maths::Matrix4) * Skeleton::c_MaxBoneCount;
+        constexpr static u64 c_SkeletonBoneDataByteSize = c_SkeletonBoneDataIncrementSize * c_MaxGPUSkinnedObjects;
 
 #ifdef VERTEX_SPLIT_STREAMS
         const u64 c_MaxVertexCount = 256_MB / Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Position);
@@ -41,14 +41,18 @@ namespace Insight
             std::lock_guard lock(m_animationsLock);
 
             m_enableGPUSkinning = false;
-
             m_state = Core::SystemStates::Initialised;
         }
 
         void AnimationSystem::Shutdown()
         {
             std::lock_guard lock(m_animationsLock);
-            m_animations.clear();
+            
+            m_animationLookup.clear();
+            while (!m_animationsOpenList.empty())
+            {
+                m_animationsOpenList.pop();
+            }
 
             DestroyGPUSkinningResoruces();
 
@@ -130,12 +134,25 @@ namespace Insight
             }
 
             std::lock_guard lock(m_animationsLock);
-            m_animations.push_back(AnimationInstance
+
+            ASSERT(m_animations.size() < c_MaxGPUSkinnedObjects);
+            if (m_animationsOpenList.empty())
+            {
+                m_animationsOpenList.push(m_animations.size());
+                m_animations.emplace_back();
+            }
+
+            const u32 index = m_animationsOpenList.front();
+            m_animationsOpenList.pop();
+
+            m_animations[index] = (AnimationInstance
             {
                 Animator(),
                 nullptr,
                 entity
             });
+            m_animationLookup[entity->GetGUID()] = index;
+
             return &m_animations.back();
         }
 
@@ -147,7 +164,8 @@ namespace Insight
                 const AnimationInstance& instance = m_animations[animIdx];
                 if (entity == instance.Entity)
                 {
-                    m_animations.erase(m_animations.begin() + animIdx);
+                    m_animationsOpenList.push(animIdx);
+                    m_animationLookup.erase(entity->GetGUID());
                     return;
                 }
             }
@@ -183,6 +201,8 @@ namespace Insight
 
         void AnimationSystem::GPUSkinning(RenderFrame& renderFrame)
         {
+            IS_PROFILE_FUNCTION();
+
             std::lock_guard lock(m_animationsLock);
 
             if (!m_enableGPUSkinning)
@@ -195,46 +215,69 @@ namespace Insight
             m_gpuBoneOffset = 0;
             m_gpuVertexOffset = 0;
 
+#ifndef RENDER_FRAME_ALLOCATE_GPU_SKINNED_MESHES
             m_animGPUSkinning.clear();
             //m_skeletonBonesBuffers.clear();
             //m_vertexBuffers.clear();
 
-            for (size_t animIdx = 0; animIdx < m_animations.size(); ++animIdx)
             {
-                const AnimationInstance& animInstance = m_animations[animIdx];
-
-                const Ref<Skeleton> skeleton = animInstance.Animator.GetSkelton();
-                const Graphics::RHI_BufferView skeletonGPUBuffer = UploadGPUSkeletonBoneData(animInstance, skeleton);
-
-                RenderMesh& skinnedMesh = renderFrame.GetRenderMesh(animInstance.Entity);
-                const Graphics::RHI_BufferView skinnedVertexBuffer = AllocateMeshVertexBuffer(animInstance, skinnedMesh);
-                
-#ifdef VERTEX_SPLIT_STREAMS
-                Graphics::RHI_BufferView inputSkinnedVertexBuffer(skinnedMesh.GetLOD(0).Vertex_buffer, skinnedMesh.GetLOD(0).Vertex_offset
-                    , skinnedMesh.GetLOD(0).Vertex_count * Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Position));
-                inputSkinnedVertexBuffer.UAVStartIndex = skinnedMesh.GetLOD(0).Vertex_offset;
-                inputSkinnedVertexBuffer.UAVNumOfElements = skinnedMesh.GetLOD(0).Vertex_count;
-                inputSkinnedVertexBuffer.Stride = Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Position);
-#else
-                Graphics::RHI_BufferView inputSkinnedVertexBuffer(skinnedMesh.GetLOD(0).VertexBuffer, skinnedMesh.GetLOD(0).Vertex_offset
-                    , skinnedMesh.GetLOD(0).Vertex_count * Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Interleaved));
-                inputSkinnedVertexBuffer.UAVStartIndex = skinnedMesh.GetLOD(0).Vertex_offset;
-                inputSkinnedVertexBuffer.UAVNumOfElements = skinnedMesh.GetLOD(0).Vertex_count;
-                inputSkinnedVertexBuffer.Stride = Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Interleaved);
-#endif
-                AnimationGPUSkinning animGPUSkinning =
+                IS_PROFILE_SCOPE("Allocator GPU Skinned meshes");
+                for (size_t animIdx = 0; animIdx < m_animations.size(); ++animIdx)
                 {
-                    skeleton,
-                    skeletonGPUBuffer,
-                    inputSkinnedVertexBuffer,
-                    skinnedVertexBuffer,
-                    skinnedMesh.GetLOD(0).Vertex_count,
-                    animInstance.Entity
-                };
-                m_animGPUSkinning.push_back(animGPUSkinning);
+                    const AnimationInstance& animInstance = m_animations[animIdx];
+                    AllocateGPUSkinnedMesh(renderFrame.GetRenderMesh(animInstance.Entity));
+                }
             }
+#endif
 
             SetupComputeSkinningPass();
+        }
+
+        void AnimationSystem::AllocateGPUSkinnedMesh(RenderMesh& renderMesh)
+        {
+            IS_PROFILE_FUNCTION();
+
+            if (!m_enableGPUSkinning)
+            {
+                return;
+            }
+
+            InitGPUSkinningResources();
+
+            const auto animInstanceIter = m_animationLookup.find(renderMesh.EntityGuid);
+            ASSERT(animInstanceIter != m_animationLookup.end());
+
+            const AnimationInstance& animInstance = m_animations[animInstanceIter->second];
+
+            const Ref<Skeleton> skeleton = animInstance.Animator.GetSkelton();
+            const Graphics::RHI_BufferView skeletonGPUBuffer = UploadGPUSkeletonBoneData(animInstance, skeleton);
+
+            RenderMesh& skinnedMesh = renderMesh;
+            const Graphics::RHI_BufferView skinnedVertexBuffer = AllocateMeshVertexBuffer(animInstance, skinnedMesh);
+
+#ifdef VERTEX_SPLIT_STREAMS
+            Graphics::RHI_BufferView inputSkinnedVertexBuffer(skinnedMesh.GetLOD(0).Vertex_buffer, skinnedMesh.GetLOD(0).Vertex_offset
+                , skinnedMesh.GetLOD(0).Vertex_count * Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Position));
+            inputSkinnedVertexBuffer.UAVStartIndex = skinnedMesh.GetLOD(0).Vertex_offset;
+            inputSkinnedVertexBuffer.UAVNumOfElements = skinnedMesh.GetLOD(0).Vertex_count;
+            inputSkinnedVertexBuffer.Stride = Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Position);
+#else
+            Graphics::RHI_BufferView inputSkinnedVertexBuffer(skinnedMesh.GetLOD(0).VertexBuffer, skinnedMesh.GetLOD(0).Vertex_offset
+                , skinnedMesh.GetLOD(0).Vertex_count * Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Interleaved));
+            inputSkinnedVertexBuffer.UAVStartIndex = skinnedMesh.GetLOD(0).Vertex_offset;
+            inputSkinnedVertexBuffer.UAVNumOfElements = skinnedMesh.GetLOD(0).Vertex_count;
+            inputSkinnedVertexBuffer.Stride = Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Interleaved);
+#endif
+            AnimationGPUSkinning animGPUSkinning =
+            {
+                skeleton,
+                skeletonGPUBuffer,
+                inputSkinnedVertexBuffer,
+                skinnedVertexBuffer,
+                skinnedMesh.GetLOD(0).Vertex_count,
+                animInstance.Entity
+            };
+            m_animGPUSkinning.push_back(animGPUSkinning);
         }
 
         void AnimationSystem::InitGPUSkinningResources()
@@ -292,13 +335,15 @@ namespace Insight
 
         Graphics::RHI_BufferView AnimationSystem::UploadGPUSkeletonBoneData(const AnimationInstance& anim, const Ref<Skeleton>& skeleton)
         {
+            IS_PROFILE_FUNCTION();
+
             //if (auto iter = m_skeletonBonesBuffers.find(skeleton->GetGuid());
             //    iter != m_skeletonBonesBuffers.end())
             //{
             //    return iter->second;
             //}
 
-            const std::vector<Maths::Matrix4> bones = anim.Animator.GetBoneTransforms();
+            const std::vector<Maths::Matrix4>& bones = anim.Animator.GetBoneTransforms();
 
             const u64 bonesBytesSize = sizeof(bones[0]) * bones.size();
             ASSERT(m_gpuBoneOffset + bonesBytesSize < c_SkeletonBoneDataByteSize);
@@ -310,7 +355,7 @@ namespace Insight
             gpuBoneData.UAVNumOfElements = (m_gpuBoneOffset + bonesBytesSize) / sizeof(bones[0]);
             gpuBoneData.Stride = sizeof(bones[0]);
 
-            m_skeletonBonesBuffers[anim.Entity->GetGUID()] = gpuBoneData;
+            //m_skeletonBonesBuffers[anim.Entity->GetGuid()] = gpuBoneData;
 
             ASSERT(bonesBytesSize <= c_SkeletonBoneDataIncrementSize);
             m_gpuBoneOffset += bonesBytesSize;
@@ -320,6 +365,8 @@ namespace Insight
 
         Graphics::RHI_BufferView AnimationSystem::AllocateMeshVertexBuffer(const AnimationInstance& anim, RenderMesh& skinnedMesh)
         {
+            IS_PROFILE_FUNCTION();
+
             //if (auto iter = m_vertexBuffers.find(mesh->GetGuid());
             //    iter != m_vertexBuffers.end())
             //{

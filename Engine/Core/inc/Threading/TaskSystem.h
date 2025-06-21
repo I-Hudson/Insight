@@ -66,10 +66,10 @@ namespace Insight
 			std::atomic<bool> m_destroy = false;
 		};
 
-		template<typename T>
-		void ParallelFor(std::string_view name, const u32 workGroupSize, std::vector<T>& vec, std::function<void(T&)> func)
+		template<typename T, typename TContainer>
+		void ParallelFor(std::string_view name, const u32 workGroupSize, TContainer& container, std::function<void(T&)> func)
 		{
-			const u32 vecSize = static_cast<u32>(vec.size());
+			const u32 vecSize = static_cast<u32>(container.size());
 			if (vecSize == 0)
 			{
 				return;
@@ -121,7 +121,7 @@ namespace Insight
 
 								for (size_t i = startIdx; i < endIdx; ++i)
 								{
-									func(vec[i]);
+									func(container[i]);
 								}
 							}
 						}));
@@ -153,7 +153,7 @@ namespace Insight
 
 				for (size_t i = startIdx; i < endIdx; ++i)
 				{
-					func(vec[i]);
+					func(container[i]);
 				}
 			}
 
@@ -165,10 +165,10 @@ namespace Insight
 			}
 		}
 
-		template<typename T>
-		void ParallelFor(const u32 workGroupSize, std::vector<T>& vec, std::function<void(T&)> func)
+		template<typename T, typename TContainer>
+		void ParallelFor(const u32 workGroupSize, TContainer& container, std::function<void(T&)> func)
 		{
-			ParallelFor("", workGroupSize, vec, std::move(func));
+			ParallelFor("", workGroupSize, container, std::move(func));
 		}
 	}
 }

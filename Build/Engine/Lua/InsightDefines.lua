@@ -29,6 +29,8 @@ function InsightDefines.All()
         --"VERTEX_BONE_WEIGHT_PACKED",
         --"VERTEX_SPLIT_STREAMS",
 
+        "RENDER_FRAME_ALLOCATE_GPU_SKINNED_MESHES",
+
         --"RENDERGRAPH_V2_ENABLED",
         --"IS_RESOURCE_HANDLES_ENABLED",
 

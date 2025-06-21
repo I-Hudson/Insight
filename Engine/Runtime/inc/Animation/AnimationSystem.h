@@ -63,6 +63,7 @@ namespace Insight
             void Update(const float deltaTime);
             void WaitForAllAnimationUpdates() const;
             void GPUSkinning(RenderFrame& renderFrame);
+            void AllocateGPUSkinnedMesh(RenderMesh& renderMesh);
 
             void SetGPUSkinningEnabled(const bool enabled) { m_enableGPUSkinning = enabled; }
             bool IsGPUSkinningEnabled() const { return m_enableGPUSkinning; }
@@ -83,6 +84,8 @@ namespace Insight
 
         private:
             std::vector<AnimationInstance> m_animations;
+            std::queue<u32> m_animationsOpenList;
+            std::unordered_map<Core::GUID, u32> m_animationLookup;
             mutable std::mutex m_animationsLock;
             
             bool m_enableGPUSkinning = false;
@@ -90,7 +93,7 @@ namespace Insight
             DoubleBufferVector<Graphics::RHI_Buffer*> m_GPUSkeletonBonesUploadBuffer;
 
             Graphics::RHI_Buffer* m_GPUSkeletonBonesBuffer = nullptr;
-            std::unordered_map<Core::GUID, Graphics::RHI_BufferView> m_skeletonBonesBuffers;
+            //std::unordered_map<Core::GUID, Graphics::RHI_BufferView> m_skeletonBonesBuffers;
 
             Graphics::RHI_Buffer* m_GPUSkinnedVertexBuffer = nullptr;
             std::unordered_map<Core::GUID, Graphics::RHI_BufferView> m_vertexBuffers;
