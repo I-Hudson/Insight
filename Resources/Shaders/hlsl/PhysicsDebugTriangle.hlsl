@@ -3,8 +3,8 @@
 VertexOutput VSMain(const VertexInput input)
 {
 	VertexOutput vsOut;
-	vsOut.Pos = float4(input.Pos.xyz, 1);
-	vsOut.Pos = mul(ProjectionView, vsOut.Pos);
+	vsOut.Position = float4(input.Position.xyz, 1);
+	vsOut.Position = mul(ProjectionView, vsOut.Position);
 	vsOut.Colour = float4(input.Colour.xyz, 1.0f);
 	vsOut.Tex = input.Tex;
 

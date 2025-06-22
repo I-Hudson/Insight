@@ -2,7 +2,7 @@
 
 struct VertexInput
 {
-	float4 Pos : POSITION;
+	float4 Position : POSITION;
 	float4 Normal : NORMAL0;
 	float4 Colour : COLOR0;
 	float4 UV : TEXCOORD0;
@@ -10,7 +10,7 @@ struct VertexInput
 
 struct VertexOutput
 {
-	float4 Pos : SV_POSITION;
+	float4 Position : SV_POSITION;
 };
 
 cbuffer UBO : register(b0, PerObjectUniform)
@@ -21,10 +21,10 @@ cbuffer UBO : register(b0, PerObjectUniform)
 VertexOutput VSMain(const VertexInput input)
 {
 	VertexOutput vsOut;
-	vsOut.Pos = float4(input.Pos.xyz, 1);
+	vsOut.Position = float4(input.Position.xyz, 1);
 
-	vsOut.Pos = mul(pubo_Transform, vsOut.Pos);
-	vsOut.Pos = mul(Main_Camera_Proj_View, vsOut.Pos);
+	vsOut.Position = mul(pubo_Transform, vsOut.Position);
+	vsOut.Position = mul(Main_Camera_Proj_View, vsOut.Position);
 
 	return vsOut;
 }

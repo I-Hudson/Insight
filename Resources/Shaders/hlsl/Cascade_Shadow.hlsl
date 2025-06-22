@@ -2,7 +2,7 @@
 
 struct VertexOutput
 {
-	float4 Pos : SV_POSITION;
+	float4 Position : SV_POSITION;
 };
 
 cbuffer UBO : register(b1, PerObjectUniform)
@@ -15,10 +15,10 @@ cbuffer UBO : register(b1, PerObjectUniform)
 VertexOutput VSMain(const GeoVertexInput input)
 {
 	VertexOutput vsOut;
-	vsOut.Pos = float4(input.Pos, 1);
+	vsOut.Position = float4(input.Position, 1);
 
-	vsOut.Pos = mul(ubo_Transform, vsOut.Pos);
-	vsOut.Pos = mul(bl_Camera_Proj_View[ubo_Buffer_Light_Camera_Index], vsOut.Pos);
+	vsOut.Position = mul(ubo_Transform, vsOut.Position);
+	vsOut.Position = mul(bl_Camera_Proj_View[ubo_Buffer_Light_Camera_Index], vsOut.Position);
 
 	return vsOut;
 }

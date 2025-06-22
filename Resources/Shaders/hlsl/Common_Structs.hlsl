@@ -1,7 +1,7 @@
 #define MAX_BONE_COUNT 4
 struct GeoVertexInput
 {
-	float3 Pos : POSITION;
+	float3 Position : POSITION;
 #ifdef VERTEX_NORMAL_PACKED
 	int Normal : NORMAL0;
 #else

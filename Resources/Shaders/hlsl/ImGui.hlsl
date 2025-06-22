@@ -7,7 +7,7 @@ struct VertexInput
 
 struct VertexOutput
 {
-	float4 Pos : SV_POSITION;
+	float4 Position : SV_POSITION;
     float4 Color : COLOR0;
     float2 UV : TEXCOORD0;
 };
@@ -34,9 +34,9 @@ VertexOutput VSMain(const VertexInput input)
     Out.Color = input.aColor;
     Out.UV = input.aUV;
     #ifdef VULKAN
-    Out.Pos = float4(input.aPos * uScale + uTranslate, 0, 1);
+    Out.Position = float4(input.aPos * uScale + uTranslate, 0, 1);
     #elif DX12
-    Out.Pos = mul(ProjectionMatrix, float4(input.aPos.xy, 0.f, 1.f));
+    Out.Position = mul(ProjectionMatrix, float4(input.aPos.xy, 0.f, 1.f));
     #endif
 	return Out;
 }

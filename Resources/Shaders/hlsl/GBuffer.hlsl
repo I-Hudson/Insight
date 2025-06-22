@@ -2,7 +2,7 @@
 
 struct VertexOutput
 {
-	float4 Pos 						: SV_POSITION;
+	float4 Position 						: SV_POSITION;
 	float4 Colour 					: COLOR0;
 	float4 WorldPos 				: POSITION1;
 	float4 WorldNormal 				: NORMAL0;
@@ -17,25 +17,25 @@ struct VertexOutput
 VertexOutput VSMain(const GeoVertexInput input, uint vertexID : SV_VertexID)
 {
 	VertexOutput vsOut;
-	vsOut.Pos = float4(input.Pos, 1);
+	vsOut.Position = float4(input.Position, 1);
 	vsOut.Colour = GetVertexColour(input);
 	vsOut.WorldNormal = GetVertexNormal(input);
 
 	[branch]
 	if (bpo_SkinnedMesh && !GPUSkinningEnabled())
 	{
-		SkinMesh(input, vsOut.Pos, vsOut.WorldNormal);
+		SkinMesh(input, vsOut.Position, vsOut.WorldNormal);
 	}
 
-	vsOut.WorldPos = mul(bpo_Transform, vsOut.Pos);
-	vsOut.Pos = mul(bf_Camera_Proj_View, vsOut.WorldPos);
+	vsOut.WorldPos = mul(bpo_Transform, vsOut.Position);
+	vsOut.Position = mul(bf_Camera_Proj_View, vsOut.WorldPos);
 	
 	vsOut.WorldNormal = normalize(mul(bpo_Transform, float4(vsOut.WorldNormal.xyz, 0.0)));
 	vsOut.UV = GetUVsForAPI(GetVertexUVs(input));
 
 	vsOut.position_ss_current = mul(bf_Camera_View, vsOut.WorldPos);
 
-	float4 world_pos_previous = mul(bpo_Previous_Transform, float4(input.Pos.xyz, 1));
+	float4 world_pos_previous = mul(bpo_Previous_Transform, float4(input.Position.xyz, 1));
 	vsOut.position_ss_previous = mul(bf_Camera_View, world_pos_previous);
 	
 	return vsOut;

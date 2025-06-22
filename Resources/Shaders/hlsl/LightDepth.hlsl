@@ -2,7 +2,7 @@
 
 struct VertexOutput
 {
-	float4 Pos : SV_POSITION;
+	float4 Position : SV_POSITION;
 };
 
 cbuffer LightBuffer : register(b1, space0)
@@ -19,17 +19,17 @@ cbuffer ObjectBuffer : register(b0, space1)
 VertexOutput VSMain(const GeoVertexInput input)
 {
 	VertexOutput vsOut;
-	vsOut.Pos = float4(input.Pos, 1);
+	vsOut.Position = float4(input.Position, 1);
 
 	[branch]
 	if (ubo_SkinnedMesh == 1 && !GPUSkinningEnabled())
 	{
 		float4 worldNormal = float4(0,0,0,0);
-		SkinMesh(input, vsOut.Pos, worldNormal);
+		SkinMesh(input, vsOut.Position, worldNormal);
 	}
 
-	vsOut.Pos = mul(ubo_Transform, vsOut.Pos);
-	vsOut.Pos = mul(Light_ProjectionView, vsOut.Pos);
+	vsOut.Position = mul(ubo_Transform, vsOut.Position);
+	vsOut.Position = mul(Light_ProjectionView, vsOut.Position);
 
 	return vsOut;
 }
