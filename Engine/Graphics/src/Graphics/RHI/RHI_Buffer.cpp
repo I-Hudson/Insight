@@ -54,7 +54,12 @@ namespace Insight
 
 		RHI_BufferView::RHI_BufferView(RHI_Buffer* buffer)
 			: m_buffer(buffer), m_offset(0), m_size(buffer->GetSize())
-		{ }
+		{
+			if (buffer->GetType() == BufferType::Vertex)
+			{
+				Vertex.Slot = buffer->GetSlot();
+			}
+		}
 
 		//// <summary>
 		//// RHI_BufferView
@@ -64,7 +69,12 @@ namespace Insight
 		//// <param name="size"></param>
 		RHI_BufferView::RHI_BufferView(RHI_Buffer* buffer, u64 offset, u64 size)
 			: m_buffer(buffer), m_offset(offset), m_size(size)
-		{ }
+		{
+			if (buffer->GetType() == BufferType::Vertex)
+			{
+				Vertex.Slot = buffer->GetSlot();
+			}
+		}
 
 		//RHI_BufferView::RHI_BufferView(const RHI_BufferView& other)
 		//{

@@ -58,9 +58,9 @@ namespace Insight
 			ShaderDesc shaderDesc("ImGui", shaderData, ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
 			shaderDesc.InputLayout =
 			{
-				ShaderInputLayout(0, PixelFormat::R32G32_Float, offsetof(ImDrawVert, pos), "POSITION"),
-				ShaderInputLayout(1, PixelFormat::R32G32_Float, offsetof(ImDrawVert, uv), "TEXCOORD0"),
-				ShaderInputLayout(2, PixelFormat::R8G8B8A8_UNorm, offsetof(ImDrawVert, col), "COLOR0"),
+				ShaderInputLayout(0, PixelFormat::R32G32_Float, 0, offsetof(ImDrawVert, pos), "POSITION"),
+				ShaderInputLayout(1, PixelFormat::R32G32_Float, 0, offsetof(ImDrawVert, uv), "TEXCOORD0"),
+				ShaderInputLayout(2, PixelFormat::R8G8B8A8_UNorm, 0, offsetof(ImDrawVert, col), "COLOR0"),
 			};
 			RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
 		}
@@ -380,9 +380,9 @@ namespace Insight
 					ShaderDesc shaderDesc("ImGui", { }, ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
 					shaderDesc.InputLayout =
 					{
-						ShaderInputLayout(0, PixelFormat::R32G32_Float, offsetof(ImDrawVert, pos), "POSITION"),
-						ShaderInputLayout(1, PixelFormat::R32G32_Float, offsetof(ImDrawVert, uv), "TEXCOORD0"),
-						ShaderInputLayout(2, PixelFormat::R8G8B8A8_UNorm, offsetof(ImDrawVert, col), "COLOR0"),
+						ShaderInputLayout(0, PixelFormat::R32G32_Float, 0, offsetof(ImDrawVert, pos), "POSITION"),
+						ShaderInputLayout(1, PixelFormat::R32G32_Float, 0, offsetof(ImDrawVert, uv), "TEXCOORD0"),
+						ShaderInputLayout(2, PixelFormat::R8G8B8A8_UNorm, 0, offsetof(ImDrawVert, col), "COLOR0"),
 					};
 					builder.SetShader(shaderDesc);
 

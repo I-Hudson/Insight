@@ -15,8 +15,21 @@ namespace Insight
 		//// </summary>
 		struct IS_GRAPHICS RHI_Buffer_Overrides
 		{
+			RHI_Buffer_Overrides() 
+			{
+				Vertex = {};
+			}
+
 			bool Force_Host_Writeable = false;
 			bool AllowUnorderedAccess = false;
+
+			union
+			{
+				struct
+				{
+					u8 Slot = 0;
+				} Vertex;
+			};
 
 			DeviceUploadStatus InitialUploadState = DeviceUploadStatus::NotUploaded;
 		};
@@ -42,9 +55,17 @@ namespace Insight
 			constexpr u64 GetOffset() const { return m_offset; }
 			constexpr u64 GetSize() const { return m_size; }
 
-			u64 UAVStartIndex = 0;
-			u64 UAVNumOfElements = 0;
-			u64 Stride = 0;
+			union
+			{
+				struct
+				{
+					u64 UAVStartIndex = 0;
+					u64 UAVNumOfElements = 0;
+					u64 Stride = 0;
+
+					u8 Slot = 0;
+				} Vertex;
+			};
 
 		private:
 			RHI_Buffer* m_buffer = nullptr;
@@ -90,6 +111,7 @@ namespace Insight
 			/// <returns></returns>
 			u64 GetSize() const { return m_size; }
 			u64 GetStride() const { return m_stride; }
+			u64 GetSlot() const { return m_overrides.Vertex.Slot; }
 			BufferType GetType() const { return m_bufferType; }
 
 		private:

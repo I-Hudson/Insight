@@ -41,17 +41,31 @@ namespace Insight
 		{
 			const static uint32_t MAX_BONE_COUNT = 4;
 
-			enum class Stream
+			enum Stream
 			{
-				Position,
-				Normal,
-				Colour,
-				UV,
-				BoneId,
-				BoneWeight,
+				Position		= BIT(0),
+				Normal			= BIT(1),
+				Colour			= BIT(2),
+				UV				= BIT(3),
+				BoneId			= BIT(4),
+				BoneWeight		= BIT(5),
 
-				Interleaved
+				All				= BIT(6),
+				Interleaved		= BIT(7),
 			};
+			constexpr static const char* StreamNames[] =
+			{
+				"Position",
+				"Normal",
+				"Colour",
+				"UV",
+				"BoneId",
+				"BoneWeight",
+
+				"All",
+				"Interleaved",
+			};
+			constexpr static int StreamCount = ARRAY_COUNT(StreamNames);
 
 			struct Vertex
 			{

@@ -8,6 +8,8 @@
 #include "Graphics/RHI/DX12/RHI_Shader_DX12.h"
 #endif
 
+#include "Graphics/Vertex.h"
+
 #include "Core/Memory.h"
 #include "Core/Logger.h"
 #include "Core/EnginePaths.h"
@@ -672,9 +674,22 @@ namespace Insight
 				std::string name = interfaceVariable->name;
 				name = name.substr(name.find_last_of('.') + 1);
 
+				int slot = 0;
+#ifdef VERTEX_SPLIT_STREAM
+				for (size_t streamIdx = 0; streamIdx < (u64)Vertices::Stream::Count; ++streamIdx)
+				{
+					if (name == Vertices::StreamNames[streamIdx])
+					{
+						slot = streamIdx;
+						break;
+					}
+				}
+#endif
+
 				ShaderInputLayout layout(
 					interfaceVariable->location,
 					SpvFormatToPixelFormat(interfaceVariable->format),
+					slot,
 					stride,
 					std::move(name));
 				inputLayout.push_back(layout);

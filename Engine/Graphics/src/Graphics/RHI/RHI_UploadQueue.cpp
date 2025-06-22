@@ -43,11 +43,10 @@ namespace Insight
 			std::lock_guard lock(m_mutex);
 			if (!m_uploadStagingBuffer)
 			{
-				m_uploadStagingBuffer = Renderer::CreateRawBuffer(c_UploadBufferMaxSize,
-					RHI_Buffer_Overrides
-					{
-						/*Force_Host_Writeable=*/true
-					});
+				RHI_Buffer_Overrides overrides;
+				overrides.Force_Host_Writeable = true;
+
+				m_uploadStagingBuffer = Renderer::CreateRawBuffer(c_UploadBufferMaxSize, overrides);
 			}
 		}
 

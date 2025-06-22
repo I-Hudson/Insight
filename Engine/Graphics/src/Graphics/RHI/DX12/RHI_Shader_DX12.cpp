@@ -131,7 +131,7 @@ namespace Insight
                     input.SemanticName = inputLayout.Name.c_str();
                     input.SemanticIndex = semanticIndex.size() > 0 ? std::stoi(semanticIndex) : 0;
                     input.Format = PixelFormatToDX12(inputLayout.Format);
-                    input.InputSlot = 0;
+                    input.InputSlot = inputLayout.Slot;
                     input.AlignedByteOffset = stride;
                     input.InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
                     input.InstanceDataStepRate = 0;

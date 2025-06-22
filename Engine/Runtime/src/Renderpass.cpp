@@ -1468,17 +1468,29 @@ namespace Insight
 		{
 			std::vector<Byte> shaderData = Runtime::AssetRegistry::Instance().LoadAssetData(EnginePaths::GetResourcePath() + "/Shaders/hlsl/Cascade_Shadow.hlsl");
 			ShaderDesc shaderDesc("CascadeShaderMap", shaderData, ShaderStageFlagBits::ShaderStage_Vertex);
+#ifdef VERTEX_SPLIT_STREAM
+			shaderDesc.InputLayout = ShaderDesc::GetShaderInputLayoutFromStreams(Graphics::Vertices::Stream::Position);
+#else
 			shaderDesc.InputLayout = ShaderDesc::GetDefaultShaderInputLayout();
+#endif
 			RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
 
 			shaderData = Runtime::AssetRegistry::Instance().LoadAssetData(EnginePaths::GetResourcePath() + "/Shaders/hlsl/Depth_Prepass.hlsl");
 			shaderDesc = ShaderDesc("DepthPrepass", shaderData, ShaderStageFlagBits::ShaderStage_Vertex);
+#ifdef VERTEX_SPLIT_STREAM
+			shaderDesc.InputLayout = ShaderDesc::GetShaderInputLayoutFromStreams(Graphics::Vertices::Stream::Position);
+#else
 			shaderDesc.InputLayout = ShaderDesc::GetDefaultShaderInputLayout();
+#endif
 			//RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
 
 			shaderData = Runtime::AssetRegistry::Instance().LoadAssetData(EnginePaths::GetResourcePath() + "/Shaders/hlsl/LightDepth.hlsl");
 			shaderDesc = ShaderDesc("LightShadowPass", shaderData, ShaderStageFlagBits::ShaderStage_Vertex);
+#ifdef VERTEX_SPLIT_STREAM
+			shaderDesc.InputLayout = ShaderDesc::GetShaderInputLayoutFromStreams(Graphics::Vertices::Stream::Position);
+#else
 			shaderDesc.InputLayout = ShaderDesc::GetDefaultShaderInputLayout();
+#endif
 			RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
 
 			shaderData = Runtime::AssetRegistry::Instance().LoadAssetData(EnginePaths::GetResourcePath() + "/Shaders/hlsl/GBuffer.hlsl");

@@ -37,9 +37,9 @@ namespace Insight
             ShaderDesc shaderDesc("PhysicsDebugPass_LineShader", shaderData, ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
             shaderDesc.InputLayout = 
             {
-                ShaderInputLayout(0, PixelFormat::R32G32B32A32_Float, 0, "POSITION"),
-                ShaderInputLayout(1, PixelFormat::R32G32B32A32_Float, 16, "COLOR"),
-                ShaderInputLayout(2, PixelFormat::R32G32_Float, 32, "TEXCOORD0")
+                ShaderInputLayout(0, PixelFormat::R32G32B32A32_Float, 0, 0, "POSITION"),
+                ShaderInputLayout(1, PixelFormat::R32G32B32A32_Float, 0, 16, "COLOR"),
+                ShaderInputLayout(2, PixelFormat::R32G32_Float, 0, 32, "TEXCOORD0")
             };
             RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
 
@@ -47,9 +47,9 @@ namespace Insight
             ShaderDesc triangleShaderDesc("PhysicsDebugPass_TriangleShader", triangleShaderData, ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
             triangleShaderDesc.InputLayout =
             {
-                ShaderInputLayout(0, PixelFormat::R32G32B32A32_Float, 0, "POSITION"),
-                ShaderInputLayout(1, PixelFormat::R32G32B32A32_Float, 16, "COLOR"),
-                ShaderInputLayout(2, PixelFormat::R32G32_Float, 32, "TEXCOORD0")
+                ShaderInputLayout(0, PixelFormat::R32G32B32A32_Float, 0, 0, "POSITION"),
+                ShaderInputLayout(1, PixelFormat::R32G32B32A32_Float, 0, 16, "COLOR"),
+                ShaderInputLayout(2, PixelFormat::R32G32_Float, 0, 32, "TEXCOORD0")
             };
             RenderContext::Instance().GetShaderManager().GetOrCreateShader(triangleShaderDesc);
         }
@@ -76,9 +76,9 @@ namespace Insight
                 ShaderDesc lineShader("PhysicsDebugPass_LineShader", {}, ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
                 lineShader.InputLayout =
                 {
-                    ShaderInputLayout(0, PixelFormat::R32G32B32A32_Float, 0, "POSITION"),
-                    ShaderInputLayout(1, PixelFormat::R32G32B32A32_Float, 16, "COLOR"),
-                    ShaderInputLayout(2, PixelFormat::R32G32_Float, 32, "TEXCOORD0")
+                    ShaderInputLayout(0, PixelFormat::R32G32B32A32_Float, 0, 0, "POSITION"),
+                    ShaderInputLayout(1, PixelFormat::R32G32B32A32_Float, 0, 16, "COLOR"),
+                    ShaderInputLayout(2, PixelFormat::R32G32_Float, 0, 32, "TEXCOORD0")
                 };
                 builder.SetShader(lineShader);
 
@@ -166,9 +166,9 @@ namespace Insight
                     ShaderDesc triangleShader("PhysicsDebugPass_TriangleShader", {}, ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
                     triangleShader.InputLayout =
                     {
-                        ShaderInputLayout(0, PixelFormat::R32G32B32A32_Float, 0, "POSITION"),
-                        ShaderInputLayout(1, PixelFormat::R32G32B32A32_Float, 16, "COLOR"),
-                        ShaderInputLayout(2, PixelFormat::R32G32_Float, 32, "TEXCOORD0")
+                        ShaderInputLayout(0, PixelFormat::R32G32B32A32_Float, 0, 0, "POSITION"),
+                        ShaderInputLayout(1, PixelFormat::R32G32B32A32_Float, 0, 16, "COLOR"),
+                        ShaderInputLayout(2, PixelFormat::R32G32_Float, 0, 32, "TEXCOORD0")
                     };
                     PipelineStateObject trianglePSO = pso;
                     trianglePSO.Name = "PhysicsDebugPass_TrianglePSO";

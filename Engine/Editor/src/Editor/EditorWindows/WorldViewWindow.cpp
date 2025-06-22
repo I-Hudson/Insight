@@ -293,7 +293,11 @@ namespace Insight
                     IS_PROFILE_SCOPE("LightShadowPass pass setup");
 
                     Graphics::ShaderDesc shaderDesc("LightShadowPass", {}, Graphics::ShaderStageFlagBits::ShaderStage_Vertex);
+#ifdef VERTEX_SPLIT_STREAM
+                    shaderDesc.InputLayout = Graphics::ShaderDesc::GetShaderInputLayoutFromStreams(Graphics::Vertices::Stream::Position);
+#else
                     shaderDesc.InputLayout = Graphics::ShaderDesc::GetDefaultShaderInputLayout();
+#endif
                     builder.SetShader(shaderDesc);
 
                     Graphics::PipelineStateObject pso = { };
@@ -536,7 +540,11 @@ namespace Insight
                 builder.WriteDepthStencil(depthStencil);
 
                 Graphics::ShaderDesc shaderDesc("GBuffer", {}, Graphics::ShaderStageFlagBits::ShaderStage_Vertex | Graphics::ShaderStageFlagBits::ShaderStage_Pixel);
+#ifdef VERTEX_SPLIT_STREAM
+                shaderDesc.InputLayout = Graphics::ShaderDesc::GetShaderInputLayoutFromStreams(Graphics::Vertices::Stream::Position);
+#else
                 shaderDesc.InputLayout = Graphics::ShaderDesc::GetDefaultShaderInputLayout();
+#endif
                 builder.SetShader(shaderDesc);
 
                 Graphics::PipelineStateObject gbufferPso = { };

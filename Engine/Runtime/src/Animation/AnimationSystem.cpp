@@ -258,15 +258,15 @@ namespace Insight
 #ifdef VERTEX_SPLIT_STREAMS
             Graphics::RHI_BufferView inputSkinnedVertexBuffer(skinnedMesh.GetLOD(0).Vertex_buffer, skinnedMesh.GetLOD(0).Vertex_offset
                 , skinnedMesh.GetLOD(0).Vertex_count * Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Position));
-            inputSkinnedVertexBuffer.UAVStartIndex = skinnedMesh.GetLOD(0).Vertex_offset;
-            inputSkinnedVertexBuffer.UAVNumOfElements = skinnedMesh.GetLOD(0).Vertex_count;
-            inputSkinnedVertexBuffer.Stride = Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Position);
+            inputSkinnedVertexBuffer.Vertex.UAVStartIndex = skinnedMesh.GetLOD(0).Vertex_offset;
+            inputSkinnedVertexBuffer.Vertex.UAVNumOfElements = skinnedMesh.GetLOD(0).Vertex_count;
+            inputSkinnedVertexBuffer.Vertex.Stride = Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Position);
 #else
             Graphics::RHI_BufferView inputSkinnedVertexBuffer(skinnedMesh.GetLOD(0).VertexBuffer, skinnedMesh.GetLOD(0).Vertex_offset
                 , skinnedMesh.GetLOD(0).Vertex_count * Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Interleaved));
-            inputSkinnedVertexBuffer.UAVStartIndex = skinnedMesh.GetLOD(0).Vertex_offset;
-            inputSkinnedVertexBuffer.UAVNumOfElements = skinnedMesh.GetLOD(0).Vertex_count;
-            inputSkinnedVertexBuffer.Stride = Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Interleaved);
+            inputSkinnedVertexBuffer.Vertex.UAVStartIndex = skinnedMesh.GetLOD(0).Vertex_offset;
+            inputSkinnedVertexBuffer.Vertex.UAVNumOfElements = skinnedMesh.GetLOD(0).Vertex_count;
+            inputSkinnedVertexBuffer.Vertex.Stride = Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Interleaved);
 #endif
             AnimationGPUSkinning animGPUSkinning =
             {
@@ -351,9 +351,9 @@ namespace Insight
             Graphics::RHI_BufferView gpuBoneData = m_GPUSkeletonBonesUploadBuffer.GetCurrent()->Upload(bones.data(), bonesBytesSize, m_gpuBoneBaseOffset + m_gpuBoneOffset, 8);
             gpuBoneData = Graphics::RHI_BufferView(m_GPUSkeletonBonesBuffer, gpuBoneData.GetOffset(), gpuBoneData.GetSize());
 
-            gpuBoneData.UAVStartIndex = m_gpuBoneOffset > 0 ? m_gpuBoneOffset / sizeof(bones[0]) : 0;
-            gpuBoneData.UAVNumOfElements = (m_gpuBoneOffset + bonesBytesSize) / sizeof(bones[0]);
-            gpuBoneData.Stride = sizeof(bones[0]);
+            gpuBoneData.Vertex.UAVStartIndex = m_gpuBoneOffset > 0 ? m_gpuBoneOffset / sizeof(bones[0]) : 0;
+            gpuBoneData.Vertex.UAVNumOfElements = (m_gpuBoneOffset + bonesBytesSize) / sizeof(bones[0]);
+            gpuBoneData.Vertex.Stride = sizeof(bones[0]);
 
             //m_skeletonBonesBuffers[anim.Entity->GetGuid()] = gpuBoneData;
 
@@ -390,9 +390,9 @@ namespace Insight
             ASSERT(m_gpuVertexOffset + vertexByteSize < c_VertexByteSize);
 
             Graphics::RHI_BufferView gpuVertexData(m_GPUSkinnedVertexBuffer, m_gpuVertexBaseOffset + m_gpuVertexOffset, vertexByteSize);
-            gpuVertexData.UAVStartIndex = m_gpuVertexOffset > 0 ? m_gpuVertexOffset / Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Interleaved) : 0;
-            gpuVertexData.UAVNumOfElements = vertexCount;
-            gpuVertexData.Stride = Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Interleaved);
+            gpuVertexData.Vertex.UAVStartIndex = m_gpuVertexOffset > 0 ? m_gpuVertexOffset / Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Interleaved) : 0;
+            gpuVertexData.Vertex.UAVNumOfElements = vertexCount;
+            gpuVertexData.Vertex.Stride = Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Interleaved);
 
             skinnedMesh.MeshLods[0].VertexBufferView = gpuVertexData;
 #endif
@@ -487,7 +487,7 @@ namespace Insight
 
                     const u32 threadGroupCount = 64;
                     const u32 threadGroupCountX = static_cast<uint32_t>(
-                        std::ceil(static_cast<float>(animGPUSkinning.SkinnedVertex.UAVNumOfElements) / static_cast<float>(threadGroupCount)));
+                        std::ceil(static_cast<float>(animGPUSkinning.SkinnedVertex.Vertex.UAVNumOfElements) / static_cast<float>(threadGroupCount)));
 
                     cmdList->Dispatch(threadGroupCountX, 1);
                 }

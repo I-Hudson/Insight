@@ -447,7 +447,7 @@ namespace Insight
 						(UINT)bufferDX12->GetStride() 
 					}
 				};
-				m_commandList->IASetVertexBuffers(0, 1, views);
+				m_commandList->IASetVertexBuffers(bufferView.Vertex.Slot, 1, views);
 				m_boundVertexBufferView = bufferView;
 				++RenderStats::Instance().VertexBufferBindings;
 			}
@@ -752,9 +752,9 @@ namespace Insight
 												D3D12_UNORDERED_ACCESS_VIEW_DESC desc = {};
 												desc.Format = DXGI_FORMAT_UNKNOWN;
 												desc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
-												desc.Buffer.FirstElement = buffer.UAVStartIndex;
-												desc.Buffer.NumElements = static_cast<UINT>(buffer.UAVNumOfElements);
-												desc.Buffer.StructureByteStride = static_cast<UINT>(buffer.Stride);
+												desc.Buffer.FirstElement = buffer.Vertex.UAVStartIndex;
+												desc.Buffer.NumElements = static_cast<UINT>(buffer.Vertex.UAVNumOfElements);
+												desc.Buffer.StructureByteStride = static_cast<UINT>(buffer.Vertex.Stride);
 
 												m_contextDX12->GetDevice()->CreateUnorderedAccessView(bufferDX12->GetResource(), nullptr, &desc, dstHandle.CPUPtr);
 

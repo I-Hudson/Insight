@@ -4,6 +4,8 @@
 #include "Graphics/PixelFormat.h"
 #include "Graphics/PixelFormatExtensions.h"
 
+#include "Graphics/Vertex.h"
+
 #include <string>
 #include <vector>
 
@@ -15,12 +17,13 @@ namespace Insight
 		{
 			ShaderInputLayout()
 			{ }
-			ShaderInputLayout(int binding, PixelFormat format, int stride, std::string name)
-				: Binding(binding), Format(format), Stride(stride), Name(std::move(name))
+			ShaderInputLayout(const int binding, const PixelFormat format, const int slot, int stride, const std::string name)
+				: Binding(binding), Format(format), Slot(slot), Stride(stride), Name(std::move(name))
 			{ }
 
 			int Binding;
 			PixelFormat Format;
+			int Slot;
 			int Stride;
 			std::string Name;
 
@@ -30,6 +33,7 @@ namespace Insight
 
 				HashCombine(hash, Binding);
 				HashCombine(hash, Format);
+				HashCombine(hash, Slot);
 				HashCombine(hash, Stride);
 
 				return hash;
@@ -84,48 +88,107 @@ namespace Insight
 
 			static std::vector<ShaderInputLayout> GetDefaultShaderInputLayout()
 			{
-				std::vector<ShaderInputLayout> DefaultShaderInputLayout =
+#ifdef VERTEX_SPLIT_STREAM
+				return GetShaderInputLayoutFromStreams(Vertices::Stream::All);
+#else
+				return GetShaderInputLayoutFromStreams(Vertices::Stream::Interleaved);
+#endif
+			}
+
+			static std::vector<ShaderInputLayout> GetShaderInputLayoutFromStreams(const Vertices::Stream streams)
+			{
+#ifdef VERTEX_SPLIT_STREAM
+				const int positionSlot = 0;
+				const int normalSlot = 1;
+				const int colourSlot = 2;
+				const int uvSlot = 3;
+				const int boneIdsSlot = 4;
+				const int boneWeightsSlot = 5;
+#else
+				const int positionSlot = 0;
+				const int normalSlot = 0;
+				const int colourSlot = 0;
+				const int uvSlot = 0;
+				const int boneIdsSlot = 0;
+				const int boneWeightsSlot = 0;
+
+#endif
+				std::vector<ShaderInputLayout> shaderInputLayout;
+				
+				if ((streams & Vertices::Stream::Position) == 0
+					|| (streams & Vertices::Stream::All) == 0
+					|| (streams & Vertices::Stream::Interleaved) == 0)
 				{
-					ShaderInputLayout(0, PixelFormat::R32G32B32_Float, 0, "POSITION"),
-#ifdef VERTEX_NORMAL_PACKED
-					ShaderInputLayout(1, PixelFormat::R32_SInt, 0, "NORMAL0"),
-#else
-					ShaderInputLayout(1, PixelFormat::R32G32B32_Float, 0, "NORMAL0"),
-#endif
-
-#ifdef VERTEX_COLOUR_PACKED
-					ShaderInputLayout(2, PixelFormat::R32_SInt, 0, "COLOR0"),
-#else
-					ShaderInputLayout(2, PixelFormat::R32G32B32_Float, 0, "COLOR0"),
-#endif
-
-#ifdef VERTEX_UV_PACKED
-					ShaderInputLayout(3, PixelFormat::R32_UInt, 0, "TEXCOORD0"),
-#else
-					ShaderInputLayout(3, PixelFormat::R32G32_Float, 0, "TEXCOORD0"),
-#endif
-
-#ifdef VERTEX_BONE_ID_PACKED
-					ShaderInputLayout(4, PixelFormat::R32_SInt, 0, "BLENDINDICES"),
-#else
-					ShaderInputLayout(4, PixelFormat::R32G32B32A32_SInt, 0, "BLENDINDICES"),
-#endif
-
-#ifdef VERTEX_BONE_WEIGHT_PACKED
-					ShaderInputLayout(5, PixelFormat::R32G32_SInt, 0, "BLENDWEIGHT"),
-#else
-					ShaderInputLayout(5, PixelFormat::R32G32B32A32_Float, 0, "BLENDWEIGHT"),
-#endif
-				};
-
-				int offset = 0;
-				for (ShaderInputLayout& inputLayout : DefaultShaderInputLayout)
-				{
-					inputLayout.Stride = offset;
-					offset += PixelFormatExtensions::SizeInBytes(inputLayout.Format);
+					shaderInputLayout.push_back(ShaderInputLayout(0, PixelFormat::R32G32B32_Float, positionSlot, 0, "POSITION"));
 				}
 
-				return DefaultShaderInputLayout;
+				if ((streams & Vertices::Stream::Normal) == 0
+					|| (streams & Vertices::Stream::All) == 0
+					|| (streams & Vertices::Stream::Interleaved) == 0)
+				{
+#ifdef VERTEX_NORMAL_PACKED
+					shaderInputLayout.push_back(ShaderInputLayout(1, PixelFormat::R32_SInt, normalSlot, 0, "NORMAL0"));
+#else
+					shaderInputLayout.push_back(ShaderInputLayout(1, PixelFormat::R32G32B32_Float, normalSlot, 0, "NORMAL0"));
+#endif
+				}
+
+				if ((streams & Vertices::Stream::Colour) == 0
+					|| (streams & Vertices::Stream::All) == 0
+					|| (streams & Vertices::Stream::Interleaved) == 0)
+				{
+#ifdef VERTEX_COLOUR_PACKED
+					shaderInputLayout.push_back(ShaderInputLayout(2, PixelFormat::R32_SInt, colourSlot, 0, "COLOR0"));
+#else
+					shaderInputLayout.push_back(ShaderInputLayout(2, PixelFormat::R32G32B32_Float, colourSlot, 0, "COLOR0"));
+#endif
+				}
+
+				if ((streams & Vertices::Stream::UV) == 0
+					|| (streams & Vertices::Stream::All) == 0
+					|| (streams & Vertices::Stream::Interleaved) == 0)
+				{
+
+#ifdef VERTEX_UV_PACKED
+					shaderInputLayout.push_back(ShaderInputLayout(3, PixelFormat::R32_UInt, uvSlot, 0, "TEXCOORD0"));
+#else
+					shaderInputLayout.push_back(ShaderInputLayout(3, PixelFormat::R32G32_Float, uvSlot, 0, "TEXCOORD0"));
+#endif
+				}
+
+				if ((streams & Vertices::Stream::BoneId) == 0
+					|| (streams & Vertices::Stream::All) == 0
+					|| (streams & Vertices::Stream::Interleaved) == 0)
+				{
+#ifdef VERTEX_BONE_ID_PACKED
+					shaderInputLayout.push_back(ShaderInputLayout(4, PixelFormat::R32_SInt, boneIdsSlot, 0, "BLENDINDICES"));
+#else
+					shaderInputLayout.push_back(ShaderInputLayout(4, PixelFormat::R32G32B32A32_SInt, boneIdsSlot, 0, "BLENDINDICES"));
+#endif
+				}
+
+				if ((streams & Vertices::Stream::BoneWeight) == 0
+					|| (streams & Vertices::Stream::All) == 0
+					|| (streams & Vertices::Stream::Interleaved) == 0)
+				{
+#ifdef VERTEX_BONE_WEIGHT_PACKED
+					shaderInputLayout.push_back(ShaderInputLayout(5, PixelFormat::R32G32_SInt, boneWeightsSlot, 0, "BLENDWEIGHT"));
+#else
+					shaderInputLayout.push_back(ShaderInputLayout(5, PixelFormat::R32G32B32A32_Float, boneWeightsSlot, 0, "BLENDWEIGHT"));
+#endif
+				}
+
+				if ((streams & Vertices::Stream::Interleaved) == 0)
+				{
+					int offset = 0;
+					for (ShaderInputLayout& inputLayout : shaderInputLayout)
+					{
+						inputLayout.Stride = offset;
+						offset += PixelFormatExtensions::SizeInBytes(inputLayout.Format);
+					}
+				}
+
+				return shaderInputLayout;
 			}
 		};
 	}
