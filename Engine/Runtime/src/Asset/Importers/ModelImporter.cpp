@@ -756,7 +756,7 @@ namespace Insight
 
 						buffer = Renderer::CreateVertexBuffer(bufferSize, stride, vertexOverrides);
 					}
-					buffer->Upload(&data, bufferSize);
+					buffer->Upload(data, bufferSize);
 					bufferView = buffer;
 				};
 

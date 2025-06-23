@@ -111,7 +111,11 @@ namespace Insight
 #endif
 
 #ifdef VERTEX_SPLIT_STREAMS
+#ifdef VERTEX_BONE_ID_PACKED
 				std::vector<int> BoneIds;
+#else
+				std::vector<float> BoneIds;
+#endif
 #else
 #ifdef VERTEX_BONE_ID_PACKED
 				int BoneIds = 0;
@@ -261,16 +265,27 @@ namespace Insight
 			void SetBoneId(const u64 vertexId, const u32 boneId, const u8 boneIdx)
 			{
 #ifdef VERTEX_SPLIT_STREAMS
+#ifdef VERTEX_BONE_ID_PACKED
+				int& vBoneId = Vertices.BoneIds[vertexId];
+#else
+				float& vBoneId = Vertices.BoneIds[vertexId];
+#endif
+
 #else
 #ifdef VERTEX_BONE_ID_PACKED
+				int& vBoneId = vertex.BoneIds[boneIdx];
+#else
+				float& vBoneId = vertex.BoneIds[boneIdx];
+#endif
 
-				Vertex& vertex = Vertices[vertexId];
+#endif
+
+#ifdef VERTEX_BONE_ID_PACKED
 				const u32 bitShiftStep = 8;
 				const u32 bitShift = bitShiftStep * boneIdx;
-				vertex.BoneIds |= boneId << bitShift;
+				vBoneId |= boneId << bitShift;
 #else
-				vertex.BoneIds[boneIdx] = boneId;
-#endif
+				vBoneId = boneId;
 #endif
 			}
 

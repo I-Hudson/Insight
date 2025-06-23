@@ -106,7 +106,7 @@ namespace Insight
 					m_gpuCrashTracker = RHI_GPUCrashTracker::Create();
 					if (m_gpuCrashTracker)
 					{
-						//m_gpuCrashTracker->Init();
+						m_gpuCrashTracker->Init();
 					}
 				}
 

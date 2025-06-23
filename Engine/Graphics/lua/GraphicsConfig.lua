@@ -2,7 +2,8 @@ local CommonConfig = require "../../lua/CommonConfig"
 
 local GraphicsConfig = { }
 
-local NvidiaAftermath_SDKPath = "../../vendor/NVIDIA_Nsight_Aftermath_SDK"
+local NvidiaAftermath_SDKPath = "../../../vendor/NVIDIA_Nsight_Aftermath_SDK"
+local NvidiaAftermath_SDKEnabled = CommonConfig.PathExists(NvidiaAftermath_SDKPath)
 
 function GraphicsConfig.DefinesSharedLib()
     defines
@@ -107,7 +108,7 @@ function GraphicsConfig.LibraryLinks()
         }
     end
 
-    if os.rename(NvidiaAftermath_SDKPath, NvidiaAftermath_SDKPath)  == true then
+    if NvidiaAftermath_SDKEnabled then
         links
         {
             "GFSDK_Aftermath_Lib.x64.lib",
