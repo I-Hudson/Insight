@@ -746,54 +746,54 @@ namespace Insight
 
 				ASSERT(mesh);
 
-				const auto UploadData =[](const void* data, const u64 slot, const u64 stride, Graphics::RHI_Buffer * &buffer, const u64 verticesCount)
+				const auto UploadData =[](const void* data, Graphics::RHI_BufferView& bufferView, const u64 stride, Graphics::RHI_Buffer*& buffer, const u64 verticesCount)
 				{
+					const u64 bufferSize = stride * verticesCount;
 					if (!buffer)
 					{
 						Graphics::RHI_Buffer_Overrides vertexOverrides;
 						vertexOverrides.AllowUnorderedAccess = true;
-						vertexOverrides.Vertex.Slot = slot;
 
-						const u64 bufferSize = stride * verticesCount;
 						buffer = Renderer::CreateVertexBuffer(bufferSize, stride, vertexOverrides);
 					}
-					buffer->Upload(&data, stride);
+					buffer->Upload(&data, bufferSize);
+					bufferView = buffer;
 				};
 
 #if VERTEX_SPLIT_STREAMS
 					UploadData(meshData.Vertices.GetData(Graphics::Vertices::Stream::Position)
-						, 0
+						, meshData.RHI_VertexBuffers.PositionView
 						, meshData.Vertices.GetStride(Graphics::Vertices::Stream::Position)
 						, meshData.RHI_VertexBuffers.Position, meshData.Vertices.VerticesCount());
 					meshData.RHI_VertexBuffers.Position->SetName(std::string(aiNode->mName.C_Str()) + "_" + aiMesh->mName.C_Str() + "_Position");
 
 					UploadData(meshData.Vertices.GetData(Graphics::Vertices::Stream::Normal)
-						, 1
+						, meshData.RHI_VertexBuffers.NormalView
 						, meshData.Vertices.GetStride(Graphics::Vertices::Stream::Normal)
 						, meshData.RHI_VertexBuffers.Normal, meshData.Vertices.VerticesCount());
 					meshData.RHI_VertexBuffers.Normal->SetName(std::string(aiNode->mName.C_Str()) + "_" + aiMesh->mName.C_Str() + "_Normal");
 
 					UploadData(meshData.Vertices.GetData(Graphics::Vertices::Stream::Colour)
-						, 2
+						, meshData.RHI_VertexBuffers.ColourView
 						, meshData.Vertices.GetStride(Graphics::Vertices::Stream::Colour)
 						, meshData.RHI_VertexBuffers.Colour, meshData.Vertices.VerticesCount());
 					meshData.RHI_VertexBuffers.Colour->SetName(std::string(aiNode->mName.C_Str()) + "_" + aiMesh->mName.C_Str() + "_Colour");
 
 
 					UploadData(meshData.Vertices.GetData(Graphics::Vertices::Stream::UV)
-						, 3
+						, meshData.RHI_VertexBuffers.UVView
 						, meshData.Vertices.GetStride(Graphics::Vertices::Stream::UV)
 						, meshData.RHI_VertexBuffers.UV, meshData.Vertices.VerticesCount());
 					meshData.RHI_VertexBuffers.UV->SetName(std::string(aiNode->mName.C_Str()) + "_" + aiMesh->mName.C_Str() + "_UV");
 
 					UploadData(meshData.Vertices.GetData(Graphics::Vertices::Stream::BoneId)
-						, 4
+						, meshData.RHI_VertexBuffers.BoneIdsView
 						, meshData.Vertices.GetStride(Graphics::Vertices::Stream::BoneId)
 						, meshData.RHI_VertexBuffers.BoneIds, meshData.Vertices.VerticesCount());
 					meshData.RHI_VertexBuffers.BoneIds->SetName(std::string(aiNode->mName.C_Str()) + "_" + aiMesh->mName.C_Str() + "_BoneId");
 
 					UploadData(meshData.Vertices.GetData(Graphics::Vertices::Stream::BoneWeight)
-						, 5
+						, meshData.RHI_VertexBuffers.BoneWeightsView
 						, meshData.Vertices.GetStride(Graphics::Vertices::Stream::BoneWeight)
 						, meshData.RHI_VertexBuffers.BoneWeights, meshData.Vertices.VerticesCount());
 					meshData.RHI_VertexBuffers.BoneWeights->SetName(std::string(aiNode->mName.C_Str()) + "_" + aiMesh->mName.C_Str() + "_BoneWeight");
@@ -802,7 +802,6 @@ namespace Insight
 				{
 					Graphics::RHI_Buffer_Overrides vertexOverrides;
 					vertexOverrides.AllowUnorderedAccess = true;
-					vertexOverrides.Vertex.Slot = 0;
 
 					meshData.RHI_VertexBuffer = Renderer::CreateVertexBuffer(meshData.Vertices.VerticesCount() * meshData.Vertices.GetStride(Graphics::Vertices::Stream::Interleaved)
 						, meshData.Vertices.GetStride(Graphics::Vertices::Stream::Interleaved), vertexOverrides);

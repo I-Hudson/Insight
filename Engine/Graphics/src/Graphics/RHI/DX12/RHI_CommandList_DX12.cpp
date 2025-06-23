@@ -397,7 +397,7 @@ namespace Insight
 			{
 				IS_PROFILE_FUNCTION();
 
-				m_boundVertexBufferView = { };
+				m_boundVertexBufferViews.clear();
 				m_boundIndexBufferView = { };
 			}
 
@@ -431,25 +431,47 @@ namespace Insight
 
 			void RHI_CommandList_DX12::SetVertexBuffer(const RHI_BufferView& bufferView)
 			{
-				IS_PROFILE_FUNCTION();
-				if (!bufferView.IsValid() || bufferView == m_boundVertexBufferView)
+				RHI_BufferView views[] =
 				{
-					return;
-				}
+					bufferView
+				};
+				SetVertexBuffer(views, 1);
+			}
 
-				const RHI_Buffer_DX12* bufferDX12 = static_cast<RHI_Buffer_DX12*>(bufferView.GetBuffer());
-				const D3D12_VERTEX_BUFFER_VIEW views[] = 
-				{ 
-					D3D12_VERTEX_BUFFER_VIEW
+			void RHI_CommandList_DX12::SetVertexBuffer(const RHI_BufferView* bufferViews, const int viewCount)
+			{
+				IS_PROFILE_FUNCTION();
+	
+				ASSERT(viewCount < D3D12_IA_VERTEX_INPUT_RESOURCE_SLOT_COUNT);
+				D3D12_VERTEX_BUFFER_VIEW views[D3D12_IA_VERTEX_INPUT_RESOURCE_SLOT_COUNT];
+
+				for (size_t i = 0; i < viewCount; ++i)
+				{
+					const RHI_BufferView& bufferView = bufferViews[i];
+					ASSERT(bufferView.IsValid());
+
+					if (m_boundVertexBufferViews.find(bufferView) != m_boundVertexBufferViews.end())
+					{
+						m_context->GetResourceRenderTracker().TrackResource(bufferView.GetBuffer());
+						continue;
+					}
+					m_boundVertexBufferViews.insert(bufferView);
+
+					const RHI_Buffer_DX12* bufferDX12 = static_cast<RHI_Buffer_DX12*>(bufferView.GetBuffer());
+					views[i] = D3D12_VERTEX_BUFFER_VIEW
 					{
 						bufferDX12->GetResource()->GetGPUVirtualAddress() + bufferView.GetOffset(),
 						(UINT)bufferDX12->GetSize(),
-						(UINT)bufferDX12->GetStride() 
-					}
-				};
-				m_commandList->IASetVertexBuffers(bufferView.Vertex.Slot, 1, views);
-				m_boundVertexBufferView = bufferView;
-				++RenderStats::Instance().VertexBufferBindings;
+						(UINT)bufferDX12->GetStride()
+					};
+					m_context->GetResourceRenderTracker().TrackResource(bufferView.GetBuffer());
+				}
+
+				{
+					IS_PROFILE_SCOPE("IASetVertexBuffers");
+					m_commandList->IASetVertexBuffers(0, viewCount, views);
+				}
+				RenderStats::Instance().VertexBufferBindings += viewCount;
 			}
 
 			void RHI_CommandList_DX12::SetIndexBuffer(const RHI_BufferView& bufferView, const IndexType index_type)

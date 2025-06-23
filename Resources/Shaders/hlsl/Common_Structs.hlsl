@@ -1,4 +1,22 @@
 #define MAX_BONE_COUNT 4
+
+struct ShadowVertexInput
+{
+	float3 Position : POSITION;
+	
+#ifdef VERTEX_BONE_ID_PACKED
+	int BoneIds : BLENDINDICES;
+#else
+	int4 BoneIds : BLENDINDICES;
+#endif
+	
+#ifdef VERTEX_BONE_WEIGHT_PACKED
+	int2 BoneWeights : BLENDWEIGHT;
+#else
+	float4 BoneWeights : BLENDWEIGHT;
+#endif
+};
+
 struct GeoVertexInput
 {
 	float3 Position : POSITION;
@@ -49,54 +67,54 @@ float UnpackNormal(const in int normal, const in uint bitshift)
 	return v;
 }
 
-float4 GetVertexNormal(const in GeoVertexInput vertex)
+float4 GetVertexNormal(const in int normal)
 {
 	const uint NormalPackedBitShiftInterval = 10;
 	const uint NormalPackedMaxValue = 1U << NormalPackedBitShiftInterval;
 
-	const float x = UnpackNormal(vertex.Normal, 0);
-	const float y = UnpackNormal(vertex.Normal, NormalPackedBitShiftInterval);
-	const float z = UnpackNormal(vertex.Normal, NormalPackedBitShiftInterval * 2);
+	const float x = UnpackNormal(normal, 0);
+	const float y = UnpackNormal(normal, NormalPackedBitShiftInterval);
+	const float z = UnpackNormal(normal, NormalPackedBitShiftInterval * 2);
 
 	return float4(x, y, z, 0.0);
 }
 
 #else
-float4 GetVertexNormal(const in GeoVertexInput vertex)
+float4 GetVertexNormal(const in float3 normal)
 {
-	return float4(vertex.Normal, 0.0);
+	return float4(normal, 0.0);
 }
 #endif
 
 #ifdef VERTEX_COLOUR_PACKED
-float4 GetVertexColour(const in GeoVertexInput vertex)
+float4 GetVertexColour(const in int colour)
 {
-	const float r = (float)(vertex.Colour & 0xFF) / 255.0;
-	const float g = (float)((vertex.Colour >> 8) & 0xFF) / 255.0;
-	const float b = (float)((vertex.Colour >> 16) & 0xFF) / 255.0;
+	const float r = (float)(colour & 0xFF) / 255.0;
+	const float g = (float)((colour >> 8) & 0xFF) / 255.0;
+	const float b = (float)((colour >> 16) & 0xFF) / 255.0;
 	return float4(r, g, b, 1.0);
 }
 #else
-float4 GetVertexColour(const in GeoVertexInput vertex)
+float4 GetVertexColour(const in float3 colour)
 {
-	return float4(vertex.Colour, 1.0);
+	return float4(colour, 1.0);
 }
 #endif
 
 #ifdef VERTEX_UV_PACKED
-float2 GetVertexUVs(const in GeoVertexInput vertex)
+float2 GetVertexUVs(const in int uv)
 {
-	const int xInt = vertex.UV & 0x0000FFFF;
-	const int yInt = vertex.UV >> 16;
+	const int xInt = uv & 0x0000FFFF;
+	const int yInt = uv >> 16;
 
 	const float xFloat = xInt / 65535.0;
 	const float yFloat = yInt / 65535.0;
 	return float2(xFloat, yFloat);
 }
 #else
-float2 GetVertexUVs(const in GeoVertexInput vertex)
+float2 GetVertexUVs(const in float2 uv)
 {
-	return vertex.UV;
+	return uv;
 }
 #endif
 

@@ -40,7 +40,7 @@ namespace Insight
 			m_pso = {};
 			m_activePSO = {};
 			m_drawData = {};
-			m_boundVertexBufferView = { };
+			m_boundVertexBufferViews.clear();
 			m_boundIndexBufferView = { };
 			m_discard = false;
 		}
@@ -146,8 +146,15 @@ namespace Insight
 			///}
 
 			// Make sure our buffers are good to go.
-			if ((m_boundVertexBufferView.IsValid() && m_boundVertexBufferView.GetBuffer()->GetUploadStatus() != DeviceUploadStatus::Completed)
-				|| (m_boundIndexBufferView.IsValid() && m_boundIndexBufferView.GetBuffer()->GetUploadStatus() != DeviceUploadStatus::Completed))
+			for (const RHI_BufferView& view : m_boundVertexBufferViews)
+			{
+				if (view.IsValid() && view.GetBuffer()->GetUploadStatus() != DeviceUploadStatus::Completed)
+				{
+					return false;
+				}
+			}
+
+			if (m_boundIndexBufferView.IsValid() && m_boundIndexBufferView.GetBuffer()->GetUploadStatus() != DeviceUploadStatus::Completed)
 			{
 				return false;
 			}

@@ -8,6 +8,8 @@
 
 #include "Core/Asserts.h"
 
+#include "Graphics/RHI/RHI_Buffer.h"
+
 #include <cstring>
 #include <vector>
 
@@ -27,16 +29,6 @@ namespace Insight
 			return bint.c[0] == 1;
 		}
 
-		struct IS_GRAPHICS VerticesSplitRHIBuffers
-		{
-			Graphics::RHI_Buffer* Position = nullptr;
-			Graphics::RHI_Buffer* Normal = nullptr;
-			Graphics::RHI_Buffer* Colour = nullptr;
-			Graphics::RHI_Buffer* UV = nullptr;
-			Graphics::RHI_Buffer* BoneIds = nullptr;
-			Graphics::RHI_Buffer* BoneWeights = nullptr;
-		};
-
 		struct IS_GRAPHICS Vertices
 		{
 			const static uint32_t MAX_BONE_COUNT = 4;
@@ -53,6 +45,7 @@ namespace Insight
 				All				= BIT(6),
 				Interleaved		= BIT(7),
 			};
+			using StreamFlags = u64;
 			constexpr static const char* StreamNames[] =
 			{
 				"Position",
@@ -807,6 +800,45 @@ namespace Insight
 #else
 			float BoneWeights[Vertices::MAX_BONE_COUNT] = { 0 };
 #endif
+		};
+
+		struct IS_GRAPHICS VerticesSplitRHIBuffers
+		{
+			RHI_BufferView PositionView;
+			RHI_BufferView NormalView;
+			RHI_BufferView ColourView;
+			RHI_BufferView UVView;
+			RHI_BufferView BoneIdsView;
+			RHI_BufferView BoneWeightsView;
+
+			VerticesSplitRHIBuffers() = default;
+			VerticesSplitRHIBuffers(RHI_Buffer* position, RHI_Buffer* normal, RHI_Buffer* colour, RHI_Buffer* uv, RHI_Buffer* boneIds, RHI_Buffer* boneWeights)
+				: Position(position), Normal(normal), Colour(colour), UV(uv), BoneIds(boneIds), BoneWeights(boneWeights)
+			{
+			}
+
+			RHI_Buffer* GetBuffer(const Vertices::Stream stream) const
+			{
+				switch (stream)
+				{
+				case Vertices::Stream::Position: return Position;
+				case Vertices::Stream::Normal: return Normal;
+				case Vertices::Stream::Colour: return Colour;
+				case Vertices::Stream::UV: return UV;
+				case Vertices::Stream::BoneId: return BoneIds;
+				case Vertices::Stream::BoneWeight: return BoneWeights;
+				default:
+					FAIL_ASSERT();
+					return nullptr;
+				}
+			}
+
+			Graphics::RHI_Buffer* Position = nullptr;
+			Graphics::RHI_Buffer* Normal = nullptr;
+			Graphics::RHI_Buffer* Colour = nullptr;
+			Graphics::RHI_Buffer* UV = nullptr;
+			Graphics::RHI_Buffer* BoneIds = nullptr;
+			Graphics::RHI_Buffer* BoneWeights = nullptr;
 		};
 
 		/*

@@ -18,8 +18,8 @@ VertexOutput VSMain(const GeoVertexInput input, uint vertexID : SV_VertexID)
 {
 	VertexOutput vsOut;
 	vsOut.Position = float4(input.Position, 1);
-	vsOut.Colour = GetVertexColour(input);
-	vsOut.WorldNormal = GetVertexNormal(input);
+	vsOut.Colour = GetVertexColour(input.Colour);
+	vsOut.WorldNormal = GetVertexNormal(input.Normal);
 
 	[branch]
 	if (bpo_SkinnedMesh && !GPUSkinningEnabled())
@@ -31,7 +31,7 @@ VertexOutput VSMain(const GeoVertexInput input, uint vertexID : SV_VertexID)
 	vsOut.Position = mul(bf_Camera_Proj_View, vsOut.WorldPos);
 	
 	vsOut.WorldNormal = normalize(mul(bpo_Transform, float4(vsOut.WorldNormal.xyz, 0.0)));
-	vsOut.UV = GetUVsForAPI(GetVertexUVs(input));
+	vsOut.UV = GetUVsForAPI(GetVertexUVs(input.UV));
 
 	vsOut.position_ss_current = mul(bf_Camera_View, vsOut.WorldPos);
 

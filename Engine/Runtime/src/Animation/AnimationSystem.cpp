@@ -256,7 +256,7 @@ namespace Insight
             const Graphics::RHI_BufferView skinnedVertexBuffer = AllocateMeshVertexBuffer(animInstance, skinnedMesh);
 
 #ifdef VERTEX_SPLIT_STREAMS
-            Graphics::RHI_BufferView inputSkinnedVertexBuffer(skinnedMesh.GetLOD(0).Vertex_buffer, skinnedMesh.GetLOD(0).Vertex_offset
+            Graphics::RHI_BufferView inputSkinnedVertexBuffer(skinnedMesh.GetLOD(0).VertexBuffers.Position, skinnedMesh.GetLOD(0).Vertex_offset
                 , skinnedMesh.GetLOD(0).Vertex_count * Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Position));
             inputSkinnedVertexBuffer.Vertex.UAVStartIndex = skinnedMesh.GetLOD(0).Vertex_offset;
             inputSkinnedVertexBuffer.Vertex.UAVNumOfElements = skinnedMesh.GetLOD(0).Vertex_count;
@@ -380,11 +380,11 @@ namespace Insight
             ASSERT(m_gpuVertexOffset + vertexByteSize < c_VertexByteSize);
 
             Graphics::RHI_BufferView gpuVertexData(m_GPUSkinnedVertexBuffer, m_gpuVertexBaseOffset + m_gpuVertexOffset, vertexByteSize);
-            gpuVertexData.UAVStartIndex = m_gpuVertexOffset > 0 ? m_gpuVertexOffset / Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Position) : 0;
-            gpuVertexData.UAVNumOfElements = vertexCount;
-            gpuVertexData.Stride = Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Position);
+            gpuVertexData.Vertex.UAVStartIndex = m_gpuVertexOffset > 0 ? m_gpuVertexOffset / Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Position) : 0;
+            gpuVertexData.Vertex.UAVNumOfElements = vertexCount;
+            gpuVertexData.Vertex.Stride = Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Position);
 
-            skinnedMesh.MeshLods[0].VertexBufferView = gpuVertexData;
+            skinnedMesh.MeshLods[0].VertexBuffers.PositionView = gpuVertexData;
 #else
             const u64 vertexByteSize = Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Interleaved) * vertexCount;
             ASSERT(m_gpuVertexOffset + vertexByteSize < c_VertexByteSize);

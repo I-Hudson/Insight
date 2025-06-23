@@ -70,6 +70,7 @@ namespace Insight
 				virtual void SetLineWidth(float width) override;
 
 				virtual void SetVertexBuffer(const RHI_BufferView& bufferView) override;
+				virtual void SetVertexBuffer(const RHI_BufferView* bufferViews, const int viewCount) override;
 				virtual void SetIndexBuffer(const RHI_BufferView& bufferView, const IndexType index_type) override;
 
 				virtual void Draw(u32 vertexCount, u32 instanceCount, u32 firstVertex, u32 firstInstance) override;

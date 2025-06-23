@@ -293,8 +293,11 @@ namespace Insight
                     IS_PROFILE_SCOPE("LightShadowPass pass setup");
 
                     Graphics::ShaderDesc shaderDesc("LightShadowPass", {}, Graphics::ShaderStageFlagBits::ShaderStage_Vertex);
-#ifdef VERTEX_SPLIT_STREAM
-                    shaderDesc.InputLayout = Graphics::ShaderDesc::GetShaderInputLayoutFromStreams(Graphics::Vertices::Stream::Position);
+#ifdef VERTEX_SPLIT_STREAMS
+                    shaderDesc.InputLayout = Graphics::ShaderDesc::GetShaderInputLayoutFromStreams(
+                        Graphics::Vertices::Stream::Position
+                        | Graphics::Vertices::Stream::BoneId
+                        | Graphics::Vertices::Stream::BoneWeight);
 #else
                     shaderDesc.InputLayout = Graphics::ShaderDesc::GetDefaultShaderInputLayout();
 #endif
@@ -421,7 +424,17 @@ namespace Insight
                                         }
 
                                         const Runtime::MeshLOD& renderMeshLod = mesh.GetLOD(0);
+#ifdef VERTEX_SPLIT_STREAMS
+                                        const Graphics::RHI_BufferView vertexBuffers[] =
+                                        {
+                                            renderMeshLod.VertexBuffers.PositionView,
+                                            renderMeshLod.VertexBuffers.BoneIdsView,
+                                            renderMeshLod.VertexBuffers.BoneWeightsView,
+                                        };
+                                        cmdList->SetVertexBuffer(vertexBuffers, ARRAY_COUNT(vertexBuffers));
+#else
                                         cmdList->SetVertexBuffer(renderMeshLod.VertexBufferView);
+#endif
                                         cmdList->SetIndexBuffer(renderMeshLod.IndexBufferView, Graphics::IndexType::Uint32);
                                         cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
                                         ++Graphics::RenderStats::Instance().MeshCount;
@@ -495,7 +508,17 @@ namespace Insight
                                         }
 
                                         const Runtime::MeshLOD& renderMeshLod = mesh.GetLOD(0);
+#ifdef VERTEX_SPLIT_STREAMS
+                                        const Graphics::RHI_BufferView vertexBuffers[] =
+                                        {
+                                            renderMeshLod.VertexBuffers.PositionView,
+                                            renderMeshLod.VertexBuffers.BoneIdsView,
+                                            renderMeshLod.VertexBuffers.BoneWeightsView,
+                                        };
+                                        cmdList->SetVertexBuffer(vertexBuffers, ARRAY_COUNT(vertexBuffers));
+#else
                                         cmdList->SetVertexBuffer(renderMeshLod.VertexBufferView);
+#endif
                                         cmdList->SetIndexBuffer(renderMeshLod.IndexBufferView, Graphics::IndexType::Uint32);
                                         cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
                                         ++Graphics::RenderStats::Instance().MeshCount;
@@ -540,7 +563,7 @@ namespace Insight
                 builder.WriteDepthStencil(depthStencil);
 
                 Graphics::ShaderDesc shaderDesc("GBuffer", {}, Graphics::ShaderStageFlagBits::ShaderStage_Vertex | Graphics::ShaderStageFlagBits::ShaderStage_Pixel);
-#ifdef VERTEX_SPLIT_STREAM
+#ifdef VERTEX_SPLIT_STREAMS
                 shaderDesc.InputLayout = Graphics::ShaderDesc::GetShaderInputLayoutFromStreams(Graphics::Vertices::Stream::Position);
 #else
                 shaderDesc.InputLayout = Graphics::ShaderDesc::GetDefaultShaderInputLayout();
@@ -607,7 +630,17 @@ namespace Insight
                         cmdList->SetUniform(2, 0, object);
 
                         const Runtime::MeshLOD& renderMeshLod = mesh.GetLOD(0);
+#ifdef VERTEX_SPLIT_STREAMS
+                        const Graphics::RHI_BufferView vertexBuffers[] =
+                        {
+                            renderMeshLod.VertexBuffers.PositionView,
+                            renderMeshLod.VertexBuffers.BoneIdsView,
+                            renderMeshLod.VertexBuffers.BoneWeightsView,
+                        };
+                        cmdList->SetVertexBuffer(vertexBuffers, ARRAY_COUNT(vertexBuffers));
+#else
                         cmdList->SetVertexBuffer(renderMeshLod.VertexBufferView);
+#endif
                         cmdList->SetIndexBuffer(renderMeshLod.IndexBufferView, Graphics::IndexType::Uint32);
                         cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
                         ++Graphics::RenderStats::Instance().MeshCount;
@@ -756,14 +789,20 @@ namespace Insight
                             cmdList->SetUniform(2, 0, object);
 
                             const Runtime::MeshLOD& renderMeshLod = mesh.GetLOD(0);
-                            if (renderMeshLod.VertexBufferView.IsValid())
+#ifdef VERTEX_SPLIT_STREAMS
+                            const Graphics::RHI_BufferView vertexBuffers[] =
                             {
-                                cmdList->SetVertexBuffer(renderMeshLod.VertexBufferView);
-                            }
-                            else
-                            {
-                                //cmdList->SetVertexBuffer(renderMeshLod.Vertex_buffer);
-                            }
+                                renderMeshLod.VertexBuffers.PositionView,
+                                renderMeshLod.VertexBuffers.NormalView,
+                                renderMeshLod.VertexBuffers.ColourView,
+                                renderMeshLod.VertexBuffers.UVView,
+                                renderMeshLod.VertexBuffers.BoneIdsView,
+                                renderMeshLod.VertexBuffers.BoneWeightsView,
+                            };
+                            cmdList->SetVertexBuffer(vertexBuffers, ARRAY_COUNT(vertexBuffers));
+#else
+                            cmdList->SetVertexBuffer(renderMeshLod.VertexBufferView);
+#endif
 
                             cmdList->SetIndexBuffer(renderMeshLod.IndexBufferView, Graphics::IndexType::Uint32);
                             cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
@@ -907,7 +946,20 @@ namespace Insight
                             cmdList->SetUniform(2, 0, object);
 
                             const Runtime::MeshLOD& renderMeshLod = mesh.GetLOD(0);
+#ifdef VERTEX_SPLIT_STREAMS
+                            const Graphics::RHI_BufferView vertexBuffers[] =
+                            {
+                                renderMeshLod.VertexBuffers.PositionView,
+                                renderMeshLod.VertexBuffers.NormalView,
+                                renderMeshLod.VertexBuffers.ColourView,
+                                renderMeshLod.VertexBuffers.UVView,
+                                renderMeshLod.VertexBuffers.BoneIdsView,
+                                renderMeshLod.VertexBuffers.BoneWeightsView,
+                            };
+                            cmdList->SetVertexBuffer(vertexBuffers, ARRAY_COUNT(vertexBuffers));
+#else
                             cmdList->SetVertexBuffer(renderMeshLod.VertexBufferView);
+#endif
                             cmdList->SetIndexBuffer(renderMeshLod.IndexBufferView, Graphics::IndexType::Uint32);
                             cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
                             ++Graphics::RenderStats::Instance().MeshCount;

@@ -88,97 +88,107 @@ namespace Insight
 
 			static std::vector<ShaderInputLayout> GetDefaultShaderInputLayout()
 			{
-#ifdef VERTEX_SPLIT_STREAM
+#ifdef VERTEX_SPLIT_STREAMS
 				return GetShaderInputLayoutFromStreams(Vertices::Stream::All);
 #else
 				return GetShaderInputLayoutFromStreams(Vertices::Stream::Interleaved);
 #endif
 			}
 
-			static std::vector<ShaderInputLayout> GetShaderInputLayoutFromStreams(const Vertices::Stream streams)
+			static std::vector<ShaderInputLayout> GetShaderInputLayoutFromStreams(const Vertices::StreamFlags streams)
 			{
-#ifdef VERTEX_SPLIT_STREAM
-				const int positionSlot = 0;
-				const int normalSlot = 1;
-				const int colourSlot = 2;
-				const int uvSlot = 3;
-				const int boneIdsSlot = 4;
-				const int boneWeightsSlot = 5;
-#else
-				const int positionSlot = 0;
-				const int normalSlot = 0;
-				const int colourSlot = 0;
-				const int uvSlot = 0;
-				const int boneIdsSlot = 0;
-				const int boneWeightsSlot = 0;
+				int vertexSlot = 0;
 
-#endif
 				std::vector<ShaderInputLayout> shaderInputLayout;
 				
-				if ((streams & Vertices::Stream::Position) == 0
-					|| (streams & Vertices::Stream::All) == 0
-					|| (streams & Vertices::Stream::Interleaved) == 0)
+				if (streams & Vertices::Stream::Position
+					|| streams & Vertices::Stream::All
+					|| streams & Vertices::Stream::Interleaved)
 				{
-					shaderInputLayout.push_back(ShaderInputLayout(0, PixelFormat::R32G32B32_Float, positionSlot, 0, "POSITION"));
+					shaderInputLayout.push_back(ShaderInputLayout(0, PixelFormat::R32G32B32_Float, vertexSlot, 0, "POSITION"));
+
+#ifdef VERTEX_SPLIT_STREAMS
+					++vertexSlot;
+#endif
 				}
 
-				if ((streams & Vertices::Stream::Normal) == 0
-					|| (streams & Vertices::Stream::All) == 0
-					|| (streams & Vertices::Stream::Interleaved) == 0)
+				if (streams & Vertices::Stream::Normal
+					|| streams & Vertices::Stream::All
+					|| streams & Vertices::Stream::Interleaved)
 				{
 #ifdef VERTEX_NORMAL_PACKED
-					shaderInputLayout.push_back(ShaderInputLayout(1, PixelFormat::R32_SInt, normalSlot, 0, "NORMAL0"));
+					shaderInputLayout.push_back(ShaderInputLayout(1, PixelFormat::R32_SInt, vertexSlot, 0, "NORMAL0"));
 #else
-					shaderInputLayout.push_back(ShaderInputLayout(1, PixelFormat::R32G32B32_Float, normalSlot, 0, "NORMAL0"));
+					shaderInputLayout.push_back(ShaderInputLayout(1, PixelFormat::R32G32B32_Float, vertexSlot, 0, "NORMAL0"));
+#endif
+
+#ifdef VERTEX_SPLIT_STREAMS
+					++vertexSlot;
 #endif
 				}
 
-				if ((streams & Vertices::Stream::Colour) == 0
-					|| (streams & Vertices::Stream::All) == 0
-					|| (streams & Vertices::Stream::Interleaved) == 0)
+				if (streams & Vertices::Stream::Colour
+					|| streams & Vertices::Stream::All
+					|| streams & Vertices::Stream::Interleaved)
 				{
 #ifdef VERTEX_COLOUR_PACKED
-					shaderInputLayout.push_back(ShaderInputLayout(2, PixelFormat::R32_SInt, colourSlot, 0, "COLOR0"));
+					shaderInputLayout.push_back(ShaderInputLayout(2, PixelFormat::R32_SInt, vertexSlot, 0, "COLOR0"));
 #else
-					shaderInputLayout.push_back(ShaderInputLayout(2, PixelFormat::R32G32B32_Float, colourSlot, 0, "COLOR0"));
+					shaderInputLayout.push_back(ShaderInputLayout(2, PixelFormat::R32G32B32_Float, vertexSlot, 0, "COLOR0"));
+#endif
+
+#ifdef VERTEX_SPLIT_STREAMS
+					++vertexSlot;
 #endif
 				}
 
-				if ((streams & Vertices::Stream::UV) == 0
-					|| (streams & Vertices::Stream::All) == 0
-					|| (streams & Vertices::Stream::Interleaved) == 0)
+				if (streams & Vertices::Stream::UV
+					|| streams & Vertices::Stream::All
+					|| streams & Vertices::Stream::Interleaved)
 				{
 
 #ifdef VERTEX_UV_PACKED
-					shaderInputLayout.push_back(ShaderInputLayout(3, PixelFormat::R32_UInt, uvSlot, 0, "TEXCOORD0"));
+					shaderInputLayout.push_back(ShaderInputLayout(3, PixelFormat::R32_UInt, vertexSlot, 0, "TEXCOORD0"));
 #else
-					shaderInputLayout.push_back(ShaderInputLayout(3, PixelFormat::R32G32_Float, uvSlot, 0, "TEXCOORD0"));
+					shaderInputLayout.push_back(ShaderInputLayout(3, PixelFormat::R32G32_Float, vertexSlot, 0, "TEXCOORD0"));
+#endif
+
+#ifdef VERTEX_SPLIT_STREAMS
+					++vertexSlot;
 #endif
 				}
 
-				if ((streams & Vertices::Stream::BoneId) == 0
-					|| (streams & Vertices::Stream::All) == 0
-					|| (streams & Vertices::Stream::Interleaved) == 0)
+				if (streams & Vertices::Stream::BoneId
+					|| streams & Vertices::Stream::All
+					|| streams & Vertices::Stream::Interleaved)
 				{
 #ifdef VERTEX_BONE_ID_PACKED
-					shaderInputLayout.push_back(ShaderInputLayout(4, PixelFormat::R32_SInt, boneIdsSlot, 0, "BLENDINDICES"));
+					shaderInputLayout.push_back(ShaderInputLayout(4, PixelFormat::R32_SInt, vertexSlot, 0, "BLENDINDICES"));
 #else
-					shaderInputLayout.push_back(ShaderInputLayout(4, PixelFormat::R32G32B32A32_SInt, boneIdsSlot, 0, "BLENDINDICES"));
+					shaderInputLayout.push_back(ShaderInputLayout(4, PixelFormat::R32G32B32A32_SInt, vertexSlot, 0, "BLENDINDICES"));
+#endif
+
+#ifdef VERTEX_SPLIT_STREAMS
+					++vertexSlot;
 #endif
 				}
 
-				if ((streams & Vertices::Stream::BoneWeight) == 0
-					|| (streams & Vertices::Stream::All) == 0
-					|| (streams & Vertices::Stream::Interleaved) == 0)
+				if (streams & Vertices::Stream::BoneWeight
+					|| streams & Vertices::Stream::All
+					|| streams & Vertices::Stream::Interleaved)
 				{
 #ifdef VERTEX_BONE_WEIGHT_PACKED
-					shaderInputLayout.push_back(ShaderInputLayout(5, PixelFormat::R32G32_SInt, boneWeightsSlot, 0, "BLENDWEIGHT"));
+					shaderInputLayout.push_back(ShaderInputLayout(5, PixelFormat::R32G32_SInt, vertexSlot, 0, "BLENDWEIGHT"));
 #else
-					shaderInputLayout.push_back(ShaderInputLayout(5, PixelFormat::R32G32B32A32_Float, boneWeightsSlot, 0, "BLENDWEIGHT"));
+					shaderInputLayout.push_back(ShaderInputLayout(5, PixelFormat::R32G32B32A32_Float, vertexSlot, 0, "BLENDWEIGHT"));
+#endif
+
+#ifdef VERTEX_SPLIT_STREAMS
+					++vertexSlot;
 #endif
 				}
 
-				if ((streams & Vertices::Stream::Interleaved) == 0)
+				if (streams & Vertices::Stream::Interleaved)
 				{
 					int offset = 0;
 					for (ShaderInputLayout& inputLayout : shaderInputLayout)

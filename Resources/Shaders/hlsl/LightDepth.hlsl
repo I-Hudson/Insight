@@ -16,7 +16,7 @@ cbuffer ObjectBuffer : register(b0, space1)
 	int ubo_SkinnedMesh;
 };
 
-VertexOutput VSMain(const GeoVertexInput input)
+VertexOutput VSMain(const ShadowVertexInput input)
 {
 	VertexOutput vsOut;
 	vsOut.Position = float4(input.Position, 1);

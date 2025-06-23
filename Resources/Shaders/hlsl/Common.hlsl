@@ -40,6 +40,23 @@ void SkinMesh(const in GeoVertexInput input, inout float4 position, inout float4
 	worldNormal = mul(BoneTransform, float4(worldNormal.xyz, 1));
 }
 
+float4x4 SkinnedBoneMatrix(const in ShadowVertexInput input)
+{
+	float4x4 BoneTransform = ZERO_MATRIX; 
+	BoneTransform += bpo_BoneMatrices[GetVertexBondId(input.BoneIds, 0)] * GetVertexBoneWeight(input.BoneWeights, 0);
+    BoneTransform += bpo_BoneMatrices[GetVertexBondId(input.BoneIds, 1)] * GetVertexBoneWeight(input.BoneWeights, 1);
+    BoneTransform += bpo_BoneMatrices[GetVertexBondId(input.BoneIds, 2)] * GetVertexBoneWeight(input.BoneWeights, 2);
+    BoneTransform += bpo_BoneMatrices[GetVertexBondId(input.BoneIds, 3)] * GetVertexBoneWeight(input.BoneWeights, 3);
+	return BoneTransform;
+}
+
+void SkinMesh(const in ShadowVertexInput input, inout float4 position, inout float4 worldNormal)
+{
+	const float4x4 BoneTransform = SkinnedBoneMatrix(input);
+	position = mul(BoneTransform, float4(position.xyz, 1));
+	worldNormal = mul(BoneTransform, float4(worldNormal.xyz, 1));
+}
+
 float LineariseFloat(const float v, const float min, const float max)
 {
 	return min * max / (max + v * (min - max));

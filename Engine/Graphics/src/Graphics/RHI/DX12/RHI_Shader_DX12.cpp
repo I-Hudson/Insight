@@ -111,6 +111,8 @@ namespace Insight
 
                 m_inputElements = {};
                 int stride = 0;
+                int previousSlot = 0;
+
                 for (size_t i = 0; i < m_shaderInputLayout.size(); ++i)
                 {
                     ShaderInputLayout& inputLayout = m_shaderInputLayout.at(i);
@@ -125,6 +127,12 @@ namespace Insight
                     if (semanticIndex.size() > 0)
                     {
                         std::reverse(semanticIndex.begin(), semanticIndex.end());
+                    }
+
+                    if (previousSlot != inputLayout.Slot)
+                    {
+                        previousSlot = inputLayout.Slot;
+                        stride = 0;
                     }
 
                     D3D12_INPUT_ELEMENT_DESC input;

@@ -27,7 +27,7 @@ function InsightDefines.All()
         --"VERTEX_UV_PACKED",
         "VERTEX_BONE_ID_PACKED",
         --"VERTEX_BONE_WEIGHT_PACKED",
-        --"VERTEX_SPLIT_STREAMS",
+        "VERTEX_SPLIT_STREAMS",
 
         "RENDER_FRAME_ALLOCATE_GPU_SKINNED_MESHES",
 

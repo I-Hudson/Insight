@@ -674,22 +674,14 @@ namespace Insight
 				std::string name = interfaceVariable->name;
 				name = name.substr(name.find_last_of('.') + 1);
 
-				int slot = 0;
-#ifdef VERTEX_SPLIT_STREAM
-				for (size_t streamIdx = 0; streamIdx < (u64)Vertices::Stream::Count; ++streamIdx)
-				{
-					if (name == Vertices::StreamNames[streamIdx])
-					{
-						slot = streamIdx;
-						break;
-					}
-				}
-#endif
-
 				ShaderInputLayout layout(
 					interfaceVariable->location,
 					SpvFormatToPixelFormat(interfaceVariable->format),
-					slot,
+#ifdef VERTEX_SPLIT_STREAMS
+					i,
+#else
+					0,
+#endif
 					stride,
 					std::move(name));
 				inputLayout.push_back(layout);

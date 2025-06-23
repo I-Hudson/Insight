@@ -105,6 +105,7 @@ namespace Insight
 			virtual void SetLineWidth(float width) = 0;
 
 			virtual void SetVertexBuffer(const RHI_BufferView& bufferView) = 0;
+			virtual void SetVertexBuffer(const RHI_BufferView* bufferViews, const int viewCount) = 0;
 			void SetVertexBuffer(RHI_Buffer* buffer) { if (buffer) { SetVertexBuffer(RHI_BufferView(buffer, 0, buffer->GetSize())); } }
 
 			virtual void SetIndexBuffer(const RHI_BufferView& bufferView, const IndexType index_type) = 0;
@@ -151,7 +152,7 @@ namespace Insight
 
 			DescriptorAllocator* m_descriptorAllocator = nullptr;
 
-			RHI_BufferView m_boundVertexBufferView;
+			std::unordered_set<RHI_BufferView> m_boundVertexBufferViews;
 			RHI_BufferView m_boundIndexBufferView;
 
 			friend class RenderContext;

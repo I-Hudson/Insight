@@ -413,20 +413,42 @@ namespace Insight
 			{
 				IS_PROFILE_FUNCTION();
 
-				if (!bufferView.IsValid() || bufferView == m_boundVertexBufferView)
+				RHI_BufferView views[] =
 				{
-					return;
+					bufferView
+				};
+				SetVertexBuffer(views, 1);
+			}
+
+			void RHI_CommandList_Vulkan::SetVertexBuffer(const RHI_BufferView* bufferViews, const int viewCount)
+			{
+				IS_PROFILE_FUNCTION();
+
+				VkBuffer vkBuffers[16];
+				VkDeviceSize vkOffsets[16];
+
+				for (size_t i = 0; i < viewCount; ++i)
+				{
+					const RHI_BufferView& bufferView = bufferViews[i];
+					ASSERT(bufferView.IsValid());
+
+					if (m_boundVertexBufferViews.find(bufferView) != m_boundVertexBufferViews.end())
+					{
+						m_context->GetResourceRenderTracker().TrackResource(bufferView.GetBuffer());
+						continue;
+					}
+					m_boundVertexBufferViews.insert(bufferView);
+
+					const RHI_Buffer_Vulkan* bufferVulkan = static_cast<RHI_Buffer_Vulkan*>(bufferView.GetBuffer());
+					vkBuffers[i] = { bufferVulkan->GetBuffer() };
+					vkOffsets[i] = { bufferView.GetOffset() };
+					m_context->GetResourceRenderTracker().TrackResource(bufferView.GetBuffer());
 				}
 
-				m_boundVertexBufferView = bufferView;
-				const RHI_Buffer_Vulkan* bufferVulkan = static_cast<RHI_Buffer_Vulkan*>(bufferView.GetBuffer());
-				std::array<VkBuffer, 1> buffers = { bufferVulkan->GetBuffer() };
-				std::array<VkDeviceSize, 1> offsets = { bufferView.GetOffset() };
 				{
 					IS_PROFILE_SCOPE("bindVertexBuffers");
-					vkCmdBindVertexBuffers(m_commandList, 0, static_cast<u32>(buffers.size()), buffers.data(), offsets.data());
-					RenderStats::Instance().VertexBufferBindings++;
-					m_context->GetResourceRenderTracker().TrackResource(bufferView.GetBuffer());
+					vkCmdBindVertexBuffers(m_commandList, 0, viewCount, vkBuffers, vkOffsets);
+					RenderStats::Instance().VertexBufferBindings += viewCount;
 				}
 			}
 
