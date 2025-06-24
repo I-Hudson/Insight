@@ -273,9 +273,9 @@ namespace Insight
 
 #else
 #ifdef VERTEX_BONE_ID_PACKED
-				int& vBoneId = vertex.BoneIds[boneIdx];
+				int& vBoneId = Vertices[vertexId].BoneIds;
 #else
-				float& vBoneId = vertex.BoneIds[boneIdx];
+				float& vBoneId = Vertices[vertexId].BoneIds[boneIdx];
 #endif
 
 #endif
