@@ -101,7 +101,7 @@ namespace Insight
 					IID_PPV_ARGS(&m_device)
 				));
 
-				if (!m_desc.GPUValidation)
+				if (!m_desc.GPUValidation && !RenderDocAPI::Instance().IsInitialised())
 				{
 					m_gpuCrashTracker = RHI_GPUCrashTracker::Create();
 					if (m_gpuCrashTracker)
