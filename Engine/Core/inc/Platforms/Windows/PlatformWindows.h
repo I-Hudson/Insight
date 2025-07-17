@@ -94,6 +94,7 @@ namespace Insight
 			static u32 s_mainThreadId;
 			static unsigned long s_processId;
 			static void* s_memoryReadProcessHandle;
+			static bool s_isInitialised;
 		};
 
 	}

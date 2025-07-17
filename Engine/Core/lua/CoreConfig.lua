@@ -83,6 +83,7 @@ function CoreConfig.FilterPlatforms(AMD_Ryzen_Master_SDK, OutputDir)
             }
             links
             {
+                "WindowsApp.lib",
                 "Platform.lib",
                 "Device.lib",
             }

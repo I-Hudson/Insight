@@ -19,6 +19,8 @@
 
 #include <psapi.h>
 
+#include <roapi.h>
+
 #include <rpc.h>
 #include <Objbase.h>
 #include <CommCtrl.h>
@@ -46,6 +48,7 @@ namespace Insight
 		u32 PlatformWindows::s_mainThreadId;
 		unsigned long PlatformWindows::s_processId;
 		void* PlatformWindows::s_memoryReadProcessHandle;
+		bool PlatformWindows::s_isInitialised = false;
 
 		class CPUID 
 		{
@@ -81,6 +84,11 @@ namespace Insight
 
 		void PlatformWindows::Initialise()
 		{
+			if (s_isInitialised)
+			{
+				IS_LOG_CORE_WARN("[PlatformWindows::Shutdown] Can't call 'Initialise' if the platform has already been initialised.");
+			}
+
 			ASSERT(SUCCEEDED(CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED)));
 
 			INITCOMMONCONTROLSEX iccex;
@@ -94,12 +102,21 @@ namespace Insight
 			s_mainThreadId = GetCurrentThreadId();
 			s_processId = GetCurrentProcessId();
 			s_memoryReadProcessHandle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, s_processId);
+
+			s_isInitialised = true;
 		}
 
 		void PlatformWindows::Shutdown()
 		{
+			if (!s_isInitialised)
+			{
+				IS_LOG_CORE_WARN("[PlatformWindows::Shutdown] Can't call 'Shutdown' unless platform is initialised.");
+			}
+
 			CloseHandle(s_memoryReadProcessHandle);
 			CoUninitialize();
+
+			s_isInitialised = false;
 		}
 
 		void PlatformWindows::MemCopy(void* dst, void const* src, u64 size)
