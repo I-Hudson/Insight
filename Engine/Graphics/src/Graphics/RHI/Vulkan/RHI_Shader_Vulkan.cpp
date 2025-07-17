@@ -8,6 +8,7 @@
 #include "Graphics/RHI/Vulkan/VulkanUtils.h"
 
 #include "Core/Logger.h"
+#include "FileSystem/FileSystem.h"
 
 #ifdef IS_PLATFORM_WINDOWS
 #include <Windows.h>
@@ -41,12 +42,16 @@ namespace Insight
 				m_shaderDesc = desc;
 
 				ASSERT(m_shaderDesc.IsValid());
-				if (m_shaderDesc.Stages & ShaderStageFlagBits::ShaderStage_Vertex) { CompileStage(ShaderStageFlagBits::ShaderStage_Vertex, m_shaderDesc.ShaderData, 0); }
-				if (m_shaderDesc.Stages & ShaderStageFlagBits::ShaderStage_TessControl) { CompileStage(ShaderStageFlagBits::ShaderStage_TessControl, m_shaderDesc.ShaderData, 1); }
-				if (m_shaderDesc.Stages & ShaderStageFlagBits::ShaderStage_TessEval) { CompileStage(ShaderStageFlagBits::ShaderStage_TessEval, m_shaderDesc.ShaderData, 2); }
-				if (m_shaderDesc.Stages & ShaderStageFlagBits::ShaderStage_Geometry) { CompileStage(ShaderStageFlagBits::ShaderStage_Geometry, m_shaderDesc.ShaderData, 3); }
-				if (m_shaderDesc.Stages & ShaderStageFlagBits::ShaderStage_Pixel) { CompileStage(ShaderStageFlagBits::ShaderStage_Pixel, m_shaderDesc.ShaderData, 4); }
-				if (m_shaderDesc.Stages & ShaderStageFlagBits::ShaderStage_Compute) { CompileStage(ShaderStageFlagBits::ShaderStage_Compute, m_shaderDesc.ShaderData, 5); }
+
+				const std::vector<Byte> shaderData = FileSystem::ReadFromFile(desc.ShaderDataPath);
+				ASSERT(!shaderData.empty());
+
+				if (m_shaderDesc.Stages & ShaderStageFlagBits::ShaderStage_Vertex) { CompileStage(ShaderStageFlagBits::ShaderStage_Vertex, shaderData, 0); }
+				if (m_shaderDesc.Stages & ShaderStageFlagBits::ShaderStage_TessControl) { CompileStage(ShaderStageFlagBits::ShaderStage_TessControl, shaderData, 1); }
+				if (m_shaderDesc.Stages & ShaderStageFlagBits::ShaderStage_TessEval) { CompileStage(ShaderStageFlagBits::ShaderStage_TessEval, shaderData, 2); }
+				if (m_shaderDesc.Stages & ShaderStageFlagBits::ShaderStage_Geometry) { CompileStage(ShaderStageFlagBits::ShaderStage_Geometry, shaderData, 3); }
+				if (m_shaderDesc.Stages & ShaderStageFlagBits::ShaderStage_Pixel) { CompileStage(ShaderStageFlagBits::ShaderStage_Pixel, shaderData, 4); }
+				if (m_shaderDesc.Stages & ShaderStageFlagBits::ShaderStage_Compute) { CompileStage(ShaderStageFlagBits::ShaderStage_Compute, shaderData, 5); }
 
 				CreateVertexInputLayout(desc);
 			}
@@ -102,8 +107,11 @@ namespace Insight
 				}
 				else
 				{
+					const std::vector<Byte> shaderData = FileSystem::ReadFromFile(desc.ShaderDataPath);
+					ASSERT(!shaderData.empty());
+
 					ShaderCompiler compiler;
-					compiler.Compile(ShaderStage_Vertex, desc.ShaderName, desc.ShaderData, ShaderCompilerLanguage::Hlsl);
+					compiler.Compile(ShaderStage_Vertex, desc.ShaderName, shaderData, ShaderCompilerLanguage::Hlsl);
 					m_shaderInputLayout = compiler.GetInputLayout();
 				}
 

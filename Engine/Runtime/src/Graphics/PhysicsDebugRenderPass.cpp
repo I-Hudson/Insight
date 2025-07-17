@@ -33,8 +33,8 @@ namespace Insight
                     });
             }
 
-            std::vector<Byte> shaderData = Runtime::AssetRegistry::Instance().LoadAssetData(EnginePaths::GetResourcePath() + "/Shaders/hlsl/PhysicsDebugLine.hlsl");
-            ShaderDesc shaderDesc("PhysicsDebugPass_LineShader", shaderData, ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
+            ShaderDesc shaderDesc("PhysicsDebugPass_LineShader", EnginePaths::GetResourcePath() + "/Shaders/hlsl/PhysicsDebugLine.hlsl"
+                , ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
             shaderDesc.InputLayout = 
             {
                 ShaderInputLayout(0, PixelFormat::R32G32B32A32_Float, 0, 0, "POSITION"),
@@ -43,8 +43,8 @@ namespace Insight
             };
             RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
 
-            std::vector<Byte> triangleShaderData = Runtime::AssetRegistry::Instance().LoadAssetData(EnginePaths::GetResourcePath() + "/Shaders/hlsl/PhysicsDebugTriangle.hlsl");
-            ShaderDesc triangleShaderDesc("PhysicsDebugPass_TriangleShader", triangleShaderData, ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
+            ShaderDesc triangleShaderDesc("PhysicsDebugPass_TriangleShader", EnginePaths::GetResourcePath() + "/Shaders/hlsl/PhysicsDebugTriangle.hlsl"
+                , ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
             triangleShaderDesc.InputLayout =
             {
                 ShaderInputLayout(0, PixelFormat::R32G32B32A32_Float, 0, 0, "POSITION"),

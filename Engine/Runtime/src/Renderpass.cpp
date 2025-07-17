@@ -1528,8 +1528,7 @@ namespace Insight
 
 		void Renderpass::CreateAllCommonShaders()
 		{
-			std::vector<Byte> shaderData = Runtime::AssetRegistry::Instance().LoadAssetData(EnginePaths::GetResourcePath() + "/Shaders/hlsl/Cascade_Shadow.hlsl");
-			ShaderDesc shaderDesc("CascadeShaderMap", shaderData, ShaderStageFlagBits::ShaderStage_Vertex);
+			ShaderDesc shaderDesc("CascadeShaderMap", EnginePaths::GetResourcePath() + "/Shaders/hlsl/Cascade_Shadow.hlsl", ShaderStageFlagBits::ShaderStage_Vertex);
 #ifdef VERTEX_SPLIT_STREAMS
 			shaderDesc.InputLayout = ShaderDesc::GetShaderInputLayoutFromStreams(
 				Graphics::Vertices::Stream::Position
@@ -1540,8 +1539,7 @@ namespace Insight
 #endif
 			RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
 
-			shaderData = Runtime::AssetRegistry::Instance().LoadAssetData(EnginePaths::GetResourcePath() + "/Shaders/hlsl/Depth_Prepass.hlsl");
-			shaderDesc = ShaderDesc("DepthPrepass", shaderData, ShaderStageFlagBits::ShaderStage_Vertex);
+			shaderDesc = ShaderDesc("DepthPrepass", EnginePaths::GetResourcePath() + "/Shaders/hlsl/Depth_Prepass.hlsl", ShaderStageFlagBits::ShaderStage_Vertex);
 #ifdef VERTEX_SPLIT_STREAMS
 			shaderDesc.InputLayout = ShaderDesc::GetShaderInputLayoutFromStreams(
 				Graphics::Vertices::Stream::Position
@@ -1552,8 +1550,7 @@ namespace Insight
 #endif
 			//RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
 
-			shaderData = Runtime::AssetRegistry::Instance().LoadAssetData(EnginePaths::GetResourcePath() + "/Shaders/hlsl/LightDepth.hlsl");
-			shaderDesc = ShaderDesc("LightShadowPass", shaderData, ShaderStageFlagBits::ShaderStage_Vertex);
+			shaderDesc = ShaderDesc("LightShadowPass", EnginePaths::GetResourcePath() + "/Shaders/hlsl/LightDepth.hlsl", ShaderStageFlagBits::ShaderStage_Vertex);
 #ifdef VERTEX_SPLIT_STREAMS
 			shaderDesc.InputLayout = ShaderDesc::GetShaderInputLayoutFromStreams(
 				Graphics::Vertices::Stream::Position
@@ -1564,33 +1561,26 @@ namespace Insight
 #endif
 			RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
 
-			shaderData = Runtime::AssetRegistry::Instance().LoadAssetData(EnginePaths::GetResourcePath() + "/Shaders/hlsl/GBuffer.hlsl");
-			shaderDesc = ShaderDesc("GBuffer", shaderData, ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
+			shaderDesc = ShaderDesc("GBuffer", EnginePaths::GetResourcePath() + "/Shaders/hlsl/GBuffer.hlsl", ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
 			shaderDesc.InputLayout = ShaderDesc::GetDefaultShaderInputLayout();
 			RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
 
-			shaderData = Runtime::AssetRegistry::Instance().LoadAssetData(EnginePaths::GetResourcePath() + "/Shaders/hlsl/Composite.hlsl");
-			shaderDesc = ShaderDesc("Composite", shaderData, ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
+			shaderDesc = ShaderDesc("Composite", EnginePaths::GetResourcePath() + "/Shaders/hlsl/Composite.hlsl", ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
 			RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
 
-			shaderData = Runtime::AssetRegistry::Instance().LoadAssetData(EnginePaths::GetResourcePath() + "/Shaders/hlsl/GFXHelper.hlsl");
-			shaderDesc = ShaderDesc("GFXHelper", shaderData, ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
+			shaderDesc = ShaderDesc("GFXHelper", EnginePaths::GetResourcePath() + "/Shaders/hlsl/GFXHelper.hlsl", ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
 			RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
 
-			shaderData = Runtime::AssetRegistry::Instance().LoadAssetData(EnginePaths::GetResourcePath() + "/Shaders/hlsl/Swapchain.hlsl");
-			shaderDesc = ShaderDesc("Swapchain", shaderData, ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
+			shaderDesc = ShaderDesc("Swapchain", EnginePaths::GetResourcePath() + "/Shaders/hlsl/Swapchain.hlsl", ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
 			RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
 
-			shaderData = Runtime::AssetRegistry::Instance().LoadAssetData(EnginePaths::GetResourcePath() + "/Shaders/hlsl/LightPass.hlsl");
-			shaderDesc = ShaderDesc("LightPass", shaderData, ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
+			shaderDesc = ShaderDesc("LightPass", EnginePaths::GetResourcePath() + "/Shaders/hlsl/LightPass.hlsl", ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
 			RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
 
-			shaderData = Runtime::AssetRegistry::Instance().LoadAssetData(EnginePaths::GetResourcePath() + "/Shaders/hlsl/LightPassCompute.hlsl");
-			shaderDesc = ShaderDesc("LightPassCompute", shaderData, ShaderStageFlagBits::ShaderStage_Compute);
+			shaderDesc = ShaderDesc("LightPassCompute", EnginePaths::GetResourcePath() + "/Shaders/hlsl/LightPassCompute.hlsl", ShaderStageFlagBits::ShaderStage_Compute);
 			RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
 
-			shaderData = Runtime::AssetRegistry::Instance().LoadAssetData(EnginePaths::GetResourcePath() + "/Shaders/hlsl/ComputeSkinning.hlsl");
-			shaderDesc = ShaderDesc("ComputeSkinning", shaderData, ShaderStageFlagBits::ShaderStage_Compute);
+			shaderDesc = ShaderDesc("ComputeSkinning", EnginePaths::GetResourcePath() + "/Shaders/hlsl/ComputeSkinning.hlsl", ShaderStageFlagBits::ShaderStage_Compute);
 			RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
 		}
 

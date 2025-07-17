@@ -96,7 +96,7 @@ namespace Insight
         }
 
         std::fstream fileStream;
-        fileStream.exceptions(std::fstream::failbit | std::fstream::badbit);
+        //fileStream.exceptions(std::fstream::failbit | std::fstream::badbit);
 
         try
         {

@@ -54,8 +54,7 @@ namespace Insight
 					});
 			}
 
-			std::vector<Byte> shaderData = Runtime::AssetRegistry::Instance().LoadAssetData(EnginePaths::GetResourcePath() + "/Shaders/hlsl/ImGui.hlsl");
-			ShaderDesc shaderDesc("ImGui", shaderData, ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
+			ShaderDesc shaderDesc("ImGui", EnginePaths::GetResourcePath() + "/Shaders/hlsl/ImGui.hlsl", ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
 			shaderDesc.InputLayout =
 			{
 				ShaderInputLayout(0, PixelFormat::R32G32_Float, 0, offsetof(ImDrawVert, pos), "POSITION"),

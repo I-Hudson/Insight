@@ -45,8 +45,8 @@ namespace Insight
 			ShaderDesc()
 			{ }
 
-			ShaderDesc(std::string shaderName, std::vector<Byte> shaderData, ShaderStageFlags stages)
-				: ShaderName(shaderName), ShaderData(shaderData), Stages(stages)
+			ShaderDesc(std::string shaderName, std::string shaderDataPath, ShaderStageFlags stages)
+				: ShaderName(shaderName), ShaderDataPath(shaderDataPath), Stages(stages)
 			{ }
 
 			~ShaderDesc()
@@ -54,7 +54,7 @@ namespace Insight
 			}
 
 			std::string ShaderName = "";
-			std::vector<Byte> ShaderData;
+			std::string ShaderDataPath;
 			ShaderStageFlags Stages;
 
 			std::string MainFunc = "Main";

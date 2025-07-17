@@ -358,6 +358,8 @@ namespace Insight
 
 			bool prepareRenderer = PrepareRender();
 
+			m_shaderManager.ReloadShaders();
+
 			RHI_CommandList* cmdList = nullptr;
 			cmdList = GetCommandListManager().GetCommandList();
 			m_gpuProfiler.BeginFrame(cmdList);

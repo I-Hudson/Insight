@@ -71,6 +71,52 @@ namespace Insight
 			return shader;
 		}
 
+		void RHI_ShaderManager::ReloadShaders()
+		{
+			std::lock_guard lock(m_shadersToReloadLock);
+			if (!m_shadersToReload.empty())
+			{
+				m_context->GpuWaitForIdle();
+				for (size_t i = 0; i < m_shadersToReload.size(); ++i)
+				{
+					RHI_Shader* shader = m_shadersToReload[i];
+					shader->Destroy();
+					shader->Create(m_context, shader->GetDesc());
+
+					m_context->GetPipelineManager().DestroyPipelineWithShader(shader->GetDesc());
+				}
+
+				m_shadersToReload.clear();
+			}
+		}
+
+		void RHI_ShaderManager::ReloadShader(std::string_view shaderName)
+		{
+			RHI_Shader* shaderPtr = nullptr;
+			std::lock_guard shaderLock(m_shaderLock);
+			for (const auto& [hash, shader] : m_shaders)
+			{
+				if (shader->GetDesc().ShaderName == shaderName) 
+				{
+					shaderPtr = shader;
+					break;
+				}
+			}
+
+			ReloadShader(shaderPtr);
+		}
+
+		void RHI_ShaderManager::ReloadShader(RHI_Shader* shader)
+		{
+			if (!shader)
+			{
+				IS_LOG_CORE_WARN("[RHI_ShaderManager::ReloadShader] Null shader pointer.");
+				return;
+			}
+			std::lock_guard lock(m_shadersToReloadLock);
+			m_shadersToReload.push_back(shader);
+		}
+
 		void RHI_ShaderManager::DestroyShader(RHI_Shader* shader)
 		{
 			if (!shader)
@@ -240,7 +286,7 @@ namespace Insight
 			arguments.push_back(L"-Qstrip_debug");
 			//arguments.push_back(L"-Qstrip_reflect");
 
-			arguments.push_back(L"-Wnull-character");
+			arguments.push_back(L"-Wno-null-character");
 
 
 			// Tell the compiler to output SPIR-V
@@ -313,7 +359,7 @@ namespace Insight
 			// IDxcCompiler3::Compile will always return an error buffer, but its length will be zero if there are no warnings or errors.
 			if (pErrors != nullptr && pErrors->GetStringLength() != 0)
 			{
-				IS_LOG_CORE_ERROR(fmt::format("Shader compilation failed : \n\n{}", pErrors->GetStringPointer()));
+				IS_LOG_CORE_ERROR(fmt::format("Shader compilation failed '{}': \n\n{}", name.c_str(), pErrors->GetStringPointer()));
 			}
 			pErrors->Release();
 
@@ -325,7 +371,7 @@ namespace Insight
 			{
 				LPCSTR strPointer = pErrors->GetStringPointer();
 				SIZE_T strLength = pErrors->GetBufferSize();
-				IS_LOG_CORE_ERROR(fmt::format("Shader compilation failed : \n\nName: {} \n\n Error: {}", name, strPointer));
+				IS_LOG_CORE_ERROR(fmt::format("Shader compilation failed : \n\nName: {} \n\n Error: {}", name.c_str(), strPointer));
 			}
 			pErrors->Release();
 

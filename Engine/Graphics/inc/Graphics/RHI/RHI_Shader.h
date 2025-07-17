@@ -61,6 +61,10 @@ namespace Insight
 			void SetRenderContext(RenderContext* context) { m_context = context; }
 			RHI_Shader* GetOrCreateShader(ShaderDesc desc);
 
+			void ReloadShaders();
+			void ReloadShader(std::string_view shaderName);
+			void ReloadShader(RHI_Shader* shader);
+
 			void DestroyShader(RHI_Shader* shader);
 
 			std::vector<RHI_Shader*> GetAllShaders() const;
@@ -69,6 +73,10 @@ namespace Insight
 		private:
 			std::map<u64, RHI_Shader*> m_shaders;
 			mutable std::mutex m_shaderLock;
+
+			std::vector<RHI_Shader*> m_shadersToReload;
+			mutable std::mutex m_shadersToReloadLock;
+
 			RenderContext* m_context{ nullptr };
 		};
 

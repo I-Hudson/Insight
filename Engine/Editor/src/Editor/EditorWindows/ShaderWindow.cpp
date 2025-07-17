@@ -25,20 +25,31 @@ namespace Insight
 			Graphics::RHI_ShaderManager& shaderManger = Graphics::RenderContext::Instance().GetShaderManager();
 			const std::vector<Graphics::RHI_Shader*> shaders = shaderManger.GetAllShaders();
 
-			if (ImGui::BeginTable("##ShaderWindowTable", 3))
+			bool reloadAllShaders = false;
+			if (ImGui::Button("ReloadAll###ReloadAllShaders"))
 			{
-				ImGui::TableSetupColumn("Name");
+				reloadAllShaders = true;
+			}
 
-				ImGui::TableHeadersRow();
-				ImGui::TableNextColumn();
-
+			ImGui::Text("Shaders");
+			if (ImGui::BeginTable("##ShaderWindowTable", 2))
+			{
 				for (size_t shaderIdx = 0; shaderIdx < shaders.size(); ++shaderIdx)
 				{
-					Graphics::RHI_Shader* shader = shaders[shaderIdx];
-
-					ImGui::Text("%s", shader->GetDesc().ShaderName.c_str());
 					ImGui::TableNextColumn();
+
+					Graphics::RHI_Shader* shader = shaders[shaderIdx];
+					ImGui::Text("%s", shader->GetDesc().ShaderName.c_str());
+
+					ImGui::TableNextColumn();
+
+					std::string label = "Reload###" + shader->GetDesc().ShaderName;
+					if (ImGui::Button(label.c_str()) || reloadAllShaders)
+					{
+						Graphics::RenderContext::Instance().GetShaderManager().ReloadShader(shader);
+					}
 				}
+
 				ImGui::EndTable();
 			}
 		}
