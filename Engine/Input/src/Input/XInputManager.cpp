@@ -146,7 +146,7 @@ namespace Insight
 				return;
 			}
 
-			HMODULE moduleHandle = LoadLibrary(TEXT("XInput1_4.dll"));
+			const HMODULE moduleHandle = LoadLibraryW(L"XInput1_4.dll");
 			if (moduleHandle)
 			{
 				XInputGetCapabilitiesEx = Platform::GetDynamicFunctionFromSignature<_XInputGetCapabilitiesEx>(moduleHandle, (char*)108);

@@ -6,7 +6,7 @@ namespace Insight::Editor
     {
     }
 
-    HotReloadMetaData::HotReloadMetaData(HotReloadMetaData&& other) NO_EXPECT
+    HotReloadMetaData::HotReloadMetaData(HotReloadMetaData&& other)
     {
         (*this) = std::move(other);
     }
@@ -15,7 +15,7 @@ namespace Insight::Editor
     {
     }
 
-    HotReloadMetaData& HotReloadMetaData::operator=(HotReloadMetaData&& other) NO_EXPECT
+    HotReloadMetaData& HotReloadMetaData::operator=(HotReloadMetaData&& other)
     {
         EditorWindowNames = std::move(other.EditorWindowNames);
         ComponentNames = std::move(other.ComponentNames);

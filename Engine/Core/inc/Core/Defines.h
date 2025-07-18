@@ -56,7 +56,7 @@
 #define INLINE inline
 #define FORCE_INLINE inline
 #define FORCE_NOINLINE __attribute__((noinline))
-#define NO_EXPECT
+#define NO_EXPECT __attribute__((nothrow))
 #define CONSTEXPR constexpr
 #define NO_RETURN __attribute__((noreturn))
 #define PACK_BEGIN()

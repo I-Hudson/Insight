@@ -176,7 +176,6 @@ end
 function RuntimeConfig.FilterPlatforms(AMD_Ryzen_Master_SDK, OutputDir)
     filter "system:Windows"
     	system "windows"
-    	toolset("msc-v143")
         defines
         {
             "IS_PLATFORM_WINDOWS",

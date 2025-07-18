@@ -13,6 +13,8 @@
 
 #include <assimp/matrix4x4.h>
 #include <assimp/quaternion.h>
+#include <assimp/material.h>
+
 #include <vector>
 
 #define EXP_MODEL_LOADING 1
@@ -20,9 +22,7 @@
 struct aiNode;
 struct aiScene;
 struct aiMesh;
-struct aiMaterial;
 struct aiAnimation;
-enum aiTextureType : int;
 
 namespace Insight
 {

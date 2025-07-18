@@ -10,7 +10,7 @@ namespace Insight
 	{
 		GUID GUID::s_InvalidGUID = GUID(0, 0, 0, { 0,0,0,0,0,0,0,0 });
 
-		GUID::GUID() NO_EXPECT
+		GUID::GUID()
 		{
 			Platform::AssignGUID(*this);
 		}
@@ -37,7 +37,7 @@ namespace Insight
 			}
 		}
 
-		GUID::GUID(const GUID& other) NO_EXPECT
+		GUID::GUID(const GUID& other)
 		{
 			m_data1 = other.m_data1;
 			m_data2 = other.m_data2;
@@ -48,7 +48,7 @@ namespace Insight
 			}
 		}
 
-		GUID::GUID(GUID&& other) NO_EXPECT
+		GUID::GUID(GUID&& other)
 		{
 			m_data1 = other.m_data1;
 			m_data2 = other.m_data2;
@@ -64,7 +64,7 @@ namespace Insight
 			Platform::MemSet(other.m_data4, 0, sizeof(other.m_data4));
 		}
 
-		GUID& GUID::operator=(const GUID& other) NO_EXPECT
+		GUID& GUID::operator=(const GUID& other)
 		{
 			m_data1 = other.m_data1;
 			m_data2 = other.m_data2;
@@ -76,7 +76,7 @@ namespace Insight
 			return *this;
 		}
 
-		GUID& GUID::operator=(GUID&& other) NO_EXPECT
+		GUID& GUID::operator=(GUID&& other)
 		{
 			m_data1 = other.m_data1;
 			m_data2 = other.m_data2;

@@ -4,9 +4,9 @@ namespace Insight
 {
 	namespace Graphics
 	{
-		DescriptorBinding::DescriptorBinding() NO_EXPECT
+		DescriptorBinding::DescriptorBinding()
 		{ }
-		DescriptorBinding::DescriptorBinding(const u32 set, const u32 binding, const u32 stages, const u32 size, const u32 count, const DescriptorType type) NO_EXPECT
+		DescriptorBinding::DescriptorBinding(const u32 set, const u32 binding, const u32 stages, const u32 size, const u32 count, const DescriptorType type)
 			: Set(set)
 			, Binding(binding)
 			, Stages(stages)
@@ -169,9 +169,9 @@ namespace Insight
 		//----------------------------------------------------------------
 		// DescriptorSet
 		//----------------------------------------------------------------
-		DescriptorSet::DescriptorSet() NO_EXPECT
+		DescriptorSet::DescriptorSet()
 		{ }
-		DescriptorSet::DescriptorSet(std::string name, int set, std::vector<DescriptorBinding> bindings) NO_EXPECT
+		DescriptorSet::DescriptorSet(std::string name, int set, std::vector<DescriptorBinding> bindings)
 			: Name(std::move(name))
 			, Set(set)
 			, Bindings(std::move(bindings))

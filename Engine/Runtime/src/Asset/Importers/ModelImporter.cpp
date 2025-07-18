@@ -980,11 +980,11 @@ namespace Insight
 			const std::string_view Directory = modelAsset->GetAssetInfo()->FilePath;
 
 			std::unordered_map<TextureAssetTypes, AssetAsyncRequest> loadedTexturesAsync;
-			loadedTexturesAsync[TextureAssetTypes::Diffuse] = LoadTextureAsync(aiScene, aiMaterial, aiTextureType_BASE_COLOR, aiTextureType_DIFFUSE, modelAsset);
-			loadedTexturesAsync[TextureAssetTypes::Normal] = LoadTextureAsync(aiScene, aiMaterial, aiTextureType_NORMAL_CAMERA, aiTextureType_NORMALS, modelAsset);
+			loadedTexturesAsync[TextureAssetTypes::Diffuse] = LoadTextureAsync(aiScene, aiMaterial, aiTextureType::aiTextureType_BASE_COLOR, aiTextureType::aiTextureType_DIFFUSE, modelAsset);
+			loadedTexturesAsync[TextureAssetTypes::Normal] = LoadTextureAsync(aiScene, aiMaterial, aiTextureType::aiTextureType_NORMAL_CAMERA, aiTextureType::aiTextureType_NORMALS, modelAsset);
 
-			material->SetTexture(TextureAssetTypes::Diffuse, LoadTexture(aiScene, aiMaterial, aiTextureType_BASE_COLOR, aiTextureType_DIFFUSE, modelAsset));
-			material->SetTexture(TextureAssetTypes::Normal, LoadTexture(aiScene, aiMaterial, aiTextureType_NORMAL_CAMERA, aiTextureType_NORMALS, modelAsset));
+			material->SetTexture(TextureAssetTypes::Diffuse, LoadTexture(aiScene, aiMaterial, aiTextureType::aiTextureType_BASE_COLOR, aiTextureType::aiTextureType_DIFFUSE, modelAsset));
+			material->SetTexture(TextureAssetTypes::Normal, LoadTexture(aiScene, aiMaterial, aiTextureType::aiTextureType_NORMAL_CAMERA, aiTextureType::aiTextureType_NORMALS, modelAsset));
 
 			aiColor4D colour(1.0f);
 			aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_DIFFUSE, &colour);
@@ -1780,7 +1780,7 @@ namespace Insight
 
 		std::string ModelImporter::GetTexturePath(const aiMaterial* aiMaterial, const std::string_view directory, const aiTextureType textureTypePBR, const aiTextureType textureTypeLegacy) const
 		{
-			aiTextureType textureType = aiTextureType_NONE;
+			aiTextureType textureType = aiTextureType::aiTextureType_NONE;
 			if (aiMaterial->GetTextureCount(textureTypePBR) > 0)
 			{
 				textureType = textureTypePBR;
@@ -1790,7 +1790,7 @@ namespace Insight
 				textureType = textureTypeLegacy;
 			}
 
-			if (textureType == aiTextureType_NONE)
+			if (textureType == aiTextureType::aiTextureType_NONE)
 			{
 				//IS_LOG_CORE_ERROR("[ModelImporter::GetTexturePath] Unable to find PRB/Legacy textures for material '{}'.", aiMaterial->GetName().C_Str());
 				return std::string();

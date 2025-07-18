@@ -9,11 +9,11 @@ namespace Insight
             : m_count(0)
         { }
 
-        RefCount::RefCount(const RefCount& other) NO_EXPECT
+        RefCount::RefCount(const RefCount& other)
             : m_count(0)
         { }
 
-        RefCount::RefCount(RefCount&& other) NO_EXPECT
+        RefCount::RefCount(RefCount&& other)
         {
             m_count.store(other.GetReferenceCount());
         }

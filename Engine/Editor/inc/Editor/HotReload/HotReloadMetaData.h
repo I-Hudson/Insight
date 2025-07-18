@@ -12,11 +12,11 @@ namespace Insight::Editor
     {
         HotReloadMetaData();
         HotReloadMetaData(const HotReloadMetaData& other) = delete;
-        HotReloadMetaData(HotReloadMetaData&& other) NO_EXPECT;
+        HotReloadMetaData(HotReloadMetaData&& other);
         ~HotReloadMetaData();
 
         HotReloadMetaData& operator=(const HotReloadMetaData& other) = delete;
-        HotReloadMetaData& operator=(HotReloadMetaData&& other) NO_EXPECT;
+        HotReloadMetaData& operator=(HotReloadMetaData&& other);
 
         std::vector<std::string> EditorWindowNames = { };
         std::vector<std::string> ComponentNames = { };

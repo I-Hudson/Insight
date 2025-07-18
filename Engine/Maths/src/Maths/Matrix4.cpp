@@ -265,7 +265,7 @@ namespace Insight
 #ifdef IS_MATHS_DIRECTX_MATHS
 			xmmatrix = DirectX::XMMatrixMultiply(DirectX::XMMatrixRotationQuaternion(DirectX::XMVectorSet(quat.x, quat.y, quat.z, quat.w)), xmmatrix);
 #elif defined(IS_MATHS_GLM)
-			mat4 = glm::rotate(mat4, glm::vec3(vector.vec4));
+			mat4 = mat4 * glm::toMat4(glm::quat(quat.w, quat.x, quat.y, quat.z));
 #else
 			Matrix4 m = Matrix4::Identity;
 			const float qw = quat.w;
@@ -316,7 +316,7 @@ namespace Insight
 #if defined(IS_MATHS_DIRECTX_MATHS)
 			DirectX::XMVECTOR quat;
 			DirectX::XMMatrixDecompose(&scale.xmvector, &quat, &position.xmvector, xmmatrix);
-			rotation = Quaternion(quat.m128_f32[3], quat.m128_f32[0], quat.m128_f32[1], quat.m128_f32[2]);
+			rotation = Quaternion(DirectX::XMVectorGetW(quat), DirectX::XMVectorGetX(quat), DirectX::XMVectorGetY(quat), DirectX::XMVectorGetZ(quat));
 			position[3] = 0.0f;
 			scale[3] = 0.0f;
 #elif defined(IS_MATHS_GLM)
@@ -653,7 +653,7 @@ else                            \
 			bool b1 = v1.Equal(other.v1, errorRange);
 			bool b2 = v2.Equal(other.v2, errorRange);
 			bool b3 = v3.Equal(other.v3, errorRange);
-			return v0.Equal(other.v0, errorRange) && v1.Equal(other.v1, errorRange) && v2.Equal(other.v2, errorRange) && v3.Equal(other.v3, errorRange);
+			return b && b1 && b2 && b3;
 		}
 
 		bool Matrix4::NotEqual(const Matrix4& other, const float errorRange) const
@@ -1307,7 +1307,9 @@ namespace test
 			CHECK(result.Equal(glmMat, 0.1f));
 			CHECK(result.Equal(one, 0.1f));
 
-			CHECK((Matrix_Test * vec) == (glmMatrixTest * glmVec));
+			const Vector4 mulVector = Matrix_Test * vec;
+			const glm::vec4 glmMulVector = glmMatrixTest * glmVec;
+			CHECK(mulVector == glmMulVector);
 		}
 
 		TEST_CASE("Division")

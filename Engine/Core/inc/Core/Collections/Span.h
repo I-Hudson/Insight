@@ -31,33 +31,33 @@ namespace Insight
 
     public:
         Span() { }
-        constexpr Span(Pointer ptr, SizeType size) NO_EXPECT
+        constexpr Span(Pointer ptr, SizeType size)
         {
             m_ptr = ptr; m_size = size;
         }
-        Span(std::vector<ElementType> const& vec) NO_EXPECT
+        Span(std::vector<ElementType> const& vec)
         {
             m_ptr = RemoveConst(vec.data()); m_size = vec.size();
         }
         template<u64 Size>
-        Span(std::array<ElementType, Size> const& array) NO_EXPECT
+        Span(std::array<ElementType, Size> const& array)
         {
             m_ptr = RemoveConst(array.data()); m_size = array.size();
         }
-        Span(std::initializer_list<ElementType> const& initList) NO_EXPECT
+        Span(std::initializer_list<ElementType> const& initList)
         {
             m_ptr = RemoveConst(initList.begin()); m_size = initList.size();
         }
-        Span(std::string const& str) NO_EXPECT
+        Span(std::string const& str)
         {
             m_ptr = RemoveConst(str.data()); m_size = str.size();
         }
 
-        constexpr Span(const Span<ElementType>& other) NO_EXPECT
+        constexpr Span(const Span<ElementType>& other)
         {
             m_ptr = other.m_ptr; m_size = other.m_size;
         }
-        constexpr Span(Span<ElementType>&& other) NO_EXPECT
+        constexpr Span(Span<ElementType>&& other)
         {
             m_ptr = other.m_ptr; m_size = other.m_size; other.m_ptr = nullptr; other.m_size = 0;
         }
@@ -67,46 +67,46 @@ namespace Insight
             m_ptr = nullptr; m_size = 0;
         }
 
-        Span<ElementType>& operator=(const Span<ElementType>& other) const NO_EXPECT
+        Span<ElementType>& operator=(const Span<ElementType>& other) const
         {
             m_ptr = other.m_ptr; m_size = other.m_size;
         }
-        Span<ElementType>& operator=(Span<ElementType>&& other) const NO_EXPECT
+        Span<ElementType>& operator=(Span<ElementType>&& other) const
         {
             m_ptr = other.m_ptr; m_size = other.m_size; other.m_ptr = nullptr; other.m_size = 0;
         }
 
-        bool operator==(const Span<ElementType>& other) const NO_EXPECT
+        bool operator==(const Span<ElementType>& other) const
         {
             return m_ptr == other.m_ptr
                 && m_size == other.m_size;
         }
-        bool operator!=(const Span<ElementType>& other) const NO_EXPECT
+        bool operator!=(const Span<ElementType>& other) const
         {
             return !(*this == other);
         }
 
-        bool operator>(const Span<ElementType>& other) const NO_EXPECT = delete;
-        bool operator>=(const Span<ElementType>& other) const NO_EXPECT = delete;
-        bool operator<(const Span<ElementType>& other) const NO_EXPECT = delete;
-        bool operator<=(const Span<ElementType>& other) const NO_EXPECT = delete;
+        bool operator>(const Span<ElementType>& other) const = delete;
+        bool operator>=(const Span<ElementType>& other) const = delete;
+        bool operator<(const Span<ElementType>& other) const = delete;
+        bool operator<=(const Span<ElementType>& other) const = delete;
 
-        constexpr bool IsEmpty()                    const NO_EXPECT { return m_size == 0; }
-        operator bool()                             const NO_EXPECT { return IsEmpty(); }
+        constexpr bool IsEmpty()                    const { return m_size == 0; }
+        operator bool()                             const { return IsEmpty(); }
 
-        constexpr u64 Size()                        const NO_EXPECT { return m_size; }
+        constexpr u64 Size()                        const { return m_size; }
 
-        constexpr Pointer Data()                    const NO_EXPECT { return m_ptr; }
-        constexpr Pointer Front()                   const NO_EXPECT { return m_ptr; }
-        constexpr Pointer Back()                    const NO_EXPECT { return At(m_size); }
+        constexpr Pointer Data()                    const { return m_ptr; }
+        constexpr Pointer Front()                   const { return m_ptr; }
+        constexpr Pointer Back()                    const { return At(m_size); }
 
-        constexpr Reference operator[](u32 index)   const NO_EXPECT { return At(index); }
-        constexpr Reference At(u32 index)           const NO_EXPECT { OUT_OF_RANGE(index); return *(Data() + index); }
+        constexpr Reference operator[](u32 index)   const { return At(index); }
+        constexpr Reference At(u32 index)           const { OUT_OF_RANGE(index); return *(Data() + index); }
 
-        constexpr Iterator Begin()                  const NO_EXPECT { return Front(); }
-        constexpr ConstIterator CBegin()            const NO_EXPECT { return Front(); }
-        constexpr Iterator End()                    const NO_EXPECT { return Back(); }
-        constexpr ConstIterator CEnd()              const NO_EXPECT { return Back(); }
+        constexpr Iterator Begin()                  const { return Front(); }
+        constexpr ConstIterator CBegin()            const { return Front(); }
+        constexpr Iterator End()                    const { return Back(); }
+        constexpr ConstIterator CEnd()              const { return Back(); }
 
     private:
 

@@ -17,8 +17,8 @@ namespace Insight
 
 		struct DescriptorBinding
 		{
-			DescriptorBinding() NO_EXPECT;
-			DescriptorBinding(const u32 set, const u32 binding, const u32 stages, const u32 size, const u32 count, const DescriptorType type) NO_EXPECT;
+			DescriptorBinding();
+			DescriptorBinding(const u32 set, const u32 binding, const u32 stages, const u32 size, const u32 count, const DescriptorType type);
 			//DescriptorBinding(const DescriptorBinding& other) NO_EXPECT;
 			//DescriptorBinding(DescriptorBinding&& other) NO_EXPECT;
 
@@ -48,8 +48,8 @@ namespace Insight
 
 		struct DescriptorSet
 		{
-			DescriptorSet() NO_EXPECT;
-			DescriptorSet(std::string name, int set, std::vector<DescriptorBinding> bindings) NO_EXPECT;
+			DescriptorSet();
+			DescriptorSet(std::string name, int set, std::vector<DescriptorBinding> bindings);
 			//DescriptorSet(const DescriptorSet& other) NO_EXPECT;
 			//DescriptorSet(DescriptorSet&& other) NO_EXPECT;
 

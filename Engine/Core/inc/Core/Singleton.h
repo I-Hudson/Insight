@@ -20,7 +20,7 @@ namespace Insight
 				ASSERT(s_instance != nullptr);
 			}
 
-			virtual ~Singleton() NO_EXPECT
+			virtual ~Singleton()
 			{
 				s_instance = nullptr;
 			}

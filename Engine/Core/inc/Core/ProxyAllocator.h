@@ -42,7 +42,7 @@ namespace Insight
 			int m_generation = -1;
 			PAllocator* m_allocator = nullptr;
 
-			friend class PAllocator;
+			friend PAllocator;
 		};
 
 		/// @brief The Proxy Allocator is an allocator which binds a proxy handle (POD struct) to 

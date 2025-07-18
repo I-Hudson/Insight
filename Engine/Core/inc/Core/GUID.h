@@ -14,14 +14,14 @@ namespace Insight
 		class IS_CORE GUID
 		{
 		public:
-			GUID() NO_EXPECT;
+			GUID();
 			GUID(u32 data1, u16 data2, u16 data3, std::array<u8, 8> data4);
 			GUID(u32 data1, u16 data2, u16 data3, u8 data4[8]);
-			GUID(const GUID& other) NO_EXPECT;
-			GUID(GUID&& other) NO_EXPECT;
+			GUID(const GUID& other);
+			GUID(GUID&& other);
 
-			GUID& operator=(const GUID& other) NO_EXPECT;
-			GUID& operator=(GUID&& other) NO_EXPECT;
+			GUID& operator=(const GUID& other);
+			GUID& operator=(GUID&& other);
 
 			bool operator==(const GUID& other) const;
 			bool operator!=(const GUID& other) const;

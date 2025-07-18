@@ -1233,7 +1233,7 @@ namespace Insight
                 m_renderResolution = Graphics::RenderGraph::Instance().GetRenderResolution();
             }
 
-            int renderRes[2] = { m_renderResolution.x, m_renderResolution.y };
+            int renderRes[2] = { (int)m_renderResolution.x, (int)m_renderResolution.y };
             ImGui::InputInt2("Render Resolution", renderRes);
             if (ImGui::Button("Apply Render Resolution"))
             {

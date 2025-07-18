@@ -120,7 +120,7 @@ namespace Insight
         {
             if (!assetInfo)
             {
-                return nullptr;
+                return false;
             }
             return HasAsset(assetInfo->Guid);
         }
