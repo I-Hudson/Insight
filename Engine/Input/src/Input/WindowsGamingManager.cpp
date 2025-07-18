@@ -169,6 +169,8 @@ namespace Insight
 
 		void WindowsGamingManager::Update(float const deltaTime)
 		{
+			IS_UNUSED(deltaTime);
+
 			for (u64 i = 0; i < m_connectControllers.size(); ++i)
 			{
 				auto controller = m_connectControllers[i];
@@ -181,8 +183,10 @@ namespace Insight
 			}
 		}
 
-		void WindowsGamingManager::OnRawControllerAdded(winrt::Windows::Foundation::IInspectable const& sender, winrt::Windows::Gaming::Input::RawGameController const& controller)
+		void WindowsGamingManager::OnRawControllerAdded(const winrt::Windows::Foundation::IInspectable& sender, const winrt::Windows::Gaming::Input::RawGameController& controller)
 		{
+			IS_UNUSED(sender);
+
 			for (u32 i = 0; i < m_connectControllers.size(); ++i)
 			{
 				if (m_connectControllers[static_cast<u64>(i)] == controller)
@@ -201,8 +205,10 @@ namespace Insight
 			}
 		}
 
-		void WindowsGamingManager::OnRawControllerRemoved(winrt::Windows::Foundation::IInspectable const& sender, winrt::Windows::Gaming::Input::RawGameController const& controller)
+		void WindowsGamingManager::OnRawControllerRemoved(const winrt::Windows::Foundation::IInspectable& sender, const winrt::Windows::Gaming::Input::RawGameController& controller)
 		{
+			IS_UNUSED(sender);
+
 			for (u32 i = 0; i < m_connectControllers.size(); ++i)
 			{
 				if (m_connectControllers[static_cast<u64>(i)] == controller)
@@ -287,7 +293,7 @@ namespace Insight
 				std::vector<double> axisReading;
 				axisReading.resize(rawGameController.AxisCount());
 
-				const u64 getCurrentReadingRCode = rawGameController.GetCurrentReading(winrt::array_view<bool>(buttonReading.get(), buttonReading.get() + rawGameController.ButtonCount()), switchPositionReading, axisReading);
+				//const u64 getCurrentReadingRCode = rawGameController.GetCurrentReading(winrt::array_view<bool>(buttonReading.get(), buttonReading.get() + rawGameController.ButtonCount()), switchPositionReading, axisReading);
 				for (i32 buttonIdx = 0; buttonIdx < rawGameController.ButtonCount(); ++buttonIdx)
 				{
 					const winrt::Windows::Gaming::Input::GameControllerButtonLabel buttonLabel = rawGameController.GetButtonLabel(buttonIdx);

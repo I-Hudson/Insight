@@ -134,7 +134,7 @@ namespace Insight
 			virtual void Initialise(u32 id) override;
 			virtual void Shutdown() override;
 
-			virtual InputDeviceTypes GetDeviceType() const { return InputDeviceTypes::KeyboardMouse; }
+			virtual InputDeviceTypes GetDeviceType() const override { return InputDeviceTypes::KeyboardMouse; }
 
 			virtual void ProcessInput(GenericInput const& input) override;
             virtual bool HasInput() const override;

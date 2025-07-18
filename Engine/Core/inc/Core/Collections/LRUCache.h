@@ -46,7 +46,7 @@ namespace Insight
 
             void Put(const TKey& key, const TValue& value)
             {
-                if (auto& iter = m_lookup.find(key);
+                if (auto iter = m_lookup.find(key);
                     iter != m_lookup.end())
                 {
                     m_items.erase(iter->second);

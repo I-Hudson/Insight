@@ -41,6 +41,8 @@ namespace Insight
 		class InputManager
 		{
 		public:
+			virtual ~InputManager() = 0;
+
 			virtual void Initialise(InputSystem* inputSystem) = 0;
 			virtual void Shutdown() = 0;
 			virtual void Update(float const deltaTime) = 0;

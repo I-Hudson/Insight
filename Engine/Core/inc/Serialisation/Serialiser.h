@@ -160,7 +160,7 @@ namespace Insight::Serialisation::Internal
 
 // Serialise a single property. This would be things which only contain data for them self. 
 #define SERIALISE_NAMED_PROPERTY(TYPE_SERIALISER, PROPERTY_NAME, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
-::Insight::Serialisation::Internal::SerialiseNamedProperty<TYPE_SERIALISER>(serialiser, version, VERSION_ADDED, VERSION_REMOVED, #PROPERTY_NAME, PPCAT(object., PROPERTY), m_options);
+::Insight::Serialisation::Internal::SerialiseNamedProperty<TYPE_SERIALISER>(serialiser, version, VERSION_ADDED, VERSION_REMOVED, #PROPERTY_NAME, object.PROPERTY, m_options);
 
 
 // Replace SERIALISE_NAMED_PROPERTY with SERIALISE_NAMED_PROPERTY_REMOVED when a property has been removed.
@@ -168,7 +168,7 @@ namespace Insight::Serialisation::Internal
 ::Insight::Serialisation::Internal::SerialiseNamedPropertyRemoved<TYPE_SERIALISER, TYPE_MIGRATION>(serialiser, version, VERSION_ADDED, VERSION_REMOVED, #PROPERTY_NAME, &object, m_options);
 
 #define SERIALISE_NAMED_OBJECT(TYPE_SERIALISER, PROPERTY_NAME, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
-::Insight::Serialisation::Internal::SerialiseNamedObject<TYPE_SERIALISER>(serialiser, version, VERSION_ADDED, VERSION_REMOVED, #PROPERTY_NAME, PPCAT(object., PROPERTY), m_options);
+::Insight::Serialisation::Internal::SerialiseNamedObject<TYPE_SERIALISER>(serialiser, version, VERSION_ADDED, VERSION_REMOVED, #PROPERTY_NAME, object.PROPERTY, m_options);
 
 // Replace SERIALISE_NAMED_OBJECT with SERIALISE_NAMED_OBJECT_REMOVED when an object is removed.
 #define SERIALISE_NAMED_OBJECT_REMOVED(TYPE_SERIALISER, PROPERTY_NAME, VERSION_ADDED, VERSION_REMOVED)\
@@ -213,18 +213,18 @@ namespace Insight::Serialisation::Internal
         {\
             if(VersionCheck(version, VERSION_ADDED, VERSION_REMOVED))\
             {\
-                using TVectorType = typename std::decay<decltype(*PPCAT(object., PROPERTY).begin())>::type;\
+                using TVectorType = typename std::decay<decltype(*object.PROPERTY.begin())>::type;\
                 ::Insight::Serialisation::VectorSerialiser<TVectorType, TYPE_SERIALISER, ::Insight::Serialisation::SerialiserType::Property> vectorSerialiser;\
-                vectorSerialiser(serialiser, #PROPERTY_NAME, PPCAT(object., PROPERTY));\
+                vectorSerialiser(serialiser, #PROPERTY_NAME, object.PROPERTY);\
             }\
         }\
         else\
         {\
             if(VersionCheck(version, VERSION_ADDED, VERSION_REMOVED) && ObjectSerialiserCheck(objectSerialiserType, serialisedObjectSerilaiser))\
             {\
-                using TVectorType = typename std::decay<decltype(*PPCAT(object., PROPERTY).begin())>::type;\
+                using TVectorType = typename std::decay<decltype(*object.PROPERTY.begin())>::type;\
                 ::Insight::Serialisation::VectorDeserialiser<TVectorType, TYPE_SERIALISER, ::Insight::Serialisation::SerialiserType::Property> vectorDeserialiser;\
-                vectorDeserialiser(serialiser, #PROPERTY_NAME, PPCAT(object., PROPERTY));\
+                vectorDeserialiser(serialiser, #PROPERTY_NAME, object.PROPERTY);\
             }\
         }
 
@@ -233,7 +233,7 @@ namespace Insight::Serialisation::Internal
 // This is fine to use in an unevaluated context
 template<class T>
 T& reference_to();
-using TVectorType = typename std::decay<decltype(*PPCAT(object., PROPERTY).begin())>::type;\
+using TVectorType = typename std::decay<decltype(*object.PROPERTY.begin())>::type;\
 using TVectorElementType = typename std::remove_pointer_t<std::remove_reference_t<decltype(*reference_to<TVectorType>())>>;\
 */
 
@@ -243,18 +243,18 @@ using TVectorElementType = typename std::remove_pointer_t<std::remove_reference_
         {\
             if(VersionCheck(version, VERSION_ADDED, VERSION_REMOVED))\
             {\
-                using TVectorType = typename std::decay<decltype(*PPCAT(object., PROPERTY).begin())>::type;\
+                using TVectorType = typename std::decay<decltype(*object.PROPERTY.begin())>::type;\
                 ::Insight::Serialisation::VectorSerialiser<TVectorType, TYPE_SERIALISER, ::Insight::Serialisation::SerialiserType::Object> vectorSerialiser;\
-                vectorSerialiser(serialiser, #PROPERTY_NAME, PPCAT(object., PROPERTY));\
+                vectorSerialiser(serialiser, #PROPERTY_NAME, object.PROPERTY);\
             }\
         }\
         else\
         {\
             if(VersionCheck(version, VERSION_ADDED, VERSION_REMOVED) && ObjectSerialiserCheck(objectSerialiserType, serialisedObjectSerilaiser))\
             {\
-                using TVectorType = typename std::decay<decltype(*PPCAT(object., PROPERTY).begin())>::type;\
+                using TVectorType = typename std::decay<decltype(*object.PROPERTY.begin())>::type;\
                 ::Insight::Serialisation::VectorDeserialiser<TVectorType, TYPE_SERIALISER, ::Insight::Serialisation::SerialiserType::Object> vectorDeserialiser;\
-                vectorDeserialiser(serialiser, #PROPERTY_NAME, PPCAT(object., PROPERTY));\
+                vectorDeserialiser(serialiser, #PROPERTY_NAME, object.PROPERTY);\
             }\
         }
 
@@ -264,18 +264,18 @@ using TVectorElementType = typename std::remove_pointer_t<std::remove_reference_
         {\
             if(VersionCheck(version, VERSION_ADDED, VERSION_REMOVED))\
             {\
-                using TArrayType = typename std::decay<decltype(*PPCAT(object., PROPERTY).begin())>::type;\
+                using TArrayType = typename std::decay<decltype(*object.PROPERTY.begin())>::type;\
                 ::Insight::Serialisation::ArraySerialiser<TArrayType, TYPE_SERIALISER, ::Insight::Serialisation::SerialiserType::Property> arraySerialiser;\
-                arraySerialiser(serialiser, #PROPERTY_NAME, const_cast<TArrayType*>(PPCAT(object., PROPERTY).data()), PPCAT(object., PROPERTY).size());\
+                arraySerialiser(serialiser, #PROPERTY_NAME, const_cast<TArrayType*>(object.PROPERTY.data()), object.PROPERTY.size());\
             }\
         }\
         else\
         {\
             if(VersionCheck(version, VERSION_ADDED, VERSION_REMOVED) && ObjectSerialiserCheck(objectSerialiserType, serialisedObjectSerilaiser))\
             {\
-                using TArrayType = typename std::decay<decltype(*PPCAT(object., PROPERTY).begin())>::type;\
+                using TArrayType = typename std::decay<decltype(*object.PROPERTY.begin())>::type;\
                 ::Insight::Serialisation::ArrayDeserialiser<TArrayType, TYPE_SERIALISER, ::Insight::Serialisation::SerialiserType::Property> arrayDeserialiser;\
-                arrayDeserialiser(serialiser, #PROPERTY_NAME, const_cast<TArrayType*>(PPCAT(object., PROPERTY).data()), PPCAT(object., PROPERTY).size());\
+                arrayDeserialiser(serialiser, #PROPERTY_NAME, const_cast<TArrayType*>(object.PROPERTY.data()), object.PROPERTY.size());\
             }\
         }
 #define SERIALISE_ARRAY_NAMED_OBJECT(TYPE_SERIALISER, PROPERTY_NAME, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
@@ -283,9 +283,9 @@ using TVectorElementType = typename std::remove_pointer_t<std::remove_reference_
         {\
             if(VersionCheck(version, VERSION_ADDED, VERSION_REMOVED))\
             {\
-                using TArrayType = typename std::decay<decltype(*PPCAT(object., PROPERTY).begin())>::type;\
+                using TArrayType = typename std::decay<decltype(*object.PROPERTY.begin())>::type;\
                 ::Insight::Serialisation::ArraySerialiser<TArrayType,TYPE_SERIALISER, ::Insight::Serialisation::SerialiserType::Object> arraySerialiser;\
-                arraySerialiser(serialiser, #PROPERTY_NAME, PPCAT(object., PROPERTY).data(), PPCAT(object., PROPERTY).size());\
+                arraySerialiser(serialiser, #PROPERTY_NAME, object.PROPERTY.data(), object.PROPERTY.size());\
             }\
         }\
         else\
@@ -301,18 +301,18 @@ using TVectorElementType = typename std::remove_pointer_t<std::remove_reference_
         {\
             if(VersionCheck(version, VERSION_ADDED, VERSION_REMOVED))\
             {\
-                using TVectorType = typename std::decay<decltype(*PPCAT(object., PROPERTY).begin())>::type;\
+                using TVectorType = typename std::decay<decltype(*object.PROPERTY.begin())>::type;\
                 ::Insight::Serialisation::SetSerialiser<TVectorType, TYPE_SERIALISER, SERIALISER_TYPE> setSerialiser;\
-                setSerialiser(serialiser, #PROPERTY_NAME, PPCAT(object., PROPERTY));\
+                setSerialiser(serialiser, #PROPERTY_NAME, object.PROPERTY);\
             }\
         }\
         else\
         {\
             if(VersionCheck(version, VERSION_ADDED, VERSION_REMOVED) && ObjectSerialiserCheck(objectSerialiserType, serialisedObjectSerilaiser))\
             {\
-                using TVectorType = typename std::decay<decltype(*PPCAT(object., PROPERTY).begin())>::type;\
+                using TVectorType = typename std::decay<decltype(*object.PROPERTY.begin())>::type;\
                 ::Insight::Serialisation::SetSerialiser<TVectorType, TYPE_SERIALISER, SERIALISER_TYPE> setDeserialiser;\
-                setDeserialiser(serialiser, #PROPERTY_NAME, PPCAT(object., PROPERTY));\
+                setDeserialiser(serialiser, #PROPERTY_NAME, object.PROPERTY);\
             }\
         }
 
@@ -321,9 +321,9 @@ using TVectorElementType = typename std::remove_pointer_t<std::remove_reference_
         {\
             if(VersionCheck(version, VERSION_ADDED, VERSION_REMOVED))\
             {\
-                using TMapType = std::remove_const_t<typename std::decay<decltype(PPCAT(object., PROPERTY))>::type>;\
+                using TMapType = std::remove_const_t<typename std::decay<decltype(object.PROPERTY)>::type>;\
                 ::Insight::Serialisation::MapSerialiser<KEY_SERIALISER, VALUE_SERIALISER, TMapType, ::Insight::Serialisation::SerialiserType::Object> mapSerialiser;\
-                mapSerialiser(serialiser, #PROPERTY_NAME, PPCAT(object., PROPERTY));\
+                mapSerialiser(serialiser, #PROPERTY_NAME, object.PROPERTY);\
             }\
         }\
         else\
@@ -331,7 +331,7 @@ using TVectorElementType = typename std::remove_pointer_t<std::remove_reference_
         }
 
 #define SERIALISE_NAMED_COMPLEX(TYPE_SERIALISER, PROPERTY_NAME, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
-::Insight::Serialisation::Internal::SerialiseNamedComplex<TYPE_SERIALISER>(serialiser, version, VERSION_ADDED, VERSION_REMOVED, PPCAT(object., PROPERTY), object);
+::Insight::Serialisation::Internal::SerialiseNamedComplex<TYPE_SERIALISER>(serialiser, version, VERSION_ADDED, VERSION_REMOVED, object.PROPERTY, object);
 
 #define SERIALISE_NAMED_COMPLEX_REMOVED(TYPE_SERIALISER, PROPERTY_TYPE, PROPERTY, VERSION_ADDED, VERSION_REMOVED, TYPE_MIGRATION)\
 ::Insight::Serialisation::Internal::SerialiseNamedComplexRemoved<TYPE_SERIALISER, PROPERTY_TYPE>(serialiser, version, VERSION_ADDED, VERSION_REMOVED, object);

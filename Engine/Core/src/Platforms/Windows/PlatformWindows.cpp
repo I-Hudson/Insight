@@ -681,9 +681,9 @@ namespace Insight
 			}
 		}
 
-		void* PlatformWindows::GetDynamicFunctionVoid(void* library, const char* functionName)
+		void* PlatformWindows::GetDynamicFunctionVoid(void* library, char* functionName)
 		{
-			if (library == nullptr || (!functionName || strlen(functionName) == 0))
+			if (library == nullptr || !functionName)
 			{
 				return nullptr;
 			}

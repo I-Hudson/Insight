@@ -18,7 +18,7 @@ namespace Insight
 		{
 		public:
 			WindowsGamingManager();
-			~WindowsGamingManager();
+			virtual ~WindowsGamingManager() override;
 
 			virtual void Initialise(InputSystem* inputSystem) override;
 			virtual void Shutdown() override;

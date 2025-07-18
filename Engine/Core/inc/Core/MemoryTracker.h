@@ -37,7 +37,7 @@ namespace Insight
 		CONSTEXPR u64 c_CallstackStringSize = 1;
 #endif
 
-		enum class IS_CORE MemoryTrackAllocationType : u8
+		enum class MemoryTrackAllocationType : u8
 		{
 			Array,
 			Single
@@ -157,13 +157,13 @@ namespace Insight
 		struct IS_CORE MemoryTrackedAlloc
 		{
 			MemoryTrackedAlloc()
-				: Ptr(nullptr), Size(0), Category(MemoryAllocCategory::General), Type(MemoryTrackAllocationType::Array)
+				: Ptr(nullptr), Size(0), Type(MemoryTrackAllocationType::Array), Category(MemoryAllocCategory::General)
 			{ }
 			MemoryTrackedAlloc(void* ptr, u64 size, MemoryAllocCategory category, MemoryTrackAllocationType type)
-				: Ptr(ptr), Size(size), Category(category), Type(type)
+				: Ptr(ptr), Size(size), Type(type), Category(category)
 			{ }
 			MemoryTrackedAlloc(void* ptr, u64 size, MemoryAllocCategory category, MemoryTrackAllocationType type, std::array<char[c_CallstackStringSize], c_CallStackCount> callStack)
-				: Ptr(ptr), Size(size), Category(category), Type(type), CallStack(std::move(callStack))
+				: CallStack(std::move(callStack)), Ptr(ptr), Size(size), Type(type), Category(category)
 			{ }
 
 			std::array<char[c_CallstackStringSize], c_CallStackCount> CallStack;

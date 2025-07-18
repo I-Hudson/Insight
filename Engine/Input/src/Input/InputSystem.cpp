@@ -102,7 +102,7 @@ namespace Insight
 
 		InputDevice_Controller* InputSystem::GetController(u32 index) const
 		{
-			int idx = 0;
+			u32 idx = 0;
 			for (auto& device : m_inputDevices)
 			{
 				if (device->GetDeviceType() == InputDeviceTypes::Controller)

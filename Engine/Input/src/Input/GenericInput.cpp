@@ -26,5 +26,8 @@ namespace Insight
 			}
 			return "";
 		}
+
+		InputManager::~InputManager()
+		{ }
 	}
 }

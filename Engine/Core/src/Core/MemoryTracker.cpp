@@ -43,7 +43,7 @@ namespace Insight
 
         void LRUCacheAddressNames::Put(const void* address, const std::string& addressName)
         {
-            if (auto& iter = m_lookup.find(address);
+            if (auto iter = m_lookup.find(address);
                 iter != m_lookup.end())
             {
                 m_resolvedAddresses.erase(iter->second);

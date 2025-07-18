@@ -22,8 +22,8 @@ namespace Insight
 		class XInputManager : public InputManager
 		{
 		public:
-			XInputManager() = default;;
-			~XInputManager() = default;
+			XInputManager();
+			virtual ~XInputManager() override;
 
 			virtual void Initialise(InputSystem* inputSystem) override;
 			virtual void Shutdown() override;
@@ -40,7 +40,7 @@ namespace Insight
 
 		private:
 			InputSystem* m_inputSystem = nullptr;
-			std::array<bool, 4> m_connectedPorts;
+			std::array<bool, 4> m_connectedPorts = { false };
 		};
 	}
 }

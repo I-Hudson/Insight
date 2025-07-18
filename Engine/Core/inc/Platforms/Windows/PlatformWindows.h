@@ -65,7 +65,7 @@ namespace Insight
 			template<typename ReturnT, typename... Args>
 			static ReturnT(*GetDynamicFunction(void* library, std::string_view functionName))(Args...)
 			{
-				void* procAddress = GetDynamicFunctionVoid(library, functionName.data());
+				void* procAddress = GetDynamicFunctionVoid(library, (char*)functionName.data());
 				using ReturnFuncSig = ReturnT(*)(Args...);
 				ReturnFuncSig func = reinterpret_cast<ReturnFuncSig>(procAddress);
 				if (func == nullptr)
@@ -75,8 +75,20 @@ namespace Insight
 				return func;
 			}
 
+			template<typename FuncSig>
+			static FuncSig GetDynamicFunctionFromSignature(void* library, char* functionName)
+			{
+				void* procAddress = GetDynamicFunctionVoid(library, functionName);
+				FuncSig func = reinterpret_cast<FuncSig>(procAddress);
+				if (func == nullptr)
+				{
+					return nullptr;
+				}
+				return func;
+			}
+
 		private:
-			static void* GetDynamicFunctionVoid(void* library, const char* functionName);
+			static void* GetDynamicFunctionVoid(void* library, char* functionName);
 
 			static unsigned int GetOSVersion();
 			static bool GetDriverPath(wchar_t* pDriverPath, const wchar_t* driverFilePath64);

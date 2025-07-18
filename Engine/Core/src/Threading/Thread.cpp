@@ -80,7 +80,8 @@ namespace Insight
 			THREADNAME_INFO info;
 			info.dwType = 0x1000;
 			info.szName = threadName;
-			info.dwThreadID = *reinterpret_cast<DWORD*>(&m_handle.get_id());
+			std::thread::id threadId = m_handle.get_id();
+			info.dwThreadID = *reinterpret_cast<DWORD*>(&threadId);
 			info.dwFlags = 0;
 
 			__try

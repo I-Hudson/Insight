@@ -29,7 +29,7 @@ namespace Insight
 		{
 			std::lock_guard eventListenerLock(m_eventListenersLock);
 			auto& eventFuncItr = m_eventListeners[eventType];
-			if (auto& eventItr = eventFuncItr.find(object); 
+			if (const auto& eventItr = eventFuncItr.find(object); 
 				eventItr != eventFuncItr.end())
 			{
 				eventFuncItr.erase(object);

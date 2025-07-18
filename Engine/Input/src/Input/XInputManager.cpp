@@ -20,7 +20,7 @@ struct XINPUT_CAPABILITIES_EX
 	DWORD a4; //unknown
 };
 
-typedef DWORD(_stdcall* _XInputGetCapabilitiesEx)(DWORD a1, DWORD dwUserIndex, DWORD dwFlags, XINPUT_CAPABILITIES_EX* pCapabilities);
+typedef DWORD(WINAPI* _XInputGetCapabilitiesEx)(DWORD a1, DWORD dwUserIndex, DWORD dwFlags, XINPUT_CAPABILITIES_EX* pCapabilities);
 _XInputGetCapabilitiesEx XInputGetCapabilitiesEx;
 
 namespace Insight
@@ -47,6 +47,12 @@ namespace Insight
 			{ 0x8000, ControllerButtons::Y },
 		};
 
+		XInputManager::XInputManager()
+		{ }
+
+		XInputManager::~XInputManager()
+		{ }
+
 		void XInputManager::Initialise(InputSystem* inputSystem)
 		{
 			m_inputSystem = inputSystem;
@@ -66,6 +72,8 @@ namespace Insight
 
 		void XInputManager::Update(float const deltaTime)
 		{
+			IS_UNUSED(deltaTime);
+
 			DWORD dwResult;
 			for (DWORD i = 0; i < XUSER_MAX_COUNT; ++i)
 			{
@@ -84,6 +92,7 @@ namespace Insight
 						m_connectedPorts.at(i) = true;
 						IInputDevice* device = m_inputSystem->AddInputDevice(InputDeviceTypes::Controller, i);
 						InputDevice_Controller* deviceController = static_cast<InputDevice_Controller*>(device);
+						ASSERT(deviceController);
 						ExtractDeviceInfo(i);
 					}
 					ProcessInput(i, state);
@@ -140,7 +149,7 @@ namespace Insight
 			HMODULE moduleHandle = LoadLibrary(TEXT("XInput1_4.dll"));
 			if (moduleHandle)
 			{
-				XInputGetCapabilitiesEx = (_XInputGetCapabilitiesEx)GetProcAddress(moduleHandle, (char*)108);
+				XInputGetCapabilitiesEx = Platform::GetDynamicFunctionFromSignature<_XInputGetCapabilitiesEx>(moduleHandle, (char*)108);
 				if (XInputGetCapabilitiesEx)
 				{
 					XINPUT_CAPABILITIES_EX capsEx;
@@ -223,6 +232,8 @@ namespace Insight
 			scaledValue *= sign;
 			value *= sign;
 #else 
+			IS_UNUSED(deadzone);
+
 			if (maxValue > 1.0f)
 			{
 				value = value / maxValue;
