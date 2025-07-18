@@ -146,17 +146,22 @@ namespace Insight
 			///}
 
 			// Make sure our buffers are good to go.
-			for (const RHI_BufferView& view : m_boundVertexBufferViews)
 			{
-				if (view.IsValid() && view.GetBuffer()->GetUploadStatus() != DeviceUploadStatus::Completed)
+				IS_PROFILE_SCOPE("Verify VertexBuffers");
+				for (const RHI_BufferView& view : m_boundVertexBufferViews)
+				{
+					if (view.IsValid() && view.GetBuffer()->GetUploadStatus() != DeviceUploadStatus::Completed)
+					{
+						return false;
+					}
+				}
+			}
+			{
+				IS_PROFILE_SCOPE("Verify IndexBuffers");
+				if (m_boundIndexBufferView.IsValid() && m_boundIndexBufferView.GetBuffer()->GetUploadStatus() != DeviceUploadStatus::Completed)
 				{
 					return false;
 				}
-			}
-
-			if (m_boundIndexBufferView.IsValid() && m_boundIndexBufferView.GetBuffer()->GetUploadStatus() != DeviceUploadStatus::Completed)
-			{
-				return false;
 			}
 			 
 			return BindDescriptorSets(gpuQueue);

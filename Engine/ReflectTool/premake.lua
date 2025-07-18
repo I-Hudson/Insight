@@ -39,7 +39,7 @@ project "InsightReflectTool"
 
     links
     {
-        "tracy.lib",
+        "TracyClient.lib",
     }
 
     filter "configurations:Debug or configurations:Testing"

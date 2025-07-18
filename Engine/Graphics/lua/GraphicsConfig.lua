@@ -150,7 +150,7 @@ filter "configurations:Release"
         "MachineIndependent.lib",
         "GenericCodeGen.lib",
         "OSDependent.lib",
-        "tracy.lib",
+        "TracyClient.lib",
         "assimp.lib",
 
         "ffx_fsr2_api_x64.lib",

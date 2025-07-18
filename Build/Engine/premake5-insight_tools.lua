@@ -65,7 +65,7 @@ workspace "InsightTools"
         includedirs { "%{IncludeDirs.tracy}", }
         links
         {
-            "tracy.lib",
+            "TracyClient.lib",
         }
     end
     if (profileTool == "pix") then

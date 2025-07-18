@@ -15,12 +15,20 @@ call :DOWNLOAD_AND_UNZIP https://github.com/danmar/cppcheck/archive/2.16.0.zip  
 
 robocopy "%vendorPath%\glfw\glfw-3.4" "%vendorPath%\glfw" /E /MOV
 
+echo Generate and Build tracy
+cd "%vendorPath%/tracy"
+call cmake -S "./" -B "build" -D TRACY_STATIC=OFF
+cd "%currentDirectory%"
+call "../Engine/Build_Solution.bat" "%vendorPath%/tracy/build/Tracy.sln" vs2022 Build Debug x64
+call "../Engine/Build_Solution.bat" "%vendorPath%/tracy/build/Tracy.sln" vs2022 Build Release x64
+
+
 echo Generate JoltPhysics solution
 cd "%vendorPath%/JoltPhysics/Build"
-call cmake_vs2022_cl.bat "-D USE_STATIC_MSVC_RUNTIME_LIBRARY=OFF"
+call cmake_vs2022_cl.bat -DUSE_STATIC_MSVC_RUNTIME_LIBRARY=OFF -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded$<$<CONFIG:Debug>:DebugDLL>$<$<CONFIG:Release>:DLL>$<$<CONFIG:Distribution>:DLL>" -Wno-dev
 cd "%currentDirectory%"
-echo Build JoltPhysics debug
 
+echo Build JoltPhysics debug
 call "../Engine/Build_Solution.bat" "%vendorPath%/JoltPhysics/Build/VS2022_CL/JoltPhysics.sln" vs2022 Build Debug x64
 echo Build JoltPhysics release
 call "../Engine/Build_Solution.bat" "%vendorPath%/JoltPhysics/Build/VS2022_CL/JoltPhysics.sln" vs2022 Build Release x64

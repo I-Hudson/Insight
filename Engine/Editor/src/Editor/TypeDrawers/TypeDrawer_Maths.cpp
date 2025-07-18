@@ -4,7 +4,7 @@
 #include "Maths/Vector3.h"
 #include "Maths/Vector4.h"
 
-#include <imgui/imgui.h>
+#include <imgui.h>
 
 namespace Insight
 {

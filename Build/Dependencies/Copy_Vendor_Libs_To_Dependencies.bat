@@ -1,4 +1,17 @@
 @echo off 
+call :COPY_TO_DEBUG_DEPS "..\..\vendor\tracy\build\Debug\TracyClient.dll"						                            "dll"
+call :COPY_TO_DEBUG_DEPS "..\..\vendor\tracy\build\Debug\TracyClient.lib"						                            "lib"
+call :COPY_TO_DEBUG_DEPS "..\..\vendor\tracy\build\Debug\TracyClient.pdb"						                            "pdb"
+
+call :COPY_TO_DEBUG_DEPS "..\..\vendor\tracy\build\Release\TracyClient.dll"						                            "dll"
+call :COPY_TO_DEBUG_DEPS "..\..\vendor\tracy\build\Release\TracyClient.lib"						                            "lib"
+call :COPY_TO_DEBUG_DEPS "..\..\vendor\tracy\build\Release\TracyClient.pdb"						                            "pdb"
+
+call :COPY_TO_DEBUG_DEPS "..\..\vendor\JoltPhysics\Build\VS2022_CL\Debug\Jolt.lib"						                    "lib"
+call :COPY_TO_DEBUG_DEPS "..\..\vendor\JoltPhysics\Build\VS2022_CL\Debug\Jolt.pdb"						                    "pdb"
+
+call :COPY_TO_DEBUG_DEPS "..\..\vendor\JoltPhysics\Build\VS2022_CL\Release\Jolt.lib"						                "lib"
+call :COPY_TO_DEBUG_DEPS "..\..\vendor\JoltPhysics\Build\VS2022_CL\Release\Jolt.pdb"						                "pdb"
 
 call :COPY_TO_DEBUG_DEPS "..\..\vendor\FidelityFX-FSR2\bin\ffx_fsr2_api\ffx_fsr2_api_x64d.lib"						        "lib"
 call :COPY_TO_DEBUG_DEPS "..\..\vendor\FidelityFX-FSR2\bin\ffx_fsr2_api\ffx_fsr2_api_vk_x64d.lib"					        "lib"
