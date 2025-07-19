@@ -8,7 +8,7 @@ SET option=%2
 IF "%option%" == "" GOTO PrintHelp exit
 IF "%option%" == "compile" GOTO Compile exit
 
-set premake=%cd%\..\..\vendor\premake\premake5.exe
+set premake=%~dp0..\..\vendor\premake\premake5.exe
 
 call %premake% --version
 echo Generating solution for premake file: '%prmakeFile%' with options '%option%'

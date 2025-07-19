@@ -77,16 +77,16 @@ call :COPY_TO_RELEASE_DEPS "..\..\vendor\SimplygonSDK_10.1.11000.0\Simplygon.dll
 pause
 
 :COPY_TO_DEBUG_DEPS
-set lib_file="%cd%\%~1"
-set output="%cd%\..\..\deps\Debug-windows-x86_64\%~2\"
+set lib_file="%~dp0%~1"
+set output="%~dp0..\..\deps\Debug-windows-x86_64\%~2\"
 if not exist %output% (
     mkdir %output%
 )
 xcopy /Y /B %lib_file% %output%
 
 :COPY_TO_RELEASE_DEPS
-set output="%cd%\..\..\deps\Release-windows-x86_64\%~2\"
-set lib_file="%cd%\%~1"
+set output="%~dp0..\..\deps\Release-windows-x86_64\%~2\"
+set lib_file="%~dp0%~1"
 if not exist %output% (
     mkdir %output%
 )

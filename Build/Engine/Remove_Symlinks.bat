@@ -1,9 +1,9 @@
 echo off
  
-set output_debug=%cd%/../../bin\Debug-windows-x86_64/Insight_Editor
-set output_release=%cd%/../../bin\Release-windows-x86_64/Insight_Editor
-set output_testing=%cd%/../../bin\Testing-windows-x86_64/Insight_Editor
-set resource_path=%cd%/../../Resources
+set output_debug=%~dp0/../../bin\Debug-windows-x86_64/Insight_Editor
+set output_release=%~dp0/../../bin\Release-windows-x86_64/Insight_Editor
+set output_testing=%~dp0/../../bin\Testing-windows-x86_64/Insight_Editor
+set resource_path=%~dp0/../../Resources
 
 if exist "%output_debug%" (
     echo "Deleting symlinks debug"
