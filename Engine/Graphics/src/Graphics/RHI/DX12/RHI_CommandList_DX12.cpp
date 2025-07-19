@@ -450,12 +450,14 @@ namespace Insight
 					const RHI_BufferView& bufferView = bufferViews[i];
 					ASSERT(bufferView.IsValid());
 
+					/*
 					if (m_boundVertexBufferViews.find(bufferView) != m_boundVertexBufferViews.end())
 					{
 						m_context->GetResourceRenderTracker().TrackResource(bufferView.GetBuffer());
 						continue;
 					}
 					m_boundVertexBufferViews.insert(bufferView);
+					*/
 
 					const RHI_Buffer_DX12* bufferDX12 = static_cast<RHI_Buffer_DX12*>(bufferView.GetBuffer());
 					views[i] = D3D12_VERTEX_BUFFER_VIEW
