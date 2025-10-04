@@ -197,6 +197,7 @@ namespace Insight
 			virtual RHI_Texture* GetSwaphchainIamge() const = 0;
 
 			virtual void SetFullScreen() { }
+			virtual void SetFPSTarget(const int targetFps) = 0;
 
 			u32 GetFrameIndex() const;
 			u32 GetFrameIndexCompleted() const;

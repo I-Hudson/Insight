@@ -2,6 +2,12 @@
 #include "Graphics/RHI/RHI_Pipeline.h"
 #include "Graphics/RHI/RHI_PipelineLayout.h"
 
+#if defined(IS_VULKAN_ENABLED)
+#endif
+#if defined(IS_DX12_ENABLED)
+#include "Graphics/RHI/DX12/RHI_PipelineCache_DX12.h"
+#endif
+
 #include "Graphics/RenderContext.h"
 
 #include "Core/Profiler.h"
@@ -12,6 +18,20 @@ namespace Insight
 {
 	namespace Graphics
 	{
+		//-------------------------
+		// RHI_PipelineLayoutManager
+		//-------------------------
+		RHI_PipelineCahce* RHI_PipelineCahce::New(RenderContext* context)
+		{
+#if defined(IS_VULKAN_ENABLED)
+			//if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan) { return ::New<RHI::Vulkan::RHI_PipelineCahce_Vulkan, Insight::Core::MemoryAllocCategory::Graphics>(context); }
+#endif
+#if defined(IS_DX12_ENABLED)
+			if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::DX12) { return ::New<RHI::DX12::RHI_PipelineCache_DX12, Insight::Core::MemoryAllocCategory::Graphics>(context); }
+#endif
+			return nullptr;
+		}
+
 		//-------------------------
 		// RHI_PipelineLayoutManager
 		//-------------------------
@@ -106,11 +126,14 @@ namespace Insight
 		// RHI_PipelineManager
 		//-------------------------
 		RHI_PipelineManager::RHI_PipelineManager()
-		{ }
+		{
+			m_pipelineCache = RHI_PipelineCahce::New(m_context);
+		}
 		
 		RHI_PipelineManager::~RHI_PipelineManager()
 		{
 			Destroy();
+			Delete(m_pipelineCache);
 		}
 
 		void RHI_PipelineManager::SetRenderContext(RenderContext* context)

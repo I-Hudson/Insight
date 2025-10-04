@@ -94,7 +94,7 @@ namespace Insight
 				}
 
 				FindPhysicalDevice(&m_physicalDevice.GetPhysicalDevice());
-
+				
 				ThrowIfFailed(D3D12CreateDevice(
 					m_physicalDevice.GetPhysicalDevice().Get(),
 					m_d3dFeatureLevel,
@@ -692,6 +692,11 @@ namespace Insight
 				// Go through out deferred manager and call all the functions which have been queued up.
 				m_gpu_defered_manager.Update(cmdList);
 				m_uploadQueue.UploadToDevice(cmdList);
+			}
+
+			void RenderContext_DX12::SetFPSTarget(const int targetFps)
+			{
+
 			}
 
 			void RenderContext_DX12::SetObjectName(std::string_view name, ID3D12Object* handle)

@@ -20,6 +20,15 @@ namespace Insight
             ImGui::DragFloat(label.data(), fData, 1.0f, 
                 clampMin.IsValid() ? clampMin.GetValue<float>() : 0.0f,
                 clampMax.IsValid() ? clampMax.GetValue<float>() : 0.0f);
+
+            if (clampMin.IsValid())
+            {
+                *fData = std::max(*fData, clampMin.GetValue<float>());
+            }
+            if (clampMax.IsValid())
+            {
+                *fData = std::min(*fData, clampMax.GetValue<float>());
+            }
         }
     }
 }

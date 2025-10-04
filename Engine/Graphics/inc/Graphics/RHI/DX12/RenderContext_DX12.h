@@ -4,11 +4,9 @@
 
 #include "Graphics/RenderContext.h"
 #include "Graphics/RHI/DX12/RHI_PhysicalDevice_DX12.h"
-#include "Graphics/RHI/DX12/RHI_CommandList_DX12.h"
 #include "Graphics/RHI/DX12/RHI_Descriptor_DX12.h"
 #include "Graphics/RHI/DX12/RHI_Queue_DX12.h"
 
-#include "Graphics/RenderGraph/RenderGraph.h"
 #include "Graphics/RHI/RHI_GPUCrashTracker.h"
 
 #ifdef IS_RESOURCE_HANDLES_ENABLED
@@ -18,6 +16,24 @@
 #include "D3D12MemAlloc.h"
 
 #include <array>
+#include <dxgi.h>
+#include <dxgi1_4.h>
+#include <Windows.h>
+#include <wrl/client.h>
+#include <atomic>
+#include <map>
+#include <string_view>
+#include <thread>
+#include <vector>
+#include <Core/TypeAlias.h>
+#include <Graphics/Enums.h>
+#include <Graphics/RHI/RHI_Buffer.h>
+#include <Graphics/RHI/RHI_CommandList.h>
+#include <Graphics/RHI/RHI_Texture.h>
+#include <Maths/Vector2.h>
+#include <d3d12.h>
+#include <d3d12sdklayers.h>
+#include <d3dcommon.h>
 
 namespace Insight
 {
@@ -76,11 +92,13 @@ namespace Insight
 				/// @brief Execute anything that is not directly graphics related like uploading data to the GPU.
 				virtual void ExecuteAsyncJobs(RHI_CommandList* cmdList) override;
 
+				virtual void SetFPSTarget(const int targetFps) override;
+
 				void SetObjectName(std::string_view name, ID3D12Object* handle);
 
 				virtual RHI_Texture* GetSwaphchainIamge() const override;
 
-				ID3D12Device* GetDevice() const { return m_device.Get(); }
+				ID3D12Device1* GetDevice() const { return m_device.Get(); }
 				DescriptorHeap_DX12& GetDescriptorHeap(DescriptorHeapTypes descriptorHeapType);
 				DescriptorHeapGPU_DX12& GetFrameDescriptorHeapGPU();
 				DescriptorHeapGPU_DX12& GetFrameDescriptorHeapGPUSampler();
@@ -110,7 +128,7 @@ namespace Insight
 			private:
 				RHI_PhysicalDevice_DX12 m_physicalDevice;
 				ComPtr<IDXGIFactory4> m_factory{ nullptr };
-				ComPtr<ID3D12Device> m_device{ nullptr };
+				ComPtr<ID3D12Device1> m_device{ nullptr };
 				ComPtr<ID3D12Debug> m_debugController{ nullptr };
 				D3D12MA::ALLOCATION_CALLBACKS m_d3d12maAllocationCallbacks = { };
 

@@ -14,6 +14,17 @@ namespace Insight
 		class RHI_Pipeline;
 		class RHI_PipelineLayout;
 
+		class RHI_PipelineCahce : public Core::Singleton<RHI_PipelineCahce>
+		{
+		public:
+			virtual ~RHI_PipelineCahce() { }
+
+			static RHI_PipelineCahce* New(RenderContext* context);
+
+			virtual RHI_Pipeline* GetGraphicsPSO(PipelineStateObject& pso) const = 0;
+			virtual void AddPSO(const PipelineStateObject& pso, const RHI_Pipeline* pipeline) = 0;
+		};
+
 		class RHI_PipelineLayoutManager
 		{
 		public:
@@ -48,6 +59,7 @@ namespace Insight
 
 		private:
 			std::map<u64, RHI_Pipeline*> m_pipelineStateObjects;
+			RHI_PipelineCahce* m_pipelineCache = nullptr;
 			RenderContext* m_context = nullptr;
 		};
 	}

@@ -75,6 +75,7 @@ namespace Insight
 		{
 			IS_PROFILE_FUNCTION();
 			ASSERT(m_context->IsRenderThread());
+			cmdList->BeginTimeBlock("RG::Execute");
 
 			/*
 			* BUILD
@@ -143,8 +144,8 @@ namespace Insight
 					}
 					cmdList->EndTimeBlock();
 				}
-				cmdList->EndTimeBlock();
 			}
+				cmdList->EndTimeBlock();
 		}
 
 		RGTextureHandle RenderGraph::CreateTexture(std::string textureName, RHI_TextureInfo info)

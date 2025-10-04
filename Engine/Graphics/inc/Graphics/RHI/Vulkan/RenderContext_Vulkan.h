@@ -65,6 +65,8 @@ namespace Insight
 
 				virtual void ExecuteAsyncJobs(RHI_CommandList* cmdList) override;
 
+				virtual void SetFPSTarget(const int targetFps) override { FAIL_ASSERT(); }
+
 				void SetObjectName(std::string_view name, u64 handle, VkObjectType objectType);
 
 				VkDevice GetDevice() const { return m_device; }

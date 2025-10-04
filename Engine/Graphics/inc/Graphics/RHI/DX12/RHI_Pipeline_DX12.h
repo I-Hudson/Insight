@@ -26,10 +26,13 @@ namespace Insight
                 virtual void Create(RenderContext* context, PipelineStateObject pso) override;
                 virtual void Create(RenderContext* context, ComputePipelineStateObject pso) override;
 
+                static D3D12_GRAPHICS_PIPELINE_STATE_DESC GetGraphicsPipelineDesc(PipelineStateObject& pso);
+
                 // RHI_Resource
                 virtual void Release() override;
                 virtual bool ValidResource() override;
                 virtual void SetName(std::string name) override;
+
 
             private:
                 ID3D12PipelineState* m_pipeline = nullptr;

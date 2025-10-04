@@ -40,7 +40,7 @@ namespace Insight
 			Graphics::RHI_Texture* GetShadowMap() const;
 
 		private:
-			REFLECT_PROPERTY(EditorVisible);
+			REFLECT_PROPERTY(EditorVisible, Meta(ClampMin(0.0)));
 			float m_radius = 8.0f;
 			LightComponentShadowMapResolutions m_shadowMapResolution = LightComponentShadowMapResolutions::_1024;
 

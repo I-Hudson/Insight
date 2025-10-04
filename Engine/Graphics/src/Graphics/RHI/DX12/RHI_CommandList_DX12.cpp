@@ -227,7 +227,8 @@ namespace Insight
 			void RHI_CommandList_DX12::Reset()
 			{
 				RHI_CommandList::Reset();
-			
+				ASSERT(timeblock == 0);
+
 				if (m_commandList && m_allocator
 					&& (m_state == RHI_CommandListStates::Ended || m_state == RHI_CommandListStates::Submitted))
 				{
@@ -594,11 +595,13 @@ namespace Insight
 				colour.z = std::max(0.0f, std::min(1.0f, colour.z));
 				UINT pixColour = PIX_COLOR(static_cast<BYTE>(colour.x * 255), static_cast<BYTE>(colour.y * 255), static_cast<BYTE>(colour.z * 255));
 				PIXBeginEvent(m_commandList, pixColour, blockName.c_str());
+				++timeblock;
 			}
 
 			void RHI_CommandList_DX12::EndTimeBlock()
 			{
 				PIXEndEvent(m_commandList);
+				--timeblock;
 				m_nvtxRangehandle = {};
 			}
 

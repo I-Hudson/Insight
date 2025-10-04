@@ -118,6 +118,7 @@ namespace Insight
 #endif // IS_DESCRIPTOR_MULTITHREAD_DX12
 
 				nvtx3::range_handle m_nvtxRangehandle;
+				int timeblock = 0;
 
 				friend class RHI_CommandListAllocator_DX12;
 				friend class RHI_FSR;
