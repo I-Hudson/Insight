@@ -25,6 +25,8 @@
 #pragma warning(pop)
 #endif
 
+#undef IS_PROFILE_TRACY
+
 namespace Insight
 {
     namespace Core

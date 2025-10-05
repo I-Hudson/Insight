@@ -16,24 +16,6 @@
 #include "D3D12MemAlloc.h"
 
 #include <array>
-#include <dxgi.h>
-#include <dxgi1_4.h>
-#include <Windows.h>
-#include <wrl/client.h>
-#include <atomic>
-#include <map>
-#include <string_view>
-#include <thread>
-#include <vector>
-#include <Core/TypeAlias.h>
-#include <Graphics/Enums.h>
-#include <Graphics/RHI/RHI_Buffer.h>
-#include <Graphics/RHI/RHI_CommandList.h>
-#include <Graphics/RHI/RHI_Texture.h>
-#include <Maths/Vector2.h>
-#include <d3d12.h>
-#include <d3d12sdklayers.h>
-#include <d3dcommon.h>
 
 namespace Insight
 {

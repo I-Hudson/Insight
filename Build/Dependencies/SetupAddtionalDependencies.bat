@@ -18,10 +18,17 @@ robocopy "%vendorPath%\glfw\glfw-3.4" "%vendorPath%\glfw" /E /MOV
 
 echo Generate and Build tracy
 cd "%vendorPath%/tracy"
-call cmake -S "./" -B "build" -D TRACY_STATIC=OFF
+call cmake -S "./" -B "build" -D TRACY_STATIC=OFF TRACY_ON_DEMAND=ON
 cd "%currentDirectory%"
 call "../Engine/Build_Solution.bat" "%vendorPath%/tracy/build/Tracy.sln" vs2022 Build Debug x64
 call "../Engine/Build_Solution.bat" "%vendorPath%/tracy/build/Tracy.sln" vs2022 Build Release x64
+
+echo Generate and Build tracy profiler
+cd "%vendorPath%/tracy/profiler"
+call cmake -S "./" -B "build"
+cd "%currentDirectory%"
+call "../Engine/Build_Solution.bat" "%vendorPath%/tracy/profiler/build/tracy-profiler.sln" vs2022 Build Debug x64
+call "../Engine/Build_Solution.bat" "%vendorPath%/tracy/profiler/build/tracy-profiler.sln" vs2022 Build Release x64
 
 
 echo Generate JoltPhysics solution
