@@ -322,8 +322,6 @@ namespace Insight
 
 			Maths::Vector2 m_swapchainBufferSize;
 
-			RHI_Texture* m_font_texture = nullptr;
-
 			bool m_imguiStartNewFrame = true;
 
 			friend class Renderer;

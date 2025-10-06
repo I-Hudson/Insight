@@ -31,15 +31,23 @@ function InsightPlatforms.All()
             }
         end
 
+        buildoptions
+        {
+            "/utf-8"
+        }
+
         links
         {
             "WinPixEventRuntime.lib",
             "cppwinrt_fast_forwarder.lib",
             "Comctl32.lib",
-            "spdlog.lib",
         }
-
+        
     filter { "platforms:Win64", "configurations:Debug" or "configurations:Testing" }
+        links
+        {
+            "spdlogd.lib",
+        }
         ignoredefaultlibraries
         {
             "libcmt.lib",
@@ -47,6 +55,10 @@ function InsightPlatforms.All()
             "libcmtd.lib",
         }
     filter { "platforms:Win64", "configurations:Release" }
+        links
+        {
+            "spdlog.lib",
+        }
         ignoredefaultlibraries
         {
             "libcmt.lib",

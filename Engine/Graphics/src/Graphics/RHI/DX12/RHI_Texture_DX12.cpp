@@ -110,8 +110,7 @@ namespace Insight
 					1,
 					0,
 					ImageUsageFlagsToDX12(createInfo.ImageUsage),
-					D3D12_TEXTURE_LAYOUT_UNKNOWN,
-					0);
+					D3D12_TEXTURE_LAYOUT_UNKNOWN);
 
 				bool optimiseClearColourEnabled = createInfo.ImageUsage & ImageUsageFlagsBits::DepthStencilAttachment
 					|| createInfo.ImageUsage & ImageUsageFlagsBits::ColourAttachment;

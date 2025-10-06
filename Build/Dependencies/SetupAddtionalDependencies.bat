@@ -16,6 +16,21 @@ call :DOWNLOAD_AND_UNZIP https://developer.nvidia.com/downloads/assets/tools/sec
 
 robocopy "%vendorPath%\glfw\glfw-3.4" "%vendorPath%\glfw" /E /MOV
 
+echo Generate and Assimp
+cd "%vendorPath%/assimp"
+call cmake -S "./" -B "build" 
+cd "%currentDirectory%"
+call "../Engine/Build_Solution.bat" "%vendorPath%/assimp/build/Assimp.sln" vs2022 Build Debug x64
+call "../Engine/Build_Solution.bat" "%vendorPath%/assimp/build/Assimp.sln" vs2022 Build Release x64
+
+echo Generate and spdlog
+cd "%vendorPath%/spdlog"
+call cmake -S "./" -B "build" -D SPDLOG_BUILD_SHARED=ON
+cd "%currentDirectory%"
+call "../Engine/Build_Solution.bat" "%vendorPath%/spdlog/build/spdlog.sln" vs2022 Build Debug x64
+call "../Engine/Build_Solution.bat" "%vendorPath%/spdlog/build/spdlog.sln" vs2022 Build Release x64
+
+
 echo Generate and Build tracy
 cd "%vendorPath%/tracy"
 call cmake -S "./" -B "build" -D TRACY_STATIC=OFF TRACY_ON_DEMAND=ON

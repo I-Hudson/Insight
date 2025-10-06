@@ -39,10 +39,10 @@ namespace Insight
 }
 
 #define SET_SPDLOG_LOGGERS()\
-std::shared_ptr<spdlog::logger> coreLogger = ::Insight::Core::Logger::GetCoreFileLogger();\
-std::shared_ptr<spdlog::logger> clientLogger = ::Insight::Core::Logger::GetClientFileLogger();\
-spdlog::register_logger(coreLogger);\
-spdlog::register_logger(clientLogger);
+//std::shared_ptr<spdlog::logger> coreLogger = ::Insight::Core::Logger::GetCoreFileLogger();\
+//std::shared_ptr<spdlog::logger> clientLogger = ::Insight::Core::Logger::GetClientFileLogger();\
+//spdlog::register_logger(coreLogger);\
+//spdlog::register_logger(clientLogger);
 
 #pragma warning(push)
 #pragma warning(disable : 4005)

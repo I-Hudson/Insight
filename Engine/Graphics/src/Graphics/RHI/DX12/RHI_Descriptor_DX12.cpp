@@ -89,14 +89,33 @@ namespace Insight
 				return true;
 			}
 
-			void DescriptorHeapPage_DX12::FreeHandle(DescriptorHeapHandle_DX12& handle)
+			bool DescriptorHeapPage_DX12::FreeHandle(DescriptorHeapHandle_DX12& handle)
 			{
 				ASSERT(m_heap);
 				if (handle.HeapId == m_heapId)
 				{
 					m_freeHandles.push_back(handle);
 					handle = {};
+					return true;
 				}
+				return false;
+			}
+
+			bool DescriptorHeapPage_DX12::FreeHandle(D3D12_CPU_DESCRIPTOR_HANDLE& handle)
+			{
+				ASSERT(m_heap);
+
+				const u64 cpuIndex = (handle.ptr - m_descriptorHeapCPUStart.ptr) / m_descriptorSize;
+
+				DescriptorHeapHandle_DX12 h(m_descriptorHeapCPUStart.ptr + (cpuIndex * m_descriptorSize)
+					, m_gpuVisable ? m_descriptorHeapGPUStart.ptr + (cpuIndex * m_descriptorSize) : 0ull
+				, m_heapId
+				, m_heapType);
+
+				m_freeHandles.push_back(h);
+				handle = {};
+
+				return true;
 			}
 
 			void DescriptorHeapPage_DX12::Reset()
@@ -127,14 +146,21 @@ namespace Insight
 			//// DescriptorHeap_DX12
 			//// </summary>
 			//// <param name="heapType"></param>
-			void DescriptorHeap_DX12::Create(DescriptorHeapTypes heapType)
+			void DescriptorHeap_DX12::Create(const DescriptorHeapTypes heapType)
 			{
 				Create(heapType, 256);
 			}
 
-			void DescriptorHeap_DX12::Create(DescriptorHeapTypes heapType, u32 handleCount)
+			void DescriptorHeap_DX12::Create(const DescriptorHeapTypes heapType, const u32 handleCount)
 			{
 				m_heapType = heapType;
+				AddNewHeap(handleCount);
+			}
+
+			void DescriptorHeap_DX12::Create(const DescriptorHeapTypes heapType, const u32 handleCount, const bool gpuVisable)
+			{
+				m_heapType = heapType;
+				m_isGPUVisalbe = gpuVisable;
 				AddNewHeap(handleCount);
 			}
 
@@ -167,6 +193,17 @@ namespace Insight
 				for (auto heap : m_heaps)
 				{
 					heap.FreeHandle(handle);
+				}
+			}
+
+			void DescriptorHeap_DX12::FreeHandle(D3D12_CPU_DESCRIPTOR_HANDLE& handle)
+			{
+				for (auto heap : m_heaps)
+				{
+					if (heap.FreeHandle(handle))
+					{
+						return;
+					}
 				}
 			}
 

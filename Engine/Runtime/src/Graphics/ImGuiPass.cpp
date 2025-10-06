@@ -13,6 +13,7 @@
 
 #include "Core/Profiler.h"
 #include "Core/EnginePaths.h"
+#include "Platforms/Platform.h"
 
 #include "Asset/AssetRegistry.h"
 
@@ -72,6 +73,17 @@ namespace Insight
 			passData.Reset();
 			passData.ImDrawData = std::move(*ImGui::GetDrawData());
 
+			if (nullptr != passData.ImDrawData.Textures)
+			{
+				for (ImTextureData* tex : *passData.ImDrawData.Textures)
+				{
+					if (tex->Status != ImTextureStatus_OK)
+					{
+						UpdateImGuiTextures(tex);
+					}
+				}
+			}
+
 			for (size_t i = 0; i < passData.ImDrawData.CmdListsCount; ++i)
 			{
 				ImDrawList* imguiDrawList = passData.ImDrawData.CmdLists[i];
@@ -100,7 +112,10 @@ namespace Insight
 				}
 			}
 			ImDrawList** drawListPtr = passData.CmdListPtrs.data();
-			passData.ImDrawData.CmdLists = drawListPtr;
+			passData.ImDrawData.CmdLists.resize(passData.CmdListPtrs.size());
+			Platform::MemCopy(passData.ImDrawData.CmdLists.Data, passData.CmdListPtrs.data(), 
+				sizeof(ImDrawList*) * passData.ImDrawData.CmdLists.size());
+			//passData.ImDrawData.CmdLists = drawListPtr;
 
 			//RenderContext::Instance().ImGuiBeginFrame();
 
@@ -572,7 +587,7 @@ namespace Insight
 
 									cmdList->SetScissor((int)clip_min.x, (int)clip_min.y, (int)clip_max.x, (int)clip_max.y);
 								}
-								RHI_Texture* texture = static_cast<RHI_Texture*>(pcmd->TextureId);
+								RHI_Texture* texture = reinterpret_cast<RHI_Texture*>(pcmd->GetTexID());
 								//ASSERT(RenderGraph::Instance().HasTexture(texture) || Renderer::HasTexture(texture));
 
 								if (texture)
@@ -580,17 +595,22 @@ namespace Insight
 									// TODO High: HACK REALLY BAD. There needs to be a system where you can predefine multiple pipelines before rendering.
 									// This would allow for at runtime pipelines to already be created.
 									PipelineStateObject pso = renderGraph.GetPipelineStateObject("ImGuiPass");
-									if (texture->m_name == "ImguiFontsTexture"
+									cmdList->BindPipeline(pso, false);
+
+									/*
+									* This was here for a reason. That reason I am unable to recall :(
+									if (texture->m_name == "ImGuiTexture"
 										|| texture->HasAplha())
 									{
-										cmdList->BindPipeline(pso, false);
 									}
-									else
+									else if(false)
 									{
 										pso.Name = "ImGuiPass_NoBlend";
 										pso.BlendEnable = false;
 										cmdList->BindPipeline(pso, false);
 									}
+									*/
+
 									PipelineBarrier pipelineBarrier;
 									pipelineBarrier.SrcStage = (u32)PipelineStageFlagBits::ColourAttachmentOutput;
 									pipelineBarrier.DstStage = (u32)PipelineStageFlagBits::FragmentShader;
@@ -634,5 +654,64 @@ namespace Insight
 					buffer = nullptr;
 				});
 		}
+
+		void ImGuiPass::UpdateImGuiTextures(ImTextureData* tex)
+		{
+			if (tex->Status == ImTextureStatus_WantCreate)
+			{
+				// Create texture based on tex->Width, tex->Height.
+				// - Most backends only support tex->Format == ImTextureFormat_RGBA32.
+				// - Backends for particularly memory constrainted platforms may support tex->Format == ImTextureFormat_Alpha8.
+
+				// Upload all texture pixels
+				// - Read from our CPU-side copy of the texture and copy to your graphics API.
+				// - Use tex->Width, tex->Height, tex->GetPixels(), tex->GetPixelsAt(), tex->GetPitch() as needed.
+
+				RHI_Texture* texture = Renderer::CreateTexture();
+				texture->SetName("ImGuiTexture");
+				texture->m_pixelFormat = PixelFormat::B8G8R8A8_UNorm;
+
+				Byte* pixelsData = (Byte*)tex->GetPixels();
+				texture->LoadFromData(pixelsData, tex->Width, tex->Height, 1, 4);
+
+				// Store your data, and acknowledge creation.
+				tex->SetTexID((ImTextureID)texture); // Specify backend-specific ImTextureID identifier which will be stored in ImDrawCmd.
+				tex->SetStatus(ImTextureStatus_OK);
+				//tex->BackendUserData = xxxx; // Store more backend data if needed (most backend allocate a small texture to store data in there)
+			}
+			if (tex->Status == ImTextureStatus_WantUpdates)
+			{
+				// Upload a rectangle of pixels to the existing texture
+				// - We only ever write to textures regions which have never been used before!
+				// - Use tex->TexID or tex->BackendUserData to retrieve your stored data.
+				// - Use tex->UpdateRect.x/y, tex->UpdateRect.w/h to obtain the block position and size.
+				//   - Use tex->Updates[] to obtain individual sub-regions within tex->UpdateRect. Not recommended.
+				// - Read from our CPU-side copy of the texture and copy to your graphics API.
+				// - Use tex->Width, tex->Height, tex->GetPixels(), tex->GetPixelsAt(), tex->GetPitch() as needed.
+
+				RHI_Texture* texture = (RHI_Texture*)tex->GetTexID();
+				Byte* pixelsData = (Byte*)tex->GetPixels();
+				texture->LoadFromData(pixelsData, tex->Width, tex->Height, 1, 4);
+
+				// Acknowledge update
+				tex->SetStatus(ImTextureStatus_OK);
+			}
+			if (tex->Status == ImTextureStatus_WantDestroy && tex->UnusedFrames > 0)
+			{
+				// If you use staged rendering and have in-flight renders, changed tex->UnusedFrames > 0 check to higher count as needed e.g. > 2
+
+				// Destroy texture
+				// - Use tex->TexID or tex->BackendUserData to retrieve your stored data.
+				// - Destroy texture in your graphics API.
+
+				RHI_Texture* texture = (RHI_Texture*)tex->GetTexID();
+				Renderer::FreeTexture(texture);
+
+				// Acknowledge destruction
+				tex->SetTexID(ImTextureID_Invalid);
+				tex->SetStatus(ImTextureStatus_Destroyed);
+			}
+		}
+
 	}
 }

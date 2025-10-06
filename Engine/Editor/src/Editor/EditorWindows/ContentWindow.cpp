@@ -619,6 +619,7 @@ namespace Insight::Editor
                     }
                 }
             }
+            ImGui::Dummy(ImVec2(0, 0));
             ImGui::EndChild();
 
             ImGui::PopStyleColor();

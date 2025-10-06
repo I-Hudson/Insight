@@ -23,6 +23,7 @@
 
 #include <meshoptimizer.h>
 #include <unordered_set>
+#include <iterator>
 
 #define SINGLE_MESH 0
 

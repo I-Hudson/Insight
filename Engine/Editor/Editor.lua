@@ -5,7 +5,7 @@ project "Insight_Editor"
     configurations { "Debug", "Release" } 
     location "./"
     
-    debugargs { "project_path=../../../DemoProject/DemoProject.isproject" }
+    debugargs { "project_path=../../../../InsightDemoProject/InsightDemoProject.isproject" }
 
     targetname ("%{prj.name}")
     targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")

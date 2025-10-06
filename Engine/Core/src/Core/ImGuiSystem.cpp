@@ -18,7 +18,8 @@ namespace Insight
 			//io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
 			//io.ConfigViewportsNoAutoMerge = true;
 			//io.ConfigViewportsNoTaskBarIcon = true;
-			// 
+			io.BackendFlags |= ImGuiBackendFlags_RendererHasTextures;
+
 			// Setup Dear ImGui style
 			ImGui::StyleColorsDark();
 			//ImGui::StyleColorsClassic();

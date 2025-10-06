@@ -31,6 +31,9 @@ namespace Insight
 			void Release();
 
 		private:
+			void UpdateImGuiTextures(ImTextureData* tex);
+
+		private:
 			FrameResource<RHI_Buffer*> m_vertex_buffer;
 			FrameResource<RHI_Buffer*> m_index_buffer;
 			DoubleBufferVector<ImGuiPassData> m_passData;

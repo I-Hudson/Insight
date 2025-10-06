@@ -96,7 +96,7 @@ function RuntimeConfig.FilterConfigurations()
         "meshoptimizer.lib",
         "lz4d.lib",
         "Reflectd.lib",
-        "assimpd.lib",
+        "assimp-vc143-mtd.lib",
 
         --"GLFW.lib",
         --"vulkan-1.lib",
@@ -140,7 +140,7 @@ buildoptions "/MD"
         "meshoptimizer.lib",
         "lz4.lib",
         "Reflect.lib",
-        "assimp.lib",
+        "assimp-vc143-mt.lib",
 
         --"GLFW.lib",
         --"vulkan-1.lib",

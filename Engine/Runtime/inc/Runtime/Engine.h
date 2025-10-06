@@ -69,6 +69,7 @@ namespace Insight
 
 			static Core::Timer s_FrameTimer;
 			u64 FrameCount = 0;
+
 		private:
 			bool m_shouldClose = false;
 

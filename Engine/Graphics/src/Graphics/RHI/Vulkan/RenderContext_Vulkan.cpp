@@ -479,10 +479,11 @@ namespace Insight
 				init_info.Queue = m_commandQueues[GPUQueue_Graphics];
 				init_info.PipelineCache = nullptr;
 				init_info.DescriptorPool = m_imguiDescriptorPool;
-				init_info.Subpass = 0;
+				init_info.PipelineInfoMain.Subpass = 0;
 				init_info.MinImageCount = RenderContext::Instance().GetFramesInFligtCount();
 				init_info.ImageCount = RenderContext::Instance().GetFramesInFligtCount();
-				init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+				init_info.PipelineInfoMain.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+				init_info.PipelineInfoMain.RenderPass = static_cast<VkRenderPass>(renderpass.Resource);
 				init_info.Allocator = nullptr;
 				init_info.CheckVkResultFn = [](VkResult error)
 				{
@@ -491,7 +492,7 @@ namespace Insight
 						IS_LOG_CORE_ERROR("[IMGUI] Error: {}", static_cast<u32>(error));
 					}
 				};
-				ImGui_ImplVulkan_Init(&init_info, static_cast<VkRenderPass>(renderpass.Resource));
+				ImGui_ImplVulkan_Init(&init_info);
 				ImGuiBeginFrame();
 			}
 

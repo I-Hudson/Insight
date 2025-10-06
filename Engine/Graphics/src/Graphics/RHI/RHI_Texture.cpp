@@ -70,6 +70,7 @@ namespace Insight
 					m_uploadRequest->OnUploadCompleted.Bind<&RHI_Texture::OnUploadComplete>(this);
 				});
 #else
+			Release();
 			Create(&RenderContext::Instance(), createInfo);
 			//Upload(data, static_cast<int>(size_in_bytes));
 			RenderContext::Instance().GetUploadQueue().UploadTexture(data, size_in_bytes, this);

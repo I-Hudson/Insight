@@ -53,7 +53,6 @@ function GraphicsConfig.IncludeDirs()
         "%{IncludeDirs.reflect}",
         "%{IncludeDirs.zip}",
         "%{IncludeDirs.spdlog}",
-        "%{IncludeDirs.vma}",
         "%{IncludeDirs.glslang}win_debug/inc",
         "%{IncludeDirs.vulkan}",
         "%{IncludeDirs.spirv_reflect}",
@@ -68,6 +67,8 @@ function GraphicsConfig.IncludeDirs()
         "%{IncludeDirs.DirectXAgilityHeaders}",
         "%{IncludeDirs.DirectXShaderCompiler}",
         "%{IncludeDirs.D3D12MemoryAllocator}",
+        "%{IncludeDirs.vma_src}",
+        "%{IncludeDirs.vma_inc}",
         "%{IncludeDirs.nvrhi}",
     }
 end

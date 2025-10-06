@@ -5,6 +5,7 @@
 #include "Graphics/RHI/DX12/RenderContext_DX12.h"
 #include "Graphics/RHI/DX12/RHI_Texture_DX12.h"
 #include "Graphics/RHI/DX12/RHI_Buffer_DX12.h"
+#include "Graphics/RHI/DX12/RHI_CommandList_DX12.h"
 #include "Graphics/RHI/DX12/DX12Utils.h"
 #include "Graphics/Window.h"
 
@@ -17,7 +18,7 @@
 #include "Event/EventSystem.h"
 
 #include "backends/imgui_impl_glfw.h"
-
+#include <nvtx3/nvtx3.hpp>
 
 #include "backends/imgui_impl_dx12.h"
 #define GLFW_EXPOSE_NATIVE_WIN32
@@ -38,6 +39,8 @@ namespace Insight
 			{
 				DeleteBytes(pMemory);
 			}
+
+			DescriptorHeap_DX12 g_imguiDescriptorHeap;
 
 			void FrameSubmitContext_DX12::OnCompleted()
 			{
@@ -116,6 +119,7 @@ namespace Insight
 				m_d3d12maAllocationCallbacks.pFree = D3D12Free;
 
 				D3D12MA::ALLOCATOR_DESC d3d12MA_AllocatorDesc = {};
+				d3d12MA_AllocatorDesc.Flags = D3D12MA_RECOMMENDED_ALLOCATOR_FLAGS | D3D12MA::ALLOCATOR_FLAG_DONT_USE_TIGHT_ALIGNMENT;
 				d3d12MA_AllocatorDesc.pDevice = m_device.Get();
 				d3d12MA_AllocatorDesc.pAdapter = m_physicalDevice.GetPhysicalDevice().Get();
 				d3d12MA_AllocatorDesc.pAllocationCallbacks = &m_d3d12maAllocationCallbacks;
@@ -336,14 +340,40 @@ namespace Insight
 			{
 				ImGui_ImplGlfw_InitForOther(Window::Instance().GetRawWindow(), false);
 
-				DescriptorHeapHandle_DX12 handle = m_descriptorHeaps.at(DescriptorHeapTypes::CBV_SRV_UAV).GetNewHandle();
+				g_imguiDescriptorHeap.SetRenderContext(this);
+				g_imguiDescriptorHeap.Create(DescriptorHeapTypes::CBV_SRV_UAV, 32, true);
 
+				ImGui_ImplDX12_InitInfo imguiInitInfo = {};
+				imguiInitInfo.Device = m_device.Get();
+				imguiInitInfo.CommandQueue = m_graphicsQueue.GetQueue();
+				imguiInitInfo.NumFramesInFlight = RenderContext::Instance().GetFramesInFligtCount();
+				imguiInitInfo.RTVFormat = DXGI_FORMAT_R8G8B8A8_UNORM; // Or your render target format.
+
+				// Allocating SRV descriptors (for textures) is up to the application, so we provide callbacks.
+				// The example_win32_directx12/main.cpp application include a simple free-list based allocator.
+				imguiInitInfo.SrvDescriptorHeap = g_imguiDescriptorHeap.GetHeap(0);
+				imguiInitInfo.SrvDescriptorAllocFn = [](ImGui_ImplDX12_InitInfo*, D3D12_CPU_DESCRIPTOR_HANDLE* out_cpu_handle, D3D12_GPU_DESCRIPTOR_HANDLE* out_gpu_handle) 
+					{ 
+						DescriptorHeapHandle_DX12 handle = g_imguiDescriptorHeap.GetNewHandle();
+						out_cpu_handle = &handle.GetCPUHandle();
+						out_gpu_handle = &handle.GetGPUHandle();
+					};
+				imguiInitInfo.SrvDescriptorFreeFn = [](ImGui_ImplDX12_InitInfo*, D3D12_CPU_DESCRIPTOR_HANDLE cpu_handle, D3D12_GPU_DESCRIPTOR_HANDLE gpu_handle) 
+					{ 
+						g_imguiDescriptorHeap.FreeHandle(cpu_handle);
+					};
+
+				ASSERT(ImGui_ImplDX12_Init(&imguiInitInfo));
+
+				/*
+				DescriptorHeapHandle_DX12 handle = m_descriptorHeaps.at(DescriptorHeapTypes::CBV_SRV_UAV).GetNewHandle();
 				ImGui_ImplDX12_Init(m_device.Get(),
 					RenderContext::Instance().GetFramesInFligtCount(),
 					DXGI_FORMAT_R8G8B8A8_UNORM,
 					m_descriptorHeaps.at(DescriptorHeapTypes::CBV_SRV_UAV).GetHeap(handle.HeapId),
 					handle.CPUPtr,
 					handle.GPUPtr);
+				*/
 
 				ImGui_ImplDX12_NewFrame();
 				ImGuiBeginFrame();
@@ -414,7 +444,7 @@ namespace Insight
 						m_submitFrameContexts.Get().CommandLists.push_back(cmdList);
 
 						{
-							IS_PROFILE_SCOPE("ExecuteCommandLists");
+							IS_PROFILE_SCOPE("Submit Command Lists");
 							m_graphicsQueue.Submit(cmdListDX12);
 						}
 
@@ -747,9 +777,10 @@ namespace Insight
 							{
 								/// Check to see whether the adapter supports Direct3D 12, but don't create the
 								/// actual device yet.
-								if (SUCCEEDED(D3D12CreateDevice(nullptr, featureLevel, __uuidof(ID3D12Device), nullptr))
-									&& m_d3dFeatureLevel <= featureLevel
-									&& desc.DedicatedVideoMemory > vram)
+								const HRESULT createdDevice = D3D12CreateDevice(adapter.Get(), featureLevel, __uuidof(ID3D12Device), NULL) == S_FALSE;
+								const bool featureLevelValid = m_d3dFeatureLevel <= featureLevel;
+								const bool higherVRAM = desc.DedicatedVideoMemory > vram;
+								if (createdDevice && featureLevelValid && higherVRAM)
 								{
 									m_d3dFeatureLevel = featureLevel;
 									adapterIdx = adapterIndex;

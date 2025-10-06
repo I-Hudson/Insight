@@ -54,6 +54,8 @@ namespace Insight
             project.ProjectPath = projectPath;
             project.ProjectName = projectName;
 
+            FileSystem::PathToUnix(project.ProjectPath);
+
             std::string projectFilePath = project.GetProjectFilePath();
 
             if (FileSystem::Exists(projectFilePath))

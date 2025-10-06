@@ -189,17 +189,10 @@ namespace Insight
 		{
 			IS_PROFILE_FUNCTION();
 
-			if (m_font_texture == nullptr)
+			ImGuiIO& io = ImGui::GetIO();
+			if (io.Fonts->Fonts.Size == 0)
 			{
-				m_font_texture = Renderer::CreateTexture();
-				m_font_texture->SetName("ImguiFontsTexture");
-
-				unsigned char* pixels;
-				int width, height;
-
-				ImGuiIO& io = ImGui::GetIO();
 				io.Fonts->AddFontDefault();
-
 				// merge in icons from Font Awesome
 				static const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_16_FA, 0 };
 				ImFontConfig icons_config; icons_config.MergeMode = true; icons_config.PixelSnapH = true;
@@ -209,13 +202,6 @@ namespace Insight
 				Platform::MemCopy(fontData, fa_solid_900_ttf, fontDataSize);
 
 				io.Fonts->AddFontFromMemoryTTF(fontData, fontDataSize, 16.0f, &icons_config, icons_ranges);
-
-				io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
-				m_font_texture->m_pixelFormat = PixelFormat::B8G8R8A8_UNorm;
-				m_font_texture->LoadFromData(pixels, width, height, 1, 4);
-
-				ImTextureID texture_id = m_font_texture;
-				io.Fonts->SetTexID(texture_id);
 			}
 
 			if (m_imguiStartNewFrame)
@@ -223,7 +209,7 @@ namespace Insight
 				m_imguiStartNewFrame = false;
 				ImGui_ImplGlfw_NewFrame();
 				ImGui::NewFrame();
-				ImGui::DockSpaceOverViewport(nullptr, ImGuiDockNodeFlags_PassthruCentralNode);
+				ImGui::DockSpaceOverViewport(0, NULL, ImGuiDockNodeFlags_PassthruCentralNode);
 			}
 		}
 
@@ -239,10 +225,9 @@ namespace Insight
 		{
 			IS_PROFILE_FUNCTION();
 
-			if (m_font_texture)
+			for (ImTextureData* tex : ImGui::GetPlatformIO().Textures)
 			{
-				Renderer::FreeTexture(m_font_texture);
-				m_font_texture = nullptr;
+				Renderer::FreeTexture((RHI_Texture*)tex->GetTexID());
 			}
 		}
 
@@ -292,6 +277,8 @@ namespace Insight
 				}
 				m_resourceCaches.clear();
 			}
+
+			m_resource_tracker.Release();
 
 			ASSERT_MSG(m_buffers.IsEmpty(), "[RenderContext::BaseDestroy] Not all RHI_Buffers have been release with 'FreeBuffer'. Please do this.");
 			ASSERT_MSG(m_textures.IsEmpty(), "[RenderContext::BaseDestroy] Not all RHI_Textures have been release with 'FreeTexture'. Please do this.");

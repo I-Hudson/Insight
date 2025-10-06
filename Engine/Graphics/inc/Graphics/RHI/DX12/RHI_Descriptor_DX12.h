@@ -85,7 +85,8 @@ namespace Insight
 				DescriptorHeapTypes GetHeapType() const { return m_heapType; }
 				u32 GetDescriptorSize() const { return m_descriptorSize; }
 				bool GetNewHandle(DescriptorHeapHandle_DX12& handle);
-				void FreeHandle(DescriptorHeapHandle_DX12& handle);
+				bool FreeHandle(DescriptorHeapHandle_DX12& handle);
+				bool FreeHandle(D3D12_CPU_DESCRIPTOR_HANDLE& handle);
 				void Reset();
 
 				void Destroy();
@@ -113,8 +114,9 @@ namespace Insight
 			public:
 				virtual ~DescriptorHeap_DX12() = default;
 
-				void Create(DescriptorHeapTypes heapType);
-				void Create(DescriptorHeapTypes heapType, u32 handleCount);
+				void Create(const DescriptorHeapTypes heapType);
+				void Create(const DescriptorHeapTypes heapType, const u32 handleCount);
+				void Create(const DescriptorHeapTypes heapType, const u32 handleCount, const bool gpuVisable);
 				void SetRenderContext(RenderContext_DX12* context) { m_context = context; }
 
 				const std::vector<DescriptorHeapPage_DX12>& GetHeaps() const { return m_heaps; }
@@ -122,6 +124,7 @@ namespace Insight
 
 				DescriptorHeapHandle_DX12 GetNewHandle();
 				void FreeHandle(DescriptorHeapHandle_DX12& handle);
+				void FreeHandle(D3D12_CPU_DESCRIPTOR_HANDLE& handle);
 
 				void Reset();
 				void Destroy();
@@ -130,7 +133,7 @@ namespace Insight
 				void AddNewHeap();
 				void AddNewHeap(u32 handleCount);
 
-			protected:
+			public:
 				bool m_isGPUVisalbe = false;
 			
 			private:

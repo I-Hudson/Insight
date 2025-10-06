@@ -1,15 +1,36 @@
 @echo off 
+
+rem ASSIMP DEBUG
+call :COPY_TO_DEBUG_DEPS "..\..\vendor\assimp\build\bin\Debug\assimp-vc143-mtd.dll"						                    "dll"
+call :COPY_TO_DEBUG_DEPS "..\..\vendor\assimp\build\lib\Debug\assimp-vc143-mtd.lib"						                    "lib"
+call :COPY_TO_DEBUG_DEPS "..\..\vendor\assimp\build\bin\Debug\\assimp-vc143-mtd.pdb"						                "pdb"
+rem ASSIMP RELEASE
+call :COPY_TO_RELEASE_DEPS "..\..\vendor\assimp\build\bin\Release\assimp-vc143-mt.dll"						                "dll"
+call :COPY_TO_RELEASE_DEPS "..\..\vendor\assimp\build\lib\Release\assimp-vc143-mt.lib"						                "lib"
+call :COPY_TO_RELEASE_DEPS "..\..\vendor\assimp\build\bin\\Release\assimp-vc143-mt.pdb"						                "pdb"
+
+rem SPDLOG DEBUG
+call :COPY_TO_DEBUG_DEPS "..\..\vendor\spdlog\build\Debug\spdlogd.dll"						                                "dll"
+call :COPY_TO_DEBUG_DEPS "..\..\vendor\spdlog\build\Debug\spdlogd.lib"						                                "lib"
+call :COPY_TO_DEBUG_DEPS "..\..\vendor\spdlog\build\Debug\spdlogd.pdb"						                                "pdb"
+rem SPDLOG RELEASE
+call :COPY_TO_RELEASE_DEPS "..\..\vendor\spdlog\build\Release\spdlog.dll"						                            "dll"
+call :COPY_TO_RELEASE_DEPS "..\..\vendor\spdlog\build\Release\spdlog.lib"						                            "lib"
+rem call :COPY_TO_RELEASE_DEPS "..\..\vendor\spdlog\build\Release\spdlog.pdb"						                            "pdb"
+
+rem TRACY DEBUG
 call :COPY_TO_DEBUG_DEPS "..\..\vendor\tracy\build\Debug\TracyClient.dll"						                            "dll"
 call :COPY_TO_DEBUG_DEPS "..\..\vendor\tracy\build\Debug\TracyClient.lib"						                            "lib"
 call :COPY_TO_DEBUG_DEPS "..\..\vendor\tracy\build\Debug\TracyClient.pdb"						                            "pdb"
-
+rem TRACY RELEASE
 call :COPY_TO_RELEASE_DEPS "..\..\vendor\tracy\build\Release\TracyClient.dll"						                        "dll"
 call :COPY_TO_RELEASE_DEPS "..\..\vendor\tracy\build\Release\TracyClient.lib"						                        "lib"
 call :COPY_TO_RELEASE_DEPS "..\..\vendor\tracy\build\Release\TracyClient.pdb"						                        "pdb"
 
+rem JOLT DEBUG
 call :COPY_TO_DEBUG_DEPS "..\..\vendor\JoltPhysics\Build\VS2022_CL\Debug\Jolt.lib"						                    "lib"
 call :COPY_TO_DEBUG_DEPS "..\..\vendor\JoltPhysics\Build\VS2022_CL\Debug\Jolt.pdb"						                    "pdb"
-
+rem JOLT RELEASE
 call :COPY_TO_RELEASE_DEPS "..\..\vendor\JoltPhysics\Build\VS2022_CL\Release\Jolt.lib"						                "lib"
 call :COPY_TO_RELEASE_DEPS "..\..\vendor\JoltPhysics\Build\VS2022_CL\Release\Jolt.pdb"						                "pdb"
 
@@ -33,8 +54,14 @@ call :COPY_TO_RELEASE_DEPS "..\..\vendor\winpixeventruntime\bin\x64\WinPixEventR
 call :COPY_TO_RELEASE_DEPS "..\..\vendor\winpixeventruntime\bin\x64\WinPixEventRuntime.dll"		                            "dll"
 
 call :COPY_TO_DEBUG_DEPS "..\..\vendor\Microsoft.Direct3D.D3D12\build\native\bin\x64\D3D12Core.dll"                         "dll\D3D12"
+call :COPY_TO_DEBUG_DEPS "..\..\vendor\Microsoft.Direct3D.D3D12\build\native\bin\x64\\D3D12Core.pdb"                        "pdb"
 call :COPY_TO_DEBUG_DEPS "..\..\vendor\Microsoft.Direct3D.D3D12\build\native\bin\x64\d3d12SDKLayers.dll"                    "dll\D3D12"
+call :COPY_TO_DEBUG_DEPS "..\..\vendor\Microsoft.Direct3D.D3D12\build\native\bin\x64\\d3d12SDKLayers.pdb"                   "pdb"
+
 call :COPY_TO_RELEASE_DEPS "..\..\vendor\Microsoft.Direct3D.D3D12\build\native\bin\x64\D3D12Core.dll"                       "dll\D3D12"
+call :COPY_TO_RELEASE_DEPS "..\..\vendor\Microsoft.Direct3D.D3D12\build\native\bin\x64\\D3D12Core.pdb"                      "pdb"
+call :COPY_TO_RELEASE_DEPS "..\..\vendor\Microsoft.Direct3D.D3D12\build\native\bin\x64\d3d12SDKLayers.dll"                  "dll\D3D12"
+call :COPY_TO_RELEASE_DEPS "..\..\vendor\Microsoft.Direct3D.D3D12\build\native\bin\x64\\d3d12SDKLayers.pdb"                 "pdb"
 
 call :COPY_TO_DEBUG_DEPS "..\..\vendor\Microsoft.VCRTForwarders.140\runtimes\win10-x64\native\debug\concrt140d_app.dll"      "dll"
 call :COPY_TO_DEBUG_DEPS "..\..\vendor\Microsoft.VCRTForwarders.140\runtimes\win10-x64\native\debug\msvcp140_1d_app.dll"     "dll"
@@ -76,6 +103,7 @@ if not exist %output% (
     mkdir %output%
 )
 xcopy /Y /B %lib_file% %output%
+EXIT /B 0
 
 :COPY_TO_RELEASE_DEPS
 set output="%~dp0..\..\deps\Release-windows-x86_64\%~2\"
@@ -84,3 +112,4 @@ if not exist %output% (
     mkdir %output%
 )
 xcopy /Y /B %lib_file% %output%
+EXIT /B 0

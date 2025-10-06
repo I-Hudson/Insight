@@ -49,7 +49,7 @@ else
 end
 
 group "Dependices"
-        include "../../premakeFiles/assimp.lua"
+        --include "../../premakeFiles/assimp.lua"
         include "../../premakeFiles/glfw.lua"
         include "../../premakeFiles/glm.lua"
         include "../../premakeFiles/imgui.lua"
@@ -60,7 +60,7 @@ group "Dependices"
         include "../../premakeFiles/xxHash.lua"
         include "../../premakeFiles/lz4.lua"
         include "../../premakeFiles/splash.lua"
-        include "../../premakeFiles/spdlog.lua"
+        --include "../../premakeFiles/spdlog.lua"
         include "../../premakeFiles/reflect.lua"
         include "../../premakeFiles/zip.lua"
         include "../../premakeFiles/efsw.lua"
