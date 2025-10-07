@@ -8,6 +8,7 @@ namespace Insight
 		void ImGuiSystem::Initialise()
 		{
 			IS_PROFILE_FUNCTION();
+
 			ImGui::CreateContext();
 			ImPlot::CreateContext();
 

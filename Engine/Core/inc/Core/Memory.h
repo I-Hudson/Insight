@@ -52,6 +52,14 @@ NO_DISCARD FORCE_INLINE T* New(Params&&... params)
 	return ptr;
 }
 
+template<typename T, Insight::Core::MemoryAllocCategory MemoryAllocCategory = Insight::Core::MemoryAllocCategory::General>
+NO_DISCARD FORCE_INLINE T* NewArray(const u64 count)
+{
+	T* arrayPtr = new T[count];
+	TrackPtr(arrayPtr);
+	return arrayPtr;
+}
+
 template<typename... Params>
 NO_DISCARD FORCE_INLINE void* NewNoTrack(u64 size)
 {
@@ -81,6 +89,27 @@ FORCE_INLINE void Delete(const T* pointer)
 	{
 		Insight::Memory::MemoryUnTrackPtr(pointer);
 		delete pointer;
+	}
+}
+
+template<typename T>
+FORCE_INLINE void DeleteArray(T*& pointer)
+{
+	if (pointer != nullptr)
+	{
+		Insight::Memory::MemoryUnTrackPtr(pointer);
+		delete[] pointer;
+		pointer = nullptr;
+	}
+}
+
+template<typename T>
+FORCE_INLINE void DeleteArray(const T* pointer)
+{
+	if (pointer != nullptr)
+	{
+		Insight::Memory::MemoryUnTrackPtr(pointer);
+		delete[] pointer;
 	}
 }
 

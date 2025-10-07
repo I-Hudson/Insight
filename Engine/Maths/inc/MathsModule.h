@@ -8,5 +8,6 @@ namespace Insight
 	{
 	public:
 		static void Initialise();
+		static void Shutdown();
 	};
 }

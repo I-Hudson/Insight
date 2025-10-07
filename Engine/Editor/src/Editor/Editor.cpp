@@ -247,6 +247,8 @@ namespace Insight
             App::Engine::Instance().GetSystemRegistry().UnregisterSystem(&m_buildSystem);
 
             Runtime::AssetRegistry::Instance().Shutdown();
+
+            EditorModule::Shutdown(GetSystemRegistry().GetSystem<Core::ImGuiSystem>());
         }
     }
 }

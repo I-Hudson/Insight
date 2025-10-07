@@ -2,6 +2,8 @@
 #if 1
 #include "Core/TypeAlias.h"
 #include "Core/NonCopyable.h"
+#include "Threading/SpinLock.h"
+#include "Threading/ScopedLock.h"
 
 #include <list>
 #include <unordered_map>
@@ -46,6 +48,8 @@ namespace Insight
 
             void Put(const TKey& key, const TValue& value)
             {
+                Threading::ScopedLock lock(m_lock);
+
                 if (auto iter = m_lookup.find(key);
                     iter != m_lookup.end())
                 {
@@ -68,6 +72,8 @@ namespace Insight
 
             bool Get(const TKey& key, TValue& value) const
             {
+                Threading::ScopedLock lock(m_lock);
+
                 if (auto iter = m_lookup.find(key);
                     iter != m_lookup.end())
                 {
@@ -82,6 +88,8 @@ namespace Insight
             std::list<Item> m_items;
             // https://stackoverflow.com/a/11275548
             std::unordered_map<TKey, typename std::list<Item>::iterator> m_lookup;
+
+            mutable Threading::SpinLock m_lock;
         };
     }
 }

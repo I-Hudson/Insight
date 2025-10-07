@@ -32,12 +32,13 @@ namespace Insight
 		};
 	}
 
-#define SET_IMGUI_CURRENT_CONTEXT() ImGui::SetCurrentContext(imguiSystem->GetCurrentContext()); \
+#define SET_IMGUI_CURRENT_CONTEXT()																\
+	ImGui::SetCurrentContext(imguiSystem->GetCurrentContext());									\
+	ImPlot::SetCurrentContext(imguiSystem->GetImPlotContext());									\
 	ImGuiMemAllocFunc allocFunc;																\
 	ImGuiMemFreeFunc freeFunc;																	\
 	void* pUsedData;																			\
 	imguiSystem->GetAllocatorFunctions(allocFunc, freeFunc, pUsedData);							\
 	ImGui::SetAllocatorFunctions(allocFunc, freeFunc, pUsedData);								\
-	ImPlot::SetCurrentContext(imguiSystem->GetImPlotContext())
-//#define SET_IMPLOT_CURRENT_CONTEXT() ImPlot::
+
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/Defines.h"
+#include "Core/TypeAlias.h"
 
 #include <mutex>
 
@@ -15,7 +16,7 @@ namespace Insight
         inline void P() { Wait(); }
         inline void V() { Signal(); }
         void Wait();
-        void Signal();
+        void Signal(const u32 count = 0);
 
     private:
         unsigned short currVal, maxVal; // 65,535 max threads assumed.

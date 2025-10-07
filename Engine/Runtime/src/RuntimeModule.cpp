@@ -1,6 +1,7 @@
 #include "RuntimeModule.h"
 #include "Core/ImGuiSystem.h"
 #include "Core/Logger.h"
+#include "Core/Asserts.h"
 
 namespace Insight
 {
@@ -10,5 +11,10 @@ namespace Insight
         SET_IMGUI_CURRENT_CONTEXT();
         SET_SPDLOG_LOGGERS();
 #endif
+    }
+
+    void RuntimeModule::Shutdown(Core::ImGuiSystem* imguiSystem)
+    {
+        ASSERT(ImGui::GetCurrentContext() == imguiSystem->GetCurrentContext());
     }
 }

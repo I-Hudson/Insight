@@ -10,4 +10,8 @@ namespace Insight
 		SET_SPDLOG_LOGGERS();
 #endif
 	}
+
+    void CoreModule::Shutdown()
+    {
+    }
 }

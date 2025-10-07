@@ -253,6 +253,13 @@ namespace Insight
 
 			OnDestroy();
 
+			CoreModule::Shutdown();
+			MathsModule::Shutdown();
+			PhysicsModule::Shutdown(&m_imguiSystem);
+			GraphicsModule::Shutdown(&m_imguiSystem);
+			InputModule::Shutdown(&m_imguiSystem);
+			RuntimeModule::Shutdown(&m_imguiSystem);
+
 			m_eventSystem.Shutdown();
 
 			m_projectSystem.Shutdown();

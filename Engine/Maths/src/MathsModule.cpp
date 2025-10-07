@@ -7,4 +7,9 @@ namespace Insight
 #ifndef IS_MONOLITH
 #endif
 	}
+
+	void MathsModule::Shutdown()
+	{
+
+	}
 }
