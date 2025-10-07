@@ -27,10 +27,17 @@ namespace Insight
             Delete(m_requestState);
         }
 
+        void AssetAsyncRequest::Wait() const
+        {
+            std::unique_lock lk(m_cvLock);
+            m_cv.wait(lk, [this]() { return IsReady(); });
+        }
+
         void AssetAsyncRequest::SetIsReady()
         {
             ASSERT(m_requestState);
             m_requestState->IsReady = true;
+            m_cv.notify_one();
         }
 
         AssetAsyncRequest& AssetAsyncRequest::operator=(AssetAsyncRequest&& other)

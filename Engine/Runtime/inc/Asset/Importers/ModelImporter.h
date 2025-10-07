@@ -130,7 +130,7 @@ namespace Insight
             Ref<MaterialAsset> ProcessMaterial(const aiScene* aiScene, const aiNode* aiNode, const aiMaterial* aiMaterial, ModelAsset* modelAsset) const;
             
             Ref<TextureAsset> LoadTexture(const aiScene* assimpScene, const aiMaterial* assimpMaterial, const aiTextureType PBRType, const aiTextureType legacyType, ModelAsset* modelAsset) const;
-            AssetAsyncRequest LoadTextureAsync(const aiScene* assimpScene, const aiMaterial* assimpMaterial, const aiTextureType PBRType, const aiTextureType legacyType, ModelAsset* modelAsset) const;
+            Ref<AssetAsyncRequest> LoadTextureAsync(const aiScene* assimpScene, const aiMaterial* assimpMaterial, const aiTextureType PBRType, const aiTextureType legacyType, ModelAsset* modelAsset) const;
             Ref<TextureAsset> LoadEmbeddedTexture(const aiScene* assimpScene, const aiMaterial* assimpMaterial, const aiTextureType PBRType, const aiTextureType legacyType, ModelAsset* modelAsset) const;
 
             void ExtractSkeleton(const aiScene* aiScene, const aiNode* aiNode, Maths::Matrix4 parentTransform, ModelAsset* modelAsset) const;

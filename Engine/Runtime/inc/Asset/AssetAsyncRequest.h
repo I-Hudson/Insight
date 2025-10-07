@@ -3,11 +3,14 @@
 #include "Core/ReferencePtr.h"
 #include "Asset/Asset.h"
 
+#include <condition_variable>
+#include <mutex>
+
 namespace Insight
 {
     namespace Runtime
     {
-        class AssetAsyncRequest
+        class AssetAsyncRequest : public Core::RefCount
         {
         public:
             AssetAsyncRequest() = default;
@@ -29,6 +32,8 @@ namespace Insight
                 return m_asset.As<T>();
             }
 
+            void Wait() const;
+
         private:
             void SetIsReady();
 
@@ -36,11 +41,14 @@ namespace Insight
             /// @brief Store the state of a 'AssetAsyncRequest'.
             struct RequestState
             {
-                bool IsReady = false;
+                std::atomic<bool> IsReady = false;
             };
 
             Ref<Asset> m_asset = nullptr;
             RequestState* m_requestState = nullptr;
+
+            mutable std::mutex m_cvLock;
+            mutable std::condition_variable m_cv;
 
             friend AssetRegistry;
         };

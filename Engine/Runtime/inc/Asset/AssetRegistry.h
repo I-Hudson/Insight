@@ -61,8 +61,8 @@ namespace Insight
             Ref<Asset> LoadAsset(std::string path);
             Ref<Asset> LoadAsset(const Core::GUID guid);
 
-            AssetAsyncRequest LoadAssetAsync(std::string path);
-            AssetAsyncRequest LoadAssetAsync(const Core::GUID guid);
+            Ref<AssetAsyncRequest> LoadAssetAsync(std::string path);
+            Ref<AssetAsyncRequest> LoadAssetAsync(const Core::GUID guid);
 
             const AssetInfo* GetAssetInfo(const std::string& path) const;
             const AssetInfo* GetAssetInfo(const Core::GUID guid) const;

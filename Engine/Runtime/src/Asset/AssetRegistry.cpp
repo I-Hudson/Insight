@@ -21,6 +21,8 @@
 #include "Core/Profiler.h"
 #include "Core/MemoryTracker.h"
 
+#include "Threading/TaskSystem.h"
+
 #include "Algorithm/Vector.h"
 
 namespace Insight::Runtime
@@ -343,23 +345,23 @@ namespace Insight::Runtime
         return LoadAsset(assetInfo->GetFullFilePath());
     }
 
-    AssetAsyncRequest AssetRegistry::LoadAssetAsync(std::string path)
+    Ref<AssetAsyncRequest> AssetRegistry::LoadAssetAsync(std::string path)
     {
-        return Ref<Asset>();
+        return Ref<AssetAsyncRequest>(::New<AssetAsyncRequest>(Ref<Asset>(), true));
     }
 
-    AssetAsyncRequest AssetRegistry::LoadAssetAsync(const Core::GUID guid)
+    Ref<AssetAsyncRequest> AssetRegistry::LoadAssetAsync(const Core::GUID guid)
     {
         if (!guid.IsValid())
         {
-            return AssetAsyncRequest();
+            return Ref<AssetAsyncRequest>(::New<AssetAsyncRequest>(Ref<Asset>(), true));
         }
 
         const AssetInfo* assetInfo = GetAssetInfo(guid);
         if (assetInfo == nullptr)
         {
             IS_LOG_CORE_ERROR("[AssetRegistry::LoadAsset] Unable to get AssetInfo from guid '{}'.", guid.ToString());
-            return AssetAsyncRequest();
+            return Ref<AssetAsyncRequest>(::New<AssetAsyncRequest>(Ref<Asset>(), true));
         }
         return LoadAssetAsync(assetInfo->GetFullFilePath());
     }

@@ -365,10 +365,12 @@ namespace Insight
 			//importer.SetIOHandler(&ioSystem);
 
 			const uint32_t importerFlags =
+				0
 				// Switch to engine conventions
 				// Validate and clean up
-				// aiProcess_ValidateDataStructure			/// Validates the imported scene data structure. This makes sure that all indices are valid, all animations and bones are linked correctly, all material references are correct
-				aiProcess_Triangulate					/// Triangulates all faces of all meshes
+				| aiProcess_ValidateDataStructure			/// Validates the imported scene data structure. This makes sure that all indices are valid, all animations and bones are linked correctly, all material references are correct
+				| aiProcess_PopulateArmatureData
+				| aiProcess_Triangulate					/// Triangulates all faces of all meshes
 				//| aiProcess_SortByPType					/// Splits meshes with more than one primitive type in homogeneous sub-meshes.
 
 				| aiProcess_MakeLeftHanded				/// DirectX style.
@@ -980,9 +982,12 @@ namespace Insight
 			const std::string materialname;// aiMaterial->GetName().C_Str();
 			const std::string_view Directory = modelAsset->GetAssetInfo()->FilePath;
 
-			std::unordered_map<TextureAssetTypes, AssetAsyncRequest> loadedTexturesAsync;
+			std::unordered_map<TextureAssetTypes, Ref<AssetAsyncRequest>> loadedTexturesAsync;
 			loadedTexturesAsync[TextureAssetTypes::Diffuse] = LoadTextureAsync(aiScene, aiMaterial, aiTextureType::aiTextureType_BASE_COLOR, aiTextureType::aiTextureType_DIFFUSE, modelAsset);
 			loadedTexturesAsync[TextureAssetTypes::Normal] = LoadTextureAsync(aiScene, aiMaterial, aiTextureType::aiTextureType_NORMAL_CAMERA, aiTextureType::aiTextureType_NORMALS, modelAsset);
+
+			loadedTexturesAsync[TextureAssetTypes::Diffuse]->Wait();
+			loadedTexturesAsync[TextureAssetTypes::Normal]->Wait();
 
 			material->SetTexture(TextureAssetTypes::Diffuse, LoadTexture(aiScene, aiMaterial, aiTextureType::aiTextureType_BASE_COLOR, aiTextureType::aiTextureType_DIFFUSE, modelAsset));
 			material->SetTexture(TextureAssetTypes::Normal, LoadTexture(aiScene, aiMaterial, aiTextureType::aiTextureType_NORMAL_CAMERA, aiTextureType::aiTextureType_NORMALS, modelAsset));
@@ -1017,7 +1022,7 @@ namespace Insight
 			return texture.As<TextureAsset>();
 		}
 
-		AssetAsyncRequest ModelImporter::LoadTextureAsync(const aiScene* assimpScene, const aiMaterial* assimpMaterial, const aiTextureType PBRType, const aiTextureType legacyType, ModelAsset* modelAsset) const
+		Ref<AssetAsyncRequest> ModelImporter::LoadTextureAsync(const aiScene* assimpScene, const aiMaterial* assimpMaterial, const aiTextureType PBRType, const aiTextureType legacyType, ModelAsset* modelAsset) const
 		{
 			const std::string texturePath = GetTexturePath(assimpMaterial, modelAsset->GetAssetInfo()->FilePath, PBRType, legacyType);
 			Ref<TextureAsset> texture = LoadEmbeddedTexture(assimpScene, assimpMaterial, PBRType, legacyType, modelAsset);
@@ -1025,7 +1030,7 @@ namespace Insight
 			{
 				return AssetRegistry::Instance().LoadAssetAsync(texturePath);
 			}
-			return AssetAsyncRequest(texture.As<TextureAsset>(), true);
+			return Ref<AssetAsyncRequest>(::New<AssetAsyncRequest>(texture.As<TextureAsset>(), true));
 		}
 
 		Ref<TextureAsset> ModelImporter::LoadEmbeddedTexture(const aiScene* assimpScene, const aiMaterial* assimpMaterial, const aiTextureType PBRType, const aiTextureType legacyType, ModelAsset* modelAsset) const
@@ -1059,6 +1064,7 @@ namespace Insight
 			bool hasBones = false;
 			for (size_t meshIdx = 0; meshIdx < aiNode->mNumMeshes; ++meshIdx)
 			{
+
 				const aiMesh* aiMesh = aiScene->mMeshes[meshIdx];
 				
 				if (aiMesh->HasBones() && !modelAsset->GetSkeleton(0))
