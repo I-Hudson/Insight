@@ -11,8 +11,8 @@ namespace Insight
         SET_SPDLOG_LOGGERS();
     }
 
-    void EditorModule::Shutdown(Core::ImGuiSystem* imguiSystem)
+    void EditorModule::Shutdown()
     {
-        ASSERT(ImGui::GetCurrentContext() == imguiSystem->GetCurrentContext());
+        ImGui::SetCurrentContext(nullptr);
     }
 }

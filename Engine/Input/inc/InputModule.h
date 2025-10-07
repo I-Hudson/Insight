@@ -13,6 +13,6 @@ namespace Insight
 	{
 	public:
 		static void Initialise(Core::ImGuiSystem* imguiSystem);
-		static void Shutdown(Core::ImGuiSystem* imguiSystem);
+		static void Shutdown();
 	};
 }

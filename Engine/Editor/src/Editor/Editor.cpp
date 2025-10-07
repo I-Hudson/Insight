@@ -248,7 +248,7 @@ namespace Insight
 
             Runtime::AssetRegistry::Instance().Shutdown();
 
-            EditorModule::Shutdown(GetSystemRegistry().GetSystem<Core::ImGuiSystem>());
+            EditorModule::Shutdown();
         }
     }
 }

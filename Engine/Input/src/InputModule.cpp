@@ -13,9 +13,8 @@ namespace Insight
 #endif
 	}
 
-	void InputModule::Shutdown(Core::ImGuiSystem* imguiSystem)
+	void InputModule::Shutdown()
 	{
-		ASSERT(ImGui::GetCurrentContext() == imguiSystem->GetCurrentContext());
-
+		ImGui::SetCurrentContext(nullptr);
 	}
 }

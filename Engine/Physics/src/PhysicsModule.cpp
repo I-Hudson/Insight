@@ -8,18 +8,13 @@ namespace Insight
     void PhysicsModule::Initialise(Core::ImGuiSystem* imguiSystem)
     {
 #ifndef IS_MONOLITH
-        ImGui::SetCurrentContext(imguiSystem->GetCurrentContext()); 
-        ImGuiMemAllocFunc allocFunc; 
-        ImGuiMemFreeFunc freeFunc; 
-        void* pUsedData; 
-        imguiSystem->GetAllocatorFunctions(allocFunc, freeFunc, pUsedData); 
-        ImGui::SetAllocatorFunctions(allocFunc, freeFunc, pUsedData);;
+        SET_IMGUI_CURRENT_CONTEXT();
         SET_SPDLOG_LOGGERS();
 #endif
     }
 
-    void PhysicsModule::Shutdown(Core::ImGuiSystem* imguiSystem)
+    void PhysicsModule::Shutdown()
     {
-        ASSERT(ImGui::GetCurrentContext() == imguiSystem->GetCurrentContext());
+        ImGui::SetCurrentContext(nullptr);
     }
 }
