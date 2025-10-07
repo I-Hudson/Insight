@@ -31,7 +31,7 @@ private:
 	const HRESULT m_hr;
 };
 
-void ThrowIfFailed(HRESULT hr);
+void ThrowIfFailed(HRESULT hr, const std::string& message = "");
 
 namespace Insight
 {

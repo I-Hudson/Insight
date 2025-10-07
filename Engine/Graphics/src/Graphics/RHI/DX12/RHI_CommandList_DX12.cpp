@@ -548,14 +548,19 @@ namespace Insight
 				m_activePSO = pso;
 
 				RHI_Pipeline_DX12* pipeline = static_cast<RHI_Pipeline_DX12*>(m_contextDX12->GetPipelineManager().GetOrCreatePSO(pso));
-				m_commandList->SetPipelineState(pipeline->GetPipeline());
-
+				// This can be very slow!!! on the first call (because of a number of thing, one of which is initial shader compilation)
+				// for PSO which is ran when the PSO is set the first time.
+				{
+					IS_PROFILE_SCOPE("SetPipelineState");
+					m_commandList->SetPipelineState(pipeline->GetPipeline());
+				}
 				RHI_PipelineLayout_DX12* pipelineLayout = static_cast<RHI_PipelineLayout_DX12*>(m_context->GetPipelineLayoutManager().GetOrCreateLayout(pso));
 				m_commandList->SetGraphicsRootSignature(pipelineLayout->GetRootSignature());
 				m_commandList->IASetPrimitiveTopology(PrimitiveTopologyToDX12(m_activePSO.PrimitiveTopologyType));
 
 				if (clearDescriptors)
 				{
+					IS_PROFILE_SCOPE("Descriptor Set Pipeline");
 					m_descriptorAllocator->SetPipeline(pso);
 #ifdef DX12_REUSE_DESCRIPTOR_TABLES
 					m_boundDescriptorSets.clear();

@@ -14,6 +14,9 @@
 #include "Graphics/Descriptors.h"
 #include "Graphics/RHI/RHI_Shader.h"
 
+#include "Threading/ScopedLock.h"
+#include "Threading/TaskSystem.h"
+
 namespace Insight
 {
 	namespace Graphics
@@ -55,15 +58,21 @@ namespace Insight
 
 			const u64 hash = HashDescriptors(pso.Shader);
 
-			auto itr = m_layouts.find(hash);
-			if (itr != m_layouts.end())
 			{
-				return itr->second;
+				Threading::ScopedLock lock(m_lock);
+				auto itr = m_layouts.find(hash);
+				if (itr != m_layouts.end())
+				{
+					return itr->second;
+				}
 			}
 
 			RHI_PipelineLayout* layout = RHI_PipelineLayout::New();
 			layout->Create(m_context, pso);
-			m_layouts[hash] = layout;
+			{
+				Threading::ScopedLock lock(m_lock);
+				m_layouts[hash] = layout;
+			}
 			return layout;
 		}
 
@@ -74,21 +83,28 @@ namespace Insight
 
 			const u64 hash = HashDescriptors(pso.Shader);
 
-			auto itr = m_layouts.find(hash);
-			if (itr != m_layouts.end())
 			{
-				return itr->second;
+				Threading::ScopedLock lock(m_lock);
+				auto itr = m_layouts.find(hash);
+				if (itr != m_layouts.end())
+				{
+					return itr->second;
+				}
 			}
 
 			RHI_PipelineLayout* layout = RHI_PipelineLayout::New();
 			layout->Create(m_context, pso);
-			m_layouts[hash] = layout;
+			{
+				Threading::ScopedLock lock(m_lock);
+				m_layouts[hash] = layout;
+			}
 			return layout;
 		}
 
 		void RHI_PipelineLayoutManager::Destroy()
 		{
 			IS_PROFILE_FUNCTION();
+			Threading::ScopedLock lock(m_lock);
 
 			for (auto& pair : m_layouts)
 			{
@@ -127,13 +143,13 @@ namespace Insight
 		//-------------------------
 		RHI_PipelineManager::RHI_PipelineManager()
 		{
-			m_pipelineCache = RHI_PipelineCahce::New(m_context);
+			//m_pipelineCache = RHI_PipelineCahce::New(m_context);
 		}
 		
 		RHI_PipelineManager::~RHI_PipelineManager()
 		{
 			Destroy();
-			Delete(m_pipelineCache);
+			//Delete(m_pipelineCache);
 		}
 
 		void RHI_PipelineManager::SetRenderContext(RenderContext* context)
@@ -148,10 +164,13 @@ namespace Insight
 			assert(m_context != nullptr);
 
 			const u64 psoHash = pso.GetHash();
-			auto itr = m_pipelineStateObjects.find(psoHash);
-			if (itr != m_pipelineStateObjects.end())
 			{
-				return itr->second;
+				Threading::ScopedLock lock(m_lock);
+				auto itr = m_pipelineStateObjects.find(psoHash);
+				if (itr != m_pipelineStateObjects.end())
+				{
+					return itr->second;
+				}
 			}
 
 			pso.Shader = RenderContext::Instance().GetShaderManager().GetOrCreateShader(pso.ShaderDescription);
@@ -159,7 +178,10 @@ namespace Insight
 			RHI_Pipeline* pipeline = RHI_Pipeline::New();
 			pipeline->ShaderDesc = pso.ShaderDescription;
 			pipeline->Create(m_context, pso);
-			m_pipelineStateObjects[psoHash] = pipeline;
+			{
+				Threading::ScopedLock lock(m_lock);
+				m_pipelineStateObjects[psoHash] = pipeline;
+			}
 			return pipeline;
 		}
 
@@ -170,21 +192,75 @@ namespace Insight
 			assert(m_context != nullptr);
 
 			const u64 psoHash = pso.GetHash();
-			auto itr = m_pipelineStateObjects.find(psoHash);
-			if (itr != m_pipelineStateObjects.end())
 			{
-				return itr->second;
+				Threading::ScopedLock lock(m_lock);
+				auto itr = m_pipelineStateObjects.find(psoHash);
+				if (itr != m_pipelineStateObjects.end())
+				{
+					return itr->second;
+				}
 			}
 
 			RHI_Pipeline* pipeline = RHI_Pipeline::New();
 			pipeline->Create(m_context, pso);
-			m_pipelineStateObjects[psoHash] = pipeline;
+			{
+				Threading::ScopedLock lock(m_lock);
+				m_pipelineStateObjects[psoHash] = pipeline;
+			}
 			return pipeline;
+		}
+
+		void RHI_PipelineManager::PreWawmPSO(PipelineStateObject pso)
+		{
+			IS_PROFILE_FUNCTION();
+
+			assert(m_context != nullptr);
+
+			const u64 psoHash = pso.GetHash();
+			{
+				Threading::ScopedLock lock(m_lock);
+				auto itr = m_pipelineStateObjects.find(psoHash);
+				if (itr != m_pipelineStateObjects.end())
+				{
+					return;
+				}
+			}
+
+			pso.Shader = RenderContext::Instance().GetShaderManager().GetOrCreateShader(pso.ShaderDescription);
+
+			RHI_Pipeline* pipeline = RHI_Pipeline::New();
+			pipeline->ShaderDesc = pso.ShaderDescription;
+			{
+				Threading::ScopedLock lock(m_lock);
+				m_pipelineStateObjects[psoHash] = pipeline;
+				m_preWarmPsos.push_back({ pipeline, pso });
+			}
+		}
+
+		void RHI_PipelineManager::CreatePreWarmPSO()
+		{
+			IS_PROFILE_FUNCTION();
+			Threading::ScopedLock lock(m_lock);
+
+			if (m_preWarmPsos.empty())
+			{
+				return;
+			}
+
+			Threading::ParallelFor<std::pair<RHI_Pipeline*, PipelineStateObject>>(1, m_preWarmPsos, 
+				[this](std::pair<RHI_Pipeline*, PipelineStateObject>& pair)
+				{
+					pair.first->Create(m_context, pair.second);
+				});
+
+			m_preWarmPsos.clear();
 		}
 
 		void RHI_PipelineManager::Destroy()
 		{
 			IS_PROFILE_FUNCTION();
+			Threading::ScopedLock lock(m_lock);
+
 			for (auto& pair : m_pipelineStateObjects)
 			{
 				pair.second->Release();
@@ -196,6 +272,8 @@ namespace Insight
 		void RHI_PipelineManager::DestroyPipelineWithShader(const ShaderDesc& shaderDesc)
 		{
 			m_context->GpuWaitForIdle();
+			Threading::ScopedLock lock(m_lock);
+
 			std::vector<u64> hashes;
 			for (auto& [hash, pipeline] : m_pipelineStateObjects)
 			{

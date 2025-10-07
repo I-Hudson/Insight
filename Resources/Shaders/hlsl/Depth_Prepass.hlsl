@@ -23,8 +23,8 @@ VertexOutput VSMain(const VertexInput input)
 	VertexOutput vsOut;
 	vsOut.Position = float4(input.Position.xyz, 1);
 
-	vsOut.Position = mul(pubo_Transform, vsOut.Position);
-	vsOut.Position = mul(Main_Camera_Proj_View, vsOut.Position);
+	vsOut.Position = mul(ubo_Transform, vsOut.Position);
+	vsOut.Position = mul(bf_Camera_Proj_View, vsOut.Position);
 
 	return vsOut;
 }

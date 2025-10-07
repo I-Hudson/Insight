@@ -8,6 +8,8 @@
 #include "Graphics/RHI/DX12/RHI_Texture_DX12.h"
 #include "Graphics/RHI/DX12/DX12Utils.h"
 
+#include "Core/Profiler.h"
+
 #include <array>
 
 namespace Insight
@@ -28,18 +30,22 @@ namespace Insight
 
 			void RHI_Pipeline_DX12::Create(RenderContext* context, PipelineStateObject pso)
 			{
+				IS_PROFILE_FUNCTION();
+
 				m_context = static_cast<RenderContext_DX12*>(context);
 
 				//m_pipeline = RHI_PipelineCahce::Instance().GetGraphicsPSO(pso);
 
 				D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPsoDecs = GetGraphicsPipelineDesc(pso);
 
-				ThrowIfFailed(m_context->GetDevice()->CreateGraphicsPipelineState(&graphicsPsoDecs, IID_PPV_ARGS(&m_pipeline)));
+				ThrowIfFailed(m_context->GetDevice()->CreateGraphicsPipelineState(&graphicsPsoDecs, IID_PPV_ARGS(&m_pipeline)), pso.Name);
 				SetName(pso.Name + "_GraphicsPipeline");
 			}
 
 			void RHI_Pipeline_DX12::Create(RenderContext* context, ComputePipelineStateObject pso)
 			{
+				IS_PROFILE_FUNCTION();
+
 				m_context = static_cast<RenderContext_DX12*>(context);
 
 				RHI_PipelineLayout_DX12* rootSignature = static_cast<RHI_PipelineLayout_DX12*>(m_context->GetPipelineLayoutManager().GetOrCreateLayout(pso));
@@ -54,12 +60,14 @@ namespace Insight
 				psoDesc.pRootSignature = rootSignature->GetRootSignature();
 				psoDesc.CS = shaderByteCode;
 
-				ThrowIfFailed(m_context->GetDevice()->CreateComputePipelineState(&psoDesc, IID_PPV_ARGS(&m_pipeline)));
+				ThrowIfFailed(m_context->GetDevice()->CreateComputePipelineState(&psoDesc, IID_PPV_ARGS(&m_pipeline)), pso.Name);
 				SetName(pso.Name + "_ComputePipeline");
 			}
 
 			D3D12_GRAPHICS_PIPELINE_STATE_DESC RHI_Pipeline_DX12::GetGraphicsPipelineDesc(PipelineStateObject& pso)
 			{
+				IS_PROFILE_FUNCTION();
+
 				RenderContext* renderContext = &RenderContext::Instance();
 
 				RHI_PipelineLayout_DX12* rootSignature = static_cast<RHI_PipelineLayout_DX12*>(renderContext->GetPipelineLayoutManager().GetOrCreateLayout(pso));

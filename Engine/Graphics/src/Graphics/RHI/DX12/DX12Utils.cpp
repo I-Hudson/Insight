@@ -140,7 +140,7 @@ DXGI_FORMAT PixelFormatToDXFormat[static_cast<int>(PixelFormat::MAX)] =
     DXGI_FORMAT_BC7_UNORM_SRGB,
 };
 
-void ThrowIfFailed(HRESULT hr)
+void ThrowIfFailed(HRESULT hr, const std::string& message)
 {
     if (FAILED(hr))
     {
@@ -151,6 +151,7 @@ void ThrowIfFailed(HRESULT hr)
         HRESULT deviceRemovedReason = static_cast<Insight::Graphics::RHI::DX12::RenderContext_DX12&>(Insight::Graphics::RenderContext::Instance()).GetDevice()->GetDeviceRemovedReason();
         std::string deviceRemovedString = std::system_category().message(deviceRemovedReason);
         IS_LOG_CORE_ERROR("Device removed reason: '{}', str: '{}'.", deviceRemovedReason, deviceRemovedString);
+        IS_LOG_CORE_ERROR("Message: {}", message);
         throw HrException(hr);
     }
 }

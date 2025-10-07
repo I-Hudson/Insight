@@ -6,6 +6,7 @@
 #include "Graphics/PixelFormatExtensions.h"
 #include "Graphics/RHI/DX12/DX12Utils.h"
 
+#include "Core/Profiler.h"
 #include "FileSystem/FileSystem.h"
 
 #include "dxcapi.h"
@@ -24,6 +25,8 @@ namespace Insight
 
             void RHI_Shader_DX12::Create(RenderContext* context, ShaderDesc desc)
             {
+                IS_PROFILE_FUNCTION();
+
                 m_context = static_cast<RenderContext_DX12*>(context);
                 m_shaderDesc = desc;
 

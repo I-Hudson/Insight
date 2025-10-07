@@ -114,6 +114,7 @@ namespace Insight
 
 			void CreateAllCommonShaders();
 			void BindCommonResources(RHI_CommandList* cmd_list, BufferFrame& buffer_frame, BufferSamplers& buffer_samplers);
+			void PreWarmPso();
 
 			Graphics::ImGuiPass m_imgui_pass;
 			Graphics::RHI_FSR m_fsr;

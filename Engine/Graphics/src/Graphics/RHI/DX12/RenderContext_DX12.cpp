@@ -410,6 +410,7 @@ namespace Insight
 					m_descriptorSetManager->Reset();
 					m_commandListManager->Reset();
 					m_resource_tracker.BeginFrame();
+					m_pipelineManager.CreatePreWarmPSO();
 				}
 
 				if (Window::Instance().GetWidth() == 0 || Window::Instance().GetHeight() == 0)

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Graphics/PipelineStateObject.h"
+#include "Threading/SpinLock.h"
 
 #include <map>
 #include <array>
@@ -42,6 +43,7 @@ namespace Insight
 		private:
 			std::map<u64, RHI_PipelineLayout*> m_layouts;
 			RenderContext* m_context = nullptr;
+			Threading::SpinLock m_lock;
 		};
 
 		class RHI_PipelineManager
@@ -53,14 +55,24 @@ namespace Insight
 			void SetRenderContext(RenderContext* context);
 			RHI_Pipeline* GetOrCreatePSO(PipelineStateObject pso);
 			RHI_Pipeline* GetOrCreatePSO(ComputePipelineStateObject pso);
+
+			// Should be called before use, as this can allow the system to create single/multiple pso
+			// in parallel and before use to reduce stuttering.
+			IS_GRAPHICS void PreWawmPSO(PipelineStateObject pso);
+			IS_GRAPHICS void CreatePreWarmPSO();
+
 			void Destroy();
 
 			void DestroyPipelineWithShader(const ShaderDesc& shaderDesc);
 
 		private:
+			std::vector<std::pair<RHI_Pipeline*, PipelineStateObject>> m_preWarmPsos;
 			std::map<u64, RHI_Pipeline*> m_pipelineStateObjects;
-			RHI_PipelineCahce* m_pipelineCache = nullptr;
+
+			//RHI_PipelineCahce* m_pipelineCache = nullptr;
 			RenderContext* m_context = nullptr;
+
+			Threading::SpinLock m_lock;
 		};
 	}
 }

@@ -6,6 +6,8 @@
 #include "Graphics/RHI/DX12/RHI_Shader_DX12.h"
 #include "Graphics/RHI/DX12/DX12Utils.h"
 
+#include "Core/Profiler.h"
+
 namespace Insight
 {
 	namespace Graphics
@@ -31,11 +33,15 @@ namespace Insight
 
 			void RHI_PipelineLayout_DX12::Create(RenderContext* context, PipelineStateObject pso)
 			{
+				IS_PROFILE_FUNCTION();
+
 				CreateLayout(context, pso.Shader, pso.Name);
 			}
 
 			void RHI_PipelineLayout_DX12::Create(RenderContext* context, ComputePipelineStateObject pso)
 			{
+				IS_PROFILE_FUNCTION();
+
 				CreateLayout(context, pso.Shader, pso.Name);
 			}
 

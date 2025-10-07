@@ -39,6 +39,9 @@ namespace Insight
 	const float Main_Camera_Near_Plane = 0.1f;
 	const float Main_Camera_Far_Plane = 1024.0f;
 
+	float g_depth_constant_factor = 4.0f;
+	float g_depth_slope_factor = 1.5f;
+
 	float cascade_split_lambda = 0.85f;
 
 	Maths::Vector3 dir_light_direction = Maths::Vector3(0.5f, -0.7f, 0.5f);
@@ -70,6 +73,27 @@ namespace Insight
 
 	namespace Graphics
 	{
+		ShaderDesc g_shadowPassShader;
+		ShaderDesc g_depthPrepassShader;
+		ShaderDesc g_GBufferShader;
+		ShaderDesc g_lighShadowPass;
+		ShaderDesc g_compositeShader;
+		ShaderDesc g_GFXHelperShader;
+		ShaderDesc g_swapChainShader;
+
+		ShaderDesc g_lighPass;
+		ShaderDesc g_lighPassCompute;
+
+		ShaderDesc g_skinningCompute;
+
+		PipelineStateObject g_ShadowPassPSO;
+		PipelineStateObject g_DepthPrepassPSO;
+		PipelineStateObject g_GBufferPSO;
+		PipelineStateObject g_TransparentGBufferPSO;
+		PipelineStateObject g_CompositePSO;
+		PipelineStateObject g_GFXHelperPSO;
+		PipelineStateObject g_SwapChainPSO;
+
 
 		struct GlobalResources
 		{
@@ -162,6 +186,8 @@ namespace Insight
 			m_imgui_pass.Create();
 
 			CreateAllCommonShaders();
+
+			PreWarmPso();
 
 			Graphics::RHI_FSR::Instance().Init();
 		}
@@ -496,8 +522,7 @@ namespace Insight
 				data.RenderFrame = renderFrame;
 			}
 
-			static float depth_constant_factor = 4.0f;
-			static float depth_slope_factor = 1.5f;
+			
 			{
 				IS_PROFILE_SCOPE("imgui drawing");
 				ImGui::Begin("Directional Light Direction");
@@ -507,8 +532,8 @@ namespace Insight
 					dir_light_direction = Maths::Vector3(dir[0], dir[1], dir[2]);
 				}
 
-				ImGui::DragFloat("Dpeth bias constant factor", &depth_constant_factor, 0.01f);
-				ImGui::DragFloat("Dpeth bias slope factor", &depth_slope_factor, 0.01f);
+				ImGui::DragFloat("Dpeth bias constant factor", &g_depth_constant_factor, 0.01f);
+				ImGui::DragFloat("Dpeth bias slope factor", &g_depth_slope_factor, 0.01f);
 				ImGui::DragFloat("Cascade Split Lambda", &cascade_split_lambda, 0.001f, 0.0f, 1.0f);
 
 				ImGui::End();
@@ -538,8 +563,8 @@ namespace Insight
 					pso.FrontFace = FrontFace::CounterClockwise;
 					pso.DepthClampEnabled = false;
 					pso.DepthBaisEnabled = true;
-					pso.DepthConstantBaisValue = RenderContext::Instance().IsRenderOptionsEnabled(RenderOptions::ReverseZ) ? -depth_constant_factor : depth_constant_factor;
-					pso.DepthSlopeBaisValue = RenderContext::Instance().IsRenderOptionsEnabled(RenderOptions::ReverseZ) ? -depth_slope_factor : depth_slope_factor;
+					pso.DepthConstantBaisValue = RenderContext::Instance().IsRenderOptionsEnabled(RenderOptions::ReverseZ) ? -g_depth_constant_factor : g_depth_constant_factor;
+					pso.DepthSlopeBaisValue = RenderContext::Instance().IsRenderOptionsEnabled(RenderOptions::ReverseZ) ? -g_depth_slope_factor : g_depth_slope_factor;
 					if (Reverse_Z_For_Depth)
 					{
 						pso.DepthCompareOp = CompareOp::GreaterOrEqual;
@@ -1528,60 +1553,60 @@ namespace Insight
 
 		void Renderpass::CreateAllCommonShaders()
 		{
-			ShaderDesc shaderDesc("CascadeShaderMap", EnginePaths::GetResourcePath() + "/Shaders/hlsl/Cascade_Shadow.hlsl", ShaderStageFlagBits::ShaderStage_Vertex);
+			g_shadowPassShader = ShaderDesc("CascadeShaderMap", EnginePaths::GetResourcePath() + "/Shaders/hlsl/Cascade_Shadow.hlsl", ShaderStageFlagBits::ShaderStage_Vertex);
 #ifdef VERTEX_SPLIT_STREAMS
-			shaderDesc.InputLayout = ShaderDesc::GetShaderInputLayoutFromStreams(
+			g_shadowPassShader.InputLayout = ShaderDesc::GetShaderInputLayoutFromStreams(
 				Graphics::Vertices::Stream::Position
 				| Graphics::Vertices::Stream::BoneId
 				| Graphics::Vertices::Stream::BoneWeight);
 #else
-			shaderDesc.InputLayout = ShaderDesc::GetDefaultShaderInputLayout();
 #endif
-			RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
+			g_shadowPassShader.InputLayout = ShaderDesc::GetDefaultShaderInputLayout();
+			RenderContext::Instance().GetShaderManager().GetOrCreateShader(g_shadowPassShader);
 
-			shaderDesc = ShaderDesc("DepthPrepass", EnginePaths::GetResourcePath() + "/Shaders/hlsl/Depth_Prepass.hlsl", ShaderStageFlagBits::ShaderStage_Vertex);
+			g_depthPrepassShader = ShaderDesc("DepthPrepass", EnginePaths::GetResourcePath() + "/Shaders/hlsl/Depth_Prepass.hlsl", ShaderStageFlagBits::ShaderStage_Vertex);
 #ifdef VERTEX_SPLIT_STREAMS
-			shaderDesc.InputLayout = ShaderDesc::GetShaderInputLayoutFromStreams(
+			g_depthPrepassShader.InputLayout = ShaderDesc::GetShaderInputLayoutFromStreams(
 				Graphics::Vertices::Stream::Position
 				| Graphics::Vertices::Stream::BoneId
 				| Graphics::Vertices::Stream::BoneWeight);
 #else
-			shaderDesc.InputLayout = ShaderDesc::GetDefaultShaderInputLayout();
 #endif
-			//RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
+			g_depthPrepassShader.InputLayout = ShaderDesc::GetDefaultShaderInputLayout();
+			RenderContext::Instance().GetShaderManager().GetOrCreateShader(g_depthPrepassShader);
 
-			shaderDesc = ShaderDesc("LightShadowPass", EnginePaths::GetResourcePath() + "/Shaders/hlsl/LightDepth.hlsl", ShaderStageFlagBits::ShaderStage_Vertex);
+			g_lighShadowPass = ShaderDesc("LightShadowPass", EnginePaths::GetResourcePath() + "/Shaders/hlsl/LightDepth.hlsl", ShaderStageFlagBits::ShaderStage_Vertex);
 #ifdef VERTEX_SPLIT_STREAMS
-			shaderDesc.InputLayout = ShaderDesc::GetShaderInputLayoutFromStreams(
+			g_lighShadowPass.InputLayout = ShaderDesc::GetShaderInputLayoutFromStreams(
 				Graphics::Vertices::Stream::Position
 				| Graphics::Vertices::Stream::BoneId
 				| Graphics::Vertices::Stream::BoneWeight);
 #else
-			shaderDesc.InputLayout = ShaderDesc::GetDefaultShaderInputLayout();
+			g_lighShadowPass.InputLayout = ShaderDesc::GetDefaultShaderInputLayout();
 #endif
-			RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
+			RenderContext::Instance().GetShaderManager().GetOrCreateShader(g_lighShadowPass);
 
-			shaderDesc = ShaderDesc("GBuffer", EnginePaths::GetResourcePath() + "/Shaders/hlsl/GBuffer.hlsl", ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
-			shaderDesc.InputLayout = ShaderDesc::GetDefaultShaderInputLayout();
-			RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
+			g_GBufferShader = ShaderDesc("GBuffer", EnginePaths::GetResourcePath() + "/Shaders/hlsl/GBuffer.hlsl", ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
+			g_GBufferShader.InputLayout = ShaderDesc::GetDefaultShaderInputLayout();
+			RenderContext::Instance().GetShaderManager().GetOrCreateShader(g_GBufferShader);
 
-			shaderDesc = ShaderDesc("Composite", EnginePaths::GetResourcePath() + "/Shaders/hlsl/Composite.hlsl", ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
-			RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
+			g_compositeShader = ShaderDesc("Composite", EnginePaths::GetResourcePath() + "/Shaders/hlsl/Composite.hlsl", ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
+			RenderContext::Instance().GetShaderManager().GetOrCreateShader(g_compositeShader);
 
-			shaderDesc = ShaderDesc("GFXHelper", EnginePaths::GetResourcePath() + "/Shaders/hlsl/GFXHelper.hlsl", ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
-			RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
+			g_GFXHelperShader = ShaderDesc("GFXHelper", EnginePaths::GetResourcePath() + "/Shaders/hlsl/GFXHelper.hlsl", ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
+			RenderContext::Instance().GetShaderManager().GetOrCreateShader(g_GFXHelperShader);
 
-			shaderDesc = ShaderDesc("Swapchain", EnginePaths::GetResourcePath() + "/Shaders/hlsl/Swapchain.hlsl", ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
-			RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
+			g_swapChainShader = ShaderDesc("Swapchain", EnginePaths::GetResourcePath() + "/Shaders/hlsl/Swapchain.hlsl", ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
+			RenderContext::Instance().GetShaderManager().GetOrCreateShader(g_swapChainShader);
 
-			shaderDesc = ShaderDesc("LightPass", EnginePaths::GetResourcePath() + "/Shaders/hlsl/LightPass.hlsl", ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
-			RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
+			g_lighPass = ShaderDesc("LightPass", EnginePaths::GetResourcePath() + "/Shaders/hlsl/LightPass.hlsl", ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
+			RenderContext::Instance().GetShaderManager().GetOrCreateShader(g_lighPass);
 
-			shaderDesc = ShaderDesc("LightPassCompute", EnginePaths::GetResourcePath() + "/Shaders/hlsl/LightPassCompute.hlsl", ShaderStageFlagBits::ShaderStage_Compute);
-			RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
+			g_lighPassCompute = ShaderDesc("LightPassCompute", EnginePaths::GetResourcePath() + "/Shaders/hlsl/LightPassCompute.hlsl", ShaderStageFlagBits::ShaderStage_Compute);
+			RenderContext::Instance().GetShaderManager().GetOrCreateShader(g_lighPassCompute);
 
-			shaderDesc = ShaderDesc("ComputeSkinning", EnginePaths::GetResourcePath() + "/Shaders/hlsl/ComputeSkinning.hlsl", ShaderStageFlagBits::ShaderStage_Compute);
-			RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
+			g_skinningCompute = ShaderDesc("ComputeSkinning", EnginePaths::GetResourcePath() + "/Shaders/hlsl/ComputeSkinning.hlsl", ShaderStageFlagBits::ShaderStage_Compute);
+			RenderContext::Instance().GetShaderManager().GetOrCreateShader(g_skinningCompute);
 		}
 
 		void Renderpass::BindCommonResources(RHI_CommandList* cmd_list, BufferFrame& buffer_frame, BufferSamplers& buffer_samplers)
@@ -1592,6 +1617,113 @@ namespace Insight
 			cmd_list->SetSampler(4, 1, buffer_samplers.Repeat_Sampler);
 			cmd_list->SetSampler(4, 2, buffer_samplers.Clamp_Sampler);
 			cmd_list->SetSampler(4, 3, buffer_samplers.MirroredRepeat_Sampler);
+		}
+
+		void Renderpass::PreWarmPso()
+		{
+			{
+				g_ShadowPassPSO.Name = "Cascade_Shadow_PSO";
+				g_ShadowPassPSO.ShaderDescription = g_shadowPassShader;
+				g_ShadowPassPSO.CullMode = CullMode::Front;
+				g_ShadowPassPSO.FrontFace = FrontFace::CounterClockwise;
+				g_ShadowPassPSO.DepthClampEnabled = false;
+				g_ShadowPassPSO.DepthBaisEnabled = true;
+				g_ShadowPassPSO.DepthConstantBaisValue = RenderContext::Instance().IsRenderOptionsEnabled(RenderOptions::ReverseZ) ? -g_depth_constant_factor : g_depth_constant_factor;
+				g_ShadowPassPSO.DepthSlopeBaisValue = RenderContext::Instance().IsRenderOptionsEnabled(RenderOptions::ReverseZ) ? -g_depth_slope_factor : g_depth_slope_factor;
+				if (Reverse_Z_For_Depth)
+				{
+					g_ShadowPassPSO.DepthCompareOp = CompareOp::GreaterOrEqual;
+				}
+				else
+				{
+					g_ShadowPassPSO.DepthCompareOp = CompareOp::LessOrEqual;
+				}
+				g_ShadowPassPSO.Dynamic_States = { DynamicState::Viewport, DynamicState::Scissor };
+			}
+
+			{
+				g_DepthPrepassPSO.Name = "Depth_Prepass_PSO";
+				g_DepthPrepassPSO.CullMode = CullMode::Front;
+				g_DepthPrepassPSO.FrontFace = FrontFace::CounterClockwise;
+				g_DepthPrepassPSO.ShaderDescription = g_depthPrepassShader;
+				g_DepthPrepassPSO.DepthTest = true;
+				g_DepthPrepassPSO.DepthWrite = true;
+				g_DepthPrepassPSO.DepthCompareOp = CompareOp::LessOrEqual;
+			}
+
+			{
+				g_GBufferPSO.Name = "GBuffer_PSO";
+				g_GBufferPSO.CullMode = CullMode::Front;
+				g_GBufferPSO.FrontFace = FrontFace::CounterClockwise;
+				g_GBufferPSO.ShaderDescription = g_GBufferShader;
+				g_GBufferPSO.DepthCompareOp = CompareOp::LessOrEqual;
+
+				if (Reverse_Z_For_Depth)
+				{
+					g_GBufferPSO.DepthCompareOp = CompareOp::GreaterOrEqual;
+				}
+				if (Depth_Prepass)
+				{
+					g_GBufferPSO.DepthWrite = false;
+				}
+			}
+
+			{
+				g_TransparentGBufferPSO.ShaderDescription = g_GBufferShader;
+				g_TransparentGBufferPSO.Name = "Transparent_GBuffer";
+				g_TransparentGBufferPSO.CullMode = CullMode::Front;
+				g_TransparentGBufferPSO.FrontFace = FrontFace::CounterClockwise;
+				g_TransparentGBufferPSO.BlendEnable = true;
+				g_TransparentGBufferPSO.SrcColourBlendFactor = BlendFactor::SrcAlpha;
+				g_TransparentGBufferPSO.DstColourBlendFactor = BlendFactor::OneMinusSrcAlpha;
+				g_TransparentGBufferPSO.ColourBlendOp = BlendOp::Add;
+				g_TransparentGBufferPSO.SrcAplhaBlendFactor = BlendFactor::One;
+				g_TransparentGBufferPSO.DstAplhaBlendFactor = BlendFactor::One;
+				g_TransparentGBufferPSO.AplhaBlendOp = BlendOp::Add;
+
+				if (Reverse_Z_For_Depth)
+				{
+					g_TransparentGBufferPSO.DepthCompareOp = CompareOp::GreaterOrEqual;
+				}
+				if (Depth_Prepass)
+				{
+					g_TransparentGBufferPSO.DepthWrite = false;
+				}
+			}
+
+			{
+				g_CompositePSO.Name = "Composite_PSO";
+				g_CompositePSO.ShaderDescription = g_compositeShader;
+				g_CompositePSO.DepthTest = false;
+				g_CompositePSO.PolygonMode = PolygonMode::Fill;
+				g_CompositePSO.CullMode = CullMode::Front;
+				g_CompositePSO.FrontFace = FrontFace::CounterClockwise;
+			}
+
+			{
+				g_GFXHelperPSO.Name = "GFXHelper_PSO";
+				g_GFXHelperPSO.ShaderDescription = g_GFXHelperShader;
+				g_GFXHelperPSO.PrimitiveTopologyType = PrimitiveTopologyType::LineList;
+				g_GFXHelperPSO.PolygonMode = PolygonMode::Line;
+				g_GFXHelperPSO.CullMode = CullMode::Front;
+				g_GFXHelperPSO.FrontFace = FrontFace::CounterClockwise;
+				g_GFXHelperPSO.Dynamic_States.push_back(DynamicState::LineWidth);
+			}
+
+			{
+				g_SwapChainPSO.Name = "Swapchain_PSO";
+				g_SwapChainPSO.CullMode = CullMode::Front;
+				g_SwapChainPSO.ShaderDescription = g_swapChainShader;
+			}
+
+			RenderContext::Instance().GetPipelineManager().PreWawmPSO(g_ShadowPassPSO);
+			RenderContext::Instance().GetPipelineManager().PreWawmPSO(g_DepthPrepassPSO);
+			RenderContext::Instance().GetPipelineManager().PreWawmPSO(g_GBufferPSO);
+			RenderContext::Instance().GetPipelineManager().PreWawmPSO(g_TransparentGBufferPSO);
+			RenderContext::Instance().GetPipelineManager().PreWawmPSO(g_CompositePSO);
+			RenderContext::Instance().GetPipelineManager().PreWawmPSO(g_GFXHelperPSO);
+			RenderContext::Instance().GetPipelineManager().PreWawmPSO(g_SwapChainPSO);
+			RenderContext::Instance().GetPipelineManager().CreatePreWarmPSO();
 		}
 
 		BufferLight BufferLight::GetCascades(const BufferFrame& buffer_frame, u32 cascade_count, float split_lambda)
