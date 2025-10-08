@@ -278,6 +278,7 @@ namespace Insight
 			DescriptorHeapHandle_DX12 RHI_Texture_DX12::CreateSharderResouceView(u32 mip_index, u32 mip_count, u32 layer_count, u32 layer_index, DescriptorHeapTypes heap, ImageUsageFlagsBits imageUsage)
 			{
 				DescriptorHeapHandle_DX12 handle = m_context->GetDescriptorHeap(heap).GetNewHandle();
+				ASSERT(handle.CPUPtr.ptr != 0);
 
 				if (heap == DescriptorHeapTypes::CBV_SRV_UAV)
 				{

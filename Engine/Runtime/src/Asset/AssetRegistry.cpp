@@ -16,7 +16,6 @@
 
 #include "FileSystem/FileSystem.h"
 
-#include "Core/EnginePaths.h"
 #include "Core/Logger.h"
 #include "Core/Profiler.h"
 #include "Core/MemoryTracker.h"
@@ -24,6 +23,8 @@
 #include "Threading/TaskSystem.h"
 
 #include "Algorithm/Vector.h"
+
+#include <imgui.h>
 
 namespace Insight::Runtime
 {
@@ -286,12 +287,13 @@ namespace Insight::Runtime
             of the file into a single buffer but could seek and only load the parts in wants at only one point in time.
         */
 
+        ValidatePath(path);
+
         if (path.empty())
         {
             return Ref<Asset>();
         }
 
-        path = ValidatePath(path);
 
         std::string_view extension = FileSystem::GetExtension(path);
         const IAssetImporter* importer = GetImporter(extension);
@@ -347,7 +349,16 @@ namespace Insight::Runtime
 
     Ref<AssetAsyncRequest> AssetRegistry::LoadAssetAsync(std::string path)
     {
-        return Ref<AssetAsyncRequest>(::New<AssetAsyncRequest>(Ref<Asset>(), true));
+        Ref<AssetAsyncRequest> request =  Ref<AssetAsyncRequest>(::New<AssetAsyncRequest>(Ref<Asset>()));
+
+        Threading::TaskSystem::Instance().CreateTask([this, path, request]() mutable
+            {
+                Ref<Asset> loadedAsset = LoadAsset(path);
+                request->m_asset = std::move(loadedAsset);
+                request->SetIsReady();
+            });
+
+        return request;
     }
 
     Ref<AssetAsyncRequest> AssetRegistry::LoadAssetAsync(const Core::GUID guid)
@@ -364,6 +375,16 @@ namespace Insight::Runtime
             return Ref<AssetAsyncRequest>(::New<AssetAsyncRequest>(Ref<Asset>(), true));
         }
         return LoadAssetAsync(assetInfo->GetFullFilePath());
+    }
+
+    void AssetRegistry::UnloadAsset(std::string path)
+    {
+        FAIL_ASSERT();
+    }
+
+    void AssetRegistry::UnloadAsset(const Core::GUID& guid)
+    {
+        FAIL_ASSERT();
     }
 
     const AssetInfo* AssetRegistry::GetAssetInfo(const std::string& path) const
@@ -702,18 +723,16 @@ namespace Insight::Runtime
         return true;
     }
 
-    std::string AssetRegistry::ValidatePath(const std::string& path) const
+    void AssetRegistry::ValidatePath(std::string& path) const
     {
         if (path.empty())
         {
-            return path;
+            return;
         }
 
-        if (FileSystem::IsAbsolutePath(path))
-        {
-            return path;
-        }
-        else
+        FileSystem::PathToUnix(path);
+
+        if (!FileSystem::IsAbsolutePath(path))
         {
             std::string newPath = ProjectSystem::Instance().GetProjectInfo().GetContentPath();
             if (path.front() != '/')
@@ -721,7 +740,9 @@ namespace Insight::Runtime
                 newPath += '/';
             }
             newPath += path;
-            return newPath;
+            path = newPath;
         }
+
+        FileSystem::FlattenAbsolutePath(path);
     }
 }

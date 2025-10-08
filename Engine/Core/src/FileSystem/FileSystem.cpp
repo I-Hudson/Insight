@@ -4,6 +4,7 @@
 #include "Core/Logger.h"
 #include "Core/StringUtils.h"
 #include "Core/Profiler.h"
+#include "Core/Asserts.h"
 
 #include <fstream>
 #include <filesystem>
@@ -322,6 +323,31 @@ namespace Insight
         return absPath;
     }
 
+    void FileSystem::FlattenAbsolutePath(std::string& path)
+    {
+        if (!FileSystem::IsAbsolutePath(path))
+        {
+            IS_LOG_CORE_ERROR("[FileSystem::FlattenAbsolutePath] Path '{}', isn't an abolsute path. Can't flatten.", path);
+            return;
+        }
+
+        constexpr const char* c_upDirectoryStr = "../";
+        u64 upDirectory = path.find(c_upDirectoryStr);
+
+        while (upDirectory != std::string::npos)
+        {
+            const u64 upDirectoryStart = path.rfind('/', upDirectory);
+            ASSERT(upDirectory > 0);
+            ASSERT(upDirectoryStart > 0);
+            ASSERT((upDirectory - upDirectoryStart) == 1);
+
+            const u64 redundentDirStart = path.rfind('/', upDirectoryStart - 1);
+            path.erase(path.begin() + redundentDirStart + 1, path.begin() + upDirectory + strlen(c_upDirectoryStr));
+
+            upDirectory = path.find(c_upDirectoryStr);
+        }
+    }
+
     std::string FileSystem::GetRelativePath(std::string_view path, std::string_view basePath)
     {
 #if 1
@@ -363,6 +389,7 @@ namespace Insight
 
         return result;
 #else
+        // Compile this out with the '#if' as this is MUCH slower than the custom above implemention.
         std::error_code errorCode;
         std::filesystem::path fsPath = std::filesystem::relative(path, basePath, errorCode);
         if (errorCode)

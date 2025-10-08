@@ -40,13 +40,13 @@ namespace Insight
             IS_PROFILE_FUNCTION();
 
             std::vector<Byte> textureData = AssetRegistry::Instance().LoadAssetData(path);
-            ImportFromMemory(asset, textureData.data(), textureData.size());
+            ImportFromMemory(asset.Ptr(), textureData.data(), textureData.size());
 
             Ref<TextureAsset> texture = asset.As<TextureAsset>();
             texture->m_isMemoryAsset = false;
         }
 
-        void TextureImporter::ImportFromMemory(Ref<Asset> asset, const void* data, const u64 dataSize) const
+        void TextureImporter::ImportFromMemory(Asset* asset, const void* data, const u64 dataSize) const
         {
             std::string_view path = asset->GetAssetInfo()->FilePath;
             if (data == nullptr || dataSize == 0)
@@ -205,7 +205,8 @@ namespace Insight
                 return;
             }
 
-            Ref<TextureAsset> texture = asset.As<TextureAsset>();
+            TextureAsset* texture = dynamic_cast<TextureAsset*>(asset);
+            ASSERT(texture);
             texture->m_width = width;
             texture->m_height = height;
             texture->m_depth = 1;

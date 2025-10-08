@@ -64,6 +64,9 @@ namespace Insight
             Ref<AssetAsyncRequest> LoadAssetAsync(std::string path);
             Ref<AssetAsyncRequest> LoadAssetAsync(const Core::GUID guid);
 
+            void UnloadAsset(std::string path);
+            void UnloadAsset(const Core::GUID& guid);
+
             const AssetInfo* GetAssetInfo(const std::string& path) const;
             const AssetInfo* GetAssetInfo(const Core::GUID guid) const;
             std::vector<Byte> LoadAssetData(std::string_view path) const;
@@ -94,7 +97,7 @@ namespace Insight
 
             std::vector<IObject*> GetObjectsFromAsset(const Core::GUID& guid) const;
 
-            std::string ValidatePath(const std::string& path) const;
+            void ValidatePath(std::string& path) const;
         private:
             IAssetPackage* CreateAssetPackageInternal(std::string_view name, std::string_view path, AssetPackageType packageType);
 

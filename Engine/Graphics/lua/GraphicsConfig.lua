@@ -152,7 +152,6 @@ filter "configurations:Release"
         "GenericCodeGen.lib",
         "OSDependent.lib",
         "TracyClient.lib",
-        "assimp.lib",
 
         "ffx_fsr2_api_x64.lib",
         "ffx_fsr2_api_dx12_x64.lib",

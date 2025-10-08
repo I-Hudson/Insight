@@ -59,7 +59,6 @@ namespace Insight
 
         Ref<Asset> AssetAsyncRequest::GetAsset() const
         {
-            ASSERT(m_asset);
             return m_asset;
         }
     }

@@ -833,7 +833,8 @@ namespace Insight
 												{
 												case DescriptorType::Sampled_Image:
 												{
-													srvHandle = textureDX12->GetDescriptorHandle();
+													ASSERT(textureDX12->GetDescriptorHandle().CPUPtr.ptr != 0);
+													srvHandle.CPUPtr.ptr = textureDX12->GetDescriptorHandle().CPUPtr.ptr;
 													break;
 												}
 												case DescriptorType::Storage_Image:
@@ -842,8 +843,10 @@ namespace Insight
 													break;
 												}
 												default:
+													FAIL_ASSERT();
 													break;
 												}
+												ASSERT(srvHandle.IsValid());
 												m_contextDX12->GetDevice()->CopyDescriptorsSimple(1, dstHandle.CPUPtr, srvHandle.CPUPtr, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 												++RenderStats::Instance().DescriptorSetUpdates;
 											}

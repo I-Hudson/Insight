@@ -61,7 +61,10 @@ namespace Insight
         {
             if (assetInfo && !HasAsset(assetInfo))
             {
-                assetInfo->AssetPackage->RemoveAsset(assetInfo);
+                if (assetInfo->AssetPackage != nullptr)
+                {
+                    assetInfo->AssetPackage->RemoveAsset(assetInfo);
+                }
                 assetInfo->AssetPackage = this;
                 assetInfo->PackageName = m_packageName;
                 assetInfo->PackagePath = m_packagePath;
@@ -143,12 +146,24 @@ namespace Insight
         const AssetInfo* IAssetPackage::GetAsset(const Core::GUID& guid) const
         {
             IS_PROFILE_SCOPE("IAssetPackage::GetAsset::Guid");
-            std::lock_guard lock(m_packageLock);
-            if (auto iter = m_assetInfosFromGuid.find(guid);
+            std::lock_guard lock(m_packageLock);         
+            if (auto iter = m_assetInfosFromGuid.find(guid); 
                 iter != m_assetInfosFromGuid.end())
             {
                 return iter->second;
             }
+
+#if 1
+            for (const auto& [assetGuid, assetInfo] : m_assetInfosFromGuid)
+            {
+                const bool match = assetGuid == guid;
+                if (match)
+                {
+                    return assetInfo;
+                }
+            }
+#endif
+
             return nullptr;
         }
 

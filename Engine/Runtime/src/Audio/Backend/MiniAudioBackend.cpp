@@ -41,7 +41,8 @@ namespace Insight
 
         u32 MiniAudioBackend::PlaySound(const char* fileName)
         {
-            const std::string audioFilePath = AssetRegistry::Instance().ValidatePath(fileName);
+            std::string audioFilePath = fileName;
+            AssetRegistry::Instance().ValidatePath(audioFilePath);
 
             const AssetInfo* assetInfo = AssetRegistry::Instance().GetAssetInfo(audioFilePath);
             MiniAudioSound* miniAudioSound = nullptr;

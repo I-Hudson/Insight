@@ -20,6 +20,7 @@
 #include <assimp/mesh.h>
 //#include <assimp/DefaultIOSystem.h>
 #include <assimp/IOStream.hpp>
+#include <assimp/ProgressHandler.hpp>
 
 #include <meshoptimizer.h>
 #include <unordered_set>
@@ -117,6 +118,23 @@ namespace Insight
 			const AssetInfo* m_assetInfo = nullptr;
 			std::vector<Byte> m_fileData;
 			u64 m_cursor = 0;
+		};
+
+		class ConsoleAssimpProgressHandler : public Assimp::ProgressHandler
+		{
+		public:
+			ConsoleAssimpProgressHandler() = delete;
+			ConsoleAssimpProgressHandler(std::string fileName)
+				: FileName(std::move(fileName))
+			{ }
+
+			virtual bool Update(float percentage = -1.f) override
+			{
+				IS_LOG_CORE_INFO("Loading Model '{}', progrss: '{}'", FileName, percentage * 100.0f);
+				return true;
+			}
+
+			std::string FileName;
 		};
 
 		//=============================================
@@ -360,6 +378,9 @@ namespace Insight
 			// Remove cameras and lights
 			importer.SetPropertyInteger(AI_CONFIG_PP_RVC_FLAGS, aiComponent_CAMERAS | aiComponent_LIGHTS);
 			//importer.SetPropertyBool(AI_CONFIG_IMPORT_FBX_PRESERVE_PIVOTS, false);
+			
+			ConsoleAssimpProgressHandler progressHandler(assetInfo->FileName);
+			importer.SetProgressHandler(&progressHandler);
 
 			//CustomAssimpIOSystem ioSystem;
 			//importer.SetIOHandler(&ioSystem);
@@ -393,6 +414,7 @@ namespace Insight
 
 			const aiScene* scene = importer.ReadFile(path.data(), importerFlags);
 			importer.SetIOHandler(nullptr);
+			importer.SetProgressHandler(nullptr);
 
 			if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 			{
@@ -934,8 +956,7 @@ namespace Insight
 				}
 				else
 				{
-					FAIL_ASSERT();
-					///vertex.UV = Maths::Vector2(0.0f, 0.0f);
+					uv = 0.0f;
 				}
 
 				//Graphics::VertexOptomised vertexOptomised(vertex);
@@ -982,15 +1003,12 @@ namespace Insight
 			const std::string materialname;// aiMaterial->GetName().C_Str();
 			const std::string_view Directory = modelAsset->GetAssetInfo()->FilePath;
 
+#define AYNSC_TEXTURE_LOAD 1
+#if AYNSC_TEXTURE_LOAD
 			std::unordered_map<TextureAssetTypes, Ref<AssetAsyncRequest>> loadedTexturesAsync;
 			loadedTexturesAsync[TextureAssetTypes::Diffuse] = LoadTextureAsync(aiScene, aiMaterial, aiTextureType::aiTextureType_BASE_COLOR, aiTextureType::aiTextureType_DIFFUSE, modelAsset);
 			loadedTexturesAsync[TextureAssetTypes::Normal] = LoadTextureAsync(aiScene, aiMaterial, aiTextureType::aiTextureType_NORMAL_CAMERA, aiTextureType::aiTextureType_NORMALS, modelAsset);
-
-			loadedTexturesAsync[TextureAssetTypes::Diffuse]->Wait();
-			loadedTexturesAsync[TextureAssetTypes::Normal]->Wait();
-
-			material->SetTexture(TextureAssetTypes::Diffuse, LoadTexture(aiScene, aiMaterial, aiTextureType::aiTextureType_BASE_COLOR, aiTextureType::aiTextureType_DIFFUSE, modelAsset));
-			material->SetTexture(TextureAssetTypes::Normal, LoadTexture(aiScene, aiMaterial, aiTextureType::aiTextureType_NORMAL_CAMERA, aiTextureType::aiTextureType_NORMALS, modelAsset));
+#endif
 
 			aiColor4D colour(1.0f);
 			aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_DIFFUSE, &colour);
@@ -1006,6 +1024,24 @@ namespace Insight
 			material->SetProperty(MaterialAssetProperty::Colour_A, colour.a);
 
 			material->SetProperty(MaterialAssetProperty::Opacity, opacity);
+
+
+			const auto Load_Texture = [&](const TextureAssetTypes textureType, const aiTextureType legacyType, const aiTextureType pbrType)
+				{
+#if AYNSC_TEXTURE_LOAD
+					loadedTexturesAsync[textureType]->Wait();
+					if (nullptr != loadedTexturesAsync[textureType]->GetAsset())
+#else
+#endif
+					{
+						material->SetTexture(textureType, LoadTexture(aiScene, aiMaterial, legacyType, pbrType, modelAsset));
+					}
+				};
+
+			Load_Texture(TextureAssetTypes::Diffuse, aiTextureType::aiTextureType_BASE_COLOR, aiTextureType::aiTextureType_DIFFUSE);
+			Load_Texture(TextureAssetTypes::Normal, aiTextureType::aiTextureType_NORMAL_CAMERA, aiTextureType::aiTextureType_NORMALS);
+
+#undef AYNSC_TEXTURE_LOAD
 
 			MaterialCache[aiMaterial] = material;
 			return material;
@@ -1052,7 +1088,7 @@ namespace Insight
 					IS_LOG_CORE_ERROR("[ModelImporter::LoadTexture] Unable to load texture format '{}', path '{}'.", embededTexture->achFormatHint, texturePath);
 					return nullptr;
 				}
-				textureImporter.ImportFromMemory(texture, embededTexture->pcData, dataSize);
+				textureImporter.ImportFromMemory(texture.Ptr(), embededTexture->pcData, dataSize);
 				modelAsset->m_embeddedTextures.push_back(texture);
 			}
 

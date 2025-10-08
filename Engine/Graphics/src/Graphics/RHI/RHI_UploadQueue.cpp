@@ -147,7 +147,6 @@ namespace Insight
 				return m_queuedUploads.back()->Request;
 			}
 			return { };
-
 		}
 
 #ifdef IS_RESOURCE_HANDLES_ENABLED

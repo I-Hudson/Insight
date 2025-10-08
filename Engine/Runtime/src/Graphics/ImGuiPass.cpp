@@ -73,17 +73,6 @@ namespace Insight
 			passData.Reset();
 			passData.ImDrawData = std::move(*ImGui::GetDrawData());
 
-			if (nullptr != passData.ImDrawData.Textures)
-			{
-				for (ImTextureData* tex : *passData.ImDrawData.Textures)
-				{
-					if (tex->Status != ImTextureStatus_OK)
-					{
-						UpdateImGuiTextures(tex);
-					}
-				}
-			}
-
 			for (size_t i = 0; i < passData.ImDrawData.CmdListsCount; ++i)
 			{
 				ImDrawList* imguiDrawList = passData.ImDrawData.CmdLists[i];
@@ -384,6 +373,17 @@ namespace Insight
 			RenderGraph::Instance().AddPass<ImguiPass>("ImGuiPass", [this](ImguiPass& data, RenderGraphBuilder& builder)
 				{
 					IS_PROFILE_SCOPE("ImGui pass setup");
+
+					if (nullptr != data.ImDrawData->Textures)
+					{
+						for (ImTextureData* tex : *data.ImDrawData->Textures)
+						{
+							if (tex->Status != ImTextureStatus_OK)
+							{
+								UpdateImGuiTextures(tex);
+							}
+						}
+					}
 
 					builder.SetViewport(Window::Instance().GetWidth(), Window::Instance().GetHeight());
 					builder.SetScissor(Window::Instance().GetWidth(), Window::Instance().GetHeight());
