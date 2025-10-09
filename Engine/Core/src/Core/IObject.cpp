@@ -17,8 +17,9 @@ namespace Insight
 
     void IObject::SetGuid(const Core::GUID& guid)
     {
-        //ObjectManager::Instance().UpdateGuidForObject(this, m_guid, guid);
+        ObjectManager::Instance().UnregisterObject(this);
         m_guid = guid;
+        ObjectManager::Instance().RegisterObject(this);
     }
 
     Core::GUID IObject::GetGuid() const

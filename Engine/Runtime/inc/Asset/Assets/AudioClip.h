@@ -20,6 +20,8 @@ namespace Insight
             AudioClipAsset(const AssetInfo* assetInfo);
             virtual ~AudioClipAsset() override;
 
+            IS_OBJECT(AudioClipAsset);
+
             // Asset - Begin
         protected:
             virtual void OnUnload() override;

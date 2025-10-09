@@ -46,6 +46,11 @@ namespace Insight
             texture->m_isMemoryAsset = false;
         }
 
+        Reflect::Type TextureImporter::GetAssetType() const
+        {
+            return TextureAsset::GetStaticTypeInfo().GetType();
+        }
+
         void TextureImporter::ImportFromMemory(Asset* asset, const void* data, const u64 dataSize) const
         {
             std::string_view path = asset->GetAssetInfo()->FilePath;

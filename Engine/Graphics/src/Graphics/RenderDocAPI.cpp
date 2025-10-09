@@ -10,7 +10,11 @@ namespace Insight
 	namespace Graphics
 	{
 		constexpr const char* renderdocapi_enabled = "renderdocapi_enabled";
-		constexpr bool c_OverrideRenderDocAPIEnabled = true;
+#if IS_DEBUG
+		constexpr const bool c_OverrideRenderDocAPIEnabled = true;
+#else
+		constexpr const bool c_OverrideRenderDocAPIEnabled = false;
+#endif
 
 		RenderDocAPI::RenderDocAPI()
 		{ }

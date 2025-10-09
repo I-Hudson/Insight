@@ -9,6 +9,8 @@
 
 #include "Core/Memory.h"
 
+#include "Core/IObject.h"
+
 #include "Serialisation/Serialiser.h"
 #include "Serialisation/ISerialisable.h"
 #include "Serialisation/MathsSerialisation.h"
@@ -85,8 +87,12 @@ namespace Insight
 		class EntityManager;
 		class Entity;
 
+#define IS_COMPONENT(ComponentType) \
+		static constexpr const char* Type_Name = #ComponentType; \
+		virtual const char* GetTypeName() const override { ASSERT(STRINGIZE_NX(ComponentType) != "Component"); return STRINGIZE_NX(ComponentType); }
+
 		REFLECT_CLASS()
-		class IS_RUNTIME Component : public Serialisation::ISerialisable
+		class IS_RUNTIME Component : public IObject
 		{
 			REFLECT_GENERATED_BODY()
 
@@ -99,9 +105,7 @@ namespace Insight
 				static constexpr char* Type_Name = "ComponentClass";
 				virtual const char* GetTypeName() override { return Type_Name; }
 			*/
-			static constexpr char* Type_Name = "Component";
-			/// @brief  Return the component's type name.
-			virtual const char* GetTypeName() { return "Component"; };
+			IS_COMPONENT(Component);
 
 			/// @brief Called on creation (When the object is newed).
 			virtual void OnCreate() { }
@@ -152,10 +156,6 @@ namespace Insight
 			friend class EntityManager;
 			friend class Editor::ComponentsOperation;
 		};
-
-#define IS_COMPONENT(Component) \
-		static constexpr const char* Type_Name = #Component; \
-		virtual const char* GetTypeName() override { return Type_Name; }
 
 		using ComponentRegistryMap = std::unordered_map<std::string, std::function<Component* ()>>;
 		class IS_RUNTIME ComponentRegistry

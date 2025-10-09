@@ -4,6 +4,9 @@
 
 #include "Core/GUID.h"
 #include "Serialisation/Serialiser.h"
+#include "Serialisation/ReflectSerialisation.h"
+
+#include <Reflect/Reflect.h>
 
 #include <string>
 
@@ -29,6 +32,7 @@ namespace Insight
             operator bool() const;
             bool IsValid() const;
 
+            Reflect::Type ReflectType;
             Core::GUID AssetGuid;
         };
 
@@ -96,12 +100,14 @@ namespace Insight
 
         private:
             void LoadMetaData() const;
+            void SaveMetaData() const;
 
             bool m_isMemoryAsset = false;
         };
     }
  
-    OBJECT_SERIALISER(Runtime::AssetMetaData, 1,
+    OBJECT_SERIALISER(Runtime::AssetMetaData, 2,
         SERIALISE_PROPERTY(Core::GUID, AssetGuid, 1, 0)
+        SERIALISE_PROPERTY(Reflect::Type, ReflectType, 2, 0)
     )
 }

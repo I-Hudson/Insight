@@ -1,6 +1,7 @@
 #include "World/WorldSystem.h"
 
 #include "Asset/AssetRegistry.h"
+#include "Asset/Importers/WorldImporter.h"
 
 #include "ECS/Components/CameraComponent.h"
 #include "ECS/Components/FreeCameraControllerComponent.h"
@@ -108,24 +109,19 @@ namespace Insight
         {
             IS_PROFILE_FUNCTION();
 
-            std::vector<Byte> worldData = AssetRegistry::Instance().LoadAssetData(filePath);
-            if (worldData.empty())
-            {
-                return nullptr;
-            }
-
-            
-            Serialisation::BinarySerialiser serialiser(true);
-            if (!serialiser.Deserialise(worldData))
-            {
-                return nullptr;
-            }
-            
-
             TObjectPtr<World> world = CreateWorld();
+
+            const AssetInfo* assetInfo = AssetRegistry::Instance().GetAssetInfo(std::string(filePath));
+            Ref<Asset> worldAsset = Ref<World>(world.Get());
+
+            WorldImporter worldImporter;
+            worldImporter.Import(worldAsset, assetInfo, assetInfo->GetFullFilePath());
+
+            worldAsset.Release();
+
             SetActiveWorld(world);
-            world->Deserialise(&serialiser);
             world->SetWorldState(WorldStates::Running);
+
             return world.Get();
         }
 

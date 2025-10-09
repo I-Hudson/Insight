@@ -24,5 +24,10 @@ namespace Insight
             Ref<AudioClipAsset> audioAsset = asset.As<AudioClipAsset>();
             audioAsset->m_assetState = AssetState::Loaded;
         }
+
+        Reflect::Type AudioClipImporter::GetAssetType() const
+        {
+            return AudioClipAsset::GetStaticTypeInfo().GetType();
+        }
     }
 }

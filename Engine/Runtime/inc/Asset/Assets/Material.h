@@ -36,6 +36,8 @@ namespace Insight
             MaterialAsset(const AssetInfo* assetInfo);
             virtual ~MaterialAsset() override;
 
+            IS_OBJECT(MaterialAsset);
+
             void SetTexture(const TextureAssetTypes textureType, Ref<TextureAsset> texture);
             Ref<TextureAsset> GetTexture(const TextureAssetTypes textureType) const;
 

@@ -26,5 +26,10 @@ namespace Insight
             Graphics::ShaderDesc shaderDesc;
             shaderDesc.MainFunc = "Main";
         }
+
+        Reflect::Type ShaderImporter::GetAssetType() const
+        {
+            return ShaderAsset::GetStaticTypeInfo().GetType();
+        }
     }
 }

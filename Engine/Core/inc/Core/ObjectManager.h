@@ -7,8 +7,12 @@
 #include "Threading/SpinLock.h"
 
 #include <unordered_set>
+#include <unordered_map>
+#include <string>
 
 #define OBJECT_SORT_SET
+
+#define OBJECT_DEBUG_INFO 1
 
 namespace Insight
 {
@@ -18,6 +22,10 @@ namespace Insight
     {
         IObject* Object = nullptr;
         u64 NextFreeItem = 0;
+
+#if OBJECT_DEBUG_INFO
+        std::string DebugName;
+#endif
     };
 
     /// @brief Track all objects which have been created. This is a global tracker which can be
@@ -38,7 +46,8 @@ namespace Insight
 
     private:
 #ifdef OBJECT_SORT_SET
-        std::unordered_set<IObject*> m_objectItems;
+        std::unordered_map<IObject*, ObjectItem*> m_objectItems;
+        std::unordered_map<Core::GUID, ObjectItem*> m_guidToObjects;
 #else
         ObjectItem* m_objectItems = nullptr;
         u64 m_size = 0;

@@ -36,6 +36,8 @@ namespace Insight
             TextureAsset(const AssetInfo* assetInfo);
             virtual ~TextureAsset() override;
 
+            IS_OBJECT(TextureAsset);
+
             u32 GetWidth() const;
             u32 GetHeight() const;
             u32 GetDepth() const;

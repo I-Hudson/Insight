@@ -25,6 +25,7 @@ namespace Insight
             Invalid
         };
 
+
         /// @brief Base class for asset classes. An Asset object is something which can comes from 
         /// a file on disk.
         REFLECT_CLASS();
@@ -35,6 +36,7 @@ namespace Insight
             Asset(const AssetInfo* assetInfo);
             virtual ~Asset() override;
 
+            IS_OBJECT(Asset);
             IS_SERIALISABLE_H(Asset);
 
             const AssetInfo* GetAssetInfo() const;

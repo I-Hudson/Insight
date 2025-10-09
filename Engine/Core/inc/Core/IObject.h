@@ -6,6 +6,12 @@
 #include "Serialisation/Serialiser.h"
 #include "Serialisation/ISerialisable.h"
 
+#include <string>
+
+#define IS_OBJECT(TYPE)\
+virtual const char* GetTypeName() const override { return STRINGIZE_NX(TYPE); }
+
+
 namespace Insight
 {
 	class ObjectManager;
@@ -25,6 +31,7 @@ namespace Insight
 
 		void SetGuid(const Core::GUID& guid);
 		Core::GUID GetGuid() const;
+		virtual const char* GetTypeName() const { return ""; }
 
 	private:
 		Core::GUID m_guid;
@@ -33,7 +40,32 @@ namespace Insight
 		friend class ObjectManager;
 	};
 
+	namespace Serialisation
+	{
+		struct IObjectGuid {};
+		template<>
+		struct ComplexSerialiser<IObjectGuid, Core::GUID, IObject>
+		{
+			void operator()(ISerialiser* serialiser, Core::GUID& guid, IObject* iobject) const
+			{
+				if (serialiser->IsReadMode())
+				{
+					std::string guidStr;
+					serialiser->Read("m_guid", guidStr);
+
+					PropertyDeserialiser<Core::GUID> guidDeserialiser;
+					iobject->SetGuid(guidDeserialiser(guidStr));
+				}
+				else
+				{
+					PropertySerialiser<Core::GUID> guidSerialiser;
+					serialiser->Write("m_guid", guidSerialiser(guid));
+				}
+			}
+		};
+	}
+
 	OBJECT_SERIALISER(IObject, 1,
-		SERIALISE_PROPERTY(Core::GUID, m_guid, 1, 0)
+		SERIALISE_COMPLEX(Serialisation::IObjectGuid, m_guid, 1, 0)
 	);
 }

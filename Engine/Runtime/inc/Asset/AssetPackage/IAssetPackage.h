@@ -28,6 +28,8 @@ namespace Insight
 
             constexpr static const char* c_FileExtension = ".isassetpackage";
 
+            IS_OBJECT(IAssetPackage);
+
             std::string_view GetPath() const;
             std::string_view GetName() const;
             AssetPackageType GetPackageType() const;

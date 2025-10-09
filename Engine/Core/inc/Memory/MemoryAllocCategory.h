@@ -9,6 +9,7 @@ namespace Insight::Core
 	{
 		General,
 		Threading,
+		Core,
 		Maths,
 		Input,
 		Graphics,
@@ -26,6 +27,7 @@ namespace Insight::Core
 	{
 		"General",
 		"Threading",
+		"Core",
 		"Maths",
 		"Input",
 		"Graphics",

@@ -10,7 +10,11 @@ namespace Insight::Editor::EditorGUI
 {
     namespace Internal
     {
-        bool VerifyObjectFieldPayload(std::string& payload, Reflect::Type type);
+        bool VerifyObjectFieldPayload(std::string& payload);
+        bool VerifyObjectFieldPayload(std::string& payload, Reflect::Type& type);
+        /*
+        bool VerifyObjectFieldPayloadType(Reflect::Type type);
+        */
     }
 
     /// @brief Call after any ImGui call to set that rect as a drag/drop source element.
@@ -25,7 +29,8 @@ namespace Insight::Editor::EditorGUI
     /// @param type 
     /// @param dataToSet 
     /// @return bool
-    bool IS_EDITOR ObjectFieldTarget(const char* id, std::string& data, Reflect::Type type = Reflect::Type());
+    bool IS_EDITOR ObjectFieldTarget(const char* id, std::string& data, Reflect::Type& type);
+    bool IS_EDITOR ObjectFieldTarget(const char* id, std::string& data);
     
     /// @brief 
     /// @param id 

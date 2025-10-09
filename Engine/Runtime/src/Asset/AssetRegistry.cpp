@@ -8,6 +8,7 @@
 #include "Asset/Importers/TextureImporter.h"
 #include "Asset/Importers/ShaderImporter.h"
 #include "Asset/Importers/AudioClipImporter.h"
+#include "Asset/Importers/WorldImporter.h"
 
 #include "Runtime/ProjectSystem.h"
 
@@ -34,6 +35,7 @@ namespace Insight::Runtime
         m_importers.push_back(New<TextureImporter>());
         m_importers.push_back(New<ShaderImporter>());
         m_importers.push_back(New<AudioClipImporter>());
+        m_importers.push_back(New<WorldImporter>());
 
         m_state = Core::SystemStates::Initialised;
     }
@@ -326,7 +328,10 @@ namespace Insight::Runtime
             }
         }
 
-        importer->Import(asset, assetInfo, path);
+        if (importer->AllowAssetImportingFromAssetRegistry())
+        {
+            importer->Import(asset, assetInfo, path);
+        }
 
         return asset;
     }

@@ -14,7 +14,7 @@ namespace Insight::Editor::EditorGUI
 {
     namespace Internal
     {
-        bool VerifyObjectFieldPayload(std::string& payload, Reflect::Type type)
+        bool VerifyObjectFieldPayload(std::string& payload, Reflect::Type& type)
         {
             std::vector<std::string> splitStrings = SplitString(payload, ',');
             std::string& payloadData = splitStrings.at(0);
@@ -29,6 +29,21 @@ namespace Insight::Editor::EditorGUI
                 return false;
             }
 
+            Reflect::Type payloadType(typeName, std::stoull(typeSize));
+            type = payloadType;
+
+            payload = std::move(payloadData);
+            return true;
+        }
+
+        bool VerifyObjectFieldPayload(std::string& payload)
+        {
+            return VerifyObjectFieldPayload(payload, Reflect::Type());
+        }
+
+        /*
+        bool VerifyObjectFieldPayloadType(const std::string& typeName, const std::string& typeSize)
+        {
             if (type.IsValid())
             {
                 Reflect::Type payloadType(typeName, std::stoull(typeSize));
@@ -46,9 +61,8 @@ namespace Insight::Editor::EditorGUI
                     return false;
                 }
             }
-            payload = std::move(payloadData);
-            return true;
         }
+        */
     }
 
 
@@ -66,7 +80,7 @@ namespace Insight::Editor::EditorGUI
         }
     }
 
-    bool ObjectFieldTarget(const char* id, std::string& data, Reflect::Type type)
+    bool ObjectFieldTarget(const char* id, std::string& data, Reflect::Type& type)
     {
         data.clear();
 
@@ -86,6 +100,12 @@ namespace Insight::Editor::EditorGUI
             ImGui::EndDragDropTarget();
         }
         return !data.empty();
+    }
+
+    bool ObjectFieldTarget(const char* id, std::string& data)
+    {
+        Reflect::Type type;
+        return ObjectFieldTarget(id, data, type);
     }
 
     bool IS_EDITOR ObjectFieldTargetCustomRect(const char* id, const ImRect& rect, std::string& data, Reflect::Type type)

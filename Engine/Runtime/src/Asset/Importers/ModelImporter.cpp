@@ -515,6 +515,12 @@ namespace Insight
 			MaterialCache.clear();
 			modelAsset.Ptr()->m_assetState = AssetState::Loaded;
 		}
+
+		Reflect::Type ModelImporter::GetAssetType() const
+		{
+			return ModelAsset::GetStaticTypeInfo().GetType();
+		}
+
 #if ENABLED_UFBX
 		void ModelImporter::ProcessNodeUfbx(const ufbx_scene* fbxScene, const ufbx_node* fbxNode, ModelAsset* modelAsset) const
 		{

@@ -32,6 +32,8 @@ namespace Insight
             ModelAsset(const AssetInfo* assetInfo);
             virtual ~ModelAsset() override;
 
+            IS_OBJECT(ModelAsset);
+
             Ref<Mesh> GetMesh() const;
             Ref<Mesh> GetMeshByIndex(const u32 index) const;
             u32 GetMeshCount() const;

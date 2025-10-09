@@ -13,6 +13,7 @@ namespace Insight
 
             virtual Ref<Asset> CreateAsset(const AssetInfo* assetInfo) const override;
             virtual void Import(Ref<Asset>& asset, const AssetInfo* assetInfo, const std::string_view path) const override;
+            virtual Reflect::Type GetAssetType() const override;
 
             void ImportFromMemory(Asset* asset, const void* data, const u64 dataSize) const;
 

@@ -27,6 +27,8 @@ namespace Insight
             ShaderAsset(const AssetInfo* assetInfo);
             virtual ~ShaderAsset() override;
 
+            IS_OBJECT(ShaderAsset);
+
             std::string_view GetName() const;
 
             bool IsShaderStages(const Graphics::ShaderStageFlags) const;

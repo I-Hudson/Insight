@@ -44,8 +44,9 @@ namespace Insight
 			World();
 			World(std::string worldName);
 			World(const AssetInfo* assetInfo);
-			~World();
+			virtual ~World() override;
 
+			IS_OBJECT(World);
 			IS_SERIALISABLE_H(World);
 
 			constexpr static const char* c_FileExtension = ".isworld";
@@ -119,6 +120,7 @@ namespace Insight
 			bool m_onlySearchable = false;
 
 			friend class WorldSystem;
+			friend class WorldImporter;
 		};
 	}
 

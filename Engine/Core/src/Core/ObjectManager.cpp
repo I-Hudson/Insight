@@ -7,8 +7,6 @@
 
 #include "Threading/ScopedLock.h"
 
-#pragma optimize("", off)
-
 namespace Insight
 {
     ObjectManager::ObjectManager()
@@ -19,7 +17,10 @@ namespace Insight
     {
         Threading::ScopedLock scopedLock(m_objectSpinLock);
 
-#ifndef OBJECT_SORT_SET
+#ifdef OBJECT_SORT_SET
+        ASSERT_MSG(m_objectItems.empty(), "[ObjectManager::~ObjectManager] 'm_objectItems' is not empty. Not all objects are unregistered");
+        ASSERT_MSG(m_guidToObjects.empty(), "[ObjectManager::~ObjectManager] 'm_guidToObjects' is not empty. Not all objects are unregistered");
+#else
         if (m_size > 0)
         {
             IS_LOG_CORE_ERROR("[ObjectManager::~ObjectManager] Not all objects are unregistered.");
@@ -42,8 +43,17 @@ namespace Insight
         Threading::ScopedLock scopedLock(m_objectSpinLock);
 
 #ifdef OBJECT_SORT_SET
+        ObjectItem* objectItem = ::New<ObjectItem, Core::MemoryAllocCategory::Core>();
+        objectItem->Object = object;
+#if OBJECT_DEBUG_INFO
+        objectItem->DebugName = object->GetTypeName();
+#endif
+
         ASSERT(m_objectItems.find(object) == m_objectItems.end());
-        m_objectItems.insert(object);
+        m_objectItems.emplace(object, objectItem);
+        m_guidToObjects.emplace(object->GetGuid(), objectItem);
+
+        IS_LOG_CORE_INFO("[ObjectManager] Total Allocated IObject's '{}'.", m_objectItems.size());
 #else
         if (m_size == m_capacity)
         {
@@ -78,8 +88,15 @@ namespace Insight
         Threading::ScopedLock scopedLock(m_objectSpinLock);
 
 #ifdef OBJECT_SORT_SET
-        ASSERT(m_objectItems.find(object) != m_objectItems.end());
+        auto iter = m_objectItems.find(object);
+
+        ASSERT(iter != m_objectItems.end());
+        ASSERT(m_guidToObjects.find(object->GetGuid()) != m_guidToObjects.end());
+
+        ::Delete(iter->second);
+
         m_objectItems.erase(object);
+        m_guidToObjects.erase(object->GetGuid());
 #else
         const u64 objectIndex = object->m_objectIndex;
         ASSERT_MSG(objectIndex < m_capacity, "[ObjectManager::UnregisterObject] Out of range.");
@@ -119,6 +136,13 @@ namespace Insight
         Threading::ScopedLock scopedLock(m_objectSpinLock);
 
 #ifdef OBJECT_SORT_SET
+        if (const auto iter = m_guidToObjects.find(guid);
+            iter != m_guidToObjects.end())
+        {
+            return iter->second;
+        }
+        return false;
+        /*
         for (const IObject* object : m_objectItems)
         {
             if (object->GetGuid() == guid) 
@@ -126,6 +150,7 @@ namespace Insight
                 return true;
             }
         }
+        */
 #else
         for (size_t i = 0; i < m_size; ++i)
         {
@@ -149,7 +174,13 @@ namespace Insight
         Threading::ScopedLock scopedLock(m_objectSpinLock);
         
 #ifdef OBJECT_SORT_SET
-        for (IObject* object : m_objectItems)
+        if (const auto iter = m_guidToObjects.find(guid);
+            iter != m_guidToObjects.end())
+        {
+            return iter->second->Object;
+        }
+
+        for (auto& [object, objectItem] : m_objectItems)
         {
             if (object->GetGuid() == guid)
             {
@@ -169,5 +200,3 @@ namespace Insight
         return nullptr;
     }
 }
-
-#pragma optimize("", on)

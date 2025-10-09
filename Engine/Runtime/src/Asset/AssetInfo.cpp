@@ -1,5 +1,6 @@
 #include "Asset/AssetInfo.h"
 #include "Asset/AssetRegistry.h"
+#include "Asset/Importers/IAssetImporter.h"
 
 #include "Core/Profiler.h"
 
@@ -32,6 +33,17 @@ namespace Insight
                 MetaData = ::New<AssetMetaData>();
                 LoadMetaData();
                 Guid = MetaData->AssetGuid;
+
+                if (!MetaData->ReflectType.IsValid())
+                {
+                    const std::string_view fileExtension = FileSystem::GetExtension(FileName);
+                    const IAssetImporter* importer = AssetRegistry::Instance().GetImporter(fileExtension);
+                    if (importer)
+                    {
+                        MetaData->ReflectType = importer->GetAssetType();
+                        SaveMetaData();
+                    }
+                }
             }
         }
 
@@ -116,10 +128,17 @@ namespace Insight
             }
             else
             {
-                Serialisation::JsonSerialiser jsonSerialiser(false);
-                MetaData->Serialise(&jsonSerialiser);
-                ASSERT(FileSystem::SaveToFile(jsonSerialiser.GetSerialisedData(), metaDataPath, FileType::Text, true));
+                SaveMetaData();
             }
+        }
+
+        void AssetInfo::SaveMetaData() const
+        {
+            const std::string metaDataPath = GetFullFilePath() + AssetMetaData::c_FileExtension;
+
+            Serialisation::JsonSerialiser jsonSerialiser(false);
+            MetaData->Serialise(&jsonSerialiser);
+            ASSERT(FileSystem::SaveToFile(jsonSerialiser.GetSerialisedData(), metaDataPath, FileType::Text, true));
         }
     }
 }

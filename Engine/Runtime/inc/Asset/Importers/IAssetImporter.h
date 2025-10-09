@@ -18,6 +18,11 @@ namespace Insight
 
             virtual Ref<Asset> CreateAsset(const AssetInfo* assetInfo) const = 0;
             virtual void Import(Ref<Asset>& asset, const AssetInfo* assetInfo, const std::string_view path) const = 0;
+            virtual Reflect::Type GetAssetType() const = 0;
+            /// @brief Define should this importer be allowed to be used via the AssetRegistry our must be made in place and 'Import' be called
+            /// by a local stack instance.
+            /// @return bool
+            virtual bool AllowAssetImportingFromAssetRegistry() const { return true; }
 
         private:
             std::vector<const char*> m_validFileExtensions;

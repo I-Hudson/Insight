@@ -56,9 +56,20 @@ namespace Insight
             return *this;
         }
 
-        void Reset()
-        {
+        void Reset() 
+        { 
             Set(nullptr);
+        }
+
+        // This shouldn't exist. But has to for WorldSystem LoadWorld to work. The Asset system needs to change how it 
+        // imports assets from a Ref<Asset> to just an Asset*&.
+        void Release() 
+        { 
+            if (m_pointer)
+            {
+                m_pointer->Unreference();
+            }
+            m_pointer = nullptr; 
         }
 
         template<typename TOther>

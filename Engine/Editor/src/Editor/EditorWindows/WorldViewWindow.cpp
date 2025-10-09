@@ -151,25 +151,27 @@ namespace Insight
             IS_PROFILE_FUNCTION();
 
             std::string resourceGuidString;
-            if (EditorGUI::ObjectFieldTarget(ContentWindow::c_ContentWindowAssetDragSource, resourceGuidString, Runtime::Asset::GetStaticTypeInfo().GetType()))
+            Reflect::Type sourceType;
+            if (EditorGUI::ObjectFieldTarget(ContentWindow::c_ContentWindowAssetDragSource, resourceGuidString, sourceType))
             {
                 Core::GUID resourceGuid;
                 resourceGuid.StringToGuid(resourceGuidString);
 
-                //Runtime::IResource* resource = Runtime::ResourceManager::Instance().GetResourceFromGuid(resourceGuid);
-                //if (resource)
-                //{
-                //    if (resource->GetTypeInfo().GetType() == Runtime::Model::GetStaticTypeInfo().GetType())
-                //    {
-                //        Runtime::Model* model = static_cast<Runtime::Model*>(resource);
-                //        model->CreateEntityHierarchy();
-                //    }
-                //}
+                const Runtime::AssetInfo* assetInfo = Runtime::AssetRegistry::Instance().GetAssetInfo(resourceGuid);
+                ASSERT_MSG(assetInfo, "[WorldViewWindow::ContentWindowDragTarget] Asset Guid is not valid. This shouldn't be possible.");
 
-                Ref<Runtime::Asset> asset = Runtime::AssetRegistry::Instance().LoadAsset(resourceGuid);
-                if (Ref<Runtime::ModelAsset> modelAsset = asset.As<Runtime::ModelAsset>())
+                if (sourceType == Runtime::ModelAsset::GetStaticTypeInfo().GetType())
                 {
-                    modelAsset->CreateEntityHierarchy();
+                    Ref<Runtime::Asset> asset = Runtime::AssetRegistry::Instance().LoadAsset(resourceGuid);
+                    if (Ref<Runtime::ModelAsset> modelAsset = asset.As<Runtime::ModelAsset>())
+                    {
+                        modelAsset->CreateEntityHierarchy();
+                    }
+                }
+                else if (sourceType == Runtime::World::GetStaticTypeInfo().GetType())
+                {
+                    Runtime::WorldSystem::Instance().RemoveWorld(Runtime::WorldSystem::Instance().GetActiveWorld());
+                    Runtime::WorldSystem::Instance().LoadWorld(assetInfo->GetFullFilePath());
                 }
             }
         }
@@ -1396,6 +1398,10 @@ namespace Insight
             }
             bufferSamplers.Shadow_Sampler = Graphics::RenderContext::Instance().GetSamplerManager().GetOrCreateSampler(sampler_create_info);
             sampler_create_info.AddressMode = Graphics::SamplerAddressMode::Repeat;
+
+            sampler_create_info.CompareEnabled = false;
+            sampler_create_info.CompareOp = Graphics::CompareOp::Never;
+
             bufferSamplers.Repeat_Sampler = Graphics::RenderContext::Instance().GetSamplerManager().GetOrCreateSampler(sampler_create_info);
             sampler_create_info.AddressMode = Graphics::SamplerAddressMode::ClampToEdge;
             bufferSamplers.Clamp_Sampler = Graphics::RenderContext::Instance().GetSamplerManager().GetOrCreateSampler(sampler_create_info);
