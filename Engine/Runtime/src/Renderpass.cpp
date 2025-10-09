@@ -622,7 +622,7 @@ namespace Insight
 								cmdList->SetUniform(2, 1, object);
 
 								const Runtime::MeshLOD& renderMeshLod = mesh.GetLOD(MeshLod);
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 								const Graphics::RHI_BufferView vertexBuffers[] =
 								{
 									renderMeshLod.VertexBuffers.PositionView,
@@ -875,7 +875,7 @@ namespace Insight
 									cmdList->SetUniform(2, 0, object);
 
 									const Runtime::MeshLOD& renderMeshLod = mesh.GetLOD(MeshLod);
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 									const Graphics::RHI_BufferView vertexBuffers[] =
 									{
 										renderMeshLod.VertexBuffers.PositionView,
@@ -922,7 +922,7 @@ namespace Insight
 								cmdList->SetUniform(2, 0, object);
 
 								const Runtime::MeshLOD& renderMeshLod = mesh.GetLOD(MeshLod);
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 								const Graphics::RHI_BufferView vertexBuffers[] =
 								{
 									renderMeshLod.VertexBuffers.PositionView,
@@ -1081,7 +1081,7 @@ namespace Insight
 									cmdList->SetUniform(2, 0, object);
 
 									const Runtime::MeshLOD& renderMeshLod = mesh.GetLOD(MeshLod);
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 									const Graphics::RHI_BufferView vertexBuffers[] =
 									{
 										renderMeshLod.VertexBuffers.PositionView,
@@ -1124,7 +1124,7 @@ namespace Insight
 								cmdList->SetUniform(2, 0, object);
 
 								const Runtime::MeshLOD& renderMeshLod = mesh.GetLOD(MeshLod);
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 								const Graphics::RHI_BufferView vertexBuffers[] =
 								{
 									renderMeshLod.VertexBuffers.PositionView,
@@ -1554,29 +1554,29 @@ namespace Insight
 		void Renderpass::CreateAllCommonShaders()
 		{
 			g_shadowPassShader = ShaderDesc("CascadeShaderMap", EnginePaths::GetResourcePath() + "/Shaders/hlsl/Cascade_Shadow.hlsl", ShaderStageFlagBits::ShaderStage_Vertex);
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 			g_shadowPassShader.InputLayout = ShaderDesc::GetShaderInputLayoutFromStreams(
 				Graphics::Vertices::Stream::Position
 				| Graphics::Vertices::Stream::BoneId
 				| Graphics::Vertices::Stream::BoneWeight);
 #else
-#endif
 			g_shadowPassShader.InputLayout = ShaderDesc::GetDefaultShaderInputLayout();
+#endif
 			RenderContext::Instance().GetShaderManager().GetOrCreateShader(g_shadowPassShader);
 
 			g_depthPrepassShader = ShaderDesc("DepthPrepass", EnginePaths::GetResourcePath() + "/Shaders/hlsl/Depth_Prepass.hlsl", ShaderStageFlagBits::ShaderStage_Vertex);
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 			g_depthPrepassShader.InputLayout = ShaderDesc::GetShaderInputLayoutFromStreams(
 				Graphics::Vertices::Stream::Position
 				| Graphics::Vertices::Stream::BoneId
 				| Graphics::Vertices::Stream::BoneWeight);
 #else
-#endif
 			g_depthPrepassShader.InputLayout = ShaderDesc::GetDefaultShaderInputLayout();
+#endif
 			RenderContext::Instance().GetShaderManager().GetOrCreateShader(g_depthPrepassShader);
 
 			g_lighShadowPass = ShaderDesc("LightShadowPass", EnginePaths::GetResourcePath() + "/Shaders/hlsl/LightDepth.hlsl", ShaderStageFlagBits::ShaderStage_Vertex);
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 			g_lighShadowPass.InputLayout = ShaderDesc::GetShaderInputLayoutFromStreams(
 				Graphics::Vertices::Stream::Position
 				| Graphics::Vertices::Stream::BoneId

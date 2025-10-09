@@ -506,24 +506,14 @@ namespace Insight::Editor
                                         }
                                         ImVec2 image_size_max = ImVec2(rect_button.Max.x - rect_button.Min.x - style.FramePadding.x * 2.0f, rect_button.Max.y - rect_button.Min.y - style.FramePadding.y - label_height - 5.0f);
                                         ImVec2 image_size = texture ? ImVec2(static_cast<float>(texture->GetWidth()), static_cast<float>(texture->GetHeight())) : image_size_max;
+                                        const bool horizontalGreater = image_size.x > image_size.y;
+                                        const float imageScale = horizontalGreater ? image_size_max.x / image_size.x : image_size_max.y / image_size.y;
                                         ImVec2 image_size_delta = ImVec2(0.0f, 0.0f);
 
                                         // Scale the image size to fit the max available size while respecting it's aspect ratio
                                         {
-                                            // Clamp width
-                                            if (image_size.x != image_size_max.x)
-                                            {
-                                                float scale = image_size_max.x / image_size.x;
-                                                image_size.x = image_size_max.x;
-                                                image_size.y = image_size.y * scale;
-                                            }
-                                            // Clamp height
-                                            if (image_size.y != image_size_max.y)
-                                            {
-                                                float scale = image_size_max.y / image_size.y;
-                                                image_size.x = image_size.x * scale;
-                                                image_size.y = image_size_max.y;
-                                            }
+                                            image_size.x = image_size.x * imageScale;
+                                            image_size.y = image_size.y * imageScale;
 
                                             image_size_delta.x = image_size_max.x - image_size.x;
                                             image_size_delta.y = image_size_max.y - image_size.y;
@@ -568,11 +558,13 @@ namespace Insight::Editor
                         {
                             EditorGUI::ObjectFieldSource(c_ContentWindowAssetDragSource
                                 , contentResource->GetGuid().ToString().data()
-                                , Runtime::Asset::GetStaticTypeInfo().GetType());
+                                , assetInfo->MetaData->ReflectType);
                         }
                         else if (assetInfo)
                         {
-                            EditorGUI::ObjectFieldSource(c_ContentWindowAssetDragSource, assetInfo->Guid.ToString().c_str());
+                            EditorGUI::ObjectFieldSource(c_ContentWindowAssetDragSource
+                                , assetInfo->Guid.ToString().c_str()
+                                , assetInfo->MetaData->ReflectType);
                         }
 
                         // Item functionality

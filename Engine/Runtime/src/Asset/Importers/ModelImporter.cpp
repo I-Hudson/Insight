@@ -194,7 +194,7 @@ namespace Insight
 
 			const u32 vertexCount = LODs[0].Vertex_count;
 			const u32 indexCount = LODs[0].Index_count;
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 			const u32 vertexSize = Vertices.GetStride(Graphics::Vertices::Stream::Position);
 #else
 			const u32 vertexSize = Vertices.GetStride(Graphics::Vertices::Stream::Interleaved);
@@ -271,7 +271,7 @@ namespace Insight
 				std::vector<u32> result_lod;
 				result_lod.resize(LOD0_IndicesCount);
 
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 				const u32 vertexSize = Vertices.GetStride(Graphics::Vertices::Stream::Position);
 #else
 				const u32 vertexSize = Vertices.GetStride(Graphics::Vertices::Stream::Interleaved);
@@ -282,7 +282,7 @@ namespace Insight
 					result_lod.data()
 					, &*indices_begin
 					, static_cast<u64>(LOD0_IndicesCount)
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 					, (float*)Vertices.GetData(Graphics::Vertices::Stream::Position) + (LOD0_VertexStart * vertexSize)
 #else
 					, (float*)Vertices.GetData(Graphics::Vertices::Stream::Interleaved) + (LOD0_VertexStart * vertexSize)
@@ -311,7 +311,7 @@ namespace Insight
 						  result_lod.data()
 						, &*indices_begin
 						, static_cast<u64>(LOD0_IndicesCount)
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 						, (float*)Vertices.GetData(Graphics::Vertices::Stream::Position) + (LOD0_VertexStart * vertexSize)
 #else
 						, (float*)Vertices.GetData(Graphics::Vertices::Stream::Interleaved) + (LOD0_VertexStart * vertexSize)
@@ -756,7 +756,7 @@ namespace Insight
 
 			mesh->m_mesh_name = aiMesh->mName.C_Str();
 			mesh->m_transform_offset = AssimpToInsightMatrix4(aiNode->mTransformation);
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 			mesh->m_boundingBox = Graphics::BoundingBox((float*)meshData.Vertices.GetData(Graphics::Vertices::Stream::Position)
 				, meshData.Vertices.GetStride(Graphics::Vertices::Stream::Position),
 				meshData.Vertices.VerticesCount());
@@ -871,7 +871,7 @@ namespace Insight
 					meshLod.First_index = static_cast<u32>(meshDataLod.First_index);
 					meshLod.Index_count = static_cast<u32>(meshDataLod.Index_count);
 
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 					meshLod.VertexBuffers = meshData.RHI_VertexBuffers;
 #else
 					meshLod.VertexBuffer = meshData.RHI_VertexBuffer;

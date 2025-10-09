@@ -22,7 +22,7 @@ namespace Insight
         constexpr static u64 c_SkeletonBoneDataIncrementSize = sizeof(Maths::Matrix4) * Skeleton::c_MaxBoneCount;
         constexpr static u64 c_SkeletonBoneDataByteSize = c_SkeletonBoneDataIncrementSize * c_MaxGPUSkinnedObjects;
 
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
         const u64 c_MaxVertexCount = 256_MB / Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Position);
         const u64 c_VertexByteSize = Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Position) * c_MaxVertexCount;
 #else
@@ -255,7 +255,7 @@ namespace Insight
             RenderMesh& skinnedMesh = renderMesh;
             const Graphics::RHI_BufferView skinnedVertexBuffer = AllocateMeshVertexBuffer(animInstance, skinnedMesh);
 
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
             Graphics::RHI_BufferView inputSkinnedVertexBuffer(skinnedMesh.GetLOD(0).VertexBuffers.Position, skinnedMesh.GetLOD(0).Vertex_offset
                 , skinnedMesh.GetLOD(0).Vertex_count * Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Position));
             inputSkinnedVertexBuffer.Vertex.UAVStartIndex = skinnedMesh.GetLOD(0).Vertex_offset;
@@ -307,7 +307,7 @@ namespace Insight
                 Graphics::RHI_Buffer_Overrides gpuSkinningVertexBufferOverrides;
                 gpuSkinningVertexBufferOverrides.AllowUnorderedAccess = true;
                 gpuSkinningVertexBufferOverrides.InitialUploadState = Graphics::DeviceUploadStatus::Completed;
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
                 m_GPUSkinnedVertexBuffer = Renderer::CreateVertexBuffer(c_VertexByteSize, Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Position), gpuSkinningVertexBufferOverrides);
 #else
                 m_GPUSkinnedVertexBuffer = Renderer::CreateVertexBuffer(c_VertexByteSize, Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Interleaved), gpuSkinningVertexBufferOverrides);
@@ -375,7 +375,7 @@ namespace Insight
 
             u64 vertexCount = skinnedMesh.MeshLods[0].Vertex_count;
 
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
             const u64 vertexByteSize = Graphics::Vertices::GetStride(Graphics::Vertices::Stream::Position) * vertexCount;
             ASSERT(m_gpuVertexOffset + vertexByteSize < c_VertexByteSize);
 

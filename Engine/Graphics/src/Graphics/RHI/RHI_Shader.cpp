@@ -308,6 +308,10 @@ namespace Insight
 				arguments.push_back(L"DX12");
 			}
 
+#if VERTEX_SPLIT_STREAMS
+			arguments.push_back(L"-D");
+			arguments.push_back(L"VERTEX_SPLIT_STREAMS");
+#endif
 #ifdef VERTEX_NORMAL_PACKED
 			arguments.push_back(L"-D");
 			arguments.push_back(L"VERTEX_NORMAL_PACKED");
@@ -723,7 +727,7 @@ namespace Insight
 				ShaderInputLayout layout(
 					interfaceVariable->location,
 					SpvFormatToPixelFormat(interfaceVariable->format),
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 					i,
 #else
 					0,

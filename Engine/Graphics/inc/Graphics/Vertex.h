@@ -62,13 +62,13 @@ namespace Insight
 
 			struct Vertex
 			{
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 				std::vector<float> Positons;
 #else
 				float Position[3] = { 0 };
 #endif
 
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 #ifdef VERTEX_NORMAL_PACKED
 				std::vector<int> Normals;
 #else
@@ -82,7 +82,7 @@ namespace Insight
 #endif
 #endif
 
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 #ifdef VERTEX_COLOUR_PACKED
 				std::vector<int> Colours;
 #else
@@ -96,7 +96,7 @@ namespace Insight
 #endif
 #endif
 
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 #ifdef VERTEX_UV_PACKED
 				std::vector<int> UVs;
 #else
@@ -110,7 +110,7 @@ namespace Insight
 #endif
 #endif
 
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 #ifdef VERTEX_BONE_ID_PACKED
 				std::vector<int> BoneIds;
 #else
@@ -124,7 +124,7 @@ namespace Insight
 #endif
 #endif
 
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 #ifdef VERTEX_BONE_WEIGHT_PACKED
 				std::vector<int> BoneWeights;
 #else
@@ -141,7 +141,7 @@ namespace Insight
 
 			void AddVertex(const Maths::Vector3& position, const Maths::Vector3& normal, const Maths::Vector4& colour, const Maths::Vector2& uv, const int boneId, const Maths::Vector4& boneWeights)
 			{
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 				Vertices.Positons.push_back(position[0]);
 				Vertices.Positons.push_back(position[1]);
 				Vertices.Positons.push_back(position[2]);
@@ -264,7 +264,7 @@ namespace Insight
 
 			void SetBoneId(const u64 vertexId, const u32 boneId, const u8 boneIdx)
 			{
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 #ifdef VERTEX_BONE_ID_PACKED
 				int& vBoneId = Vertices.BoneIds[vertexId];
 #else
@@ -291,7 +291,7 @@ namespace Insight
 
 			float GetBoneWeight(const u64 vertexId, const u8 idx) const
 			{
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 				const u64 boneWeightStartIdx = vertexId * MAX_BONE_COUNT;
 
 #ifdef VERTEX_BONE_WEIGHT_PACKED
@@ -353,7 +353,7 @@ namespace Insight
 
 			void SetBoneWeight(const u64 vertexId, const float boneWeight, const u8 idx)
 			{
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 				const u64 boneWeightStartIdx = vertexId * MAX_BONE_COUNT;
 
 #ifdef VERTEX_BONE_WEIGHT_PACKED
@@ -417,7 +417,7 @@ namespace Insight
 				{
 				case Stream::Position:
 				{
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 					return Vertices.Positons.data();
 #else
 					return Vertices[0].Position;
@@ -425,7 +425,7 @@ namespace Insight
 				}
 				case Stream::Normal:
 				{
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 					return Vertices.Normals.data();
 
 #else
@@ -438,7 +438,7 @@ namespace Insight
 				}
 				case Stream::Colour:
 				{
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 					return Vertices.Colours.data();
 
 #else
@@ -451,7 +451,7 @@ namespace Insight
 				}
 				case Stream::UV:
 				{
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 					return Vertices.UVs.data();
 
 #else
@@ -464,7 +464,7 @@ namespace Insight
 				}
 				case Stream::BoneId:
 				{
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 					return Vertices.BoneIds.data();
 
 #else
@@ -477,7 +477,7 @@ namespace Insight
 				}
 				case Stream::BoneWeight:
 				{
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 					return Vertices.BoneWeights.data();
 #else
 					return Vertices[0].BoneWeights;
@@ -486,7 +486,7 @@ namespace Insight
 
 				case Stream::Interleaved:
 				{
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 					return Vertices.Positons.data();
 #else
 					return Vertices[0].Position;
@@ -510,7 +510,7 @@ namespace Insight
 				{
 				case Stream::Position:
 				{
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 					return sizeof(decltype(Vertex::Positons)::value_type) * 3;
 #else
 					return sizeof(Vertex::Position);
@@ -518,7 +518,7 @@ namespace Insight
 				}
 				case Stream::Normal:
 				{
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 #ifdef VERTEX_NORMAL_PACKED
 					return sizeof(decltype(Vertex::Normals)::value_type);
 #else
@@ -530,7 +530,7 @@ namespace Insight
 				}
 				case Stream::Colour:
 				{
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 #ifdef VERTEX_COLOUR_PACKED
 					return sizeof(decltype(Vertex::Colours)::value_type);
 #else
@@ -542,7 +542,7 @@ namespace Insight
 				}
 				case Stream::UV:
 				{
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 #ifdef VERTEX_UV_PACKED
 					return sizeof(decltype(Vertex::UVs)::value_type);
 #else
@@ -554,7 +554,7 @@ namespace Insight
 				}
 				case Stream::BoneId:
 				{
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 #ifdef VERTEX_BONE_ID_PACKED
 					return sizeof(decltype(Vertex::BoneIds)::value_type);
 #else
@@ -566,7 +566,7 @@ namespace Insight
 				}
 				case Stream::BoneWeight:
 				{
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 #ifdef VERTEX_BONE_WEIGHT_PACKED
 					return sizeof(decltype(Vertex::BoneWeights)::value_type) * (MAX_BONE_COUNT / 2);
 #else
@@ -578,7 +578,7 @@ namespace Insight
 				}
 				case Stream::Interleaved:
 				{
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 					FAIL_ASSERT();
 #else
 					return sizeof(Vertex);
@@ -592,7 +592,7 @@ namespace Insight
 
 			u64 VerticesCount() const 
 			{ 
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 				return Vertices.Positons.size() / 3;
 #else
 				return Vertices.size();
@@ -601,7 +601,7 @@ namespace Insight
 
 			bool IsEmpty() const
 			{
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 				return Vertices.Positons.empty();
 #else
 				return Vertices.empty();
@@ -610,7 +610,7 @@ namespace Insight
 
 			void Resize(const int size)
 			{
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 				Vertices.Positons.resize(size * 3);
 
 #ifdef VERTEX_NORMAL_PACKED
@@ -690,7 +690,7 @@ namespace Insight
 					return intValue;
 				}
 
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 			Vertex Vertices;
 #else
 			std::vector<Vertex> Vertices;

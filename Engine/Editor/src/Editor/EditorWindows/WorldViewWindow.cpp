@@ -295,7 +295,7 @@ namespace Insight
                     IS_PROFILE_SCOPE("LightShadowPass pass setup");
 
                     Graphics::ShaderDesc shaderDesc("LightShadowPass", {}, Graphics::ShaderStageFlagBits::ShaderStage_Vertex);
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
                     shaderDesc.InputLayout = Graphics::ShaderDesc::GetShaderInputLayoutFromStreams(
                         Graphics::Vertices::Stream::Position
                         | Graphics::Vertices::Stream::BoneId
@@ -426,7 +426,7 @@ namespace Insight
                                         }
 
                                         const Runtime::MeshLOD& renderMeshLod = mesh.GetLOD(0);
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
                                         const Graphics::RHI_BufferView vertexBuffers[] =
                                         {
                                             renderMeshLod.VertexBuffers.PositionView,
@@ -510,7 +510,7 @@ namespace Insight
                                         }
 
                                         const Runtime::MeshLOD& renderMeshLod = mesh.GetLOD(0);
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
                                         const Graphics::RHI_BufferView vertexBuffers[] =
                                         {
                                             renderMeshLod.VertexBuffers.PositionView,
@@ -565,7 +565,7 @@ namespace Insight
                 builder.WriteDepthStencil(depthStencil);
 
                 Graphics::ShaderDesc shaderDesc("GBuffer", {}, Graphics::ShaderStageFlagBits::ShaderStage_Vertex | Graphics::ShaderStageFlagBits::ShaderStage_Pixel);
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
                 shaderDesc.InputLayout = Graphics::ShaderDesc::GetShaderInputLayoutFromStreams(Graphics::Vertices::Stream::Position);
 #else
                 shaderDesc.InputLayout = Graphics::ShaderDesc::GetDefaultShaderInputLayout();
@@ -632,7 +632,7 @@ namespace Insight
                         cmdList->SetUniform(2, 0, object);
 
                         const Runtime::MeshLOD& renderMeshLod = mesh.GetLOD(0);
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
                         const Graphics::RHI_BufferView vertexBuffers[] =
                         {
                             renderMeshLod.VertexBuffers.PositionView,
@@ -791,7 +791,7 @@ namespace Insight
                             cmdList->SetUniform(2, 0, object);
 
                             const Runtime::MeshLOD& renderMeshLod = mesh.GetLOD(0);
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
                             const Graphics::RHI_BufferView vertexBuffers[] =
                             {
                                 renderMeshLod.VertexBuffers.PositionView,
@@ -948,7 +948,7 @@ namespace Insight
                             cmdList->SetUniform(2, 0, object);
 
                             const Runtime::MeshLOD& renderMeshLod = mesh.GetLOD(0);
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
                             const Graphics::RHI_BufferView vertexBuffers[] =
                             {
                                 renderMeshLod.VertexBuffers.PositionView,
@@ -1226,7 +1226,7 @@ namespace Insight
             bool reset = false;
             if (ImGui::Checkbox("Editor Enable FSR", &m_fsr2Enabled))
             {
-                //reset = true;
+                reset = true;
             }
             ImGui::DragFloat("Editor FSR sharpness", &fsrSharpness, 0.05f, 0.0f, 1.0f);
 
@@ -1244,8 +1244,21 @@ namespace Insight
                 return;
             }
 
-            if (Graphics::RenderGraph::Instance().GetRenderResolution() == Graphics::RenderGraph::Instance().GetOutputResolution()
-                || !m_fsr2Enabled)
+            if (ImGui::Button("Apply Monitor Resolution"))
+            {
+                m_renderResolution = Graphics::RenderGraph::Instance().GetOutputResolution();
+                Graphics::RenderGraph::Instance().SetRenderResolution(m_renderResolution);
+                return;
+            }
+            else if (ImGui::Button("Apply 720p Resolution"))
+            {
+                m_renderResolution = Maths::Vector2(1270, 720);
+                Graphics::RenderGraph::Instance().SetRenderResolution(m_renderResolution);
+                return;
+            }
+
+            if (/*Graphics::RenderGraph::Instance().GetRenderResolution() == Graphics::RenderGraph::Instance().GetOutputResolution()
+                || */!m_fsr2Enabled)
             {
                 return;
             }

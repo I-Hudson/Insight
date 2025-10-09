@@ -88,7 +88,7 @@ namespace Insight
 
 			static std::vector<ShaderInputLayout> GetDefaultShaderInputLayout()
 			{
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 				return GetShaderInputLayoutFromStreams(Vertices::Stream::All);
 #else
 				return GetShaderInputLayoutFromStreams(Vertices::Stream::Interleaved);
@@ -107,7 +107,7 @@ namespace Insight
 				{
 					shaderInputLayout.push_back(ShaderInputLayout(0, PixelFormat::R32G32B32_Float, vertexSlot, 0, "POSITION"));
 
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 					++vertexSlot;
 #endif
 				}
@@ -122,7 +122,7 @@ namespace Insight
 					shaderInputLayout.push_back(ShaderInputLayout(1, PixelFormat::R32G32B32_Float, vertexSlot, 0, "NORMAL0"));
 #endif
 
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 					++vertexSlot;
 #endif
 				}
@@ -137,7 +137,7 @@ namespace Insight
 					shaderInputLayout.push_back(ShaderInputLayout(2, PixelFormat::R32G32B32_Float, vertexSlot, 0, "COLOR0"));
 #endif
 
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 					++vertexSlot;
 #endif
 				}
@@ -153,7 +153,7 @@ namespace Insight
 					shaderInputLayout.push_back(ShaderInputLayout(3, PixelFormat::R32G32_Float, vertexSlot, 0, "TEXCOORD0"));
 #endif
 
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 					++vertexSlot;
 #endif
 				}
@@ -168,7 +168,7 @@ namespace Insight
 					shaderInputLayout.push_back(ShaderInputLayout(4, PixelFormat::R32G32B32A32_SInt, vertexSlot, 0, "BLENDINDICES"));
 #endif
 
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 					++vertexSlot;
 #endif
 				}
@@ -183,7 +183,7 @@ namespace Insight
 					shaderInputLayout.push_back(ShaderInputLayout(5, PixelFormat::R32G32B32A32_Float, vertexSlot, 0, "BLENDWEIGHT"));
 #endif
 
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 					++vertexSlot;
 #endif
 				}

@@ -18,7 +18,7 @@ cbuffer UBO : register(b0, PerObjectUniform)
 	float4x4 ubo_Transform;
 };
 
-VertexOutput VSMain(const VertexInput input)
+VertexOutput VSMain(const ShadowVertexInput input)
 {
 	VertexOutput vsOut;
 	vsOut.Position = float4(input.Position.xyz, 1);

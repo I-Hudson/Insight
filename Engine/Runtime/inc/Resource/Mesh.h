@@ -36,7 +36,7 @@ namespace Insight
 			u32 First_index = 0;
 			u32 Index_count = 0;
 
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 			Graphics::VerticesSplitRHIBuffers VertexBuffers;
 #else
 			Graphics::RHI_Buffer* VertexBuffer = nullptr;

@@ -1,22 +1,5 @@
 #define MAX_BONE_COUNT 4
 
-struct ShadowVertexInput
-{
-	float3 Position : POSITION;
-	
-#ifdef VERTEX_BONE_ID_PACKED
-	int BoneIds : BLENDINDICES;
-#else
-	int4 BoneIds : BLENDINDICES;
-#endif
-	
-#ifdef VERTEX_BONE_WEIGHT_PACKED
-	int2 BoneWeights : BLENDWEIGHT;
-#else
-	float4 BoneWeights : BLENDWEIGHT;
-#endif
-};
-
 struct GeoVertexInput
 {
 	float3 Position : POSITION;
@@ -50,6 +33,27 @@ struct GeoVertexInput
 	float4 BoneWeights : BLENDWEIGHT;
 #endif
 };
+
+#ifdef VERTEX_SPLIT_STREAMS
+struct ShadowVertexInput
+{
+	float3 Position : POSITION;
+	
+#ifdef VERTEX_BONE_ID_PACKED
+	int BoneIds : BLENDINDICES;
+#else
+	int4 BoneIds : BLENDINDICES;
+#endif
+	
+#ifdef VERTEX_BONE_WEIGHT_PACKED
+	int2 BoneWeights : BLENDWEIGHT;
+#else
+	float4 BoneWeights : BLENDWEIGHT;
+#endif
+};
+#else
+typedef GeoVertexInput ShadowVertexInput;
+#endif
 
 #ifdef VERTEX_NORMAL_PACKED
 float UnpackNormal(const in int normal, const in uint bitshift)

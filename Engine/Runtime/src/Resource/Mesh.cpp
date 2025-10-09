@@ -16,7 +16,7 @@ namespace Insight
 
 		Mesh::~Mesh()
 		{
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 			Renderer::FreeVertexBuffer(m_lods.at(0).VertexBuffers.Position);
 			Renderer::FreeVertexBuffer(m_lods.at(0).VertexBuffers.Normal);
 			Renderer::FreeVertexBuffer(m_lods.at(0).VertexBuffers.Colour);
@@ -38,7 +38,7 @@ namespace Insight
 			const u32 lodIndex = std::min(lod_index, static_cast<u32>(m_lods.size()));
 			const MeshLOD& meshLOD = m_lods[lodIndex];
 
-#ifdef VERTEX_SPLIT_STREAMS
+#if VERTEX_SPLIT_STREAMS
 #else
 			cmd_list->SetVertexBuffer(meshLOD.VertexBufferView);
 			cmd_list->SetIndexBuffer(meshLOD.IndexBufferView, Graphics::IndexType::Uint32);

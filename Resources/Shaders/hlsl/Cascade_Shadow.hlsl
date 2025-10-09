@@ -12,7 +12,7 @@ cbuffer UBO : register(b1, PerObjectUniform)
 };
 
 
-VertexOutput VSMain(const GeoVertexInput input)
+VertexOutput VSMain(const ShadowVertexInput input)
 {
 	VertexOutput vsOut;
 	vsOut.Position = float4(input.Position, 1);
