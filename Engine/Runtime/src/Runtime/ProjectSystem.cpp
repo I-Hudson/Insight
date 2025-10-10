@@ -74,10 +74,9 @@ namespace Insight
             archive.Write(serialisedData.data(), serialisedData.size());
             archive.Close();
 
-            FileSystem::CreateFolder(project.GetContentPath());
-            FileSystem::CreateFolder(project.GetIntermediatePath());
+            ValidateProjectFolder(m_projectInfo);
 
-            Core::EventSystem::Instance().DispatchEventNow(MakeRPtr<Core::ProjectCreateEvent>(m_projectInfo.ProjectPath));
+            OpenProject(project.GetProjectFilePath());
 
             return true;
         }
@@ -90,8 +89,6 @@ namespace Insight
             }
 
             bool foundProjectFile = std::filesystem::path(projectPath).extension() == c_ProjectExtension;
-            std::string isProjectPath;
-
             if (!foundProjectFile)
             {
                 for (const auto& iter : std::filesystem::directory_iterator(projectPath))
@@ -104,10 +101,6 @@ namespace Insight
                         break;
                     }
                 }
-            }
-            else
-            {
-                isProjectPath = projectPath;
             }
 
             if (!foundProjectFile)
@@ -123,8 +116,6 @@ namespace Insight
                 return false;
             }
 
-            //m_resourceSystem->ClearDatabase();
-
             if (m_projectInfo.IsOpen)
             {
                 Core::EventSystem::Instance().DispatchEventNow(MakeRPtr<Core::ProjectCloseEvent>(m_projectInfo.ProjectPath));
@@ -138,7 +129,10 @@ namespace Insight
             }
 
             m_projectInfo.Deserialise(&jsonSerialiser);
+            m_projectInfo.ProjectPath = FileSystem::GetParentPath(FileSystem::GetAbsolutePath(projectPath));
             m_projectInfo.IsOpen = true;
+
+            ValidateProjectFolder(m_projectInfo);
 
             Core::EventSystem::Instance().DispatchEventNow(MakeRPtr<Core::ProjectOpenEvent>(m_projectInfo.ProjectPath));
             return true;
@@ -163,6 +157,19 @@ namespace Insight
         {
             ASSERT_MSG(IsProjectOpen(), "There must be an open project to get the project info.");
             return m_projectInfo;
+        }
+
+        void ProjectSystem::ValidateProjectFolder(const ProjectInfo& projectInfo) const
+        {
+            if (!FileSystem::Exists(projectInfo.GetContentPath()))
+            {
+                FileSystem::CreateFolder(projectInfo.GetContentPath());
+            }
+
+            if (!FileSystem::Exists(projectInfo.GetIntermediatePath()))
+            {
+                FileSystem::CreateFolder(projectInfo.GetIntermediatePath());
+            }
         }
     }
 }

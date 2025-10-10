@@ -95,6 +95,7 @@ call :COPY_TO_RELEASE_DEPS "..\..\vendor\DirectXShaderCompiler\bin\x64\dxcompile
 call :COPY_TO_RELEASE_DEPS "..\..\vendor\DirectXShaderCompiler\bin\x64\dxil.dll"                 "dll"
 
 pause
+exit
 
 :COPY_TO_DEBUG_DEPS
 set lib_file="%~dp0%~1"

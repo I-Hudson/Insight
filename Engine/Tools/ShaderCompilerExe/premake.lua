@@ -12,6 +12,11 @@ project "ShaderCompilerExe"
     {
     }
 
+    dependson
+    {
+        "ShaderCompiler"
+    }
+
     includedirs
     {
         "inc",

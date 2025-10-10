@@ -10,22 +10,25 @@ call :DOWNLOAD_AND_UNZIP https://www.nuget.org/api/v2/package/Microsoft.VCRTForw
 call :DOWNLOAD_AND_UNZIP https://www.nuget.org/api/v2/package/Microsoft.Windows.CppWinRT/2.0.221121.5                                                                       %vendorPath%\Microsoft.Windows.CppWinRT
 call :DOWNLOAD_AND_UNZIP https://github.com/microsoft/DirectXShaderCompiler/releases/download/v1.7.2212/dxc_2022_12_16.zip                                                  %vendorPath%\DirectXShaderCompiler
 call :DOWNLOAD_AND_UNZIP https://github.com/glfw/glfw/releases/download/3.4/glfw-3.4.zip                                                                                    %vendorPath%\glfw
-call :DOWNLOAD_AND_UNZIP https://github.com/wolfpld/tracy/releases/download/v0.11.1/windows-0.11.1.zip                                                                      %vendorPath%\tracyProfiler
+rem call :DOWNLOAD_AND_UNZIP https://github.com/wolfpld/tracy/releases/download/v0.11.1/windows-0.11.1.zip                                                                      %vendorPath%\tracyProfiler
 call :DOWNLOAD_AND_UNZIP https://github.com/danmar/cppcheck/archive/2.16.0.zip                                                                                              %vendorPath%\cppcheck
 call :DOWNLOAD_AND_UNZIP https://developer.nvidia.com/downloads/assets/tools/secure/nsight-aftermath-sdk/2025_1_0/windows/NVIDIA_Nsight_Aftermath_SDK_2025.1.0.25009.zip    %vendorPath%\NVIDIA_Nsight_Aftermath_SDK
 
 robocopy "%vendorPath%\glfw\glfw-3.4" "%vendorPath%\glfw" /E /MOV
 
+set cmakeGenerator="Visual Studio 17 2022"
+set cmakeArch="x64"
+
 echo Generate and Assimp
 cd "%vendorPath%/assimp"
-call cmake -S "./" -B "build" 
+call cmake -S "./" -B "build" -G %cmakeGenerator% -A %cmakeArch%
 cd "%currentDirectory%"
 call "../Engine/Build_Solution.bat" "%vendorPath%/assimp/build/Assimp.sln" vs2022 Build Debug x64
 call "../Engine/Build_Solution.bat" "%vendorPath%/assimp/build/Assimp.sln" vs2022 Build Release x64
 
 echo Generate and spdlog
 cd "%vendorPath%/spdlog"
-call cmake -S "./" -B "build" -D SPDLOG_BUILD_SHARED=ON
+call cmake -S "./" -B "build"  -G %cmakeGenerator% -A %cmakeArch% -D SPDLOG_BUILD_SHARED=ON
 cd "%currentDirectory%"
 call "../Engine/Build_Solution.bat" "%vendorPath%/spdlog/build/spdlog.sln" vs2022 Build Debug x64
 call "../Engine/Build_Solution.bat" "%vendorPath%/spdlog/build/spdlog.sln" vs2022 Build Release x64
@@ -33,21 +36,21 @@ call "../Engine/Build_Solution.bat" "%vendorPath%/spdlog/build/spdlog.sln" vs202
 
 echo Generate and Build tracy
 cd "%vendorPath%/tracy"
-call cmake -S "./" -B "build" -D TRACY_STATIC=OFF TRACY_ON_DEMAND=ON
+call cmake -S "./" -B "build" -G %cmakeGenerator% -A %cmakeArch% -D TRACY_STATIC=OFF TRACY_ON_DEMAND=ON
 cd "%currentDirectory%"
 call "../Engine/Build_Solution.bat" "%vendorPath%/tracy/build/Tracy.sln" vs2022 Build Debug x64
 call "../Engine/Build_Solution.bat" "%vendorPath%/tracy/build/Tracy.sln" vs2022 Build Release x64
 
 echo Generate and Build tracy profiler
 cd "%vendorPath%/tracy/profiler"
-call cmake -S "./" -B "build"
+call cmake -S "./" -B "build" -G %cmakeGenerator% -A %cmakeArch%
 cd "%currentDirectory%"
 call "../Engine/Build_Solution.bat" "%vendorPath%/tracy/profiler/build/tracy-profiler.sln" vs2022 Build Debug x64
 call "../Engine/Build_Solution.bat" "%vendorPath%/tracy/profiler/build/tracy-profiler.sln" vs2022 Build Release x64
 
 
 echo Generate JoltPhysics solution
-cd "%vendorPath%/JoltPhysics/Build"
+cd "%vendorPath%/JoltPhysics/Build
 call cmake_vs2022_cl.bat -DUSE_STATIC_MSVC_RUNTIME_LIBRARY=OFF -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded$<$<CONFIG:Debug>:DebugDLL>$<$<CONFIG:Release>:DLL>$<$<CONFIG:Distribution>:DLL>" -Wno-dev
 cd "%currentDirectory%"
 

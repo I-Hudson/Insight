@@ -8,7 +8,7 @@ SET msBuildType=%2
 echo Starting dependencies builds
 
 echo Generating premake projects and solution
-call ..\..\vendor\premake\premake5.exe %vsVersion% 
+call ..\..\vendor\premake\premake5.exe --file=premake5.lua %vsVersion% 
 echo Solution generated
 
 if "%msBuildType%" == "" (

@@ -31,6 +31,11 @@ project "glm"
         folderDir .. "glm/**.c",
     }
 
+    removefiles
+    {
+        folderDir .. "glm/**.cppm",
+    }
+
     postbuildcommands
     {
        "{COPY} \"%{cfg.targetdir}/glm.lib\" \"" .. output_deps .. "/lib/\"",

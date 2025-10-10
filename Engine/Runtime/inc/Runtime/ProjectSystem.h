@@ -52,12 +52,15 @@ namespace Insight
             const ProjectInfo& GetProjectInfo() const;
 
         private:
+            void ValidateProjectFolder(const ProjectInfo& projectInfo) const;
+
+        private:
             ProjectInfo m_projectInfo;
         };
     }
 
-    OBJECT_SERIALISER(Runtime::ProjectInfo, 3,
-        SERIALISE_PROPERTY(std::string, ProjectPath, 1, 0)
+    OBJECT_SERIALISER(Runtime::ProjectInfo, 4,
+        SERIALISE_PROPERTY(std::string, ProjectPath, 1, 4)
         SERIALISE_PROPERTY(std::string, ProjectName, 1, 0)
         SERIALISE_PROPERTY(u32, ProjectVersion, 1, 2)
         SERIALISE_PROPERTY(bool, IsOpen, 1, 2)
