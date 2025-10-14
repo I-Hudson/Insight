@@ -20,7 +20,9 @@ namespace Insight
             static void Shutdown();
 
             static void Update(const float deltaTime);
+            static void DrawDebug();
 
+            static bool IsRecording();
             static void StartRecord();
             static void EndRecord();
 

@@ -226,6 +226,11 @@ namespace Insight::Physics::Jolt
 			m_physicsSystem.Update(cDeltaTime, cCollisionSteps, &m_tempAllocatorMalloc, &m_jobSystem);
 		}
 
+		DrawDebug();
+	}
+
+	void PhysicsWorld_Jolt::DrawDebug()
+	{
 #ifdef JPH_DEBUG_RENDERER
 		if (m_isRecording)
 		{
@@ -240,6 +245,15 @@ namespace Insight::Physics::Jolt
 			m_debugRenderData = std::move(static_cast<DebugRendererJolt*>(m_debugRenderer)->RendererData);
 			m_debugRenderer->NextFrame();
 		}
+#endif
+	}
+
+	bool PhysicsWorld_Jolt::IsRecording() const
+	{
+#ifdef JPH_DEBUG_RENDERER
+		return m_isRecording;
+#else
+		return false;
 #endif
 	}
 

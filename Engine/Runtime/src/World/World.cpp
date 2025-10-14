@@ -143,9 +143,14 @@ namespace Insight
 			}
 		}
 
-		std::vector<Ptr<ECS::Entity>> World::GetAllEntitiesWithComponentByName(std::string_view component_type) const
+		std::vector<Ptr<ECS::Component>> World::GetAllComponentsByName(std::string_view componentType) const
 		{
-			return m_entityManager.GetAllEntitiesWithComponentByName(component_type);
+			return m_entityManager.GetAllComponentsByName(componentType);
+		}
+
+		std::vector<Ptr<ECS::Entity>> World::GetAllEntitiesWithComponentByName(std::string_view componentType) const
+		{
+			return m_entityManager.GetAllEntitiesWithComponentByName(componentType);
 		}
 
 		std::vector<Ptr<ECS::Entity>> World::GetAllEntities() const

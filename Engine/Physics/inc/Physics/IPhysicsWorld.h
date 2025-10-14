@@ -19,7 +19,9 @@ namespace Insight::Physics
         virtual void Shutdown() = 0;
 
         virtual void Update(const float deltaTime) = 0;
+        virtual void DrawDebug() = 0;
 
+        virtual bool IsRecording() const = 0;
         virtual void StartRecord() = 0;
         virtual void EndRecord() = 0;
         const DebugRendererData& GetDebugRenderData() const { return m_debugRenderData; }

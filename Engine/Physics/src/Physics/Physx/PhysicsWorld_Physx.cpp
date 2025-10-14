@@ -21,6 +21,16 @@ namespace Insight::Physics::Physx
     {
     }
 
+    void PhysicsWorld_Physx::DrawDebug()
+    {
+
+    }
+
+    bool PhysicsWorld_Physx::IsRecording() const
+    {
+        return false;
+    }
+
     void PhysicsWorld_Physx::StartRecord()
     {
     }

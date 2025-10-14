@@ -51,6 +51,7 @@ namespace Insight
             void GBufferPass();
             void TransparentGBufferPass();
             void LightPass();
+            void GFXHelper();
             void FSR2Pass();
 
             void RenderSetSkinnedMeshesBonesUniform(const RenderMesh& mesh, Graphics::RHI_CommandList* cmdList) const;

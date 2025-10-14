@@ -14,7 +14,9 @@ namespace Insight::Physics::Physx
         virtual void Shutdown() override;
 
         virtual void Update(const float deltaTime) override;
+        virtual void DrawDebug() override;
 
+        virtual bool IsRecording() const override;
         virtual void StartRecord() override;
         virtual void EndRecord() override;
 

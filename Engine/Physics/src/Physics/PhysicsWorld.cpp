@@ -48,6 +48,16 @@ namespace Insight
 			s_PhsyicsWorld->Update(deltaTime);
 		}
 
+		void PhysicsWorld::DrawDebug()
+		{
+			s_PhsyicsWorld->DrawDebug();
+		}
+
+		bool PhysicsWorld::IsRecording()
+		{
+			return s_PhsyicsWorld->IsRecording();
+		}
+
 		void PhysicsWorld::StartRecord()
 		{
 			s_PhsyicsWorld->StartRecord();

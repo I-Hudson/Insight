@@ -11,6 +11,7 @@
 #include "Graphics/GraphicsSystem.h"
 #include "Graphics/RenderGraph/RenderGraph.h"
 #include "Graphics/RenderGraph/RenderGraphBuilder.h"
+#include "Graphics/GFXHelper.h"
 #ifdef RENDERGRAPH_V2_ENABLED
 #include "Graphics/RenderGraphV2/RenderGraphV2.h"
 #endif
@@ -277,6 +278,7 @@ namespace Insight
                 TransparentGBufferPass();
                 m_physicsDebugRenderPass.Render(constantBuffer, "EditorWorldColourRT", "EditorWorldDepthStencilRT");
                 LightPass();
+                GFXHelper();
                 FSR2Pass();
             }
         }
@@ -1215,6 +1217,133 @@ namespace Insight
 
                         cmdList->PipelineBarrier(afterBarreir);
                     }
+                }, std::move(passData));
+        }
+
+        void WorldViewWindow::GFXHelper()
+        {
+            IS_PROFILE_FUNCTION();
+
+            struct TestPassData
+            { };
+            TestPassData passData = {};
+
+            Graphics::RenderGraph::Instance().AddPass<TestPassData>("WorldViewWindow_GFXHelperPass", [this](TestPassData& data, Graphics::RenderGraphBuilder& builder)
+                {
+                    IS_PROFILE_SCOPE("GFXHelper pass setup");
+
+                    builder.SetViewport(builder.GetOutputResolution().x, builder.GetOutputResolution().y);
+                    builder.SetScissor(builder.GetOutputResolution().x, builder.GetOutputResolution().y);
+                    builder.WriteTexture(builder.GetTexture("EditorWorldLightRT"));
+
+                    Graphics::ShaderDesc shaderDesc("GFXHelper", {},
+                        Graphics::ShaderStageFlagBits::ShaderStage_Vertex | Graphics::ShaderStageFlagBits::ShaderStage_Pixel);
+                    builder.SetShader(shaderDesc);
+
+                    Graphics::PipelineStateObject pso = { };
+                    pso.Name = "GFXHelper_PSO";
+                    pso.ShaderDescription = shaderDesc;
+
+                    pso.PrimitiveTopologyType = Graphics::PrimitiveTopologyType::LineList;
+                    pso.PolygonMode = Graphics::PolygonMode::Line;
+                    pso.CullMode = Graphics::CullMode::Front;
+                    pso.FrontFace = Graphics::FrontFace::CounterClockwise;
+                    pso.Dynamic_States.push_back(Graphics::DynamicState::LineWidth);
+
+                    builder.SetPipeline(pso);
+
+                    Graphics::RenderpassDescription renderpassDescription = { };
+                    renderpassDescription.AddAttachment(Graphics::AttachmentDescription::Load(PixelFormat::Unknown, Graphics::ImageLayout::ColourAttachment));
+                    renderpassDescription.Attachments.back().InitalLayout = Graphics::ImageLayout::ColourAttachment;
+                    builder.SetRenderpass(renderpassDescription);
+                },
+                [&](TestPassData& data, Graphics::RenderGraph& renderGraph, Graphics::RHI_CommandList* cmdList)
+                {
+                    IS_PROFILE_SCOPE("GFXHelper pass execute");
+
+                    if (GFXHelper::m_lines.size() == 0)
+                    {
+                        return;
+                    }
+
+                    Graphics::PipelineStateObject pso = renderGraph.GetPipelineStateObject("GFXHelperPass");
+                    cmdList->BindPipeline(pso, nullptr);
+                    cmdList->BeginRenderpass(renderGraph.GetRenderpassDescription("GFXHelperPass"));
+
+                    {
+                        IS_PROFILE_SCOPE("Set Buffer Frame Uniform");
+                        BindCommonResources(cmdList, m_renderingData.GetCurrent());
+                    }
+
+                    struct Line
+                    {
+                        Line(Maths::Vector3 pos, Maths::Vector4 color)
+                            : Pos(Maths::Vector4(pos, 1.0f)), Color(color)
+                        {
+                        }
+                        Maths::Vector4 Pos;
+                        Maths::Vector4 Color;
+                    };
+
+                    struct GFXHelperDrawCall
+                    {
+                        int VertexCount;
+                        int InstanceCount;
+                        int FirstVertex;
+                        int FirstInstance;
+                    };
+
+                    int drawCallVertexStart = 0;
+                    std::vector<Line> gizmoLineData;
+                    std::vector<GFXHelperDrawCall> gizmoDrawCall;
+                    gizmoDrawCall.reserve(GFXHelper::m_lines.size());
+
+                    {
+                        IS_PROFILE_SCOPE("[GFXHelper pass] Directions");
+                        for (const GFXHelperLine& line : GFXHelper::m_lines)
+                        {
+                            std::array<Line, 2> lines
+                            {
+                                Line(line.Start, line.Colour),
+                                Line(line.End, line.Colour)
+                            };
+
+                            gizmoLineData.insert(gizmoLineData.end(), lines.begin(), lines.end());
+                            gizmoDrawCall.push_back({ 2, 1, drawCallVertexStart, 0 });
+                            drawCallVertexStart += 2;
+                        }
+                    }
+
+
+                    static Graphics::RHI_Buffer* vBuffer = nullptr;
+                    if (!vBuffer)
+                    {
+                        vBuffer = Renderer::CreateVertexBuffer(sizeof(Line) * gizmoLineData.size(), sizeof(Line));
+                    }
+
+                    if (vBuffer->GetSize() < sizeof(Line) * gizmoLineData.size())
+                    {
+                        vBuffer->Resize(sizeof(Line) * gizmoLineData.size());
+                    }
+
+                    {
+                        IS_PROFILE_SCOPE("[Gizmos] Upload vertex buffer");
+
+                        vBuffer->Upload(gizmoLineData.data(), sizeof(Line) * gizmoLineData.size());
+                    }
+
+                    Graphics::RHI_Buffer* vBuffers[] = { vBuffer };
+                    u32 offsets[] = { 0 };
+                    cmdList->SetVertexBuffer(vBuffer);
+                    cmdList->SetLineWidth(1.0f);
+                    {
+                        IS_PROFILE_SCOPE("[Gizmos] Draw");
+                        for (const GFXHelperDrawCall& dc : gizmoDrawCall)
+                        {
+                            cmdList->Draw(dc.VertexCount, dc.InstanceCount, dc.FirstVertex, dc.FirstInstance);
+                        }
+                    }
+                    cmdList->EndRenderpass();
                 }, std::move(passData));
         }
 

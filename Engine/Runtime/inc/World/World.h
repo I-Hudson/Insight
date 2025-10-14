@@ -77,7 +77,20 @@ namespace Insight
 			Ptr<ECS::Entity> GetEntityByName(std::string entity_name) const;
 			void RemoveEntity(Ptr<ECS::Entity>& entity);
 
-			std::vector<Ptr<ECS::Entity>> GetAllEntitiesWithComponentByName(std::string_view component_type) const;
+			template<typename TComponentType>
+			std::vector<Ptr<TComponentType>> GetAllComponents() const
+			{
+				return m_entityManager.GetAllComponents<TComponentType>();
+			}
+			std::vector<Ptr<ECS::Component>> GetAllComponentsByName(std::string_view componentType) const;
+
+			template<typename TComponentType>
+			std::vector<Ptr<ECS::Entity>> GetAllEntitiesWithComponent() const
+			{
+				return m_entityManager.GetAllEntitiesWithComponent<TComponentType>();
+			}
+
+			std::vector<Ptr<ECS::Entity>> GetAllEntitiesWithComponentByName(std::string_view componentType) const;
 			/// @brief This only returns the roots entities.
 			/// @return 
 			std::vector<Ptr<ECS::Entity>> GetAllEntities() const;

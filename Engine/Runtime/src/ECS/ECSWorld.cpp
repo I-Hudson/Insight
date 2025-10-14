@@ -79,9 +79,9 @@ namespace Insight
 			return m_entityManager.GetEntityByName(entity_name);
 		}
 
-		std::vector<Ptr<ECS::Entity>> ECSWorld::GetAllEntitiesWithComponentByName(std::string_view component_type) const
+		std::vector<Ptr<ECS::Entity>> ECSWorld::GetAllEntitiesWithComponentByName(std::string_view componentType) const
 		{
-			return m_entityManager.GetAllEntitiesWithComponentByName(component_type);
+			return m_entityManager.GetAllEntitiesWithComponentByName(componentType);
 		}
 
 #endif

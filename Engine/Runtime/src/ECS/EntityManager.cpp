@@ -298,16 +298,30 @@ namespace Insight
 				}
 			}
 			return nullptr;
+		}		
+
+		std::vector<Ptr<ECS::Component>> EntityManager::GetAllComponentsByName(std::string_view componentType) const
+		{
+			std::vector<Ptr<ECS::Component>> components;
+			std::lock_guard lock(m_lock);
+			for (const UPtr<Entity>& e : m_entities)
+			{
+				if (ECS::Component* entityComponent = e->GetComponentByName(componentType))
+				{
+					components.push_back(entityComponent);
+				}
+			}
+			return components;
 		}
 
-		std::vector<Ptr<ECS::Entity>> EntityManager::GetAllEntitiesWithComponentByName(std::string_view component_type) const
+		std::vector<Ptr<ECS::Entity>> EntityManager::GetAllEntitiesWithComponentByName(std::string_view componentType) const
 		{
 			IS_PROFILE_FUNCTION();
 			std::vector<Ptr<ECS::Entity>> entities;
 			std::lock_guard lock(m_lock);
 			for (const UPtr<Entity>& e : m_entities)
 			{
-				if (e->GetComponentByName(component_type) != nullptr)
+				if (e->GetComponentByName(componentType) != nullptr)
 				{
 					entities.push_back(e);
 				}

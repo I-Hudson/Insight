@@ -204,6 +204,10 @@ namespace Insight
 						{
 							Physics::PhysicsWorld::Update(delta_time);
 						}
+						else
+						{
+							Physics::PhysicsWorld::DrawDebug();
+						}
 					}
 
 					{

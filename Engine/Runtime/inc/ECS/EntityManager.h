@@ -76,7 +76,32 @@ namespace Insight
 			void Destroy();
 
 			Ptr<Entity> GetEntityByName(std::string_view entity_name) const;
-			std::vector<Ptr<ECS::Entity>> GetAllEntitiesWithComponentByName(std::string_view component_type) const;
+
+			template<typename TComponentType>
+			std::vector<Ptr<TComponentType>> GetAllComponents() const
+			{
+				static_assert(std::is_base_of_v<Component, TComponentType>);
+				IS_PROFILE_FUNCTION();
+				const std::vector<Ptr<ECS::Component>> components = GetAllComponentsByName(TComponentType::Type_Name);
+
+				std::vector<Ptr<TComponentType>> castedComponents(components.size());
+				for (size_t i = 0; i < components.size(); ++i)
+				{
+					castedComponents[i] = dynamic_cast<TComponentType*>(components[i].Get());
+					ASSERT(castedComponents[i]);
+				}
+
+				return castedComponents;
+			}
+			std::vector<Ptr<ECS::Component>> GetAllComponentsByName(std::string_view componentType) const;
+
+			template<typename TComponentType>
+			std::vector<Ptr<ECS::Entity>> GetAllEntitiesWithComponent() const
+			{
+				return GetAllEntitiesWithComponentByName(TComponentType::Type_Name);
+			}
+			std::vector<Ptr<ECS::Entity>> GetAllEntitiesWithComponentByName(std::string_view componentType) const;
+
 			std::vector<Ptr<ECS::Entity>> GetAllEntities() const;
 			u32 GetEntityCount() const;
 			ECS::Entity* GetEntityByGUID(const Core::GUID& guid) const;
