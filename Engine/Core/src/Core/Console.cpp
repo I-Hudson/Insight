@@ -126,17 +126,19 @@ namespace Insight
 
                 ImGui::BeginChild("InAppConsoleWindow_Text", textArea);
                 {
-                    ImGuiWindow* window = ImGui::GetCurrentWindow();
+                    //ImGuiWindow* window = ImGui::GetCurrentWindow();
 
                     const ImVec2 windowAbsMin = ImGui::GetWindowPos();
                     const ImVec2 windowAbsMax = ImVec2(windowAbsMin.x + ImGui::GetWindowSize().x, windowAbsMin.y + ImGui::GetWindowSize().y);
                     const ImRect windowRect(windowAbsMin, windowAbsMax);
 
+                    /*
                     const ImVec4 consoleTextColour(
                         consoleBackgroundColour.x + 0.2f,
                         consoleBackgroundColour.x + 0.2f,
                         consoleBackgroundColour.x + 0.2f,
                         1.0f);
+                    */
 
                     u8 messageIndex = m_consoleMessageLastIndex == 0 ? c_ConsoleMessageSize - 1 : m_consoleMessageLastIndex - 1;
                     const u8 endMessageIndex = m_consoleMessageLastIndex;
@@ -148,7 +150,7 @@ namespace Insight
                         {
                             const float worldWrapLength = (windowAbsMax.x - windowAbsMin.x);
                             const ImVec2 textCursorPos = ImVec2(ImGui::GetCursorScreenPos().x, ImGui::GetCursorScreenPos().y);
-                            const float wrapWidthPos = ImGui::CalcWrapWidthForPos(ImGui::GetCursorPos(), worldWrapLength);
+                            //const float wrapWidthPos = ImGui::CalcWrapWidthForPos(ImGui::GetCursorPos(), worldWrapLength);
                             const ImVec2 textSize = ImGui::CalcTextSize(message.Message.data());
                             const ImVec2 rectMax(windowAbsMax.x - windowAbsMin.x, (textCursorPos.y + textSize.y) - 2);
 
@@ -157,13 +159,13 @@ namespace Insight
                             {
                                 textBGRect.ClipWith(windowRect);
                                 //ImGui::GetBackgroundDrawList()->AddRectFilled(textBGRect.Min, textBGRect.Max, ImGui::ColorConvertFloat4ToU32(consoleTextColour));
-                                const ImVec2 endCursorPos = ImGui::GetCursorScreenPos();
+                                //const ImVec2 endCursorPos = ImGui::GetCursorScreenPos();
 
                                 //ImGui::SetCursorScreenPos(textCursorPos);
 
                                 const ConsoleMessageColour messageColour = GetMesageColour(message);
                                 ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(messageColour.r, messageColour.g, messageColour.b, messageColour.a));
-                                ImGui::TextWrapped(message.Message.data());
+                                ImGui::TextWrapped("%s", message.Message.data());
                                 ImGui::PopStyleColor();
                                 ImGui::Separator();
 
@@ -176,7 +178,7 @@ namespace Insight
                     const ConsoleMessage& message = m_consoleMessages[messageIndex];
                     if (!message.Message.empty())
                     {
-                        ImGui::Text(message.Message.data());
+                        ImGui::Text("%s", message.Message.data());
                     }
                 }
 

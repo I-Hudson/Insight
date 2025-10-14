@@ -5,7 +5,7 @@
 
 void RemoveWhilteSpaces(std::string& str)
 {
-	auto a = std::remove_if(str.begin(), str.end(), isspace);
+	IS_UNUSED(std::remove_if(str.begin(), str.end(), isspace));
 }
 
 void ToLower(std::string& str)

@@ -6,7 +6,7 @@ namespace Insight
 {
 	namespace Algorithm
 	{
-		constexpr static uint32_t const g_hashSeed = 'EE8';
+		constexpr static uint32_t const g_hashSeed = static_cast<uint32_t>('EE8');
 
 		u32 GetHash32(const char* cStr, u64 length)
 		{

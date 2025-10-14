@@ -687,7 +687,7 @@ namespace Insight
 			{
 				return nullptr;
 			}
-			void* procAddress = GetProcAddress(reinterpret_cast<HMODULE>(library), functionName);
+			void* procAddress = static_cast<void*>(GetProcAddress(reinterpret_cast<HMODULE>(library), functionName));
 			return procAddress;
 		}
 
@@ -828,7 +828,7 @@ namespace Insight
 							NULL, NULL, NULL, NULL, NULL);
 					}
 					else
-						printf("InstallDriver: error code returned from CreateService is: %d", GetLastError());
+						printf("InstallDriver: error code returned from CreateService is: %u", static_cast<u32>(GetLastError()));
 				}
 				LOG_PROCESS_ERROR(hService);
 

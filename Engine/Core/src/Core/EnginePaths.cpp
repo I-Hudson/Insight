@@ -23,7 +23,7 @@ namespace Insight
         // Windows specific
         wchar_t szPath[MAX_PATH];
         GetModuleFileNameW(NULL, szPath, MAX_PATH);
-        m_executablePath = std::move(std::filesystem::path{ szPath }.parent_path().string()); // to finish the folder path with (back)slash
+        m_executablePath = std::filesystem::path{ szPath }.parent_path().string(); // to finish the folder path with (back)slash
         FileSystem::PathToUnix(m_executablePath);
 #endif
 

@@ -48,6 +48,7 @@ namespace Insight
 
 		struct IS_CORE Event
 		{
+			virtual ~Event() { }
 			virtual std::string GetName() = 0;
 			virtual EventType GetEventType() = 0;
 		};
@@ -83,8 +84,8 @@ namespace Insight
 		struct IS_CORE ProjectCreateEvent : public Event
 		{
 			ProjectCreateEvent() { }
-			ProjectCreateEvent(std::string projectPath)
-				: ProjectPath(std::move(ProjectPath))
+			ProjectCreateEvent(const std::string projectPath)
+				: ProjectPath(std::move(projectPath))
 			{ }
 
 			virtual std::string GetName() override { return "ProjectCreateEvent"; }
@@ -96,8 +97,8 @@ namespace Insight
 		struct IS_CORE ProjectOpenEvent : public Event
 		{
 			ProjectOpenEvent() { }
-			ProjectOpenEvent(std::string projectPath)
-				: ProjectPath(std::move(ProjectPath))
+			ProjectOpenEvent(const std::string projectPath)
+				: ProjectPath(std::move(projectPath))
 			{ }
 
 			virtual std::string GetName() override { return "ProjectOpenEvent"; }
@@ -109,8 +110,8 @@ namespace Insight
 		struct IS_CORE ProjectSaveEvent : public Event
 		{
 			ProjectSaveEvent() { }
-			ProjectSaveEvent(std::string projectPath)
-				: ProjectPath(std::move(ProjectPath))
+			ProjectSaveEvent(const std::string projectPath)
+				: ProjectPath(std::move(projectPath))
 			{ }
 
 			virtual std::string GetName() override { return "ProjectSaveEvent"; }
@@ -122,8 +123,8 @@ namespace Insight
 		struct IS_CORE ProjectCloseEvent : public Event
 		{
 			ProjectCloseEvent() { }
-			ProjectCloseEvent(std::string projectPath)
-				: ProjectPath(std::move(ProjectPath))
+			ProjectCloseEvent(const std::string projectPath)
+				: ProjectPath(std::move(projectPath))
 			{ }
 
 			virtual std::string GetName() override { return "ProjectCloseEvent"; }
