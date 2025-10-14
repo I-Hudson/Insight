@@ -5,10 +5,7 @@
 #include "Core/Logger.h"
 #include "Core/Profiler.h"
 
-#ifdef TEST_ENABLED
-#define DOCTEST_CONFIG_IMPLEMENTATION_IN_DLL
-#include "doctest.h"
-#endif 
+#include "Core/Testing.h"
 
 extern Insight::App::Engine* CreateApplication();
 

@@ -126,7 +126,7 @@ workspace "InsightTools"
             "cppwinrt_fast_forwarder.lib",
         }
 
-    filter { "system:Windows", "configurations:Debug" or "configurations:Testing" }
+    filter { "system:Windows", "configurations:Debug or configurations:Testing" }
         ignoredefaultlibraries
         {
             "libcmt.lib",

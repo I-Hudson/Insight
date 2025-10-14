@@ -2,7 +2,7 @@
 local InsightPlatforms = { }
 
 function InsightPlatforms.All()
-    filter { "platforms:Win64" or "platforms:UWP" }
+    filter { "platforms:Win64 or platforms:UWP" }
         toolset("msc-v145")
         --toolset("clang")
         defines
@@ -43,7 +43,7 @@ function InsightPlatforms.All()
             "Comctl32.lib",
         }
         
-    filter { "platforms:Win64", "configurations:Debug" or "configurations:Testing" }
+    filter { "platforms:Win64", "configurations:Debug or configurations:Testing" }
         links
         {
             "spdlogd.lib",

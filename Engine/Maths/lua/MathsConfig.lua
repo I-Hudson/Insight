@@ -56,6 +56,10 @@ function MathsConfig.FilterConfigurations()
     CommonConfig.FilterConfigurations()
 
     filter "configurations:Testing"
+    defines
+    {
+        "GLM_ENABLE_EXPERIMENTAL",
+    }
     includedirs
     {
         "../../vendor/glm",

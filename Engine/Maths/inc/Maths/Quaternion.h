@@ -12,7 +12,7 @@
 #endif
 #if defined(IS_MATHS_GLM) || defined(IS_MATHS_CONSTRUCTOR_GLM) || defined(IS_TESTING)
 #include <glm/glm.hpp>
-#endif 
+#endif
 
 namespace Insight
 {

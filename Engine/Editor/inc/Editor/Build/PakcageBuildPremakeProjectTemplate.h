@@ -308,7 +308,7 @@ namespace Insight::Editor
             insightPath .. "/vendor/D3D12MemoryAllocator/include/D3D12MemAlloc.h",
         }
 
-    filter { "system:Windows", "configurations:Debug" or "configurations:Testing" }
+    filter { "system:Windows", "configurations:Debug or configurations:Testing" }
         ignoredefaultlibraries
         {
             "libcmt.lib",

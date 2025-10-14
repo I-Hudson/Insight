@@ -16,6 +16,7 @@
 #include "Core/Memory.h"
 #include "Core/ImGuiSystem.h"
 #include "Core/EnginePaths.h"
+#include "Core/Testing.h"
 
 #include "Graphics/Window.h"
 #include "Graphics/RenderContext.h"
@@ -122,8 +123,7 @@ namespace Insight
                         }
                     }
 
-                    Ref<Runtime::Asset> a = Runtime::AssetRegistry::Instance().LoadAsset("Main.1_Sponza_/NewSponza_Main_glTF_002.gltf");
-                    //Runtime::ResourceManager::Instance().LoadResourcesInFolder(projectInfo.GetContentPath(), true);
+                    Ref<Runtime::Asset> a = Runtime::AssetRegistry::Instance().LoadAsset("Models/pkg_a_curtains/gltf/../../../Models_2/Cube.gltf");
 
                     Runtime::AssetRegistry::Instance().SetDebugDirectories(projectInfo.GetIntermediatePath() + "/AssetMeta", projectInfo.GetContentPath());
 
@@ -257,3 +257,16 @@ Insight::App::Engine* CreateApplication()
 {
     return New<Insight::Editor::Editor, Insight::Core::MemoryAllocCategory::Editor>();
 }
+
+#if IS_TESTING
+TEST_INTERGRATION_TEST(Editor)
+{
+    TEST_CASE("Create Editor")
+    {
+        Insight::App::Engine* editor = CreateApplication();
+        CHECK(editor != nullptr);
+        Delete(editor);
+        CHECK(editor == nullptr);
+    }
+}
+#endif

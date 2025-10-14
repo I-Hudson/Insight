@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/norm.hpp>
 #include <doctest.h>
+
 namespace test
 {
 	using namespace Insight::Maths;

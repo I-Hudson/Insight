@@ -1,0 +1,5 @@
+#if TEST_ENABLED
+#define DOCTEST_CONFIG_IMPLEMENTATION_IN_DLL
+#define DOCTEST_CONFIG_IMPLEMENT
+#endif
+#include "Core/Testing.h"

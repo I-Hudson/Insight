@@ -158,7 +158,7 @@ project "InsightStandalone"
     }
     CommonConfig.PostBuildCopyLibraryToOutput()
 
-    filter { "system:Windows", "configurations:Debug" or "configurations:Testing" }
+    filter { "system:Windows", "configurations:Debug or configurations:Testing" }
     ignoredefaultlibraries
     {
         "libcmt.lib",
