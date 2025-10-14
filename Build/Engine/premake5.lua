@@ -129,6 +129,7 @@ group "Editor"
 
 group "Runtime"
     include "../../Engine/Core/Core.lua"
+    include "../../Engine/FileSystem/FileSystem.lua"
     include "../../Engine/Maths/Maths.lua"
     include "../../Engine/Physics/Physics.lua"
     include "../../Engine/Graphics/Graphics.lua"
