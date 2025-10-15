@@ -3,8 +3,7 @@
 #include "Editor/HotReload/HotReloadPremakeSolutionTemplate.h"
 #include "Editor/HotReload/HotReloadPremakeProjectTemplate.h"
 
-#include "Editor/HotReload/Operations/EditorWindowsOperation.h"
-#include "Editor/HotReload/Operations/ComponentsOperation.h"
+#include "Editor/HotReload/Operations/WorldsSerialiseOperation.h"
 
 #include "Editor/Premake/PremakeSolutionGenerator.h"
 
@@ -142,7 +141,15 @@ namespace Insight::Editor
     void HotReloadSystem::OnProjectOpened(Core::Event& e)
     {
         const Runtime::ProjectInfo& projectInfo = Runtime::ProjectSystem::Instance().GetProjectInfo();
-        LoadLibrary(GetLibraryPathFromProjectInfo(projectInfo));
+        const std::string libraryPath = GetLibraryPathFromProjectInfo(projectInfo);
+        if (FileSystem::Exists(libraryPath))
+        {
+            LoadLibrary(libraryPath);
+        }
+        else
+        {
+            Reload();
+        }
     }
 
     void HotReloadSystem::OnProjectClosed(Core::Event& e)
@@ -152,8 +159,9 @@ namespace Insight::Editor
 
     void HotReloadSystem::RegisterAllHotReloadOperations()
     {
-        m_operations.push_back(::New<EditorWindowsOperation>());
-        m_operations.push_back(::New<ComponentsOperation>());
+        //m_operations.push_back(::New<EditorWindowsOperation>());
+        //m_operations.push_back(::New<ComponentsOperation>());
+        m_operations.push_back(::New<WorldsSerialiseOperation>());
     }
 
     std::string HotReloadSystem::GetLibraryPathFromProjectInfo(const Runtime::ProjectInfo& projectInfo) const

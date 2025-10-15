@@ -95,6 +95,7 @@ namespace Insight
             void SetDirectoryFromParent(u32 parentIndex);
 
             void DrawGeneralMenu();
+            void DrawCreateClassNamePopup();
 
         private:
             std::unordered_map<ContentWindowThumbnailType, Ref<Runtime::TextureAsset>> m_thumbnailToTexture;
@@ -116,6 +117,7 @@ namespace Insight
             bool m_showCreateResourceWindow = false;
 
             bool m_showGeneralMenu = false;
+            bool m_showCreateClassNamePopup = false;
 
             friend IContentThumbnail;
         };

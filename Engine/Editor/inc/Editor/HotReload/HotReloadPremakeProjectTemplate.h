@@ -48,6 +48,8 @@ namespace Insight::Editor
         "%{IncludeDirs.InsightRuntime}",
         "%{IncludeDirs.InsightEditor}",
 
+        "Intermediate/CodeFiles/Generated",
+
         "%{IncludeDirs.glfw}",
         --"%{IncludeDirs.glm}",
         "%{IncludeDirs.spdlog}",
@@ -83,6 +85,11 @@ namespace Insight::Editor
 
         "imgui.lib",
         --"glm.lib",
+    }
+
+    buildoptions
+    {
+        "/utf-8",
     }
 
     if (profileTool == "pix") then

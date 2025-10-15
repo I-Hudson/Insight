@@ -143,7 +143,7 @@ namespace Insight
             //SetEditorStyle();
 
             std::string windowTitle = "Insight Editor";
-#ifdef IS_DEBUG
+#if IS_DEBUG
             windowTitle += " Debug ";
 #elif IS_RELEASE
             windowTitle += " Release ";

@@ -104,6 +104,7 @@ workspace "--SOLUTION_NAME"
         "GLM_FORCE_DEPTH_ZERO_TO_ONE",
 
         "REFLECT_TYPE_INFO_ENABLED",
+        "REFLECT_DLL_IMPORT",
 
         "IS_PLATFORM_X64",
         "IS_MEMORY_TRACKING",

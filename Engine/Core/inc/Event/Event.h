@@ -21,6 +21,8 @@ namespace Insight
 			WorldLoad,
 			WorldDestroy,
 
+			HotReloadStarted,
+			HotReloadFinished,
 			HotReloadLibraryUnLoaded,
 			HotReloadLibraryLoaded,
 
@@ -41,6 +43,8 @@ namespace Insight
 			true,	// WorldLoad
 			true,	// WorldDestroy
 
+			false,	// HotReloadStarted
+			false,	// HotReloadFinished
 			false,	// HotReloadLibraryUnLoaded
 			false,	// HotReloadLibraryLoaded
 		};
@@ -131,6 +135,34 @@ namespace Insight
 			virtual EventType GetEventType() override { return EventType::Project_Close; }
 
 			std::string ProjectPath;
+		};
+
+		struct IS_CORE HotReloadStartedEvent : public Event
+		{
+			HotReloadStartedEvent() { }
+			virtual std::string GetName() override { return "HotReloadStartedEvent"; }
+			virtual EventType GetEventType() override { return EventType::HotReloadStarted; }
+		};
+
+		struct IS_CORE HotReloadFinishedEvent : public Event
+		{
+			HotReloadFinishedEvent() {}
+			virtual std::string GetName() override { return "HotReloadFinishedEvent"; }
+			virtual EventType GetEventType() override { return EventType::HotReloadFinished; }
+		};
+
+		struct IS_CORE HotReloadUnloadedEvent : public Event
+		{
+			HotReloadUnloadedEvent() {}
+			virtual std::string GetName() override { return "HotReloadUnloadedEvent"; }
+			virtual EventType GetEventType() override { return EventType::HotReloadLibraryUnLoaded; }
+		};
+
+		struct IS_CORE HotReloadLoadedEvent : public Event
+		{
+			HotReloadLoadedEvent() {}
+			virtual std::string GetName() override { return "HotReloadLoadedEvent"; }
+			virtual EventType GetEventType() override { return EventType::HotReloadLibraryLoaded; }
 		};
 	}
 }

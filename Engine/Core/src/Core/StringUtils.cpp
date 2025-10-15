@@ -90,3 +90,24 @@ std::vector<std::string_view> SplitString(std::string_view str, const char split
 	}
 	return strings;
 }
+
+void ReplaceAll(std::string& str, const std::string& oldVal, const std::string& newVal)
+{
+	std::string newString;
+	newString.reserve(str.length());  // avoids a few memory allocations
+
+	std::string::size_type lastPos = 0;
+	std::string::size_type findPos;
+
+	while (std::string::npos != (findPos = str.find(oldVal, lastPos)))
+	{
+		newString.append(str, lastPos, findPos - lastPos);
+		newString += newVal;
+		lastPos = findPos + oldVal.length();
+	}
+
+	// Care for the rest after last occurrence
+	newString.append(str, lastPos, str.length() - lastPos);
+
+	str.swap(newString);
+}
