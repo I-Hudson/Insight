@@ -391,26 +391,30 @@ namespace Insight
 				// Validate and clean up
 				| aiProcess_ValidateDataStructure			/// Validates the imported scene data structure. This makes sure that all indices are valid, all animations and bones are linked correctly, all material references are correct
 				| aiProcess_PopulateArmatureData
-				| aiProcess_Triangulate					/// Triangulates all faces of all meshes
+				| aiProcess_Triangulate						/// Triangulates all faces of all meshes
 				//| aiProcess_SortByPType					/// Splits meshes with more than one primitive type in homogeneous sub-meshes.
+				| aiProcess_LimitBoneWeights
 
-				| aiProcess_MakeLeftHanded				/// DirectX style.
-				| aiProcess_FlipUVs						/// DirectX style.
-				| aiProcess_FlipWindingOrder			/// DirectX style.
+				| aiProcess_MakeLeftHanded					/// DirectX style.
+				| aiProcess_FlipUVs							/// DirectX style.
+				| aiProcess_FlipWindingOrder				/// DirectX style.
 
-				| aiProcess_CalcTangentSpace			/// Calculates the tangents and bitangents for the imported meshes.
-				| aiProcess_GenSmoothNormals			/// Ignored if the mesh already has normal.
-				| aiProcess_GenUVCoords					/// Converts non-UV mappings (such as spherical or cylindrical mapping) to proper texture coordinate channels.
+				| aiProcess_CalcTangentSpace				/// Calculates the tangents and bitangents for the imported meshes.
+				| aiProcess_GenSmoothNormals				/// Ignored if the mesh already has normal.
+				| aiProcess_GenUVCoords						/// Converts non-UV mappings (such as spherical or cylindrical mapping) to proper texture coordinate channels.
 				
-				//| aiProcess_GenBoundingBoxes			//
+				| aiProcess_GenBoundingBoxes				//
 
-				//| aiProcess_RemoveRedundantMaterials	/// Searches for redundant/unreferenced materials and removes them
-				| aiProcess_JoinIdenticalVertices		/// Triangulates all faces of all meshes
+				//| aiProcess_RemoveRedundantMaterials		/// Searches for redundant/unreferenced materials and removes them
+				| aiProcess_JoinIdenticalVertices			/// Triangulates all faces of all meshes
 				//| aiProcess_PopulateArmatureData
-				//| aiProcess_FindDegenerates			/// Convert degenerate primitives to proper lines or points.
-				//| aiProcess_FindInvalidData			/// This step searches all meshes for invalid data, such as zeroed normal vectors or invalid UV coords and removes / fixes them
-				//| aiProcess_FindInstances				/// This step searches for duplicate meshes and replaces them with references to the first mesh
+				//| aiProcess_FindDegenerates				/// Convert degenerate primitives to proper lines or points.
+				//| aiProcess_FindInvalidData				/// This step searches all meshes for invalid data, such as zeroed normal vectors or invalid UV coords and removes / fixes them
+				//| aiProcess_FindInstances					/// This step searches for duplicate meshes and replaces them with references to the first mesh
 				;
+
+			importer.SetPropertyBool(AI_CONFIG_IMPORT_FBX_PRESERVE_PIVOTS, false);
+			importer.SetPropertyInteger(AI_CONFIG_PP_LBW_MAX_WEIGHTS, 4);
 
 			const aiScene* scene = importer.ReadFile(path.data(), importerFlags);
 			importer.SetIOHandler(nullptr);

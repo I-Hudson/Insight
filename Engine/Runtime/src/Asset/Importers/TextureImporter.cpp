@@ -27,7 +27,7 @@ namespace Insight
     namespace Runtime
     {
         TextureImporter::TextureImporter()
-            : IAssetImporter({ ".png", ".jpeg", ".jpg", ".qoi" })
+            : IAssetImporter({ ".png", ".jpeg", ".jpg", ".qoi", ".tga" })
         { }
 
         Ref<Asset> TextureImporter::CreateAsset(const AssetInfo* assetInfo) const
