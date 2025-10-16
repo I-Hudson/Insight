@@ -2,6 +2,7 @@
 #include "Editor/EditorWindows/EditorWindowManager.h"
 
 #include "Editor/Asset/AssetInspectorWindow.h"
+#include "Editor/HotReload/HotReloadSystem.h"
 
 #include "Editor/EditorGUI.h"
 #include "Editor/EditorAssetRegistry.h"
@@ -984,71 +985,33 @@ namespace Insight::Editor
             if (ImGui::Button("Create") && !className.empty())
             {
                 const std::string hFilePath = m_currentDirectory + "/" + className + ".h";
-                std::string componentFileHeaderTemplate =
-                    R"(#pragma once
-
-#include "Runtime/Defines.h"
-
-#include "ECS/Entity.h"
-
-#include <Reflect/Reflect.h>
-
-#include "Generated/COMPONENT_TYPE_NAME_reflect_generated.h"
-
-namespace Insight
-{
-	namespace ECS
-	{
-		REFLECT_CLASS();
-		class COMPONENT_TYPE_NAME : public Component
-		{
-			REFLECT_GENERATED_BODY();
-		public:
-			IS_COMPONENT(COMPONENT_TYPE_NAME);
-
-			COMPONENT_TYPE_NAME();
-			virtual ~COMPONENT_TYPE_NAME() override;
-
-			IS_SERIALISABLE_H(COMPONENT_TYPE_NAME);
-
-		private:
-		};
-	}
-	OBJECT_SERIALISER(ECS::COMPONENT_TYPE_NAME, 1,
-		SERIALISE_BASE(ECS::Component, 1, 0)
-	);
-})";
-                ReplaceAll(componentFileHeaderTemplate, "COMPONENT_TYPE_NAME", className);
-                FileSystem::SaveToFile((Byte*)componentFileHeaderTemplate.data(), componentFileHeaderTemplate.size(), hFilePath, FileType::Text);
-
                 const std::string cppFilePath = m_currentDirectory + "/" + className + ".cpp";
-                const std::string headerFileRelativePathToContentFolder 
+                
+                const std::string headerTemplatePath = EnginePaths::GetResourcePath() + "CodeGeneration/GameTemplateHeaderFile.txt";
+                const std::string sourceTemplatePath = EnginePaths::GetResourcePath() + "CodeGeneration/GameTemplateSourceFile.txt";
+
+                ASSERT(FileSystem::Exists(headerTemplatePath) && FileSystem::Exists(sourceTemplatePath));
+
+                const std::vector<Byte> templateHeaderFileData = FileSystem::ReadFromFile(headerTemplatePath);
+                const std::vector<Byte> templateSourceFileData = FileSystem::ReadFromFile(sourceTemplatePath);
+
+                std::string templateHeaderFile(templateHeaderFileData.begin(), templateHeaderFileData.end());
+                std::string templateSourceFile(templateSourceFileData.begin(), templateSourceFileData.end());
+
+                const std::string headerFileRelativePathToContentFolder
                     = FileSystem::GetRelativePath(FileSystem::GetParentPath(hFilePath), Runtime::ProjectSystem::Instance().GetProjectInfo().GetContentPath());
-                std::string componentFileSourceTemplate =
-R"(#include "RELATIVE_PATH/COMPONENT_TYPE_NAME.h"
 
-namespace Insight
-{
-	namespace ECS
-	{
-		COMPONENT_TYPE_NAME::COMPONENT_TYPE_NAME()
-		{
-		}
+                ReplaceAll(templateHeaderFile, "COMPONENT_TYPE_NAME", className);
+                ReplaceAll(templateSourceFile, "RELATIVE_PATH", headerFileRelativePathToContentFolder);
+                ReplaceAll(templateSourceFile, "COMPONENT_TYPE_NAME", className);
 
-		COMPONENT_TYPE_NAME::~COMPONENT_TYPE_NAME()
-		{
-		}
-
-		IS_SERIALISABLE_CPP(COMPONENT_TYPE_NAME);
-	}
-})";
-
-                ReplaceAll(componentFileSourceTemplate, "RELATIVE_PATH", headerFileRelativePathToContentFolder);
-                ReplaceAll(componentFileSourceTemplate, "COMPONENT_TYPE_NAME", className);
-                FileSystem::SaveToFile((Byte*)componentFileSourceTemplate.data(), componentFileSourceTemplate.size(), cppFilePath, FileType::Text);
+                FileSystem::SaveToFile((Byte*)templateHeaderFile.data(), templateHeaderFile.size(), hFilePath, FileType::Text);
+                FileSystem::SaveToFile((Byte*)templateSourceFile.data(), templateSourceFile.size(), cppFilePath, FileType::Text);
 
                 className.clear();
                 m_showCreateClassNamePopup = false;
+
+                HotReloadSystem::Instance().GenerateProjectSolution();
             }
             
             ImGui::EndPopup();

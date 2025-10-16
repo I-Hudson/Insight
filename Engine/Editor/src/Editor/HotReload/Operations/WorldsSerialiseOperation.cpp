@@ -1,9 +1,10 @@
 #include "Editor/HotReload/Operations/WorldsSerialiseOperation.h"
 #include "Editor/HotReload/HotReloadSystem.h"
 
-#include "Serialisation/Serialisers/BinarySerialiser.h"
+#include "Serialisation/Serialisers/JsonSerialiser.h"
 #include "World/WorldSystem.h"
 
+#include "FileSystem/FileSystem.h"
 
 namespace Insight::Editor
 {
@@ -22,10 +23,13 @@ namespace Insight::Editor
 	{
 		TObjectPtr<Runtime::World> activeWorld = Runtime::WorldSystem::Instance().GetActiveWorld();
 
-		Serialisation::BinarySerialiser binarySerialiser(false);
+		Serialisation::JsonSerialiser binarySerialiser(false);
 		activeWorld->Serialise(&binarySerialiser);
 
 		m_activeWorldSerialisedData = binarySerialiser.GetSerialisedData();
+		const Runtime::ProjectInfo& projectInfo = Runtime::ProjectSystem::Instance().GetProjectInfo();
+		
+		FileSystem::SaveToFile(m_activeWorldSerialisedData, projectInfo.GetIntermediatePath() + "/HotReloadTemp/SerialisedWorld" + Runtime::World::c_FileExtension, true);
 
 		activeWorld->Destroy();
 	}
@@ -34,9 +38,13 @@ namespace Insight::Editor
 	{
 		TObjectPtr<Runtime::World> activeWorld = Runtime::WorldSystem::Instance().GetActiveWorld();
 
-		Serialisation::BinarySerialiser binarySerialiser(true);
-		binarySerialiser.Deserialise(m_activeWorldSerialisedData);
+		if (!m_activeWorldSerialisedData.empty())
+		{
+			Serialisation::JsonSerialiser binarySerialiser(true);
+			binarySerialiser.Deserialise(m_activeWorldSerialisedData);
+			activeWorld->Deserialise(&binarySerialiser);
+		}
+
 		Reset();
-		activeWorld->Deserialise(&binarySerialiser);
 	}
 }

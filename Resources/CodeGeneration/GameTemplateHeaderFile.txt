@@ -1,0 +1,30 @@
+#pragma once
+
+#include "ECS/Entity.h"
+
+#include "Generated/COMPONENT_TYPE_NAME_reflect_generated.h"
+
+namespace Insight
+{
+	namespace ECS
+	{
+		REFLECT_CLASS();
+		class COMPONENT_TYPE_NAME : public Component
+		{
+			REFLECT_GENERATED_BODY();
+		public:
+			IS_COMPONENT(COMPONENT_TYPE_NAME);
+
+			COMPONENT_TYPE_NAME();
+			virtual ~COMPONENT_TYPE_NAME() override;
+
+			IS_SERIALISABLE_H(COMPONENT_TYPE_NAME);
+
+		private:
+        
+		};
+	}
+	OBJECT_SERIALISER(ECS::COMPONENT_TYPE_NAME, 1,
+		SERIALISE_BASE(ECS::Component, 1, 0)
+	);
+}
