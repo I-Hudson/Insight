@@ -36,4 +36,4 @@ project "Insight_FileSystem"
     FileSystemConfig.FilterConfigurations()
     FileSystemConfig.FilterPlatforms()
 
-    CommonConfig.PostBuildCopyLibraryToOutput()
+    CommonConfig.PostBuildCopyLibraryToOutput(output_project_subfix, outputdir, output_executable)

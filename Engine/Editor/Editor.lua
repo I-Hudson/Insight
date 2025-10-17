@@ -15,6 +15,7 @@ project "Insight_Editor"
     dependson 
     {
         "Insight_Core",
+        "Insight_FileSystem",
         "Insight_Maths",
         "Insight_Physics",
         "Insight_Input",

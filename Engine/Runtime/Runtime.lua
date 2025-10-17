@@ -13,6 +13,7 @@ project "Insight_Runtime"
     dependson 
     { 
         "Insight_Core",
+        "Insight_FileSystem",
         "Insight_Maths",
         "Insight_Physics",
         "Insight_Graphics",

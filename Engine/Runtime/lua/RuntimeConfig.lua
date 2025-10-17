@@ -24,6 +24,7 @@ function RuntimeConfig.IncludeDirs()
     {
         "inc",
         "%{IncludeDirs.InsightCore}",
+        "%{IncludeDirs.InsightFileSystem}",
         "%{IncludeDirs.InsightMaths}",
         "%{IncludeDirs.InsightPhysics}",
         "%{IncludeDirs.InsightGraphics}",
@@ -59,6 +60,7 @@ function RuntimeConfig.LibraryLinks()
     links
     {
         "Insight_Core" .. output_project_subfix .. ".lib",
+        "Insight_FileSystem" .. output_project_subfix .. ".lib",
         "Insight_Maths" .. output_project_subfix .. ".lib",
         "Insight_Physics" .. output_project_subfix .. ".lib",
         "Insight_Graphics" .. output_project_subfix .. ".lib",

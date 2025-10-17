@@ -15,6 +15,7 @@ project "Insight_Physics"
     dependson 
     { 
         "Insight_Core",
+        "Insight_FileSystem",
         "Insight_Maths",
     }
 
