@@ -70,6 +70,7 @@ namespace Insight
 			// Systems
 			m_systemRegistry.RegisterSystem(&m_assetRegistry);
 
+			m_systemRegistry.RegisterSystem(&m_fileMangerSystem);
 			m_systemRegistry.RegisterSystem(&m_animationSystem);
 			m_systemRegistry.RegisterSystem(&m_audioSystem);
 			m_systemRegistry.RegisterSystem(&m_taskSystem);
@@ -80,6 +81,7 @@ namespace Insight
 			m_systemRegistry.RegisterSystem(&m_worldSystem);
 			m_systemRegistry.RegisterSystem(&m_projectSystem);
 
+			m_fileMangerSystem.Initialise();
 			m_imguiSystem.Initialise();
 			ImGui::SetCurrentContext(m_imguiSystem.GetCurrentContext());
 
@@ -279,6 +281,8 @@ namespace Insight
 
 			m_inputSystem.Shutdown();
 
+			m_fileMangerSystem.Shutdown();
+			
 			m_systemRegistry.VerifyAllSystemsStates(Core::SystemStates::Not_Initialised);
 
 			m_systemRegistry.UnregisterSystem(&m_worldSystem);
@@ -291,6 +295,7 @@ namespace Insight
 			m_systemRegistry.UnregisterSystem(&m_audioSystem);
 			m_systemRegistry.UnregisterSystem(&m_animationSystem);
 			m_systemRegistry.UnregisterSystem(&m_assetRegistry);
+			m_systemRegistry.UnregisterSystem(&m_fileMangerSystem);
 
 			ASSERT(m_systemRegistry.IsEmpty());
 

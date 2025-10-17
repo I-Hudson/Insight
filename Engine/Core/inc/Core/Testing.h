@@ -1,7 +1,7 @@
 #pragma once
 
 #if TEST_ENABLED
-#include "doctest.h"
+//#include "doctest.h"
 
 #define TEST_INTERGRATION_TEST(name)\
 TEST_SUITE("INTERGRATION" * doctest::description(#name))

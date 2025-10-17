@@ -24,6 +24,8 @@ namespace Insight
 	public:
 		IFile() = delete;
 		IFile(const std::string& path) : m_path(path)
+		{ }
+		virtual ~IFile() override 
 		{
 		}
 

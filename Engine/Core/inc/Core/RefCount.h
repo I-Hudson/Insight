@@ -19,7 +19,7 @@ namespace Insight
             RefCount();
             RefCount(const RefCount& other);
             RefCount(RefCount&& other);
-            ~RefCount();
+            virtual ~RefCount() override;
 
             RefCount operator=(const RefCount& other) const;
             RefCount operator=(RefCount&& other);

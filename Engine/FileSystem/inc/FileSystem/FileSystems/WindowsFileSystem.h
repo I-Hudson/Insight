@@ -14,6 +14,9 @@ namespace Insight
 		{
 		}
 
+		virtual const char* GetTypeName() const { return GetPath().c_str(); }
+
+
 	private:
 		void* m_win32Handle = nullptr;
 
@@ -24,14 +27,15 @@ namespace Insight
 	{
 	public:
 		WindowsFileSystem() = default;
-		virtual ~WindowsFileSystem() = default;
+		virtual ~WindowsFileSystem();
 
 		// { IFileSystem
 		virtual bool CreateDirectory(const std::string& path) const override;
 		virtual bool FileExists(const std::string& path) const override;
 
 	protected:
-		virtual Ref<IFile> OpenFileHandle(const std::string& path, const bool openFile) override;
+		virtual Ref<IFile> CreateFileHandle(const std::string& path) override;
+		virtual void OpenFileHandle(IFile* file) override;
 		virtual void CloseFileHandle(Ref<IFile>& file) override;
 		virtual bool DeleteFileHandle(IFile* file) override;
 		// }

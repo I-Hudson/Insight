@@ -13,7 +13,9 @@ namespace Insight
 	{
 	public:
 		IFileSystem() = default;
-		virtual ~IFileSystem() {}
+		virtual ~IFileSystem();
+
+		void Shutdown();
 
 		Ref<IFile> OpenFile(std::string path, const bool openFile = true);
 		void CloseFile(Ref<IFile>& file);
@@ -26,7 +28,8 @@ namespace Insight
 		virtual bool FileExists(const std::string& path) const = 0;
 
 	protected:
-		virtual Ref<IFile> OpenFileHandle(const std::string& path, const bool openFile) = 0;
+		virtual Ref<IFile> CreateFileHandle(const std::string& path) = 0;
+		virtual void OpenFileHandle(IFile* file) = 0;
 		virtual void CloseFileHandle(Ref<IFile>& file) = 0;
 		virtual bool DeleteFileHandle(IFile* file) = 0;
 
@@ -37,6 +40,4 @@ namespace Insight
 		Threading::SpinLock m_openedFilesLock;
 		std::unordered_map<std::string, Ref<IFile>> m_openedFiles;
 	};
-
-	IS_FILESYSTEM IFileSystem* GetNativeFileSystem();
 }

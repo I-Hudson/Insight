@@ -10,6 +10,7 @@
 
 #include "Runtime/RuntimeSettings.h"
 
+#include "FileSystem/FileManagerSystem.h"
 #include "Asset/AssetRegistry.h"
 #include "Animation/AnimationSystem.h"
 #include "Audio/AudioSystem.h"
@@ -83,6 +84,7 @@ namespace Insight
 			// Systems
 			Core::SystemRegistry m_systemRegistry;
 
+			FileManagerSystem m_fileMangerSystem;
 			Runtime::AssetRegistry m_assetRegistry;
 			Runtime::AnimationSystem m_animationSystem;
 			Runtime::AudioSystem m_audioSystem;

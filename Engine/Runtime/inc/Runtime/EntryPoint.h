@@ -5,7 +5,10 @@
 #include "Core/Logger.h"
 #include "Core/Profiler.h"
 
-#include "Core/Testing.h"
+#ifdef IS_TESTING
+#define DOCTEST_CONFIG_IMPLEMENTATION_IN_DLL
+#include "doctest.h"
+#endif
 
 extern Insight::App::Engine* CreateApplication();
 
@@ -19,16 +22,16 @@ int main(int argc, char** argv)
 	Insight::Core::MemoryTracker::Instance().Initialise();
 	Insight::Core::Logger::Init();
 
-#ifdef TEST_ENABLED
-	const char* args[] = { "-d", "--order-by=suite", "--no-breaks=false", "--reporters=console" };
-	doctest::Context context = doctest::Context(ARRAY_COUNT(args), args);
-	const int result = context.run();
-	return result;
-#else
 	Insight::App::Engine* app = CreateApplication();
 	if (app->Init(argc, argv))
 	{
+#ifdef TEST_ENABLED
+		const char* args[] = { "-d", "--order-by=suite", "--no-breaks=false", "--reporters=console" };
+		doctest::Context context = doctest::Context(ARRAY_COUNT(args), args);
+		const int result = context.run();
+#else
 		app->Update();
+#endif
 	}
 	app->Destroy();
 	DeleteTracked(app);
@@ -36,5 +39,4 @@ int main(int argc, char** argv)
 	Insight::Core::ShutdownProfiler();
 	///Insight::Core::MemoryTracker::Instance().Destroy();
 	return 0;
-#endif
 }

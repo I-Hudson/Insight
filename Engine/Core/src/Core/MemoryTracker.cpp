@@ -13,8 +13,8 @@
 #include <charconv>
 
 
-#ifdef IS_PLATFORM_WINDOWS
-#ifndef WIN32_LEAN_AND_MEAN
+#if IS_PLATFORM_WINDOWS
+#if !WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN             /// Exclude rarely-used stuff from Windows headers.
 #endif
 #include <Windows.h>

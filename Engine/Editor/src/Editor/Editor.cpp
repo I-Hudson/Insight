@@ -21,7 +21,7 @@
 #include "Graphics/Window.h"
 #include "Graphics/RenderContext.h"
 
-#include "FileSystem/FileSystems/IFileSystem.h"
+#include "FileSystem/FileManagerSystem.h"
 
 #include "Serialisation/Archive.h"
 
@@ -64,11 +64,14 @@ namespace Insight
         {
             IS_PROFILE_FUNCTION();
 
-            IFileSystem* fileSystem = GetNativeFileSystem();
+            IFileSystem* fileSystem = FileManagerSystem::Instance().GetNativeFileSystem();
             fileSystem->CreateDirectory("TestFolder");
             Ref<IFile> file = fileSystem->OpenFile("TestFolder/TestFile.txt");
             fileSystem->CloseFile(file);
             fileSystem->DeleteFile(file);
+
+            Ref<IFile> file1 = fileSystem->OpenFile("TestFolder/TestFile.txt");
+
 
             const std::string engineResources = EnginePaths::GetInstallDirectory() + "/EngineResources.zip";
             if (FileSystem::Exists(engineResources))
@@ -265,18 +268,3 @@ Insight::App::Engine* CreateApplication()
 {
     return New<Insight::Editor::Editor, Insight::Core::MemoryAllocCategory::Editor>();
 }
-
-#if IS_TESTING
-#define DOCTEST_CONFIG_IMPLEMENTATION_IN_DLL
-//#define DOCTEST_CONFIG_IMPLEMENT
-TEST_INTERGRATION_TEST(Editor)
-{
-    TEST_CASE("Create Editor")
-    {
-        Insight::App::Engine* editor = CreateApplication();
-        CHECK(editor != nullptr);
-        Delete(editor);
-        CHECK(editor == nullptr);
-    }
-}
-#endif

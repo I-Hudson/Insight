@@ -2,20 +2,23 @@
 #include "FileSystem/FileSystems/WindowsFileSystem.h"
 
 #include "Core/Profiler.h"
+#include "Core/Asserts.h"
 
 namespace Insight
 {
-	static IFileSystem* g_FileSystem = nullptr;
-
-	IFileSystem* GetNativeFileSystem()
+	IFileSystem::~IFileSystem()
 	{
-		if (!g_FileSystem)
+		ASSERT(m_openedFiles.empty());
+	}
+
+	void IFileSystem::Shutdown()
+	{
+		for (auto& [path, file] : m_openedFiles)
 		{
-#if IS_PLATFORM_WINDOWS
-			g_FileSystem = New<WindowsFileSystem>();
-#endif
+			CloseFile(file);
 		}
-		return g_FileSystem;
+
+		m_openedFiles.clear();
 	}
 
 	Ref<IFile> IFileSystem::OpenFile(std::string path, const bool openFile)
@@ -23,16 +26,16 @@ namespace Insight
 		PathToFileSystemPath(path);
 		Ref<IFile> file = GetOpenedFile(path);
 
-		if (file)
+		if (!file)
 		{
-			return file;
-		}
-
-		file = OpenFileHandle(path, openFile);
-
-		{
+			file = CreateFileHandle(path);
 			Threading::ScopedLock lock(m_openedFilesLock);
 			m_openedFiles[path] = file;
+		}
+
+		if (openFile)
+		{
+			OpenFileHandle(file.Ptr());
 		}
 
 		return file;
@@ -40,7 +43,7 @@ namespace Insight
 
 	void IFileSystem::CloseFile(Ref<IFile>& file)
 	{
-		if (!file)
+		if (!file || file->GetStatus() != FileStatus::Opened)
 		{
 			return;
 		}

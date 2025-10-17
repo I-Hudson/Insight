@@ -9,6 +9,10 @@
 
 namespace Insight
 {
+	WindowsFileSystem::~WindowsFileSystem()
+	{
+	}
+
 	bool WindowsFileSystem::CreateDirectory(const std::string& path) const
 	{
 		return CreateDirectoryA(path.c_str(), NULL);
@@ -21,49 +25,47 @@ namespace Insight
 				!(attrib & FILE_ATTRIBUTE_DIRECTORY));
 	}
 
-	Ref<IFile> WindowsFileSystem::OpenFileHandle(const std::string& path, const bool openFile)
+	Ref<IFile> WindowsFileSystem::CreateFileHandle(const std::string& path)
 	{
+		return Ref<WindowsFile>(::New<WindowsFile>(path));
+	}
 
-		HANDLE win32Handle = INVALID_HANDLE_VALUE;
-		if (openFile)
+	void WindowsFileSystem::OpenFileHandle(IFile* file)
+	{
+		WindowsFile* winFile = static_cast<WindowsFile*>(file);
+
+		HANDLE win32Handle = CreateFileA(file->GetPath().c_str()
+			, GENERIC_READ | GENERIC_WRITE
+			, FILE_SHARE_READ | FILE_SHARE_WRITE
+			, NULL
+			, OPEN_ALWAYS
+			, FILE_ATTRIBUTE_NORMAL
+			, NULL);
+		
+		if (win32Handle == INVALID_HANDLE_VALUE)
 		{
-			win32Handle = CreateFileA(path.c_str()
-				, GENERIC_READ | GENERIC_WRITE
-				, FILE_SHARE_READ | FILE_SHARE_WRITE
-				, NULL
-				, OPEN_ALWAYS
-				, FILE_ATTRIBUTE_NORMAL
-				, NULL);
+			const DWORD errorMessageID = GetLastError();
+			LPSTR messageBuffer = nullptr;
 
-			if (win32Handle == INVALID_HANDLE_VALUE)
-			{
-				const DWORD errorMessageID = GetLastError();
-				LPSTR messageBuffer = nullptr;
+			//Ask Win32 to give us the string version of that message ID.
+			//The parameters we pass in, tell Win32 to create the buffer that holds the message for us (because we don't yet know how long the message string will be).
+			size_t size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+										 NULL, errorMessageID, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, NULL);
 
-				//Ask Win32 to give us the string version of that message ID.
-				//The parameters we pass in, tell Win32 to create the buffer that holds the message for us (because we don't yet know how long the message string will be).
-				size_t size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-											 NULL, errorMessageID, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, NULL);
+			//Copy the error message into a std::string.
+			std::string message(messageBuffer, size);
 
-				//Copy the error message into a std::string.
-				std::string message(messageBuffer, size);
+			//Free the Win32's string's buffer.
+			LocalFree(messageBuffer);
 
-				//Free the Win32's string's buffer.
-				LocalFree(messageBuffer);
-
-				IS_LOG_CORE_ERROR("[WindowsFileSystem::OpenFile] Unable to open/create file '{}'. Error: '{}'.", path, message);
-				return nullptr;
-			}
+			IS_LOG_CORE_ERROR("[WindowsFileSystem::OpenFile] Unable to open/create file '{}'. Error: '{}'.", file->GetPath(), message);
 		}
 
-		Ref<WindowsFile> file = Ref<WindowsFile>(New<WindowsFile>(path));
 		{
-			Threading::ScopedLock fileLock(file->m_lock);
-			file->m_win32Handle = win32Handle;
-			file->m_status = win32Handle != INVALID_HANDLE_VALUE ? FileStatus::Opened : FileStatus::Closed;
+			Threading::ScopedLock fileLock(winFile->m_lock);
+			winFile->m_win32Handle = win32Handle;
+			winFile->m_status = win32Handle != INVALID_HANDLE_VALUE ? FileStatus::Opened : FileStatus::Closed;
 		}
-
-		return file;
 	}
 
 	void WindowsFileSystem::CloseFileHandle(Ref<IFile>& file)
@@ -89,7 +91,7 @@ namespace Insight
 
 	bool WindowsFileSystem::DeleteFileHandle(IFile* file)
 	{
-		if (FileExists(file->GetPath()))
+		if (!FileExists(file->GetPath()))
 		{
 			IS_LOG_CORE_WARN("[WindowsFileSystem::DeleteFileHandle] Trying to delete non-exist file '{}'.", file->GetPath());
 			return false;
@@ -104,7 +106,7 @@ namespace Insight
 		WindowsFile* winFile = static_cast<WindowsFile*>(file);
 		{
 			Threading::ScopedLock fileLock(winFile->m_lock);
-			ASSERT(winFile->m_win32Handle != INVALID_HANDLE_VALUE);
+			ASSERT(winFile->m_win32Handle == INVALID_HANDLE_VALUE);
 			DeleteFileA(file->GetPath().c_str());
 			winFile->m_status = FileStatus::Deleted;
 		}
@@ -116,26 +118,30 @@ namespace Insight
 #define DOCTEST_CONFIG_IMPLEMENTATION_IN_DLL
 //#define DOCTEST_CONFIG_IMPLEMENT
 #include <doctest.h>
+#include "FileSystem/FileManagerSystem.h"
 namespace test
 {
 	TEST_SUITE("WindowsFileSystem")
 	{
 		using namespace Insight;
-		using namespace Insight::FileSystem;
-		WindowsFileSystem fileSystem;
 		const std::string testFilePath = "windowsFileSystemTestFile.txt";
 
 		TEST_CASE("Create File")
 		{
+			IFileSystem& fileSystem = *FileManagerSystem::Instance().GetNativeFileSystem();
+
 			CHECK_FALSE(fileSystem.FileExists(testFilePath));
 
 			Ref<IFile> file = fileSystem.OpenFile(testFilePath);
 			CHECK(file);
+			fileSystem.CloseFile(file);
 			fileSystem.DeleteFile(file);
 		}
 
 		TEST_CASE("Open Existing File")
 		{
+			IFileSystem& fileSystem = *FileManagerSystem::Instance().GetNativeFileSystem();
+
 			CHECK_FALSE(fileSystem.FileExists(testFilePath));
 
 			Ref<IFile> file = fileSystem.OpenFile(testFilePath);
@@ -152,7 +158,6 @@ namespace test
 		}
 	}
 }
-
-#endif
+#endif // IS_TESTING
 
 #endif
