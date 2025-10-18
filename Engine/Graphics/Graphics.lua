@@ -10,13 +10,9 @@ project "Insight_Graphics"
     objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
     debugdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 
-    dependson 
-    {
-        "Insight_Core",
-        "Insight_FileSystem",
-        "Insight_Maths",
-        "Insight_Input",
-    }
+    CommonConfig.LinkToInsightModule("Core")
+    CommonConfig.LinkToInsightModule("Maths")
+    CommonConfig.LinkToInsightModule("Input")
 
     files 
     { 

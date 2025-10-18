@@ -2,6 +2,23 @@ local CommonConfig = { }
 
 local getOsName = require "get_os_name"
 
+function CommonConfig.LinkToInsightModule(moduleName)
+    dependson 
+    { 
+        "Insight_" .. moduleName .. "",
+    }
+
+    includedirs
+    {
+        "%{IncludeDirs.Insight" .. moduleName .. "}",
+    }
+
+    links
+    {
+        "Insight_" .. moduleName .. output_project_subfix .. ".lib",
+    }
+end
+
 function CommonConfig.PostBuildCopyLibraryToOutput()
     filter { "kind:SharedLib or SharedLib" }
     postbuildcommands
