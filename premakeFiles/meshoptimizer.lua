@@ -30,8 +30,8 @@ project "meshoptimizer"
 	
 	postbuildcommands
     {
-       "{COPY} \"%{cfg.targetdir}/meshoptimizer.lib\" \"" .. output_deps .. "/lib/\"",
-       "{COPY} \"%{cfg.targetdir}/meshoptimizer.pdb\" \"" .. output_deps .. "/lib/\"",
+       "{COPYFILE} \"%{cfg.targetdir}/meshoptimizer.lib\" \"" .. output_deps .. "/lib/\"",
+       "{COPYFILE} \"%{cfg.targetdir}/meshoptimizer.pdb\" \"" .. output_deps .. "/lib/\"",
     }
 
 	filter "configurations:Debug"

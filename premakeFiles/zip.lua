@@ -37,8 +37,8 @@ project "zip"
 
 	postbuildcommands
     {
-		"{COPY} \"%{cfg.targetdir}/zip.lib\" \"" .. output_deps .. "/lib/\"",
-		"{COPY} \"%{cfg.targetdir}/zip.pdb\" \"" .. output_deps .. "/lib/\"",
+		"{COPYFILE} \"%{cfg.targetdir}/zip.lib\" \"" .. output_deps .. "/lib/\"",
+		"{COPYFILE} \"%{cfg.targetdir}/zip.pdb\" \"" .. output_deps .. "/lib/\"",
     }
 
 	filter "system:linux"

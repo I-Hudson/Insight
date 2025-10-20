@@ -32,9 +32,9 @@ project "tracy"
 	
 	postbuildcommands
     {
-       "{COPY} \"%{cfg.targetdir}/TracyClient.dll\" \"" .. output_deps .. "/dll/\"",
-       "{COPY} \"%{cfg.targetdir}/TracyClient.lib\" \"" .. output_deps .. "/lib/\"",
-       "{COPY} \"%{cfg.targetdir}/TracyClient.pdb\" \"" .. output_deps .. "/lib/\"",
+       "{COPYFILE} \"%{cfg.targetdir}/TracyClient.dll\" \"" .. output_deps .. "/dll/\"",
+       "{COPYFILE} \"%{cfg.targetdir}/TracyClient.lib\" \"" .. output_deps .. "/lib/\"",
+       "{COPYFILE} \"%{cfg.targetdir}/TracyClient.pdb\" \"" .. output_deps .. "/lib/\"",
     }
 
 	filter "configurations:Debug"

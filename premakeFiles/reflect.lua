@@ -38,9 +38,9 @@ project "Reflect"
          targetname "Reflectd"
          postbuildcommands
          {
-             "{COPY} \"%{cfg.targetdir}/Reflectd.lib\" \"" .. output_deps .. "/lib/\"",
-             "{COPY} \"%{cfg.targetdir}/Reflectd.dll\" \"" .. output_deps .. "/dll/\"",
-             "{COPY} \"%{cfg.targetdir}/Reflectd.pdb\" \"" .. output_deps .. "/lib/\"",
+             "{COPYFILE} \"%{cfg.targetdir}/Reflectd.lib\" \"" .. output_deps .. "/lib/\"",
+             "{COPYFILE} \"%{cfg.targetdir}/Reflectd.dll\" \"" .. output_deps .. "/dll/\"",
+             "{COPYFILE} \"%{cfg.targetdir}/Reflectd.pdb\" \"" .. output_deps .. "/lib/\"",
          }
 
      filter  "configurations:Release"
@@ -50,7 +50,7 @@ project "Reflect"
          targetname "Reflect"
         postbuildcommands
         {
-            "{COPY} \"%{cfg.targetdir}/Reflect.lib\" \"" .. output_deps .. "/lib/\"",
-            "{COPY} \"%{cfg.targetdir}/Reflect.dll\" \"" .. output_deps .. "/dll/\"",
-            "{COPY} \"%{cfg.targetdir}/Reflect.pdb\" \"" .. output_deps .. "/lib/\"",
+            "{COPYFILE} \"%{cfg.targetdir}/Reflect.lib\" \"" .. output_deps .. "/lib/\"",
+            "{COPYFILE} \"%{cfg.targetdir}/Reflect.dll\" \"" .. output_deps .. "/dll/\"",
+            "{COPYFILE} \"%{cfg.targetdir}/Reflect.pdb\" \"" .. output_deps .. "/lib/\"",
         }

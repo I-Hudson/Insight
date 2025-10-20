@@ -28,8 +28,8 @@ project "xxHash"
          targetname "xxHashd"
          postbuildcommands
          {
-             "{COPY} \"%{cfg.targetdir}/xxHashd.lib\" \"" .. output_deps .. "/lib/\"",
-             "{COPY} \"%{cfg.targetdir}/xxHashd.pdb\" \"" .. output_deps .. "/lib/\"",
+             "{COPYFILE} \"%{cfg.targetdir}/xxHashd.lib\" \"" .. output_deps .. "/lib/\"",
+             "{COPYFILE} \"%{cfg.targetdir}/xxHashd.pdb\" \"" .. output_deps .. "/lib/\"",
          }
 
      filter  "configurations:Release"
@@ -38,6 +38,6 @@ project "xxHash"
          targetname "xxHash"
         postbuildcommands
         {
-            "{COPY} \"%{cfg.targetdir}/xxHash.lib\" \"" .. output_deps .. "/lib/\"",
-            "{COPY} \"%{cfg.targetdir}/xxHash.pdb\" \"" .. output_deps .. "/lib/\"",
+            "{COPYFILE} \"%{cfg.targetdir}/xxHash.lib\" \"" .. output_deps .. "/lib/\"",
+            "{COPYFILE} \"%{cfg.targetdir}/xxHash.pdb\" \"" .. output_deps .. "/lib/\"",
         }

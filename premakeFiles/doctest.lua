@@ -30,7 +30,7 @@ project "doctest"
 	
 	postbuildcommands
     {
-		"{COPY} \"%{cfg.targetdir}/doctest.dll\" \"" .. output_deps .. "/dll/\"",
-		"{COPY} \"%{cfg.targetdir}/doctest.lib\" \"" .. output_deps .. "/lib/\"",
-		"{COPY} \"%{cfg.targetdir}/doctest.pdb\" \"" .. output_deps .. "/lib/\"",
+		"{COPYFILE} \"%{cfg.targetdir}/doctest.dll\" \"" .. output_deps .. "/dll/\"",
+		"{COPYFILE} \"%{cfg.targetdir}/doctest.lib\" \"" .. output_deps .. "/lib/\"",
+		"{COPYFILE} \"%{cfg.targetdir}/doctest.pdb\" \"" .. output_deps .. "/lib/\"",
     }

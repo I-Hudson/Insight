@@ -33,9 +33,9 @@ project "spdlog"
 	
 	postbuildcommands
     {
-       "{COPY} \"%{cfg.targetdir}/spdlog.dll\" \"" .. output_deps .. "/dll/\"",
-       "{COPY} \"%{cfg.targetdir}/spdlog.lib\" \"" .. output_deps .. "/lib/\"",
-       "{COPY} \"%{cfg.targetdir}/spdlog.pdb\" \"" .. output_deps .. "/lib/\"",
+       "{COPYFILE} \"%{cfg.targetdir}/spdlog.dll\" \"" .. output_deps .. "/dll/\"",
+       "{COPYFILE} \"%{cfg.targetdir}/spdlog.lib\" \"" .. output_deps .. "/lib/\"",
+       "{COPYFILE} \"%{cfg.targetdir}/spdlog.pdb\" \"" .. output_deps .. "/lib/\"",
     }
 
 	filter "configurations:Debug"

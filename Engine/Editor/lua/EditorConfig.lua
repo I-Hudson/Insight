@@ -77,8 +77,12 @@ end
 function EditorConfig.PostBuildCommands(OutputProjectSubfix, OutputDir)
     postbuildcommands
     {
-        "{COPY} \"%{cfg.targetdir}/%{prj.name}" .. OutputProjectSubfix .. ".lib\" \"%{wks.location}deps/".. OutputDir..  "/lib/\"\n",
-        "{COPY} \"%{cfg.targetdir}/%{prj.name}" .. OutputProjectSubfix .. ".pdb\" \"%{wks.location}deps/".. OutputDir..  "/pdb/\"\n",
+        "{COPYFILE} \"%{cfg.targetdir}/%{prj.name}" .. OutputProjectSubfix .. ".lib\" \"%{wks.location}deps/".. OutputDir..  "/lib/\"\n",
+        "{COPYFILE} \"%{cfg.targetdir}/%{prj.name}" .. OutputProjectSubfix .. ".pdb\" \"%{wks.location}deps/".. OutputDir..  "/pdb/\"\n",
+    }
+    prebuildcommands 
+    { 
+        "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/dll/\" \"%{cfg.targetdir}\"", 
     }
 end
 
@@ -92,11 +96,6 @@ function EditorConfig.FilterConfigurations()
             "Splashd.lib",
             "efswd.lib",
         }
-        prebuildcommands 
-        { 
-            "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/dll/\" \"%{cfg.targetdir}\"", 
-            "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/pdb/\" \"%{cfg.targetdir}\"",  
-        }
 
     filter "configurations:Release"  
         links
@@ -104,11 +103,6 @@ function EditorConfig.FilterConfigurations()
             "Reflect.lib",
             "Splash.lib",
             "efsw.lib",
-        }
-        prebuildcommands 
-        { 
-            "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/dll/\" \"%{cfg.targetdir}\"", 
-            "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/pdb/\" \"%{cfg.targetdir}\"", 
         }
 
 end

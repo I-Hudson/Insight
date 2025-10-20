@@ -79,8 +79,8 @@ project "GLFW"
 
 		postbuildcommands
 		{
-			"{COPY} \"%{cfg.targetdir}/GLFW.lib\" \"" .. output_deps .. "/lib/\"",
-			"{COPY} \"%{cfg.targetdir}/GLFW.pdb\" \"" .. output_deps .. "/lib/\"",
+			"{COPYFILE} \"%{cfg.targetdir}/GLFW.lib\" \"" .. output_deps .. "/lib/\"",
+			"{COPYFILE} \"%{cfg.targetdir}/GLFW.pdb\" \"" .. output_deps .. "/lib/\"",
 		}
 
 	filter "configurations:Debug"

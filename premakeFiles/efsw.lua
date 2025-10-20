@@ -156,8 +156,8 @@ project "efsw"
 		conf_warnings()
 		postbuildcommands
 		{
-			"{COPY} \"%{cfg.targetdir}/efswd.lib\" \"" .. output_deps .. "/lib/\"",
-			"{COPY} \"%{cfg.targetdir}/efswd.pdb\" \"" .. output_deps .. "/lib/\"",
+			"{COPYFILE} \"%{cfg.targetdir}/efswd.lib\" \"" .. output_deps .. "/lib/\"",
+			"{COPYFILE} \"%{cfg.targetdir}/efswd.pdb\" \"" .. output_deps .. "/lib/\"",
 		}
 
 	filter "configurations:Release"
@@ -167,6 +167,6 @@ project "efsw"
 		conf_warnings()
 		postbuildcommands
 		{
-			"{COPY} \"%{cfg.targetdir}/efsw.lib\" \"" .. output_deps .. "/lib/\"",
-			"{COPY} \"%{cfg.targetdir}/efsw.pdb\" \"" .. output_deps .. "/lib/\"",
+			"{COPYFILE} \"%{cfg.targetdir}/efsw.lib\" \"" .. output_deps .. "/lib/\"",
+			"{COPYFILE} \"%{cfg.targetdir}/efsw.pdb\" \"" .. output_deps .. "/lib/\"",
 		}

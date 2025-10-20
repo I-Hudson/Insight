@@ -89,10 +89,10 @@ function CoreConfig.FilterPlatforms(AMD_Ryzen_Master_SDK, OutputDir)
             }
             prebuildcommands
             {
-                "{COPY} \"" .. AMD_Ryzen_Master_SDK .. "/bin/Platform.dll\" \"%{wks.location}deps/".. OutputDir..  "/dll/\"\n",
-                "{COPY} \"" .. AMD_Ryzen_Master_SDK .. "/lib/Platform.lib\" \"%{wks.location}deps/".. OutputDir..  "/lib/\"\n",
-                "{COPY} \"" .. AMD_Ryzen_Master_SDK .. "/bin/Device.dll\" \"%{wks.location}deps/".. OutputDir..  "/dll/\"\n",
-                "{COPY} \"" .. AMD_Ryzen_Master_SDK .. "/lib/Device.lib\" \"%{wks.location}deps/".. OutputDir..  "/lib/\"\n",
+                "{COPYFILE} \"" .. AMD_Ryzen_Master_SDK .. "/bin/Platform.dll\" \"%{wks.location}deps/".. OutputDir..  "/dll/\"\n",
+                "{COPYFILE} \"" .. AMD_Ryzen_Master_SDK .. "/lib/Platform.lib\" \"%{wks.location}deps/".. OutputDir..  "/lib/\"\n",
+                "{COPYFILE} \"" .. AMD_Ryzen_Master_SDK .. "/bin/Device.dll\" \"%{wks.location}deps/".. OutputDir..  "/dll/\"\n",
+                "{COPYFILE} \"" .. AMD_Ryzen_Master_SDK .. "/lib/Device.lib\" \"%{wks.location}deps/".. OutputDir..  "/lib/\"\n",
             }
         end
         links

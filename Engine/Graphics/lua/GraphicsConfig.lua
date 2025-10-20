@@ -191,7 +191,7 @@ function GraphicsConfig.FilterPlatforms(AMD_Ryzen_Master_SDK, OutputDir)
             }
             prebuildcommands
             {
-                "{COPY} \"" .. renderDocPath .. "/renderdoc.dll\" \"%{wks.location}deps/".. outputdir..  "/dll/\"\n",
+                "{COPYFILE} \"" .. renderDocPath .. "/renderdoc.dll\" \"%{wks.location}deps/".. outputdir..  "/dll/\"\n",
             }
         end
 end

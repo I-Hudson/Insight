@@ -35,8 +35,8 @@ project "Splash"
          targetname "Splashd"
          postbuildcommands
          {
-             "{COPY} \"%{cfg.targetdir}/Splashd.lib\" \"" .. output_deps .. "/lib/\"",
-             "{COPY} \"%{cfg.targetdir}/Splashd.pdb\" \"" .. output_deps .. "/lib/\"",
+             "{COPYFILE} \"%{cfg.targetdir}/Splashd.lib\" \"" .. output_deps .. "/lib/\"",
+             "{COPYFILE} \"%{cfg.targetdir}/Splashd.pdb\" \"" .. output_deps .. "/lib/\"",
          }
 
      filter  "configurations:Release"
@@ -45,6 +45,6 @@ project "Splash"
          targetname "Splash"
         postbuildcommands
         {
-            "{COPY} \"%{cfg.targetdir}/Splash.lib\" \"" .. output_deps .. "/lib/\"",
-            "{COPY} \"%{cfg.targetdir}/Splash.pdb\" \"" .. output_deps .. "/lib/\"",
+            "{COPYFILE} \"%{cfg.targetdir}/Splash.lib\" \"" .. output_deps .. "/lib/\"",
+            "{COPYFILE} \"%{cfg.targetdir}/Splash.pdb\" \"" .. output_deps .. "/lib/\"",
         }

@@ -38,7 +38,7 @@ namespace Insight::Editor
             if (path.is_regular_file()
                 && path.path().filename().string().find("Insight_") == std::string::npos)
             {
-               //dllPaths += "\"{COPY} \\\"" + formatedPath + "\\\" \\\"%{cfg.targetdir}" + relativePath + "\\\"\",\n";
+               //dllPaths += "\"{COPYFILE} \\\"" + formatedPath + "\\\" \\\"%{cfg.targetdir}" + relativePath + "\\\"\",\n";
             }
         }
         premake.replace(premake.find(c_PremakeProjectTag_PrebuildCommands), strlen(c_PremakeProjectTag_PrebuildCommands), dllPaths);

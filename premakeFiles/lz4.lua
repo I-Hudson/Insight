@@ -28,8 +28,8 @@ project "lz4"
          targetname "lz4d"
          postbuildcommands
          {
-             "{COPY} \"%{cfg.targetdir}/lz4d.lib\" \"" .. output_deps .. "/lib/\"",
-             "{COPY} \"%{cfg.targetdir}/lz4d.pdb\" \"" .. output_deps .. "/lib/\"",
+             "{COPYFILE} \"%{cfg.targetdir}/lz4d.lib\" \"" .. output_deps .. "/lib/\"",
+             "{COPYFILE} \"%{cfg.targetdir}/lz4d.pdb\" \"" .. output_deps .. "/lib/\"",
          }
 
      filter  "configurations:Release"
@@ -38,6 +38,6 @@ project "lz4"
          targetname "lz4"
         postbuildcommands
         {
-            "{COPY} \"%{cfg.targetdir}/lz4.lib\" \"" .. output_deps .. "/lib/\"",
-            "{COPY} \"%{cfg.targetdir}/lz4.pdb\" \"" .. output_deps .. "/lib/\"",
+            "{COPYFILE} \"%{cfg.targetdir}/lz4.lib\" \"" .. output_deps .. "/lib/\"",
+            "{COPYFILE} \"%{cfg.targetdir}/lz4.pdb\" \"" .. output_deps .. "/lib/\"",
         }

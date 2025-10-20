@@ -344,8 +344,8 @@ project "assimp"
          targetname "assimpd"
          postbuildcommands
          {
-             "{COPY} \"%{cfg.targetdir}/assimpd.lib\" \"" .. output_deps .. "/lib/\"",
-             "{COPY} \"%{cfg.targetdir}/assimpd.pdb\" \"" .. output_deps .. "/lib/\"",
+             "{COPYFILE} \"%{cfg.targetdir}/assimpd.lib\" \"" .. output_deps .. "/lib/\"",
+             "{COPYFILE} \"%{cfg.targetdir}/assimpd.pdb\" \"" .. output_deps .. "/lib/\"",
          }
 
      filter  "configurations:Release"
@@ -354,8 +354,8 @@ project "assimp"
          targetname "assimp"
         postbuildcommands
         {
-            "{COPY} \"%{cfg.targetdir}/assimp.lib\" \"" .. output_deps .. "/lib/\"",
-            "{COPY} \"%{cfg.targetdir}/assimp.pdb\" \"" .. output_deps .. "/lib/\"",
+            "{COPYFILE} \"%{cfg.targetdir}/assimp.lib\" \"" .. output_deps .. "/lib/\"",
+            "{COPYFILE} \"%{cfg.targetdir}/assimp.pdb\" \"" .. output_deps .. "/lib/\"",
         }
 
 premake.modules.lua = {}

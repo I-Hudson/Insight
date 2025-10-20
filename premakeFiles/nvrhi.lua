@@ -31,8 +31,8 @@ project "nvrhi"
 
     postbuildcommands
     {
-        "{COPY} \"%{cfg.targetdir}/nvrhi.lib\" \"" .. output_deps .. "/lib/\"",
-        "{COPY} \"%{cfg.targetdir}/nvrhi.pdb\" \"" .. output_deps .. "/lib/\"",
+        "{COPYFILE} \"%{cfg.targetdir}/nvrhi.lib\" \"" .. output_deps .. "/lib/\"",
+        "{COPYFILE} \"%{cfg.targetdir}/nvrhi.pdb\" \"" .. output_deps .. "/lib/\"",
     }
 
      filter "configurations:Debug"

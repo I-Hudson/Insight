@@ -105,18 +105,18 @@ function PhysicsConfig.PreBuildCommands(OutputDir)
         if EnabledPhysicsEngine == JoltPhysics then
             prebuildcommands
             {
-                "{COPY} \"%{wks.location}vendor/JoltPhysics/Build/VS2022_CL/Debug/Jolt.lib\" \"%{wks.location}deps/".. OutputDir..  "/lib/\"\n",
+                "{COPYFILE} \"%{wks.location}vendor/JoltPhysics/Build/VS2022_CL/Debug/Jolt.lib\" \"%{wks.location}deps/".. OutputDir..  "/lib/\"\n",
             }
         elseif EnabledPhysicsEngine == PhysXPhysics then
             prebuildcommands
             {
-                "{COPY} \"%{wks.location}vendor/PhysX/physx/bin/win.x86_64.vc143.md/checked/PhysXCommon_64.lib\" \"%{wks.location}deps/".. OutputDir..  "/lib/\"\n",
-                "{COPY} \"%{wks.location}vendor/PhysX/physx/bin/win.x86_64.vc143.md/checked/PhysX_64.lib\" \"%{wks.location}deps/".. OutputDir..  "/lib/\"\n",
-                "{COPY} \"%{wks.location}vendor/PhysX/physx/bin/win.x86_64.vc143.md/checked/PhysXFoundation_64.lib\" \"%{wks.location}deps/".. OutputDir..  "/lib/\"\n",
+                "{COPYFILE} \"%{wks.location}vendor/PhysX/physx/bin/win.x86_64.vc143.md/checked/PhysXCommon_64.lib\" \"%{wks.location}deps/".. OutputDir..  "/lib/\"\n",
+                "{COPYFILE} \"%{wks.location}vendor/PhysX/physx/bin/win.x86_64.vc143.md/checked/PhysX_64.lib\" \"%{wks.location}deps/".. OutputDir..  "/lib/\"\n",
+                "{COPYFILE} \"%{wks.location}vendor/PhysX/physx/bin/win.x86_64.vc143.md/checked/PhysXFoundation_64.lib\" \"%{wks.location}deps/".. OutputDir..  "/lib/\"\n",
 
-                "{COPY} \"%{wks.location}vendor/PhysX/physx/bin/win.x86_64.vc143.md/checked/PhysXCommon_64.dll\" \"%{wks.location}deps/".. OutputDir..  "/dll/\"\n",
-                "{COPY} \"%{wks.location}vendor/PhysX/physx/bin/win.x86_64.vc143.md/checked/PhysX_64.dll\" \"%{wks.location}deps/".. OutputDir..  "/dll/\"\n",
-                "{COPY} \"%{wks.location}vendor/PhysX/physx/bin/win.x86_64.vc143.md/checked/PhysXFoundation_64.dll\" \"%{wks.location}deps/".. OutputDir..  "/dll/\"\n",
+                "{COPYFILE} \"%{wks.location}vendor/PhysX/physx/bin/win.x86_64.vc143.md/checked/PhysXCommon_64.dll\" \"%{wks.location}deps/".. OutputDir..  "/dll/\"\n",
+                "{COPYFILE} \"%{wks.location}vendor/PhysX/physx/bin/win.x86_64.vc143.md/checked/PhysX_64.dll\" \"%{wks.location}deps/".. OutputDir..  "/dll/\"\n",
+                "{COPYFILE} \"%{wks.location}vendor/PhysX/physx/bin/win.x86_64.vc143.md/checked/PhysXFoundation_64.dll\" \"%{wks.location}deps/".. OutputDir..  "/dll/\"\n",
             }
         end
 
@@ -124,20 +124,20 @@ function PhysicsConfig.PreBuildCommands(OutputDir)
         if EnabledPhysicsEngine == JoltPhysics then
             prebuildcommands
             {
-                "{COPY} \"%{wks.location}vendor/JoltPhysics/Build/VS2022_CL/Release/Jolt.lib\" \"%{wks.location}deps/".. OutputDir..  "/lib/\"\n",
+                "{COPYFILE} \"%{wks.location}vendor/JoltPhysics/Build/VS2022_CL/Release/Jolt.lib\" \"%{wks.location}deps/".. OutputDir..  "/lib/\"\n",
             }
         end
 
         if EnabledPhysicsEngine == PhysXPhysics then
             prebuildcommands
             {
-                "{COPY} \"%{wks.location}vendor/PhysX/physx/bin/win.x86_64.vc143.md/release/PhysXCommon_64.lib\" \"%{wks.location}deps/".. OutputDir..  "/lib/\"\n",
-                "{COPY} \"%{wks.location}vendor/PhysX/physx/bin/win.x86_64.vc143.md/release/PhysX_64.lib\" \"%{wks.location}deps/".. OutputDir..  "/lib/\"\n",
-                "{COPY} \"%{wks.location}vendor/PhysX/physx/bin/win.x86_64.vc143.md/release/PhysXFoundation_64.lib\" \"%{wks.location}deps/".. OutputDir..  "/lib/\"\n",
+                "{COPYFILE} \"%{wks.location}vendor/PhysX/physx/bin/win.x86_64.vc143.md/release/PhysXCommon_64.lib\" \"%{wks.location}deps/".. OutputDir..  "/lib/\"\n",
+                "{COPYFILE} \"%{wks.location}vendor/PhysX/physx/bin/win.x86_64.vc143.md/release/PhysX_64.lib\" \"%{wks.location}deps/".. OutputDir..  "/lib/\"\n",
+                "{COPYFILE} \"%{wks.location}vendor/PhysX/physx/bin/win.x86_64.vc143.md/release/PhysXFoundation_64.lib\" \"%{wks.location}deps/".. OutputDir..  "/lib/\"\n",
 
-                "{COPY} \"%{wks.location}vendor/PhysX/physx/bin/win.x86_64.vc143.md/release/PhysXCommon_64.dll\" \"%{wks.location}deps/".. OutputDir..  "/dll/\"\n",
-                "{COPY} \"%{wks.location}vendor/PhysX/physx/bin/win.x86_64.vc143.md/release/PhysX_64.dll\" \"%{wks.location}deps/".. OutputDir..  "/dll/\"\n",
-                "{COPY} \"%{wks.location}vendor/PhysX/physx/bin/win.x86_64.vc143.md/release/PhysXFoundation_64.dll\" \"%{wks.location}deps/".. OutputDir..  "/dll/\"\n",
+                "{COPYFILE} \"%{wks.location}vendor/PhysX/physx/bin/win.x86_64.vc143.md/release/PhysXCommon_64.dll\" \"%{wks.location}deps/".. OutputDir..  "/dll/\"\n",
+                "{COPYFILE} \"%{wks.location}vendor/PhysX/physx/bin/win.x86_64.vc143.md/release/PhysX_64.dll\" \"%{wks.location}deps/".. OutputDir..  "/dll/\"\n",
+                "{COPYFILE} \"%{wks.location}vendor/PhysX/physx/bin/win.x86_64.vc143.md/release/PhysXFoundation_64.dll\" \"%{wks.location}deps/".. OutputDir..  "/dll/\"\n",
             }
         end
 end

@@ -38,8 +38,8 @@ project "glm"
 
     postbuildcommands
     {
-       "{COPY} \"%{cfg.targetdir}/glm.lib\" \"" .. output_deps .. "/lib/\"",
-       "{COPY} \"%{cfg.targetdir}/glm.pdb\" \"" .. output_deps .. "/lib/\"",
+       "{COPYFILE} \"%{cfg.targetdir}/glm.lib\" \"" .. output_deps .. "/lib/\"",
+       "{COPYFILE} \"%{cfg.targetdir}/glm.pdb\" \"" .. output_deps .. "/lib/\"",
     }
 
     filter "configurations:Debug"
