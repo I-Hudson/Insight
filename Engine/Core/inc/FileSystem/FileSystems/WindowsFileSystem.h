@@ -30,15 +30,18 @@ namespace Insight
 		virtual ~WindowsFileSystem();
 
 		// { IFileSystem
-		virtual bool CreateDirectory(const std::string& path) const override;
-		virtual bool FileExists(const std::string& path) const override;
-
 	protected:
-		virtual Ref<IFile> CreateFileHandle(const std::string& path) override;
+		virtual FileSystemResult CreateDirectory(const std::string_view path) const override;
+		virtual bool Exists(const std::string_view path, const FileSystemFileType type) const override;
+
+		virtual Ref<IFile> CreateFileHandle(const std::string_view path) override;
 		virtual void OpenFileHandle(IFile* file) override;
 		virtual void CloseFileHandle(Ref<IFile>& file) override;
 		virtual bool DeleteFileHandle(IFile* file) override;
 		// }
+
+	private:
+		std::string PathToWindowsPath(const std::string_view path) const;
 	};
 }
 #endif

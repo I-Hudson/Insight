@@ -52,6 +52,7 @@ namespace Insight
 			static Core::CPUInformation GetCPUInformation();
 			static Core::MemoryInformation GetMemoryInformation();
 
+			static std::string NativeErrorToMessage(const unsigned long error);
 
 			static void* LoadDynamicLibrary(std::string_view path);
 			static void FreeDynamicLibrary(void*& library);

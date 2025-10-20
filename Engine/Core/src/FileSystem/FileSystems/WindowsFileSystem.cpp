@@ -1,8 +1,11 @@
 #if IS_PLATFORM_WINDOWS
 #include "FileSystem/FileSystems/WindowsFileSystem.h"
 
+#include "Platforms/Platform.h"
+
 #include "Core/Logger.h"
 #include "Core/Asserts.h"
+#include "Core/Profiler.h"
 
 #define _M_CEE
 #include <Windows.h>
@@ -13,28 +16,49 @@ namespace Insight
 	{
 	}
 
-	bool WindowsFileSystem::CreateDirectory(const std::string& path) const
+	FileSystemResult WindowsFileSystem::CreateDirectory(const std::string_view path) const
 	{
-		return CreateDirectoryA(path.c_str(), NULL);
+		const std::string winStringTemp = PathToWindowsPath(path);
+
+		FileSystemResult fileSystemResult;
+		fileSystemResult.Result = CreateDirectoryA(winStringTemp.data(), NULL);
+		if (!fileSystemResult)
+		{
+			fileSystemResult.ErrorMessage = Platform::NativeErrorToMessage(GetLastError());
+		}
+		return fileSystemResult;
 	}
 
-	bool WindowsFileSystem::FileExists(const std::string& path) const
+	bool WindowsFileSystem::Exists(const std::string_view path, const FileSystemFileType type) const
 	{
-		const DWORD attrib = GetFileAttributesA(path.c_str());
-		return (attrib != INVALID_FILE_ATTRIBUTES &&
-				!(attrib & FILE_ATTRIBUTE_DIRECTORY));
+		const std::string winStringTemp = PathToWindowsPath(path);
+		const DWORD attrib = GetFileAttributesA(winStringTemp.data());
+
+		switch (type)
+		{
+			case FileSystemFileType::File: return (attrib != INVALID_FILE_ATTRIBUTES && !(attrib & FILE_ATTRIBUTE_DIRECTORY));
+			case FileSystemFileType::Directory: return (attrib != INVALID_FILE_ATTRIBUTES && (attrib & FILE_ATTRIBUTE_DIRECTORY));
+			default:
+			{
+				IS_LOG_CORE_ERROR("{}, {}", Platform::NativeErrorToMessage(GetLastError()), GetLastError());
+				return false;
+			}
+		}
+		return false;
 	}
 
-	Ref<IFile> WindowsFileSystem::CreateFileHandle(const std::string& path)
+	Ref<IFile> WindowsFileSystem::CreateFileHandle(const std::string_view path)
 	{
-		return Ref<WindowsFile>(::New<WindowsFile>(path));
+		return Ref<WindowsFile>(::New<WindowsFile>(std::string(path)));
 	}
 
 	void WindowsFileSystem::OpenFileHandle(IFile* file)
 	{
 		WindowsFile* winFile = static_cast<WindowsFile*>(file);
 
-		HANDLE win32Handle = CreateFileA(file->GetPath().c_str()
+		const std::string winStringTemp = PathToWindowsPath(file->GetPath());
+
+		HANDLE win32Handle = CreateFileA(winStringTemp.c_str()
 			, GENERIC_READ | GENERIC_WRITE
 			, FILE_SHARE_READ | FILE_SHARE_WRITE
 			, NULL
@@ -103,14 +127,29 @@ namespace Insight
 			return false;
 		}
 
+		const std::string windowsPathTemp = PathToWindowsPath(file->GetPath());
+
 		WindowsFile* winFile = static_cast<WindowsFile*>(file);
 		{
 			Threading::ScopedLock fileLock(winFile->m_lock);
-			ASSERT(winFile->m_win32Handle == INVALID_HANDLE_VALUE);
-			DeleteFileA(file->GetPath().c_str());
+			DeleteFileA(windowsPathTemp.c_str());
 			winFile->m_status = FileStatus::Deleted;
 		}
 		return true;
+	}
+
+	std::string WindowsFileSystem::PathToWindowsPath(const std::string_view path) const
+	{
+		IS_PROFILE_FUNCTION();
+		std::string windowsString(path.data(), path.size());
+
+		std::replace(windowsString.begin(), windowsString.end(), '/', '\\');
+		if (!path.empty() && path.back() == L'\\')
+		{
+			//path.pop_back();
+		}
+
+		return windowsString;
 	}
 }
 
@@ -121,41 +160,56 @@ namespace Insight
 #include "FileSystem/FileManagerSystem.h"
 namespace test
 {
-	TEST_SUITE("WindowsFileSystem")
+	using namespace Insight;
+	class WindowsFileSystemFixture
 	{
-		using namespace Insight;
+	public:
+		WindowsFileSystemFixture()
+			: fileSystem(*Insight::FileManagerSystem::Instance().GetNativeFileSystem())
+		{
+			if (fileSystem.FileExists(testFilePath))
+			{
+				Ref<IFile> file = fileSystem.OpenFile(testFilePath, false);
+				fileSystem.DeleteFile(file);
+				fileSystem.CloseFile(file);
+			}
+		}
+
+		~WindowsFileSystemFixture()
+		{
+		}
+
+		Insight::IFileSystem& fileSystem;
 		const std::string testFilePath = "windowsFileSystemTestFile.txt";
+	};
 
-		TEST_CASE("Create File")
-		{
-			IFileSystem& fileSystem = *FileManagerSystem::Instance().GetNativeFileSystem();
+	TEST_CASE_FIXTURE(WindowsFileSystemFixture, "Create File")
+	{
+		CHECK_FALSE(fileSystem.FileExists(testFilePath));
 
-			CHECK_FALSE(fileSystem.FileExists(testFilePath));
+		Ref<IFile> file = fileSystem.OpenFile(testFilePath);
+		CHECK(file);
+		fileSystem.CloseFile(file);
+		fileSystem.DeleteFile(file);
+	}
 
-			Ref<IFile> file = fileSystem.OpenFile(testFilePath);
-			CHECK(file);
-			fileSystem.CloseFile(file);
-			fileSystem.DeleteFile(file);
-		}
+	TEST_CASE_FIXTURE(WindowsFileSystemFixture, "Open Existing File")
+	{
+		IFileSystem& fileSystem = *FileManagerSystem::Instance().GetNativeFileSystem();
 
-		TEST_CASE("Open Existing File")
-		{
-			IFileSystem& fileSystem = *FileManagerSystem::Instance().GetNativeFileSystem();
+		CHECK_FALSE(fileSystem.FileExists(testFilePath));
 
-			CHECK_FALSE(fileSystem.FileExists(testFilePath));
+		Ref<IFile> file = fileSystem.OpenFile(testFilePath);
+		fileSystem.CloseFile(file);
 
-			Ref<IFile> file = fileSystem.OpenFile(testFilePath);
-			fileSystem.CloseFile(file);
+		CHECK(fileSystem.FileExists(testFilePath));
 
-			CHECK(fileSystem.FileExists(testFilePath));
+		file = fileSystem.OpenFile(testFilePath);
+		CHECK(file);
+		CHECK(file->GetStatus() == FileStatus::Opened);
 
-			file = fileSystem.OpenFile(testFilePath);
-			CHECK(file);
-			CHECK(file->GetStatus() == FileStatus::Opened);
-
-			fileSystem.CloseFile(file);
-			fileSystem.DeleteFile(file);
-		}
+		fileSystem.CloseFile(file);
+		fileSystem.DeleteFile(file);
 	}
 }
 #endif // IS_TESTING

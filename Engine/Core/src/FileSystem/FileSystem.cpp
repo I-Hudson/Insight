@@ -6,6 +6,8 @@
 #include "Core/Profiler.h"
 #include "Core/Asserts.h"
 
+#include "FileSystem/FileManagerSystem.h"
+
 #include <fstream>
 #include <filesystem>
 
@@ -13,15 +15,10 @@ namespace Insight
 {
     void FileSystem::CreateFolder(const std::string& path)
     {
-        if (Exists(path))
+        const FileSystemResult result = FileManagerSystem::Instance().GetNativeFileSystem()->CreateDirectories(path);
+        if (!result)
         {
-            return;
-        }
-        std::error_code errorCode;
-        std::filesystem::create_directories(GetAbsolutePath(path), errorCode);
-        if (errorCode)
-        {
-            IS_LOG_CORE_ERROR("[FileSystem::CreateFolder] Error code: '{}', Message: '{}'.", errorCode.value(), errorCode.message());
+            IS_LOG_CORE_ERROR("[FileSystem::CreateFolder] Error Message: '{}'.", result.ErrorMessage);
         }
     }
 

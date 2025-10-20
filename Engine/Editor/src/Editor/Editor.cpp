@@ -64,14 +64,17 @@ namespace Insight
         {
             IS_PROFILE_FUNCTION();
 
+            /*
             IFileSystem* fileSystem = FileManagerSystem::Instance().GetNativeFileSystem();
-            fileSystem->CreateDirectory("TestFolder");
+            fileSystem->CreateDirectories("TestFolder");
+            fileSystem->CreateDirectories("TestFolder/NewFolder/BadFolder/OldFolder");
+            fileSystem->CreateDirectories("TestFolder/NewFolder/BadFolder/OldFolder/../../NewFolder2");
             Ref<IFile> file = fileSystem->OpenFile("TestFolder/TestFile.txt");
             fileSystem->CloseFile(file);
             fileSystem->DeleteFile(file);
 
             Ref<IFile> file1 = fileSystem->OpenFile("TestFolder/TestFile.txt");
-
+            */
 
             const std::string engineResources = EnginePaths::GetInstallDirectory() + "/EngineResources.zip";
             if (FileSystem::Exists(engineResources))
