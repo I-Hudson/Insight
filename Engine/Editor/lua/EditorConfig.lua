@@ -21,13 +21,6 @@ function EditorConfig.IncludeDirs()
     includedirs
     {
         "inc",
-        "%{IncludeDirs.InsightCore}",
-        "%{IncludeDirs.InsightFileSystem}",
-        "%{IncludeDirs.InsightMaths}",
-        "%{IncludeDirs.InsightPhysics}",
-        "%{IncludeDirs.InsightInput}",
-        "%{IncludeDirs.InsightGraphics}",
-        "%{IncludeDirs.InsightRuntime}",
     
         "%{IncludeDirs.glfw}",
         "%{IncludeDirs.glm}",
@@ -53,14 +46,6 @@ end
 function EditorConfig.LibraryLinks(OutputProjectSubfix)
     links
     {
-        "Insight_Core" .. OutputProjectSubfix .. ".lib",
-        "Insight_FileSystem" .. OutputProjectSubfix .. ".lib",
-        "Insight_Maths" .. OutputProjectSubfix .. ".lib",
-        "Insight_Physics" .. OutputProjectSubfix .. ".lib",
-        "Insight_Input" .. OutputProjectSubfix .. ".lib",
-        "Insight_Graphics" .. OutputProjectSubfix .. ".lib",
-        "Insight_Runtime" .. OutputProjectSubfix .. ".lib",
-
         "glm.lib",
         "imgui.lib",
         "zip.lib",

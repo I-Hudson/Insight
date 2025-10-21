@@ -57,7 +57,7 @@ namespace std
 	{
 		size_t operator()(const Insight::Core::GUID& guid) const
 		{
-			size_t hash;
+			size_t hash = 0;
 			HashCombine(hash, guid.m_data1);
 			HashCombine(hash, guid.m_data2);
 			HashCombine(hash, guid.m_data3);

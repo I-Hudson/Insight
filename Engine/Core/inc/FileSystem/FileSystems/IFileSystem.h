@@ -34,7 +34,7 @@ namespace Insight
 		virtual bool IsAbsolutePath(std::string_view path) const;
 
 		virtual void PathToAbsoltePath(std::string& path) const;
-		virtual void PathToFlattenPath(std::string& path) const;
+		virtual void PathToCanonicalPath(std::string& path) const;
 
 		std::string GetParentPath(std::string path) const;
 

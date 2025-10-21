@@ -7,6 +7,8 @@
 
 #include "Threading/ScopedLock.h"
 
+#pragma optimize("", off)
+
 namespace Insight
 {
     ObjectManager::ObjectManager()
@@ -88,15 +90,18 @@ namespace Insight
         Threading::ScopedLock scopedLock(m_objectSpinLock);
 
 #ifdef OBJECT_SORT_SET
+        const Core::GUID objectGUID = object->GetGuid();
+
         auto iter = m_objectItems.find(object);
+        const auto guidIter = m_guidToObjects.find(objectGUID);
 
         ASSERT(iter != m_objectItems.end());
-        ASSERT(m_guidToObjects.find(object->GetGuid()) != m_guidToObjects.end());
+        ASSERT(guidIter != m_guidToObjects.end());
 
         ::Delete(iter->second);
 
         m_objectItems.erase(object);
-        m_guidToObjects.erase(object->GetGuid());
+        m_guidToObjects.erase(guidIter);
 #else
         const u64 objectIndex = object->m_objectIndex;
         ASSERT_MSG(objectIndex < m_capacity, "[ObjectManager::UnregisterObject] Out of range.");

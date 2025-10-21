@@ -40,7 +40,11 @@ namespace Insight
 		virtual bool DeleteFileHandle(IFile* file) override;
 		// }
 
+#if IS_TESTING
+	public:
+#else
 	private:
+#endif
 		std::string PathToWindowsPath(const std::string_view path) const;
 	};
 }

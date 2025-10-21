@@ -165,51 +165,26 @@ namespace test
 	{
 	public:
 		WindowsFileSystemFixture()
-			: fileSystem(*Insight::FileManagerSystem::Instance().GetNativeFileSystem())
+			: fileSystem(*static_cast<WindowsFileSystem*>(Insight::FileManagerSystem::Instance().GetNativeFileSystem()))
 		{
-			if (fileSystem.FileExists(testFilePath))
-			{
-				Ref<IFile> file = fileSystem.OpenFile(testFilePath, false);
-				fileSystem.DeleteFile(file);
-				fileSystem.CloseFile(file);
-			}
+
 		}
 
 		~WindowsFileSystemFixture()
 		{
 		}
 
-		Insight::IFileSystem& fileSystem;
-		const std::string testFilePath = "windowsFileSystemTestFile.txt";
+		Insight::WindowsFileSystem& fileSystem;
 	};
 
-	TEST_CASE_FIXTURE(WindowsFileSystemFixture, "Create File")
+	TEST_CASE_FIXTURE(WindowsFileSystemFixture, "PathToWindowsPath")
 	{
-		CHECK_FALSE(fileSystem.FileExists(testFilePath));
+		std::string path = "C:/User/Home/Documents/PC/InsightEngine";
+		const std::string windowsPathExpected = "C:\\User\\Home\\Documents\\PC\\InsightEngine";
 
-		Ref<IFile> file = fileSystem.OpenFile(testFilePath);
-		CHECK(file);
-		fileSystem.CloseFile(file);
-		fileSystem.DeleteFile(file);
-	}
+		path = fileSystem.PathToWindowsPath(path);
 
-	TEST_CASE_FIXTURE(WindowsFileSystemFixture, "Open Existing File")
-	{
-		IFileSystem& fileSystem = *FileManagerSystem::Instance().GetNativeFileSystem();
-
-		CHECK_FALSE(fileSystem.FileExists(testFilePath));
-
-		Ref<IFile> file = fileSystem.OpenFile(testFilePath);
-		fileSystem.CloseFile(file);
-
-		CHECK(fileSystem.FileExists(testFilePath));
-
-		file = fileSystem.OpenFile(testFilePath);
-		CHECK(file);
-		CHECK(file->GetStatus() == FileStatus::Opened);
-
-		fileSystem.CloseFile(file);
-		fileSystem.DeleteFile(file);
+		CHECK(path == windowsPathExpected);
 	}
 }
 #endif // IS_TESTING

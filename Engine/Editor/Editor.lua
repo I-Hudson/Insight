@@ -1,3 +1,4 @@
+local CommonConfig = require "../lua/CommonConfig"
 local EditorConfig = require "lua/EditorConfig"
 
 project "Insight_Editor"  
@@ -12,18 +13,14 @@ project "Insight_Editor"
     objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
     debugdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 
-    dependson 
-    {
-        "Insight_Core",
-        "Insight_FileSystem",
-        "Insight_Maths",
-        "Insight_Physics",
-        "Insight_Input",
-        "Insight_Graphics",
-        "Insight_Runtime",
-    }
+    CommonConfig.LinkToInsightModule("Core")
+    CommonConfig.LinkToInsightModule("Maths")
+    CommonConfig.LinkToInsightModule("Physics")
+    CommonConfig.LinkToInsightModule("Input")
+    CommonConfig.LinkToInsightModule("Graphics")
+    CommonConfig.LinkToInsightModule("Runtime")
 
-        files 
+    files 
     { 
         "inc/**.hpp", 
         "inc/**.h", 

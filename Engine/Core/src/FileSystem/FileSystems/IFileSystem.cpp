@@ -96,7 +96,7 @@ namespace Insight
 	{
 		if (IsAbsolutePath(path))
 		{
-			PathToFlattenPath(path);
+			PathToCanonicalPath(path);
 			// We have a drive letter so must go from the drive to the destination folder.
 			return;
 		}
@@ -106,10 +106,10 @@ namespace Insight
 		//std::string exeParent = GetParentPath(exePath);
 		path = exePath + kSeperator + (path.front() == kSeperator ? path.substr(1) : path);
 
-		PathToFlattenPath(path);
+		PathToCanonicalPath(path);
 	}
 
-	void IFileSystem::PathToFlattenPath(std::string& path) const
+	void IFileSystem::PathToCanonicalPath(std::string& path) const
 	{
 		if (!IsAbsolutePath(path))
 		{
@@ -157,7 +157,7 @@ namespace Insight
 		std::error_code errorCode;
 		FileSystemResult lastResult;
 		std::filesystem::create_directories(path, errorCode);
-		
+
 		lastResult.Result = !errorCode.value();
 		if (!lastResult.Result)
 		{
@@ -240,12 +240,21 @@ namespace test
 	{
 	public:
 		IFileSystemTestFixture()
-			:fileManager(Insight::FileManagerSystem::Instance())
-		{ }
+			: fileManager(Insight::FileManagerSystem::Instance()), fileSystem(*fileManager.GetNativeFileSystem())
+		{
+			if (fileSystem.FileExists(testFilePath))
+			{
+				Insight::Ref<Insight::IFile> file = fileSystem.OpenFile(testFilePath, false);
+				fileSystem.DeleteFile(file);
+				fileSystem.CloseFile(file);
+			}
+		}
 		~IFileSystemTestFixture()
 		{ }
 
+		const std::string testFilePath = "windowsFileSystemTestFile.txt";
 		Insight::FileManagerSystem& fileManager;
+		Insight::IFileSystem& fileSystem;
 	};
 
 	TEST_CASE_FIXTURE(IFileSystemTestFixture, "IsAbsolutePath")
@@ -264,20 +273,52 @@ namespace test
 		fileManager.GetNativeFileSystem()->PathToAbsoltePath(localPath);
 		CHECK(localPath == localAbsPath);
 	}
-	TEST_CASE_FIXTURE(IFileSystemTestFixture, "PathToFlattenPath")
+
+	TEST_CASE_FIXTURE(IFileSystemTestFixture, "PathToCanonicalPath")
 	{
 		std::string localPath = "/dummyPath";
 		const std::string exePath = Insight::Platform::GetExecuteablePath();
 		std::string localAbsPath = exePath + "/dummyPath/dummyPath1/dummyPath2/../../";
+		std::string localAbsPath1 = "/dummyPath/dummyPath1/../dummyPath1/dummyPath2/../../";
 
 		std::string flattenAbsPath = localAbsPath;
 
-		fileManager.GetNativeFileSystem()->PathToFlattenPath(flattenAbsPath);
+		fileManager.GetNativeFileSystem()->PathToCanonicalPath(flattenAbsPath);
 		fileManager.GetNativeFileSystem()->PathToAbsoltePath(localAbsPath);
 		fileManager.GetNativeFileSystem()->PathToAbsoltePath(localPath);
+		fileManager.GetNativeFileSystem()->PathToAbsoltePath(localAbsPath1);
+
 		CHECK(localPath == flattenAbsPath);
 		CHECK(flattenAbsPath == localAbsPath);
 		CHECK(localAbsPath == localPath);
+		CHECK(localAbsPath1 == flattenAbsPath);
+	}
+
+	TEST_CASE_FIXTURE(IFileSystemTestFixture, "Create File")
+	{
+		CHECK_FALSE(fileSystem.FileExists(testFilePath));
+
+		Insight::Ref<Insight::IFile> file = fileSystem.OpenFile(testFilePath);
+		CHECK(file);
+		fileSystem.CloseFile(file);
+		fileSystem.DeleteFile(file);
+	}
+
+	TEST_CASE_FIXTURE(IFileSystemTestFixture, "Open Existing File")
+	{
+		CHECK_FALSE(fileSystem.FileExists(testFilePath));
+
+		Insight::Ref<Insight::IFile> file = fileSystem.OpenFile(testFilePath);
+		fileSystem.CloseFile(file);
+
+		CHECK(fileSystem.FileExists(testFilePath));
+
+		file = fileSystem.OpenFile(testFilePath);
+		CHECK(file);
+		CHECK(file->GetStatus() == Insight::FileStatus::Opened);
+
+		fileSystem.CloseFile(file);
+		fileSystem.DeleteFile(file);
 	}
 }
 #endif

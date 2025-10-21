@@ -57,9 +57,6 @@ function PhysicsConfig.IncludeDirs()
     includedirs
     {
         "inc",
-        "%{IncludeDirs.InsightCore}",
-        "%{IncludeDirs.InsightFileSystem}",
-        "%{IncludeDirs.InsightMaths}",
         
         "%{IncludeDirs.spdlog}",
         "%{IncludeDirs.imgui}",
@@ -79,9 +76,6 @@ end
 function PhysicsConfig.LibraryLinks()
     links
     {
-        "Insight_Core" .. output_project_subfix .. ".lib",
-        "Insight_FileSystem" .. output_project_subfix .. ".lib",
-        "Insight_Maths" .. output_project_subfix .. ".lib",
         "imgui.lib",
     }
 

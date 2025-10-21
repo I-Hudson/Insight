@@ -23,12 +23,6 @@ function RuntimeConfig.IncludeDirs()
     includedirs
     {
         "inc",
-        --"%{IncludeDirs.InsightCore}",
-        --"%{IncludeDirs.InsightFileSystem}",
-        --"%{IncludeDirs.InsightMaths}",
-        --"%{IncludeDirs.InsightPhysics}",
-        --"%{IncludeDirs.InsightGraphics}",
-        --"%{IncludeDirs.InsightInput}",
 
         "%{IncludeDirs.spdlog}",
         "%{IncludeDirs.glm}",
@@ -58,14 +52,7 @@ end
 
 function RuntimeConfig.LibraryLinks()
     links
-    {
-        --"Insight_Core" .. output_project_subfix .. ".lib",
-        --"Insight_FileSystem" .. output_project_subfix .. ".lib",
-        --"Insight_Maths" .. output_project_subfix .. ".lib",
-        --"Insight_Physics" .. output_project_subfix .. ".lib",
-        --"Insight_Graphics" .. output_project_subfix .. ".lib",
-        --"Insight_Input" .. output_project_subfix .. ".lib",
-        
+    {  
         "glm.lib",
         "imgui.lib",
         "zip.lib",

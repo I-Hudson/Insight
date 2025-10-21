@@ -40,11 +40,6 @@ function GraphicsConfig.IncludeDirs()
         "inc",
         "inc/FSR2",
         "inc/FSR2/DX12",
-
-        "%{IncludeDirs.InsightCore}",
-        "%{IncludeDirs.InsightFileSystem}",
-        "%{IncludeDirs.InsightMaths}",
-        "%{IncludeDirs.InsightInput}",
         
         "%{IncludeDirs.InsightToolShaderCompiler}",
 
@@ -83,12 +78,7 @@ end
 
 function GraphicsConfig.LibraryLinks()
     links
-    {
-        "Insight_Core" .. output_project_subfix .. ".lib",
-        "Insight_FileSystem" .. output_project_subfix .. ".lib",
-        "Insight_Maths" .. output_project_subfix .. ".lib",
-        "Insight_Input" .. output_project_subfix .. ".lib",
-        
+    {      
         "GLFW.lib",
         "glm.lib",
         "imgui.lib",
