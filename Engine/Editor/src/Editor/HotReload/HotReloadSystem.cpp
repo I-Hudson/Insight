@@ -92,11 +92,13 @@ namespace Insight::Editor
 
     void HotReloadSystem::Reload()
     {
+#if IS_TESTING == 0
         UnloadLibrary();
 
         BuildProjectSolution();
 
         LoadLibrary(GetLibraryPathFromProjectInfo(Runtime::ProjectSystem::Instance().GetProjectInfo()));
+#endif
     }
 
     void HotReloadSystem::BuildProjectSolution()

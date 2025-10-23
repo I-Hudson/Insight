@@ -257,68 +257,72 @@ namespace test
 		Insight::IFileSystem& fileSystem;
 	};
 
-	TEST_CASE_FIXTURE(IFileSystemTestFixture, "IsAbsolutePath")
+	TEST_SUITE("IFileSystem")
 	{
-		CHECK_FALSE(fileManager.GetNativeFileSystem()->IsAbsolutePath("dummyPath"));
-		CHECK(fileManager.GetNativeFileSystem()->IsAbsolutePath("C:/dummyPath"));
-		CHECK(fileManager.GetNativeFileSystem()->IsAbsolutePath("C:\\dummyPath"));
-	}
 
-	TEST_CASE_FIXTURE(IFileSystemTestFixture, "PathToAbsoltePath")
-	{
-		std::string localPath = "dummyPath";
-		const std::string exePath = Insight::Platform::GetExecuteablePath();
-		const std::string localAbsPath = exePath + Insight::kSeperator + "dummyPath";
+		TEST_CASE_FIXTURE(IFileSystemTestFixture, "IsAbsolutePath")
+		{
+			CHECK_FALSE(fileManager.GetNativeFileSystem()->IsAbsolutePath("dummyPath"));
+			CHECK(fileManager.GetNativeFileSystem()->IsAbsolutePath("C:/dummyPath"));
+			CHECK(fileManager.GetNativeFileSystem()->IsAbsolutePath("C:\\dummyPath"));
+		}
 
-		fileManager.GetNativeFileSystem()->PathToAbsoltePath(localPath);
-		CHECK(localPath == localAbsPath);
-	}
+		TEST_CASE_FIXTURE(IFileSystemTestFixture, "PathToAbsoltePath")
+		{
+			std::string localPath = "dummyPath";
+			const std::string exePath = Insight::Platform::GetExecuteablePath();
+			const std::string localAbsPath = exePath + Insight::kSeperator + "dummyPath";
 
-	TEST_CASE_FIXTURE(IFileSystemTestFixture, "PathToCanonicalPath")
-	{
-		std::string localPath = "/dummyPath";
-		const std::string exePath = Insight::Platform::GetExecuteablePath();
-		std::string localAbsPath = exePath + "/dummyPath/dummyPath1/dummyPath2/../../";
-		std::string localAbsPath1 = "/dummyPath/dummyPath1/../dummyPath1/dummyPath2/../../";
+			fileManager.GetNativeFileSystem()->PathToAbsoltePath(localPath);
+			CHECK(localPath == localAbsPath);
+		}
 
-		std::string flattenAbsPath = localAbsPath;
+		TEST_CASE_FIXTURE(IFileSystemTestFixture, "PathToCanonicalPath")
+		{
+			std::string localPath = "/dummyPath";
+			const std::string exePath = Insight::Platform::GetExecuteablePath();
+			std::string localAbsPath = exePath + "/dummyPath/dummyPath1/dummyPath2/../../";
+			std::string localAbsPath1 = "/dummyPath/dummyPath1/../dummyPath1/dummyPath2/../../";
 
-		fileManager.GetNativeFileSystem()->PathToCanonicalPath(flattenAbsPath);
-		fileManager.GetNativeFileSystem()->PathToAbsoltePath(localAbsPath);
-		fileManager.GetNativeFileSystem()->PathToAbsoltePath(localPath);
-		fileManager.GetNativeFileSystem()->PathToAbsoltePath(localAbsPath1);
+			std::string flattenAbsPath = localAbsPath;
 
-		CHECK(localPath == flattenAbsPath);
-		CHECK(flattenAbsPath == localAbsPath);
-		CHECK(localAbsPath == localPath);
-		CHECK(localAbsPath1 == flattenAbsPath);
-	}
+			fileManager.GetNativeFileSystem()->PathToCanonicalPath(flattenAbsPath);
+			fileManager.GetNativeFileSystem()->PathToAbsoltePath(localAbsPath);
+			fileManager.GetNativeFileSystem()->PathToAbsoltePath(localPath);
+			fileManager.GetNativeFileSystem()->PathToAbsoltePath(localAbsPath1);
 
-	TEST_CASE_FIXTURE(IFileSystemTestFixture, "Create File")
-	{
-		CHECK_FALSE(fileSystem.FileExists(testFilePath));
+			CHECK(localPath == flattenAbsPath);
+			CHECK(flattenAbsPath == localAbsPath);
+			CHECK(localAbsPath == localPath);
+			CHECK(localAbsPath1 == flattenAbsPath);
+		}
 
-		Insight::Ref<Insight::IFile> file = fileSystem.OpenFile(testFilePath);
-		CHECK(file);
-		fileSystem.CloseFile(file);
-		fileSystem.DeleteFile(file);
-	}
+		TEST_CASE_FIXTURE(IFileSystemTestFixture, "Create File")
+		{
+			CHECK_FALSE(fileSystem.FileExists(testFilePath));
 
-	TEST_CASE_FIXTURE(IFileSystemTestFixture, "Open Existing File")
-	{
-		CHECK_FALSE(fileSystem.FileExists(testFilePath));
+			Insight::Ref<Insight::IFile> file = fileSystem.OpenFile(testFilePath);
+			CHECK(file);
+			fileSystem.CloseFile(file);
+			fileSystem.DeleteFile(file);
+		}
 
-		Insight::Ref<Insight::IFile> file = fileSystem.OpenFile(testFilePath);
-		fileSystem.CloseFile(file);
+		TEST_CASE_FIXTURE(IFileSystemTestFixture, "Open Existing File")
+		{
+			CHECK_FALSE(fileSystem.FileExists(testFilePath));
 
-		CHECK(fileSystem.FileExists(testFilePath));
+			Insight::Ref<Insight::IFile> file = fileSystem.OpenFile(testFilePath);
+			fileSystem.CloseFile(file);
 
-		file = fileSystem.OpenFile(testFilePath);
-		CHECK(file);
-		CHECK(file->GetStatus() == Insight::FileStatus::Opened);
+			CHECK(fileSystem.FileExists(testFilePath));
 
-		fileSystem.CloseFile(file);
-		fileSystem.DeleteFile(file);
+			file = fileSystem.OpenFile(testFilePath);
+			CHECK(file);
+			CHECK(file->GetStatus() == Insight::FileStatus::Opened);
+
+			fileSystem.CloseFile(file);
+			fileSystem.DeleteFile(file);
+		}
 	}
 }
 #endif

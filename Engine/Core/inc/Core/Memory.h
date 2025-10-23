@@ -255,6 +255,11 @@ public:
 
 	bool operator==(const UPtr& other) const { return m_ptr == other.m_ptr; }
 	bool operator==(const T* other) const { return m_ptr == other; }
+	//bool operator==(std::nullptr_t) const { return m_ptr == std::nullptr_t; }
+
+	bool operator!=(const UPtr& other) const { return !(m_ptr == other.m_ptr); }
+	bool operator!=(const T* other) const { return !(m_ptr == other); }
+	//bool operator!=(std::nullptr_t) const { return !(m_ptr == std::nullptr_t); }
 
 
 	operator bool() const { return m_ptr; }
@@ -389,13 +394,21 @@ public:
 		}
 	}
 
-	bool operator==(const RPtr& other) const { return Get() == other.Get(); }
-	bool operator==(const RPtr* other) const { return Get() == other->Get(); }
+	bool operator==(const RPtr& other)		const { return Get() == other.Get(); }
+	bool operator==(const T* other)			const { return Get() == other; }
 	template<typename T2>
-	bool operator==(const RPtr<T2>& other) const { return Get() == other.Get(); }
+	bool operator==(const RPtr<T2>& other)	const { return Get() == other.Get(); }
 	template<typename T2>
-	bool operator==(const RPtr<T2>* other) const { return Get() == other->Get(); }
-	operator bool() { return IsValid(); }
+	bool operator==(const T2* other)		const { return Get() == other; }
+
+	bool operator!=(const RPtr& other)		const { return !(Get() == other.Get()); }
+	bool operator!=(const T* other)			const { return !(Get() == other); }
+	template<typename T2>
+	bool operator!=(const RPtr<T2>& other)	const { return !(Get() == other.Get()); }
+	template<typename T2>
+	bool operator!=(const T2* other)		const { return !(Get() == other); }
+
+	operator bool() const { return IsValid(); }
 
 	T* operator->() const { return Get(); }
 	T* operator*() const { return Get(); }

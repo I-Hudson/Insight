@@ -166,25 +166,25 @@ namespace test
 	public:
 		WindowsFileSystemFixture()
 			: fileSystem(*static_cast<WindowsFileSystem*>(Insight::FileManagerSystem::Instance().GetNativeFileSystem()))
-		{
-
-		}
+		{ }
 
 		~WindowsFileSystemFixture()
-		{
-		}
+		{ }
 
 		Insight::WindowsFileSystem& fileSystem;
 	};
 
-	TEST_CASE_FIXTURE(WindowsFileSystemFixture, "PathToWindowsPath")
+	TEST_SUITE("WindowsFileSystem")
 	{
-		std::string path = "C:/User/Home/Documents/PC/InsightEngine";
-		const std::string windowsPathExpected = "C:\\User\\Home\\Documents\\PC\\InsightEngine";
+		TEST_CASE_FIXTURE(WindowsFileSystemFixture, "PathToWindowsPath")
+		{
+			std::string path = "C:/User/Home/Documents/PC/InsightEngine";
+			const std::string windowsPathExpected = "C:\\User\\Home\\Documents\\PC\\InsightEngine";
 
-		path = fileSystem.PathToWindowsPath(path);
+			path = fileSystem.PathToWindowsPath(path);
 
-		CHECK(path == windowsPathExpected);
+			CHECK(path == windowsPathExpected);
+		}
 	}
 }
 #endif // IS_TESTING

@@ -94,6 +94,11 @@ namespace Insight
         {
 #ifdef IS_MEMORY_TRACKING
             std::lock_guard lock(m_lock);
+            if (m_isReady)
+            {
+                return;
+            }
+
             m_isReady = true;
             for (size_t i = 0; i < static_cast<u64>(MemoryAllocCategory::Size); ++i)
             {
@@ -178,11 +183,13 @@ namespace Insight
             IS_PROFILE_FUNCTION();
 
 #ifdef IS_MEMORY_TRACKING
-            std::unique_lock lock(m_lock);
 
+            std::unique_lock lock(m_lock);
             if (!m_isReady)
             {
-                return;
+                lock.unlock();
+                Initialise();
+                lock.lock();
             }
 
             auto itr = m_allocations.find(ptr);
