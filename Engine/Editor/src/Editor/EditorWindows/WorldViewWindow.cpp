@@ -478,8 +478,9 @@ namespace Insight
 
                                     for (const u64 meshIndex : renderWorld.OpaqueMeshIndexs)
                                     {
-                                        bool isVisable = false;
                                         const RenderMesh& mesh = renderWorld.Meshes[meshIndex];
+                                        const float meshDistanceToLight = Maths::Vector3Distance(Maths::Vector3(mesh.Transform[3]), pointLight.Position);
+                                        bool isVisable = meshDistanceToLight <= pointLight.Radius;
                                         {
                                             IS_PROFILE_SCOPE("Frustum Culling");
                                             //Graphics::Frustum pointLightFrustum(pointLight.View[arrayIdx], pointLight.Projection, pointLight.Radius);
@@ -487,7 +488,7 @@ namespace Insight
                                         }
                                         if (!isVisable)
                                         {
-                                            //continue;
+                                            continue;
                                         }
 
                                         struct alignas(16) Object

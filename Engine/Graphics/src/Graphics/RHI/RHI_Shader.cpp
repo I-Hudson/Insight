@@ -276,6 +276,11 @@ namespace Insight
 			if (argDebugData)
 			{
 				arguments.push_back(DXC_ARG_DEBUG);
+				arguments.push_back(L"-Qembed_debug");
+			}
+			else
+			{
+				arguments.push_back(L"-Qstrip_debug");
 			}
 			if (argOptimisationsEnabled)
 			{
@@ -283,7 +288,6 @@ namespace Insight
 			}
 			//arguments.push_back(DXC_ARG_DEBUG_NAME_FOR_BINARY);
 
-			arguments.push_back(L"-Qstrip_debug");
 			//arguments.push_back(L"-Qstrip_reflect");
 
 			arguments.push_back(L"-Wno-null-character");

@@ -18,6 +18,9 @@ cbuffer ObjectBuffer : register(b0, space1)
 
 VertexOutput VSMain(const ShadowVertexInput input)
 {
+	const float4x4 modelSpaceTransform = ubo_Transform;
+	const float4x4 lightProjectionView = Light_ProjectionView;
+
 	VertexOutput vsOut;
 	vsOut.Position = float4(input.Position, 1);
 
@@ -28,8 +31,8 @@ VertexOutput VSMain(const ShadowVertexInput input)
 		SkinMesh(input, vsOut.Position, worldNormal);
 	}
 
-	vsOut.Position = mul(ubo_Transform, vsOut.Position);
-	vsOut.Position = mul(Light_ProjectionView, vsOut.Position);
+	vsOut.Position = mul(modelSpaceTransform, vsOut.Position);
+	vsOut.Position = mul(lightProjectionView, vsOut.Position);
 
 	return vsOut;
 }

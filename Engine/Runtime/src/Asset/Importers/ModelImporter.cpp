@@ -338,7 +338,7 @@ namespace Insight
 			: IAssetImporter(
 				{
 					".obj",
-					".fbx",
+					//".fbx",
 					".gltf",
 					".dae",
 				})
