@@ -37,15 +37,15 @@ end
 function InputConfig.LibraryLinks()
     links
     {
-        "Insight_Core" .. output_project_subfix .. ".lib",
-        "Insight_Maths" .. output_project_subfix .. ".lib",
+        "Insight_Core" .. output_project_subfix .. "",
+        "Insight_Maths" .. output_project_subfix .. "",
 
-        "imgui.lib",
+        "imgui",
     }
     if (profileTool == "pix") then
         links
         {
-            "WinPixEventRuntime.lib"
+            "WinPixEventRuntime"
         }
     end
 end
@@ -58,8 +58,8 @@ function InputConfig.FilterPlatforms(AMD_Ryzen_Master_SDK, OutputDir)
     filter "platforms:Win64"
         links
         {
-            "Xinput.lib",
-            "WindowsApp.lib",
+            "Xinput",
+            "WindowsApp",
         }
 end
 

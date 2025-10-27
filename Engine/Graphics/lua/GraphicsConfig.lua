@@ -79,32 +79,32 @@ end
 function GraphicsConfig.LibraryLinks()
     links
     {      
-        "GLFW.lib",
-        "glm.lib",
-        "imgui.lib",
-        "zip.lib",
+        "GLFW",
+        "glm",
+        "imgui",
+        "zip",
 
-        "D3d12.lib",
-        "DXGI.lib",
-        "dxguid.lib",
-        "dxcompiler.lib",
-        "meshoptimizer.lib",
-        "nvrhi.lib",
-        "ShaderCompiler.lib"
+        "D3d12",
+        "DXGI",
+        "dxguid",
+        "dxcompiler",
+        "meshoptimizer",
+        "nvrhi",
+        "ShaderCompiler"
     }
 
     if VULKAN_SDK == nil then
     else
         links
         {
-            "vulkan-1.lib",
+            "vulkan-1",
         }
     end
 
     if NvidiaAftermath_SDKEnabled then
         links
         {
-            "GFSDK_Aftermath_Lib.x64.lib",
+            "GFSDK_Aftermath_Lib.x64",
         }
     end
 end
@@ -115,44 +115,44 @@ function GraphicsConfig.FilterConfigurations()
     filter "configurations:Debug or configurations:Testing"
         links
         {
-            "GenericCodeGen.lib",
-            "glslang.lib",
-            "glslang-default-resource-limits.lib",
-            "MachineIndependent.lib",
-            "OSDependent.lib",
-            "SPIRV.lib",
-            "SPIRV-Tools.lib",
-            "SPIRV-Tools-opt.lib",
-            "SPVRemapper.lib",
+            "GenericCodeGen",
+            "glslang",
+            "glslang-default-resource-limits",
+            "MachineIndependent",
+            "OSDependent",
+            "SPIRV",
+            "SPIRV-Tools",
+            "SPIRV-Tools-opt",
+            "SPVRemapper",
 
-            "ffx_fsr2_api_x64d.lib",
-            "ffx_fsr2_api_dx12_x64d.lib",
+            "ffx_fsr2_api_x64d",
+            "ffx_fsr2_api_dx12_x64d",
         }
     if VULKAN_SDK == nil then
     else
         links
         {
-            "ffx_fsr2_api_vk_x64d.lib",
+            "ffx_fsr2_api_vk_x64d",
         }
     end
 
 filter "configurations:Release"  
     links
     {
-        "glslang.lib",
-        "MachineIndependent.lib",
-        "GenericCodeGen.lib",
-        "OSDependent.lib",
-        "TracyClient.lib",
+        "glslang",
+        "MachineIndependent",
+        "GenericCodeGen",
+        "OSDependent",
+        "TracyClient",
 
-        "ffx_fsr2_api_x64.lib",
-        "ffx_fsr2_api_dx12_x64.lib",
+        "ffx_fsr2_api_x64",
+        "ffx_fsr2_api_dx12_x64",
     }
     if VULKAN_SDK == nil then
     else
         links
         {
-            "ffx_fsr2_api_vk_x64.lib",
+            "ffx_fsr2_api_vk_x64",
         }
     end
 end

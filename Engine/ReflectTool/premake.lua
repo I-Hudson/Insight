@@ -39,7 +39,7 @@ project "InsightReflectTool"
 
     links
     {
-        "TracyClient.lib",
+        "TracyClient",
     }
 
     filter "configurations:Debug or configurations:Testing"
@@ -51,7 +51,7 @@ project "InsightReflectTool"
         }
         links
         {
-            "Reflectd.lib",
+            "Reflectd",
         }
         prebuildcommands { "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/dll/Reflectd.dll\" \"%{cfg.targetdir}\"" }
 
@@ -67,31 +67,6 @@ project "InsightReflectTool"
         }
         links
         {
-            "Reflect.lib",
+            "Reflect",
         }
         prebuildcommands { "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/dll/Reflect.dll\" \"%{cfg.targetdir}\"" }
-
-
-    filter "system:Windows"
-    	system "windows"
-    	toolset("msc-v143")
-        defines
-        {
-        }
-        includedirs
-         { 
-            "%{IncludeDirs.pix}",
-         }
-        links
-        {
-            "WinPixEventRuntime.lib",
-        }
-
-    filter "system:Unix"
-    	system "linux"
-    	toolset("clang")
-        defines
-        {
-            "IS_PLATFORM_LINUX",
-            "IS_VULKAN_ENABLED",
-        }

@@ -118,11 +118,11 @@ project "tracyProfiler"
 
 	links
 	{
-		--"capstone.lib",
-		"glfw3.lib",
+		--"capstone",
+		"glfw3",
 
-		"ws2_32.lib",
-		"Dbghelp.lib",
+		"ws2_32",
+		"Dbghelp",
 	}
 
 	defines 
@@ -182,10 +182,10 @@ project "tracyProfiler"
 		}
 		links
 		{
-			"bz2d.lib",
-			"freetyped.lib",
-			"libpng16d.lib",
-			"zlibd.lib",
+			"bz2d",
+			"freetyped",
+			"libpng16d",
+			"zlibd",
 		}
 
 		defines
@@ -200,10 +200,10 @@ project "tracyProfiler"
 		}
 		links
 		{
-			"bz2.lib",
-			"freetype.lib",
-			"libpng16.lib",
-			"zlib.lib",
+			"bz2",
+			"freetype",
+			"libpng16",
+			"zlib",
 		}
 		defines
 		{ 

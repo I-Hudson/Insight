@@ -41,13 +41,13 @@ end
 function MathsConfig.LibraryLinks()
     links
     {
-        "imgui.lib",
-        "glm.lib"
+        "imgui",
+        "glm"
     }
     if (profileTool == "pix") then
         links
         {
-            "WinPixEventRuntime.lib"
+            "WinPixEventRuntime"
         }
     end
 end
@@ -70,9 +70,9 @@ function MathsConfig.FilterPlatforms(AMD_Ryzen_Master_SDK, OutputDir)
     filter "platforms:Win64"
         links
         {
-            "Ole32.lib",
-            "dbghelp.lib",
-            "Rpcrt4.lib",
+            "Ole32",
+            "dbghelp",
+            "Rpcrt4",
         }
 end
 

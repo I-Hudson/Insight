@@ -113,9 +113,9 @@ workspace "Insight"
         editandcontinue "off"
         defines { "IS_PROFILE_ENABLED", "IS_PROFILE_TRACY", "TRACY_IMPORTS", "TRACY_ON_DEMAND", }
         filter "configurations:Debug or configurations:Testing"
-            links { "TracyClient.lib", }
+            links { "TracyClient", }
         filter { "configurations:Release" }
-            links { "TracyClient.lib", }
+            links { "TracyClient", }
     end
     if (profileTool == "pix") then
         defines { "IS_PROFILE_ENABLED", "IS_PROFILE_PIX", "USE_PIX" }

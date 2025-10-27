@@ -46,15 +46,15 @@ end
 function EditorConfig.LibraryLinks(OutputProjectSubfix)
     links
     {
-        "glm.lib",
-        "imgui.lib",
-        "zip.lib",
+        "glm",
+        "imgui",
+        "zip",
     }
 
     if (profileTool == "pix") then
         links
         {
-            "WinPixEventRuntime.lib"
+            "WinPixEventRuntime"
         }
     end
 end
@@ -77,17 +77,17 @@ function EditorConfig.FilterConfigurations()
     filter "configurations:Debug or configurations:Testing"
         links
         {
-            "Reflectd.lib",
-            "Splashd.lib",
-            "efswd.lib",
+            "Reflectd",
+            "Splashd",
+            "efswd",
         }
 
     filter "configurations:Release"  
         links
         {
-            "Reflect.lib",
-            "Splash.lib",
-            "efsw.lib",
+            "Reflect",
+            "Splash",
+            "efsw",
         }
 
 end

@@ -76,20 +76,20 @@ end
 function PhysicsConfig.LibraryLinks()
     links
     {
-        "imgui.lib",
+        "imgui",
     }
 
     if EnabledPhysicsEngine == JoltPhysics then
         links
         {
-            "Jolt.lib",
+            "Jolt",
         }
     elseif EnabledPhysicsEngine == PhysXPhysics then
         links
         {
-            "PhysXCommon_64.lib",
-            "PhysX_64.lib",
-            "PhysXFoundation_64.lib",
+            "PhysXCommon_64",
+            "PhysX_64",
+            "PhysXFoundation_64",
         }
     end
 end

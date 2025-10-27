@@ -38,15 +38,15 @@ end
 function CoreConfig.LibraryLinks()
     links
     {
-        "imgui.lib",
-        "glm.lib",
-        "zip.lib",
+        "imgui",
+        "glm",
+        "zip",
     }
 
     if (profileTool == "pix") then
         links
         {
-            "WinPixEventRuntime.lib"
+            "WinPixEventRuntime"
         }
     end
 end
@@ -57,15 +57,15 @@ function CoreConfig.FilterConfigurations()
     filter "configurations:Debug or configurations:Testing"
         links
         {
-            "xxHashd.lib",
-            "lz4d.lib",
+            "xxHashd",
+            "lz4d",
         }
 
     filter "configurations:Release"  
         links
         {
-            "xxHash.lib",
-            "lz4.lib",
+            "xxHash",
+            "lz4",
         }
 end
 
@@ -83,9 +83,9 @@ function CoreConfig.FilterPlatforms(AMD_Ryzen_Master_SDK, OutputDir)
             }
             links
             {
-                "WindowsApp.lib",
-                "Platform.lib",
-                "Device.lib",
+                "WindowsApp",
+                "Platform",
+                "Device",
             }
             prebuildcommands
             {
@@ -97,9 +97,9 @@ function CoreConfig.FilterPlatforms(AMD_Ryzen_Master_SDK, OutputDir)
         end
         links
         {
-            "Ole32.lib",
-            "dbghelp.lib",
-            "Rpcrt4.lib",
+            "Ole32",
+            "dbghelp",
+            "Rpcrt4",
         }
 end
 

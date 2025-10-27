@@ -16,10 +16,16 @@ if "%msBuildType%" == "" (
     GOTO END
 )
 
+SET vsDevCmd2026Insider="C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"
 SET vsDevCmd2022Preview="C:\Program Files\Microsoft Visual Studio\2022\Preview\Common7\Tools\VsDevCmd.bat"
 SET vsDevCmd2022="C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools\VsDevCmd.bat"
 SET vsDevCmd2019="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\Tools\VsDevCmd.bat"
 
+if exist %vsDevCmd2026Insider% (
+    echo VSDevCmd 2026 Insider found.
+    call %vsDevCmd2026Insider%
+    GOTO MSBUILD
+    )
 if exist %vsDevCmd2022Preview% (
     echo VSDevCmd 2022 Preview found.
     call %vsDevCmd2022Preview%

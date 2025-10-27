@@ -65,7 +65,7 @@ workspace "InsightTools"
         includedirs { "%{IncludeDirs.tracy}", }
         links
         {
-            "TracyClient.lib",
+            "TracyClient",
         }
     end
     if (profileTool == "pix") then
@@ -73,7 +73,7 @@ workspace "InsightTools"
         includedirs { "%{IncludeDirs.pix}", }
         links
         {
-            "WinPixEventRuntime.lib"
+            "WinPixEventRuntime"
         }
     end 
 
@@ -103,7 +103,7 @@ workspace "InsightTools"
 
         filter "system:Windows"
     	system "windows"
-    	toolset("msc-v143")
+    	toolset("msc-v145")
         defines
         {
             "IS_PLATFORM_WINDOWS",
@@ -122,23 +122,32 @@ workspace "InsightTools"
         }
         links
         {
-            "WinPixEventRuntime.lib",
-            "cppwinrt_fast_forwarder.lib",
+            "WinPixEventRuntime",
+            "cppwinrt_fast_forwarder",
         }
 
     filter { "system:Windows", "configurations:Debug or configurations:Testing" }
         ignoredefaultlibraries
         {
-            "libcmt.lib",
-            "msvcrt.lib",
-            "libcmtd.lib",
+            "libcmt",
+            "msvcrt",
+            "libcmtd",
         }
     filter { "system:Windows", "configurations:Release" }
         ignoredefaultlibraries
         {
-            "libcmt.lib",
-            "libcmtd.lib",
-            "msvcrtd.lib",
+            "libcmt",
+            "libcmtd",
+            "msvcrtd",
+        }
+
+    filter "system:Unix"
+    	system "linux"
+    	toolset("clang")
+        defines
+        {
+            "IS_PLATFORM_LINUX",
+            "IS_VULKAN_ENABLED",
         }
 
     filter "system:Unix"

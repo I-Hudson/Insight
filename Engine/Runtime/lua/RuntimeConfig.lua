@@ -53,15 +53,15 @@ end
 function RuntimeConfig.LibraryLinks()
     links
     {  
-        "glm.lib",
-        "imgui.lib",
-        "zip.lib",
-        "meshoptimizer.lib",
+        "glm",
+        "imgui",
+        "zip",
+        "meshoptimizer",
     }
     if (profileTool == "pix") then
         links
         {
-            "WinPixEventRuntime.lib"
+            "WinPixEventRuntime"
         }
     end
 end
@@ -78,36 +78,36 @@ function RuntimeConfig.FilterConfigurations()
     }
     links
     {
-        "Splashd.lib",
-        "glm.lib",
-        "imgui.lib",
-        "xxHashd.lib",
-        "meshoptimizer.lib",
-        "lz4d.lib",
-        "Reflectd.lib",
-        "assimp-vc143-mtd.lib",
+        "Splashd",
+        "glm",
+        "imgui",
+        "xxHashd",
+        "meshoptimizer",
+        "lz4d",
+        "Reflectd",
+        "assimp-vc143-mtd",
 
-        --"GLFW.lib",
-        --"vulkan-1.lib",
-        --"D3d12.lib",
-        --"DXGI.lib",
-        --"dxguid.lib",
-        --"dxcompiler.lib",
-        --"GFSDK_Aftermath_Lib.x64.lib",
+        --"GLFW",
+        --"vulkan-1",
+        --"D3d12",
+        --"DXGI",
+        --"dxguid",
+        --"dxcompiler",
+        --"GFSDK_Aftermath_Lib.x64",
 
-        --"GenericCodeGen.lib",
-        --"glslang.lib",
-        --"glslang-default-resource-limits.lib",
-        --"MachineIndependent.lib",
-        --"OSDependent.lib",
-        --"SPIRV.lib",
-        --"SPIRV-Tools.lib",
-        --"SPIRV-Tools-opt.lib",
-        --"SPVRemapper.lib",
+        --"GenericCodeGen",
+        --"glslang",
+        --"glslang-default-resource-limits",
+        --"MachineIndependent",
+        --"OSDependent",
+        --"SPIRV",
+        --"SPIRV-Tools",
+        --"SPIRV-Tools-opt",
+        --"SPVRemapper",
 
-        --"ffx_fsr2_api_x64d.lib",
-        --"ffx_fsr2_api_vk_x64d.lib",
-        --"ffx_fsr2_api_dx12_x64d.lib",
+        --"ffx_fsr2_api_x64d",
+        --"ffx_fsr2_api_vk_x64d",
+        --"ffx_fsr2_api_dx12_x64d",
     }
     prebuildcommands { "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/dll/\" \"%{cfg.targetdir}\"", "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/pdb/\" \"%{cfg.targetdir}\"",  }
 
@@ -122,39 +122,39 @@ buildoptions "/MD"
     }
     links
     {
-        "Splash.lib",
-        "glm.lib",
-        "imgui.lib",
-        "xxHash.lib",
-        "meshoptimizer.lib",
-        "lz4.lib",
-        "Reflect.lib",
-        "assimp-vc143-mt.lib",
+        "Splash",
+        "glm",
+        "imgui",
+        "xxHash",
+        "meshoptimizer",
+        "lz4",
+        "Reflect",
+        "assimp-vc143-mt",
 
-        --"GLFW.lib",
-        --"vulkan-1.lib",
-        --"D3d12.lib",
-        --"DXGI.lib",
-        --"dxguid.lib",
-        --"dxcompiler.lib",
-        --"GFSDK_Aftermath_Lib.x64.lib",
+        --"GLFW",
+        --"vulkan-1",
+        --"D3d12",
+        --"DXGI",
+        --"dxguid",
+        --"dxcompiler",
+        --"GFSDK_Aftermath_Lib.x64",
 
-        --"glslang.lib",
-        --"MachineIndependent.lib",
-        --"GenericCodeGen.lib",
-        --"OGLCompiler.lib",
-        --"OSDependent.lib",
+        --"glslang",
+        --"MachineIndependent",
+        --"GenericCodeGen",
+        --"OGLCompiler",
+        --"OSDependent",
 
-        --"ffx_fsr2_api_x64.lib",
-        --"ffx_fsr2_api_vk_x64.lib",
-        --"ffx_fsr2_api_dx12_x64.lib",
+        --"ffx_fsr2_api_x64",
+        --"ffx_fsr2_api_vk_x64",
+        --"ffx_fsr2_api_dx12_x64",
     }
     prebuildcommands { "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/dll/\" \"%{cfg.targetdir}\"", "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/pdb/\" \"%{cfg.targetdir}\"", }
     
     filter "configurations:Testing" 
     links
     {
-        --"doctest.lib",
+        --"doctest",
     }
     libdirs
     {
@@ -194,10 +194,10 @@ function RuntimeConfig.FilterPlatforms(AMD_Ryzen_Master_SDK, OutputDir)
          }
         links
         {
-            "WinPixEventRuntime.lib",
-            "cppwinrt_fast_forwarder.lib",
-            "Xinput.lib",
-            "Comctl32.lib",
+            "WinPixEventRuntime",
+            "cppwinrt_fast_forwarder",
+            "Xinput",
+            "Comctl32",
         }
 
         filter "system:Unix"

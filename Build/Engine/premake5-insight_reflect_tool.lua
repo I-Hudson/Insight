@@ -79,9 +79,33 @@ workspace "InsightReflectTool"
     if (profileTool == "pix") then
         links
         {
-            "WinPixEventRuntime.lib"
+            "WinPixEventRuntime"
         }
     end
+
+    
+    filter "system:Windows"
+    	system "windows"
+    	toolset("msc-v145")
+        defines
+        { }
+        includedirs
+        { 
+            "%{IncludeDirs.pix}",
+        }
+        links
+        {
+            "WinPixEventRuntime",
+        }
+
+    filter "system:Unix"
+    	system "linux"
+    	toolset("clang")
+        defines
+        {
+            "IS_PLATFORM_LINUX",
+            "IS_VULKAN_ENABLED",
+        }
 
 include "../../Engine/ReflectTool/premake.lua"
 

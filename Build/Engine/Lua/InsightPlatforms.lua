@@ -38,32 +38,32 @@ function InsightPlatforms.All()
 
         links
         {
-            "WinPixEventRuntime.lib",
-            "cppwinrt_fast_forwarder.lib",
-            "Comctl32.lib",
+            "WinPixEventRuntime",
+            "cppwinrt_fast_forwarder",
+            "Comctl32",
         }
         
     filter { "platforms:Win64", "configurations:Debug or configurations:Testing" }
         links
         {
-            "spdlogd.lib",
+            "spdlogd",
         }
         ignoredefaultlibraries
         {
-            "libcmt.lib",
-            "msvcrt.lib",
-            "libcmtd.lib",
+            "libcmt",
+            "msvcrt",
+            "libcmtd",
         }
     filter { "platforms:Win64", "configurations:Release" }
         links
         {
-            "spdlog.lib",
+            "spdlog",
         }
         ignoredefaultlibraries
         {
-            "libcmt.lib",
-            "libcmtd.lib",
-            "msvcrtd.lib",
+            "libcmt",
+            "libcmtd",
+            "msvcrtd",
         }
 
     filter "system:Unix"

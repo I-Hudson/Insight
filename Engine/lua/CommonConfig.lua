@@ -15,7 +15,7 @@ function CommonConfig.LinkToInsightModule(moduleName)
 
     links
     {
-        "Insight_" .. moduleName .. output_project_subfix .. ".lib",
+        "Insight_" .. moduleName .. output_project_subfix .. "",
     }
 end
 

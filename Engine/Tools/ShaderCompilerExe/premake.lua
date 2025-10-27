@@ -40,7 +40,7 @@ project "ShaderCompilerExe"
 
     links
     {
-        "ShaderCompiler.lib",
+        "ShaderCompiler",
     }
 
     filter "configurations:Debug or configurations:Testing"
@@ -66,18 +66,4 @@ project "ShaderCompilerExe"
         }
         links
         {
-        }
-
-
-    filter "system:Windows"
-    	system "windows"
-    	toolset("msc-v143")
-
-    filter "system:Unix"
-    	system "linux"
-    	toolset("clang")
-        defines
-        {
-            "IS_PLATFORM_LINUX",
-            "IS_VULKAN_ENABLED",
         }

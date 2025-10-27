@@ -149,28 +149,28 @@ project "InsightStandalone"
 
     removelinks
     {
-        "Insight_Core" .. output_project_subfix .. ".lib",
-        "Insight_Maths" .. output_project_subfix .. ".lib",
-        "Insight_Input" .. output_project_subfix .. ".lib",
-        "Insight_Graphics" .. output_project_subfix .. ".lib",
-        "Insight_Physics" .. output_project_subfix .. ".lib",
-        "Insight_Runtime" .. output_project_subfix .. ".lib",
+        "Insight_Core" .. output_project_subfix .. "",
+        "Insight_Maths" .. output_project_subfix .. "",
+        "Insight_Input" .. output_project_subfix .. "",
+        "Insight_Graphics" .. output_project_subfix .. "",
+        "Insight_Physics" .. output_project_subfix .. "",
+        "Insight_Runtime" .. output_project_subfix .. "",
     }
     CommonConfig.PostBuildCopyLibraryToOutput()
 
     filter { "system:Windows", "configurations:Debug or configurations:Testing" }
     ignoredefaultlibraries
     {
-        "libcmt.lib",
-        "msvcrt.lib",
-        "libcmtd.lib",
+        "libcmt",
+        "msvcrt",
+        "libcmtd",
     }
 filter { "system:Windows", "configurations:Release" }
     ignoredefaultlibraries
     {
-        "libcmt.lib",
-        "libcmtd.lib",
-        "msvcrtd.lib",
+        "libcmt",
+        "libcmtd",
+        "msvcrtd",
     }
 
 filter "configurations:Testing"

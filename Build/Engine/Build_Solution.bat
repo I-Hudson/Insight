@@ -24,23 +24,32 @@ call :ValididateInput %MSConfigurationTypes% "%configuration%" "Invalid configur
 set MSPlatformTypes="win64, x64"
 call :ValididateInput %MSPlatformTypes% "%platform%" "Invalid platform type, valid platform types are:"
 
-SET vsDevCmd2022="C:\Program Files\Microsoft Visual Studio\2022\Preview\Common7\Tools\VsDevCmd.bat"
+SET vsDevCmd2026Insider="C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"
+SET vsDevCmd2022Preview="C:\Program Files\Microsoft Visual Studio\2022\Preview\Common7\Tools\VsDevCmd.bat"
+SET vsDevCmd2022="C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools\VsDevCmd.bat"
 SET vsDevCmd2019="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\Tools\VsDevCmd.bat"
 
-set platformToolSet="v143"
-
+if exist %vsDevCmd2026Insider% (
+    echo VSDevCmd 2026 Insider found.
+    call %vsDevCmd2026Insider%
+    GOTO MSBUILD
+    )
+if exist %vsDevCmd2022Preview% (
+    echo VSDevCmd 2022 Preview found.
+    call %vsDevCmd2022Preview%
+    GOTO MSBUILD
+    )
 if exist %vsDevCmd2022% ( 
-    echo Found vs 2022 dev cmd.
-    set platformToolSet="v143"
+    echo VSDevCmd 2022 found.
     call %vsDevCmd2022%
     GOTO MSBUILD
     )
 if exist %vsDevCmd2019% (
-    echo Found vs 2019 dev cmd.
-    set platformToolSet="v142"
+    echo VSDevCmd 2019 found.
     call %vsDevCmd2019%
     GOTO MSBUILD
-)
+) 
+
 echo No valid VSDevCmd found.
 GOTO END
 

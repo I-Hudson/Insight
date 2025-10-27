@@ -37,7 +37,7 @@ project "ShaderCompiler"
 
     links
     {
-        "dxcompiler.lib",
+        "dxcompiler",
     }
 
     CommonConfig.PostBuildCopyLibraryToOutput()
@@ -65,18 +65,4 @@ project "ShaderCompiler"
         }
         links
         {
-        }
-
-
-    filter "system:Windows"
-    	system "windows"
-    	toolset("msc-v143")
-
-    filter "system:Unix"
-    	system "linux"
-    	toolset("clang")
-        defines
-        {
-            "IS_PLATFORM_LINUX",
-            "IS_VULKAN_ENABLED",
         }

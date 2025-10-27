@@ -32,7 +32,7 @@ project "AssetPacker"
 
     links
     {
-        "Insight_Runtime.lib",
+        "Insight_Runtime",
     }
 
     RuntimeConfig.IncludeDirs()
@@ -81,7 +81,7 @@ project "AssetPacker"
          }
         links
         {
-            "WinPixEventRuntime.lib",
+            "WinPixEventRuntime",
         }
 
     filter "system:Unix"

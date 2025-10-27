@@ -35,12 +35,12 @@ end
 function FileSystemConfig.LibraryLinks()
     links
     {
-        "Insight_Core" .. output_project_subfix .. ".lib",
+        "Insight_Core" .. output_project_subfix .. "",
     }
     if (profileTool == "pix") then
         links
         {
-            "WinPixEventRuntime.lib"
+            "WinPixEventRuntime"
         }
     end
 end
