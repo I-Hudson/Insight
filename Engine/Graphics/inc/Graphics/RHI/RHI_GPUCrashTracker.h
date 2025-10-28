@@ -20,12 +20,14 @@ namespace Insight
 {
 	namespace Graphics
 	{
+		enum class GraphicsAPI;
+
 		class RHI_GPUCrashTracker : public Core::Singleton<RHI_GPUCrashTracker>
 		{
 		public:
 			static RHI_GPUCrashTracker* Create();
 
-			virtual void Init() = 0;
+			virtual void Init(const GraphicsAPI graphicsAPI) = 0;
 			virtual void Destroy() = 0;
 
 			virtual void DeviceLost() = 0;
@@ -38,7 +40,7 @@ namespace Insight
 		class RHI_GPUCrashTrackerNvidiaAftermath : public RHI_GPUCrashTracker
 		{
 		public:
-			virtual void Init() override;
+			virtual void Init(const GraphicsAPI graphicsAPI) override;
 			virtual void Destroy() override;
 
 			virtual void DeviceLost() override;

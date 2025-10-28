@@ -65,6 +65,11 @@ namespace Insight
 				#if VK_KHR_shader_float16_int8 && VK_VERSION_1_2 == 0
 				VK_KHR_SHADER_FLOAT16_INT8_EXTENSION_NAME,
 				#endif
+
+				#if VK_EXT_graphics_pipeline_library && VK_KHR_pipeline_library
+				VK_EXT_GRAPHICS_PIPELINE_LIBRARY_EXTENSION_NAME,
+				VK_KHR_PIPELINE_LIBRARY_EXTENSION_NAME,
+				#endif
 			};
 
 			std::vector<const char*> StringVectorToConstChar(const std::vector<std::string>& vec)
@@ -181,7 +186,7 @@ namespace Insight
 				m_gpuCrashTracker = RHI_GPUCrashTracker::Create();
 				if (m_gpuCrashTracker)
 				{
-					m_gpuCrashTracker->Init();
+					m_gpuCrashTracker->Init(GraphicsAPI::Vulkan);
 				}
 
 				std::vector<QueueInfo> queueInfo = {};
@@ -224,8 +229,13 @@ namespace Insight
 				std::vector<const char*> deviceLayersCC = StringVectorToConstChar(deviceLayers);
 				std::vector<const char*> deviceExtensionsCC = StringVectorToConstChar(deviceExtensions);
 
+				VkPhysicalDeviceGraphicsPipelineLibraryFeaturesEXT pipelineLibraryExt = { };
+				pipelineLibraryExt.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_GRAPHICS_PIPELINE_LIBRARY_FEATURES_EXT;
+				pipelineLibraryExt.graphicsPipelineLibrary = VK_TRUE;
+
 				VkPhysicalDeviceVulkan13Features deviceFeaturesToEnable13 = { };
 				deviceFeaturesToEnable13.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
+				deviceFeaturesToEnable13.pNext = &pipelineLibraryExt;
 
 				VkPhysicalDeviceVulkan12Features deviceFeaturesToEnable12 = { };
 				deviceFeaturesToEnable12.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
@@ -248,6 +258,7 @@ namespace Insight
 					deviceFeaturesToEnable13.dynamicRendering = VK_TRUE;
 					EnableExtension(DeviceExtension::VulkanDynamicRendering);
 				}
+
 
 				VkDeviceCreateInfo deviceCreateInfo = { };
 				deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
@@ -743,11 +754,10 @@ namespace Insight
 				swapchainCreateInfo.presentMode = presentMode;
 				swapchainCreateInfo.oldSwapchain = m_swapchain;
 
-				VkSwapchainKHR swapchain;
-				ThrowIfFailed(vkCreateSwapchainKHR(m_device, &swapchainCreateInfo, nullptr, &swapchain));
-
 				if (m_swapchain)
 				{
+					swapchainCreateInfo.oldSwapchain = VK_NULL_HANDLE;
+
 					for (RHI_Texture*& tex : m_swapchainImages)
 					{
 						static_cast<RHI_Texture_Vulkan*>(tex)->m_image = VkImage();
@@ -759,6 +769,9 @@ namespace Insight
 					vkDestroySwapchainKHR(m_device, m_swapchain, nullptr);
 					m_swapchain = nullptr;
 				}
+
+				VkSwapchainKHR swapchain;
+				ThrowIfFailed(vkCreateSwapchainKHR(m_device, &swapchainCreateInfo, nullptr, &swapchain));
 
 				u32 swapchainImageCount = 0;
 				vkGetSwapchainImagesKHR(m_device, swapchain, &swapchainImageCount, nullptr);

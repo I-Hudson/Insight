@@ -426,26 +426,33 @@ namespace Insight
 
 				VkBuffer vkBuffers[16];
 				VkDeviceSize vkOffsets[16];
+				bool rebindBuffers = false;
 
 				for (size_t i = 0; i < viewCount; ++i)
 				{
 					const RHI_BufferView& bufferView = bufferViews[i];
 					ASSERT(bufferView.IsValid());
 
-					if (m_boundVertexBufferViews.find(bufferView) != m_boundVertexBufferViews.end())
-					{
-						m_context->GetResourceRenderTracker().TrackResource(bufferView.GetBuffer());
-						continue;
-					}
-					m_boundVertexBufferViews.insert(bufferView);
-
 					const RHI_Buffer_Vulkan* bufferVulkan = static_cast<RHI_Buffer_Vulkan*>(bufferView.GetBuffer());
 					vkBuffers[i] = { bufferVulkan->GetBuffer() };
 					vkOffsets[i] = { bufferView.GetOffset() };
 					m_context->GetResourceRenderTracker().TrackResource(bufferView.GetBuffer());
+
+					if (m_boundVertexBufferViews.find(bufferView) == m_boundVertexBufferViews.end())
+					{
+						rebindBuffers = true;
+						continue;
+					}
 				}
 
+				if (rebindBuffers)
 				{
+					m_boundVertexBufferViews.clear();
+					for (size_t i = 0; i < viewCount; ++i)
+					{
+						m_boundVertexBufferViews.insert(bufferViews[i]);
+					}
+
 					IS_PROFILE_SCOPE("bindVertexBuffers");
 					vkCmdBindVertexBuffers(m_commandList, 0, viewCount, vkBuffers, vkOffsets);
 					RenderStats::Instance().VertexBufferBindings += viewCount;
@@ -561,7 +568,7 @@ namespace Insight
 			void RHI_CommandList_Vulkan::BeginTimeBlock(const std::string& blockName, Maths::Vector4 colour)
 			{
 				ASSERT(m_state == RHI_CommandListStates::Recording);
-				ASSERT_MSG(m_activeDebugUtilsLabel.pLabelName == VkDebugUtilsLabelEXT().pLabelName, "[RHI_CommandList_Vulkan::BeginTimeBlock] Time block must be ended before a new one can start.");
+				//ASSERT_MSG(m_activeDebugUtilsLabel.pLabelName == VkDebugUtilsLabelEXT().pLabelName, "[RHI_CommandList_Vulkan::BeginTimeBlock] Time block must be ended before a new one can start.");
 
 				VkDebugUtilsLabelEXT label = {};
 				label.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT;

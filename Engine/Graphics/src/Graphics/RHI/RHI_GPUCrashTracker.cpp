@@ -1,7 +1,12 @@
 #include "Graphics/RHI/RHI_GPUCrashTracker.h"
+
 #ifdef IS_DX12_ENABLED
 #include "Graphics/RHI/DX12/RenderContext_DX12.h"
 #endif
+#ifdef IS_VULKAN_ENABLED
+#include "Graphics/RHI/Vulkan/RenderContext_Vulkan.h"
+#endif
+
 #ifdef IS_NVIDIA_AFTERMATH_ENABLED
 #include "GFSDK_Aftermath.h"
 #endif
@@ -13,7 +18,7 @@
 
 #include <string>
 
-#ifdef IS_NVIDIA_AFTERMATH_ENABLED
+#if IS_NVIDIA_AFTERMATH_ENABLED
 
 namespace std
 {
@@ -123,14 +128,22 @@ namespace Insight
 			return nullptr;
 		}
 
-#ifdef IS_NVIDIA_AFTERMATH_ENABLED
-		void RHI_GPUCrashTrackerNvidiaAftermath::Init()
+#if IS_NVIDIA_AFTERMATH_ENABLED
+		void RHI_GPUCrashTrackerNvidiaAftermath::Init(const GraphicsAPI graphicsAPI)
 		{
-			u32 aftermathAPIFlag =
-#ifdef IS_DX12_ENABLED
-				GFSDK_Aftermath_GpuCrashDumpWatchedApiFlags_DX;
-#elif defined(IS_VULKAN_ENABLED)
-				GFSDK_Aftermath_GpuCrashDumpWatchedApiFlags_Vulkan;
+			u32 aftermathAPIFlag = 0;
+
+#if IS_DX12_ENABLED
+			if (graphicsAPI == GraphicsAPI::DX12)
+			{
+				aftermathAPIFlag |= GFSDK_Aftermath_GpuCrashDumpWatchedApiFlags_DX;
+			}
+#endif
+#if IS_VULKAN_ENABLED
+			if (graphicsAPI == GraphicsAPI::Vulkan)
+			{
+				aftermathAPIFlag |= GFSDK_Aftermath_GpuCrashDumpWatchedApiFlags_Vulkan;
+			}
 #endif
 
 			// Enable GPU crash dumps and set up the callbacks for crash dump notifications,
@@ -152,7 +165,6 @@ namespace Insight
 				ResolveMarkerCallback,                                            // Register callback for resolving application-managed markers.
 				this));                                                           // Set the GpuCrashTracker object as user data for the above callbacks.
 
-#ifdef IS_DX12_ENABLED
 			// Initialize Nsight Aftermath for this device.
 			const uint32_t aftermathFlags =
 				GFSDK_Aftermath_FeatureFlags_EnableMarkers |             // Enable event marker tracking.
@@ -161,13 +173,16 @@ namespace Insight
 				GFSDK_Aftermath_FeatureFlags_GenerateShaderDebugInfo |   // Generate debug information for shaders.
 				GFSDK_Aftermath_FeatureFlags_EnableShaderErrorReporting; // Enable additional runtime shader error reporting.
 
-			RHI::DX12::RenderContext_DX12& renderContextDX12 = static_cast<RHI::DX12::RenderContext_DX12&>(RenderContext::Instance());
-			AFTERMATH_CHECK_ERROR(GFSDK_Aftermath_DX12_Initialize(
-				GFSDK_Aftermath_Version_API,
-				aftermathFlags,
-				renderContextDX12.GetDevice()));
+#if IS_DX12_ENABLED
+			if (graphicsAPI == GraphicsAPI::DX12)
+			{
+				RHI::DX12::RenderContext_DX12& renderContextDX12 = static_cast<RHI::DX12::RenderContext_DX12&>(RenderContext::Instance());
+				AFTERMATH_CHECK_ERROR(GFSDK_Aftermath_DX12_Initialize(
+					GFSDK_Aftermath_Version_API,
+					aftermathFlags,
+					renderContextDX12.GetDevice()));
+			}
 #endif
-
 			m_initiaised = true;
 		}
 
