@@ -103,7 +103,7 @@ workspace "InsightTools"
 
         filter "system:Windows"
     	system "windows"
-    	toolset("msc-v145")
+    	toolset("msc")
         defines
         {
             "IS_PLATFORM_WINDOWS",

@@ -86,7 +86,7 @@ workspace "InsightReflectTool"
     
     filter "system:Windows"
     	system "windows"
-    	toolset("msc-v145")
+    	toolset("msc-143")
         defines
         { }
         includedirs

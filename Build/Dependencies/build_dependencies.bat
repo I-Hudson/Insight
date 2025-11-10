@@ -1,5 +1,6 @@
 @echo off
 @setlocal enableextensions
+@setlocal enabledelayedexpansion
 @cd /d "%~dp0"
 
 SET vsVersion=%1
@@ -16,39 +17,30 @@ if "%msBuildType%" == "" (
     GOTO END
 )
 
-SET vsDevCmd2026Insider="C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"
-SET vsDevCmd2022Preview="C:\Program Files\Microsoft Visual Studio\2022\Preview\Common7\Tools\VsDevCmd.bat"
-SET vsDevCmd2022="C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools\VsDevCmd.bat"
-SET vsDevCmd2019="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\Tools\VsDevCmd.bat"
+set vsDevCmd=
+echo Finding most recent VS option
+for /f "tokens=1,2 delims=," %%a in (../Engine/vsDevCmdVersions.txt) do (
+    if "!vsDevCmd!" == "" (
+        if exist "%%a" (
+            SET vsDevCmd=%%a
+        )
+    )
+)
 
-if exist %vsDevCmd2026Insider% (
-    echo VSDevCmd 2026 Insider found.
-    call %vsDevCmd2026Insider%
+if "!vsDevCmd!" == "" (
+    echo No valid VSDevCmd found.
+    GOTO END
+) else (
+    echo Found VSDevCmd !vsDevCmd!
+    call "!vsDevCmd!"
     GOTO MSBUILD
-    )
-if exist %vsDevCmd2022Preview% (
-    echo VSDevCmd 2022 Preview found.
-    call %vsDevCmd2022Preview%
-    GOTO MSBUILD
-    )
-if exist %vsDevCmd2022% ( 
-    echo VSDevCmd 2022 found.
-    call %vsDevCmd2022%
-    GOTO MSBUILD
-    )
-if exist %vsDevCmd2019% (
-    echo VSDevCmd 2019 found.
-    call %vsDevCmd2019%
-    GOTO MSBUILD
-) 
-
-echo No valid VSDevCmd found.
-GOTO END
+)
 
 :MSBUILD
 SET solutionFile="../../Engine/Vendor/Dependencies.sln"
-msbuild -maxCpuCount /t:%msBuildType% /p:Configuration="Debug" /p:Platform=Win64 %solutionFile%
-msbuild -maxCpuCount /t:%msBuildType% /p:Configuration="Release" /p:Platform=Win64 %solutionFile%
+
+msbuild -maxCpuCount /t:!msBuildType! /p:Configuration="Debug" /p:Platform=Win64 %solutionFile%
+msbuild -maxCpuCount /t:!msBuildType! /p:Configuration="Release" /p:Platform=Win64 %solutionFile%
 GOTO END
 
 :END

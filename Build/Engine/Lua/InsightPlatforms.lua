@@ -3,7 +3,7 @@ local InsightPlatforms = { }
 
 function InsightPlatforms.All()
     filter { "platforms:Win64 or platforms:UWP" }
-        toolset("msc-v145")
+        toolset("msc")
         --toolset("clang")
         defines
         {

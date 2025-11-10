@@ -1,5 +1,6 @@
 @echo off
 @setlocal enableextensions
+@setlocal enabledelayedexpansion
 @cd /d "%~dp0"
 
 SET prmakeFile=%1
@@ -8,10 +9,22 @@ SET option=%2
 IF "%option%" == "" GOTO PrintHelp exit
 IF "%option%" == "compile" GOTO Compile exit
 
+if "%option%" == "vsany" (
+    echo Finding most recent VS option
+    for /f "tokens=1,2 delims=," %%a in (vsDevCmdVersions.txt) do (
+        if "!option!" == "vsany" (
+            if exist "%%a" (
+                SET option=%%b
+                echo Found vs dev cmd %%b
+            )
+        )
+    )
+)
+
 set premake=%~dp0..\..\vendor\premake\premake5.exe
 
 call %premake% --version
-echo Generating solution for premake file: '%prmakeFile%' with options '%option%'
+echo Generating solution for premake file: '%prmakeFile%' with options '!option!'
 call %premake% --file=%prmakeFile% %option%
 echo:
 call Generate_Symlinks.bat
