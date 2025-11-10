@@ -1,10 +1,31 @@
 -- table for our functions
+local CommonConfig = dofile("../../../Engine/lua/CommonConfig.lua")
 local InsightPlatforms = { }
+
+function InsightPlatforms.SetWindowsPlatformToolset()
+    filter { "platforms:Win64 or platforms:UWP" }
+        local msvcInstalls = io.open("vsDevCmdVersions.txt", "r")
+        for line in msvcInstalls:lines() do
+            local splitString = {}
+            for i in string.gmatch(line, '([^,]+)') do
+                splitString[#splitString + 1] = i
+            end 
+
+            if CommonConfig.PathExists(splitString[1]) then
+                local msvcToolset = splitString[3]
+                toolset(splitString[3])       
+                print("Settings MSVC ToolSet to '" .. splitString[3] .. "'")
+                break
+            end
+        end
+
+        --toolset("clang")
+end
 
 function InsightPlatforms.All()
     filter { "platforms:Win64 or platforms:UWP" }
-        toolset("msc")
-        --toolset("clang")
+        InsightPlatforms.SetWindowsPlatformToolset()
+
         defines
         {
             "IS_PLATFORM_WINDOWS",

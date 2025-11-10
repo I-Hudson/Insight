@@ -1,3 +1,5 @@
+local InsightPlatforms = dofile("lua/InsightPlatforms.lua")
+
 local profileTool="tracy"
 
 local InsightEngineIncludes = require "lua/InsightEngineIncludes"
@@ -86,7 +88,7 @@ workspace "InsightReflectTool"
     
     filter "system:Windows"
     	system "windows"
-    	toolset("msc-143")
+        InsightPlatforms.SetWindowsPlatformToolset()
         defines
         { }
         includedirs

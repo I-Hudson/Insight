@@ -1,5 +1,6 @@
 local InsightEngineIncludes = require "lua/InsightEngineIncludes"
 local InsightVendorIncludes = require "lua/InsightVendorIncludes"
+local InsightPlatforms = dofile("lua/InsightPlatforms.lua")
 
 local profileTool="tracy"
 
@@ -103,7 +104,8 @@ workspace "InsightTools"
 
         filter "system:Windows"
     	system "windows"
-    	toolset("msc")
+    	InsightPlatforms.SetWindowsPlatformToolset()
+
         defines
         {
             "IS_PLATFORM_WINDOWS",

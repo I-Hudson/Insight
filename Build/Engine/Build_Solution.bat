@@ -1,5 +1,6 @@
-rem @echo off
+@echo off
 @setlocal enableextensions
+@setlocal enabledelayedexpansion
 @cd /d "%~dp0"
 
 SET solution=%1
@@ -24,12 +25,17 @@ call :ValididateInput %MSConfigurationTypes% "%configuration%" "Invalid configur
 set MSPlatformTypes="win64, x64"
 call :ValididateInput %MSPlatformTypes% "%platform%" "Invalid platform type, valid platform types are:"
 
+set vsSolutionExtension=
 set vsDevCmd=
 echo Finding most recent VS option
-for /f "tokens=1,2 delims=," %%a in (../Engine/vsDevCmdVersions.txt) do (
+for /f "tokens=1,2 delims=," %%a in (vsDevCmdVersions.txt) do (
     if "!vsDevCmd!" == "" (
         if exist "%%a" (
             SET vsDevCmd=%%a
+            echo %%b
+            if "%%b" == "vs2026" (
+                set vsSolutionExtension=x
+            )
         )
     )
 )
@@ -63,7 +69,9 @@ if not "%outDirectory%" == "" (
     set msbuildOutDirectory=/p:OutDir=%outDirectory% 
     echo Out directory '%outDirectory%'
 )
-msbuild -maxCpuCount /t:%msBuildType% /p:Configuration=%configuration% /p:Platform=%platform% /p:PlatformToolset=%platformToolSet% %msbuildOutDirectory% %solution% 
+
+set solution=!solution!!vsSolutionExtension!
+msbuild -maxCpuCount /t:%msBuildType% /p:Configuration=%configuration% /p:Platform=%platform% /p:PlatformToolset=%platformToolSet% %msbuildOutDirectory% !solution!
 GOTO END
 
 :ValididateInput
