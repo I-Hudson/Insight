@@ -9,6 +9,7 @@
 
 #define _M_CEE
 #include <Windows.h>
+#include <algorithm>
 
 namespace Insight
 {

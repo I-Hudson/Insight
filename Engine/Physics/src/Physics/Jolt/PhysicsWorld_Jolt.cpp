@@ -10,6 +10,7 @@
 
 #include <Jolt/Physics/Collision/Shape/BoxShape.h>
 
+#include <cstdarg>
 #include <iostream>
 #include <iomanip>
 

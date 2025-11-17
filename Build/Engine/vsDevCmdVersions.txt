@@ -1,4 +1,4 @@
-C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat,vs2022,msc-145
-C:\Program Files\Microsoft Visual Studio\2022\Preview\Common7\Tools\VsDevCmd.bat,vs2022,msc-143
-C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools\VsDevCmd.bat,vs2022,msc-143
-C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\Tools\VsDevCmd.bat,vs2019,msc-142
+C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat,vs2026,msc-145,Visual Studio 18 2026
+C:\Program Files\Microsoft Visual Studio\2022\Preview\Common7\Tools\VsDevCmd.bat,vs2022,msc-143,Visual Studio 17 2022
+C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools\VsDevCmd.bat,vs2022,msc-143,Visual Studio 17 2022
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\Tools\VsDevCmd.bat,vs2019,msc-142,Visual Studio 16 2019

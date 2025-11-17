@@ -3,7 +3,7 @@
 @setlocal enabledelayedexpansion
 @cd /d "%~dp0"
 
-SET solution=%1
+SET solution=%~1
 SET vsVersion=%2
 SET msBuildType=%3
 SET configuration=%4
@@ -27,11 +27,13 @@ call :ValididateInput %MSPlatformTypes% "%platform%" "Invalid platform type, val
 
 set vsSolutionExtension=
 set vsDevCmd=
+set vsBuildVersion=
 echo Finding most recent VS option
 for /f "tokens=1,2,3 delims=," %%a in (vsDevCmdVersions.txt) do (
     if "!vsDevCmd!" == "" (
         if exist "%%a" (
             SET vsDevCmd=%%a
+            set vsBuildVersion=%%b
             if "%%b" == "vs2026" (
                 set vsSolutionExtension=x
             )
@@ -59,18 +61,30 @@ GOTO END
 
 :MSBUILD
 echo Start project build.
-set msbuildOutDirectory=""
+echo:
 
 echo Build type '%msBuildType%'
 echo Configuration '%configuration%'
 echo Platform '%platform%'
-if not "%outDirectory%" == "" ( 
-    set msbuildOutDirectory=/p:OutDir=%outDirectory% 
-    echo Out directory '%outDirectory%'
-)
 
-set solution=!solution!!vsSolutionExtension!
-msbuild -maxCpuCount /t:%msBuildType% /p:Configuration=%configuration% /p:Platform=%platform% %msbuildOutDirectory% !solution!
+set msbuildOutDirectory=
+if not "%outDirectory%" == "" ( 
+    set msbuildOutDirectory=/p:OutDir="%outDirectory%"
+)
+echo Out directory '!msbuildOutDirectory!'
+echo VS Build Version '!vsBuildVersion!' 
+
+rem Remove quotes from !solution! to add the vs2026 'x' if needed
+set solution2026=!solution!!vsSolutionExtension!
+if exist "!solution2026!" (
+    set solution=!solution2026!
+)
+echo Solution '!solution!'
+
+echo:
+set msbuildCommand=-maxCpuCount /t:%msBuildType% /p:Configuration=%configuration% /p:Platform=%platform% !msbuildOutDirectory! "!solution!"
+echo msbuild command: '%msbuildCommand%'
+msbuild %msbuildCommand%
 GOTO END
 
 :ValididateInput

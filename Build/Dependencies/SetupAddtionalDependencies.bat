@@ -1,4 +1,5 @@
 @echo off
+@setlocal enabledelayedexpansion
 
 set vendorPath=%~dp0..\..\vendor
 set currentDirectory=%~dp0
@@ -16,48 +17,82 @@ call :DOWNLOAD_AND_UNZIP https://developer.nvidia.com/downloads/assets/tools/sec
 
 robocopy "%vendorPath%\glfw\glfw-3.4" "%vendorPath%\glfw" /E /MOV
 
-set cmakeGenerator="Visual Studio 17 2022"
+set vsVersion=
+set cmakeGenerator=
 set cmakeArch="x64"
+
+echo Finding most recent cmake VS option
+for /f "tokens=1,2,3,4 delims=," %%a in (../Engine/vsDevCmdVersions.txt) do (
+    if "!vsDevCmd!" == "" (
+        if exist "%%a" (
+            SET cmakeGenerator="%%d"
+            set vsVersion=%%b
+            echo Selecting CMake generator '%%d'
+        )
+    )
+)
 
 echo Generate and Assimp
 cd "%vendorPath%/assimp"
-call cmake -S "./" -B "build" -G %cmakeGenerator% -A %cmakeArch%
+git clean -fxd build/CMakeCache.txt build/CMakeFiles
+call cmake -S "./" -B "build" -G !cmakeGenerator! -A %cmakeArch%
 cd "%currentDirectory%"
-call "../Engine/Build_Solution.bat" "%vendorPath%/assimp/build/Assimp.sln" vs2022 Build Debug x64
-call "../Engine/Build_Solution.bat" "%vendorPath%/assimp/build/Assimp.sln" vs2022 Build Release x64
+call "../Engine/Build_Solution.bat" "%vendorPath%/assimp/build/Assimp.sln" !vsVersion! Build Debug x64
+call "../Engine/Build_Solution.bat" "%vendorPath%/assimp/build/Assimp.sln" !vsVersion! Build Release x64
 
 echo Generate and spdlog
 cd "%vendorPath%/spdlog"
-call cmake -S "./" -B "build"  -G %cmakeGenerator% -A %cmakeArch% -D SPDLOG_BUILD_SHARED=ON
+git clean -fxd build/CMakeCache.txt build/CMakeFiles
+call cmake -S "./" -B "build"  -G !cmakeGenerator! -A %cmakeArch% -D SPDLOG_BUILD_SHARED=ON
 cd "%currentDirectory%"
-call "../Engine/Build_Solution.bat" "%vendorPath%/spdlog/build/spdlog.sln" vs2022 Build Debug x64
-call "../Engine/Build_Solution.bat" "%vendorPath%/spdlog/build/spdlog.sln" vs2022 Build Release x64
+call "../Engine/Build_Solution.bat" "%vendorPath%/spdlog/build/spdlog.sln" !vsVersion! Build Debug x64
+call "../Engine/Build_Solution.bat" "%vendorPath%/spdlog/build/spdlog.sln" !vsVersion! Build Release x64
 
 
 echo Generate and Build tracy
 cd "%vendorPath%/tracy"
-call cmake -S "./" -B "build" -G %cmakeGenerator% -A %cmakeArch% -D TRACY_STATIC=OFF TRACY_ON_DEMAND=ON
+git clean -fxd build/CMakeCache.txt build/CMakeFiles
+call cmake -S "./" -B "build" -G !cmakeGenerator! -A %cmakeArch% -D TRACY_STATIC=OFF -D TRACY_ON_DEMAND=ON
 cd "%currentDirectory%"
-call "../Engine/Build_Solution.bat" "%vendorPath%/tracy/build/Tracy.sln" vs2022 Build Debug x64
-call "../Engine/Build_Solution.bat" "%vendorPath%/tracy/build/Tracy.sln" vs2022 Build Release x64
+call "../Engine/Build_Solution.bat" "%vendorPath%/tracy/build/Tracy.sln" !vsVersion! Build Debug x64
+call "../Engine/Build_Solution.bat" "%vendorPath%/tracy/build/Tracy.sln" !vsVersion! Build Release x64
 
 echo Generate and Build tracy profiler
 cd "%vendorPath%/tracy/profiler"
-call cmake -S "./" -B "build" -G %cmakeGenerator% -A %cmakeArch%
+git clean -fxd build/CMakeCache.txt build/CMakeFiles
+call cmake -S "./" -B "build" -G !cmakeGenerator! -A %cmakeArch% -D TRACY_ON_DEMAND=ON
 cd "%currentDirectory%"
-call "../Engine/Build_Solution.bat" "%vendorPath%/tracy/profiler/build/tracy-profiler.sln" vs2022 Build Debug x64
-call "../Engine/Build_Solution.bat" "%vendorPath%/tracy/profiler/build/tracy-profiler.sln" vs2022 Build Release x64
+call "../Engine/Build_Solution.bat" "%vendorPath%/tracy/profiler/build/tracy-profiler.sln" !vsVersion! Build Debug x64
+call "../Engine/Build_Solution.bat" "%vendorPath%/tracy/profiler/build/tracy-profiler.sln" !vsVersion! Build Release x64
 
 
 echo Generate JoltPhysics solution
 cd "%vendorPath%/JoltPhysics/Build
+if "!vsVersion!" == "vs2022" (
+git clean -fxd VS2022_CL/CMakeCache.txt VS2022_CL/CMakeFiles
 call cmake_vs2022_cl.bat -DUSE_STATIC_MSVC_RUNTIME_LIBRARY=OFF -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded$<$<CONFIG:Debug>:DebugDLL>$<$<CONFIG:Release>:DLL>$<$<CONFIG:Distribution>:DLL>" -Wno-dev
+)
+if "!vsVersion!" == "vs2026" (
+    git clean -fxd VS2026_CL/CMakeCache.txt VS2026_CL/CMakeFiles
+call cmake_vs2026_cl.bat -DUSE_STATIC_MSVC_RUNTIME_LIBRARY=OFF -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded$<$<CONFIG:Debug>:DebugDLL>$<$<CONFIG:Release>:DLL>$<$<CONFIG:Distribution>:DLL>" -Wno-dev
+)
 cd "%currentDirectory%"
 
 echo Build JoltPhysics debug
-call "../Engine/Build_Solution.bat" "%vendorPath%/JoltPhysics/Build/VS2022_CL/JoltPhysics.sln" vs2022 Build Debug x64
+if "!vsVersion!" == "vs2022" (
+call "../Engine/Build_Solution.bat" "%vendorPath%/JoltPhysics/Build/VS2022_CL/JoltPhysics.sln" !vsVersion! Build Debug x64
+)
+if "!vsVersion!" == "vs2026" (
+call "../Engine/Build_Solution.bat" "%vendorPath%/JoltPhysics/Build/VS2026_CL/JoltPhysics.sln" !vsVersion! Build Debug x64
+)
+
 echo Build JoltPhysics release
-call "../Engine/Build_Solution.bat" "%vendorPath%/JoltPhysics/Build/VS2022_CL/JoltPhysics.sln" vs2022 Build Release x64
+if "!vsVersion!" == "vs2022" (
+call "../Engine/Build_Solution.bat" "%vendorPath%/JoltPhysics/Build/VS2022_CL/JoltPhysics.sln" !vsVersion! Build Release x64
+)
+if "!vsVersion!" == "vs2026" (
+call "../Engine/Build_Solution.bat" "%vendorPath%/JoltPhysics/Build/VS2026_CL/JoltPhysics.sln" !vsVersion! Build Release x64
+)
 
 rem Generate FSR2 projects and build them.
 cd "%vendorPath%\FidelityFX-FSR2\build"
@@ -74,12 +109,12 @@ if %FSR2GenerateSolutions%=="1" (
     call GenerateSolutions.bat
 
     echo Buildiing FSR2 DX12 solutions
-    call "..\..\..\Build\Engine\Build_Solution.bat" "%vendorPath%\FidelityFX-FSR2\build\DX12\FSR2_Sample_DX12.sln" vs2022 Build Release x64
-    call "..\..\..\Build\Engine\Build_Solution.bat" "%vendorPath%\FidelityFX-FSR2\build\DX12\FSR2_Sample_DX12.sln" vs2022 Build Debug x64
+    call "..\..\..\Build\Engine\Build_Solution.bat" "%vendorPath%\FidelityFX-FSR2\build\DX12\FSR2_Sample_DX12.sln" !vsVersion! Build Release x64
+    call "..\..\..\Build\Engine\Build_Solution.bat" "%vendorPath%\FidelityFX-FSR2\build\DX12\FSR2_Sample_DX12.sln" !vsVersion! Build Debug x64
 
     echo Buildiing FSR2 Vulkan solutions
-    call "..\..\..\Build\Engine\Build_Solution.bat" "%vendorPath%\FidelityFX-FSR2\build\VK\FSR2_Sample_VK.sln" vs2022 Build Release x64
-    call "..\..\..\Build\Engine\Build_Solution.bat" "%vendorPath%\FidelityFX-FSR2\build\VK\FSR2_Sample_VK.sln" vs2022 Build Debug x64
+    call "..\..\..\Build\Engine\Build_Solution.bat" "%vendorPath%\FidelityFX-FSR2\build\VK\FSR2_Sample_VK.sln" !vsVersion! Build Release x64
+    call "..\..\..\Build\Engine\Build_Solution.bat" "%vendorPath%\FidelityFX-FSR2\build\VK\FSR2_Sample_VK.sln" !vsVersion! Build Debug x64
 )
 
 rem Copy all downloaded and unziped lib/dll and built lib/dll into the deps folder. 

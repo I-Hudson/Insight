@@ -117,7 +117,7 @@ namespace Insight
 								}
 								const u32 endIdx = std::min(startIdx + workGroupSize, vecSize);
 								IS_PROFILE_SCOPE("ParallelFor");
-								ZoneTextF("ParallelFor - %s (%d)", name.data(), endIdx - startIdx);
+								IS_PROFILE_SCOPE_TEXT("ParallelFor - %s (%d)", name.data(), endIdx - startIdx);
 
 								for (size_t i = startIdx; i < endIdx; ++i)
 								{
@@ -148,8 +148,7 @@ namespace Insight
 				completedIndexZero = true;
 				const u32 endIdx = std::min(startIdx + workGroupSize, vecSize);
 				IS_PROFILE_SCOPE("ParallelFor");
-				ZoneNameF("ParallelFor - %s (%d)", name.data(), endIdx - startIdx);
-				ZoneTextF("ParallelFor - %s (%d)", name.data(), endIdx - startIdx);
+				IS_PROFILE_SCOPE_TEXT("ParallelFor - %s (%d)", name.data(), endIdx - startIdx);
 
 				for (size_t i = startIdx; i < endIdx; ++i)
 				{

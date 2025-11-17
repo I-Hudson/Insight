@@ -103,7 +103,7 @@ set output="%~dp0..\..\deps\Debug-windows-x86_64\%~2\"
 if not exist %output% (
     mkdir %output%
 )
-xcopy /Y /B %lib_file% %output%
+xcopy /y /b %lib_file% %output%
 EXIT /B 0
 
 :COPY_TO_RELEASE_DEPS
@@ -112,5 +112,5 @@ set lib_file="%~dp0%~1"
 if not exist %output% (
     mkdir %output%
 )
-xcopy /Y /B %lib_file% %output%
+xcopy /y /b %lib_file% %output%
 EXIT /B 0
