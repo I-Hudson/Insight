@@ -1,1 +1,3 @@
-call build_dependencies.bat vs2019 Build
+call Generate_Dependencies_Solution.bat
+
+call "../Engine/Build_Solution.bat" "%dir%/../../Engine/Vendor/Dependencies.sln" vsany Build Debug win64
