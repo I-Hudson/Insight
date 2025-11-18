@@ -23,7 +23,7 @@ if "%option%" == "vsany" (
 
 set premake=%~dp0..\..\vendor\premake\premake5.exe
 
-call %premake% --version
+rem call %premake% --version
 echo Generating solution for premake file: '%prmakeFile%' with options '!option!'
 call %premake% --file=%prmakeFile% %option%
 echo:
