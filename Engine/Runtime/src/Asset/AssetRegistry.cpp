@@ -744,10 +744,13 @@ namespace Insight::Runtime
             {
                 newPath += '/';
             }
+            
             newPath += path;
             path = newPath;
         }
 
         FileSystem::FlattenAbsolutePath(path);
+
+        path = FileSystem::GetAbsolutePath(path);
     }
 }

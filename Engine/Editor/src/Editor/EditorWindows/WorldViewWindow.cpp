@@ -367,6 +367,12 @@ namespace Insight
                             for (size_t dirLightIdx = 0; dirLightIdx < renderWorld.DirectionalLights.size(); ++dirLightIdx)
                             {
                                 const RenderDirectionalLight& directionalLight = renderWorld.DirectionalLights[dirLightIdx];
+
+                                const int boundingRadiusCutoff[ECS::DirectionalLightComponent::c_cascadeCount] =
+                                {
+                                    5, 15, 45, 75
+                                };
+
                                 for (size_t cascadeIdx = 0; cascadeIdx < ECS::DirectionalLightComponent::c_cascadeCount; ++cascadeIdx)
                                 {
                                     IS_PROFILE_SCOPE("DirectionalLight Side");
@@ -405,6 +411,11 @@ namespace Insight
                                             //continue;
                                         }
                                         */
+
+                                        if (mesh.BoudingBox.GetRadius() < boundingRadiusCutoff[cascadeIdx])
+                                        {
+                                            continue;
+                                        }
 
                                         struct alignas(16) Object
                                         {
@@ -486,7 +497,7 @@ namespace Insight
                                             //Graphics::Frustum pointLightFrustum(pointLight.View[arrayIdx], pointLight.Projection, pointLight.Radius);
                                             //isVisable = pointLightFrustum.IsVisible(Maths::Vector3(mesh.Transform[3]), mesh.BoudingBox.GetRadius());
                                         }
-                                        if (!isVisable)
+                                        if (!isVisable || mesh.BoudingBox.GetRadius() < 2.5f)
                                         {
                                             continue;
                                         }
