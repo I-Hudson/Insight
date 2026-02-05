@@ -4,6 +4,8 @@
 
 #include "ECS/Entity.h"
 
+#include "Serialisation/MathsSerialisation.h"
+
 #include "Maths/Vector3.h"
 #include "Maths/Vector2.h"
 #include "Generated/LightComponent_reflect_generated.h"
