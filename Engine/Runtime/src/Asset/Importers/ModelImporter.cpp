@@ -1010,7 +1010,7 @@ namespace Insight
 			
 			Ref<MaterialAsset> material = ::New<MaterialAsset>(modelAsset->GetAssetInfo());
 
-			const std::string materialname;// aiMaterial->GetName().C_Str();
+			const std::string materialname = aiMaterial->GetName().C_Str();
 			const std::string_view Directory = modelAsset->GetAssetInfo()->FilePath;
 
 #define AYNSC_TEXTURE_LOAD 1

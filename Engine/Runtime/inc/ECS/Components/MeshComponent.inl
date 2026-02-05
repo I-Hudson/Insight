@@ -59,14 +59,14 @@ namespace Insight
 			(ISerialiser* serialiser, Ref<Runtime::MaterialAsset>& material, ECS::MeshComponent* meshComponent) const
 		{
 			constexpr const char* c_AssetGuid = "AssetGuid";
-			constexpr const char* c_MaterialGuid = "MaterialGuid";
+			constexpr const char* c_MaterialName = "MaterialName";
 			if (serialiser->IsReadMode())
 			{
 				PropertyDeserialiser<Core::GUID> guidDeserialiser;
 				std::string serialisedGuid;
 				std::string mateiralName;
 				serialiser->Read(c_AssetGuid, serialisedGuid);
-				serialiser->Read(c_MaterialGuid, mateiralName);
+				serialiser->Read(c_MaterialName, mateiralName);
 
 				if (!serialisedGuid.empty())
 				{
@@ -84,6 +84,11 @@ namespace Insight
 								break;
 							}
 						}
+
+						if (!material)
+						{
+							IS_LOG_CORE_ERROR("[ComplexSerialiser<MaterialToGuid>] Unable to load material with name '{}'.", c_MaterialName);
+						}
 					}
 					else
 					{
@@ -95,7 +100,7 @@ namespace Insight
 			{
 				PropertySerialiser<Core::GUID> guidSerialiser;
 				serialiser->Write(c_AssetGuid, material ? guidSerialiser(material->GetAssetInfo()->Guid) : "");
-				serialiser->Write(c_MaterialGuid, material ? material->GetName().data() : "");
+				serialiser->Write(c_MaterialName, material ? material->GetName() : "");
 			}
 		}
     }

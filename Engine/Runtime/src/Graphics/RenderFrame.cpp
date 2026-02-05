@@ -170,7 +170,8 @@ namespace Insight
                         Ref<Runtime::MaterialAsset> material = meshComponent ? meshComponent->GetMaterial() : skinnedMeshComponent->GetMaterial();
                         if (!material)
                         {
-                            //continue;
+                            FAIL_ASSERT();
+                            continue;
                         }
 
                         RenderMesh renderMesh;
