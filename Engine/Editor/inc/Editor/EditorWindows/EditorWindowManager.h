@@ -88,6 +88,17 @@ namespace Insight
 			std::vector<std::string> GetAllRegisteredWindowNames() const;
 			std::vector<std::string> GetAllActiveWindowNames() const;
 			IEditorWindow* GetActiveWindow(std::string_view windowName);
+			template<typename T, std::enable_if_t<std::is_base_of_v<IEditorWindow, T>, int> = 0>
+			T* GetActiveWindow()
+			{
+				if (const auto iter = m_windows.find(T::WINDOW_NAME);
+					iter != m_windows.end())
+				{
+					return static_cast<T*>(iter->second);
+				}
+				return nullptr;
+			}
+
 			void RemoveAllWindows();
 
 			void Update();

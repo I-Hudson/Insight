@@ -77,6 +77,8 @@ namespace Insight
 			, m_removeable(true)
 			, m_on_begin_called(false)
 			, m_on_end_called(false)
+			, m_isEnabled(true)
+			, m_isDirty(true)
 		{ }
 
 		Component::~Component()

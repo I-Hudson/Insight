@@ -130,9 +130,13 @@ namespace Insight
 			bool IsEnabled() const { return m_isEnabled; }
 			void SetEnabled(bool enabled) { m_isEnabled = enabled; OnEnabled(m_isEnabled); }
 
+			void SetDirty() { m_isDirty = true; }
+
 			IS_SERIALISABLE_H(Component)
 
 		protected:
+			Core::Delegate<bool> OnEnabled;
+
 			/// @brief  Allow multiple of the same component to be added to a single entity. Default is true
 			bool m_allow_multiple : 1;
 			/// @brief  Allow the component to be removed from an entity. Default is true.
@@ -143,14 +147,15 @@ namespace Insight
 			/// @brief Track when OnEnd has been called (Should only be called once, for each time this object is Enabled).
 			bool m_on_end_called : 1;
 
-			Core::Delegate<bool> OnEnabled;
+			bool m_isDirty : 1;
 
 		private:
+			bool m_isEnabled;
+
 			// TODO Low: Must add type information.
 			/// @brief Store the unique ID for the component.
 			Core::GUID m_guid;
 			Entity* m_ownerEntity = nullptr;
-			bool m_isEnabled = true;
 
 			friend class Entity;
 			friend class EntityManager;

@@ -65,26 +65,35 @@ namespace Insight
 			m_position = position;
 			m_rotation = rotation;
 			m_scale = scale;
+
+			SetDirty();
 		}
 
 		void TransformComponent::SetPosition(const Maths::Vector3& position)
 		{
 			m_position = position;
+			SetDirty();
 		}
 
 		void TransformComponent::SetRotation(const Maths::Quaternion& rotation)
 		{
 			m_rotation = rotation;
+			SetDirty();
 		}
 
 		void TransformComponent::SetScale(const Maths::Vector3& scale)
 		{
 			m_scale = scale;
+			SetDirty();
 		}
 
 		void TransformComponent::OnUpdate(const float delta_time)
 		{
-			m_previous_transform = GetTransform();
+			if (m_isDirty)
+			{
+				m_previous_transform = GetTransform();
+				m_isDirty = false;
+			}
 		}
 
 		IS_SERIALISABLE_CPP(TransformComponent)

@@ -475,17 +475,19 @@ namespace Insight::Editor
                                             else
                                             {
 
-                                                AssetInspectorWindow* assetInspectorWindow = static_cast<AssetInspectorWindow*>(EditorWindowManager::Instance().GetActiveWindow(AssetInspectorWindow::WINDOW_NAME));
+                                                AssetInspectorWindow* assetInspectorWindow = EditorWindowManager::Instance().GetActiveWindow<AssetInspectorWindow>();
                                                 if (assetInspectorWindow)
                                                 {
                                                     assetInspectorWindow->SetSelectedAssetInfo(assetInfo);
                                                 }
 
+                                                /*
                                                 std::vector<IObject*> objects = Runtime::AssetRegistry::Instance().GetObjectsFromAsset(assetInfo->Guid);
                                                 if (!objects.empty())
                                                 {
 
                                                 }
+                                                */
                                             }
                                         }
                                     }
