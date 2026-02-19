@@ -5,6 +5,8 @@
 #include "Editor/EditorWindows/GameViewWindow.h"
 #include "Editor/EditorWindows/WorldViewWindow.h"
 
+#include "Editor/Asset/EditorAssetRegistry.h"
+
 #include "Asset/AssetRegistry.h"
 #include "Asset/AssetPackage/IAssetPackage.h"
 
@@ -40,6 +42,7 @@ namespace Insight
 
         Editor::Editor()
         {
+            m_assetRegistry = New<EditorAssetRegistry>();
         }
 
         Editor::~Editor()

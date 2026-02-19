@@ -33,6 +33,7 @@ namespace Insight
             AssetRegistry() = default;
             virtual ~AssetRegistry() override = default;
 
+
             // Begin - ISystem -
             IS_SYSTEM(AssetRegistry);
             virtual void Initialise() override;
@@ -58,7 +59,7 @@ namespace Insight
             void UpdateMetaData(AssetUser* object);
             void DeserialiseAssetUser(AssetInfo* assetInfo, AssetUser* object) const;
 
-            Ref<Asset> LoadAsset(std::string path);
+            virtual Ref<Asset> LoadAsset(std::string path);
             Ref<Asset> LoadAsset(const Core::GUID guid);
 
             Ref<AssetAsyncRequest> LoadAssetAsync(std::string path);

@@ -71,6 +71,9 @@ namespace Insight
 			static Core::Timer s_FrameTimer;
 			u64 FrameCount = 0;
 
+		protected:
+			Runtime::AssetRegistry* m_assetRegistry = nullptr;
+
 		private:
 			bool m_shouldClose = false;
 
@@ -85,7 +88,6 @@ namespace Insight
 			Core::SystemRegistry m_systemRegistry;
 
 			FileManagerSystem m_fileMangerSystem;
-			Runtime::AssetRegistry m_assetRegistry;
 			Runtime::AnimationSystem m_animationSystem;
 			Runtime::AudioSystem m_audioSystem;
 			Threading::TaskSystem m_taskSystem;

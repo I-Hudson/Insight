@@ -353,6 +353,7 @@ namespace Insight
 		void ModelImporter::Import(Ref<Asset>& asset, const AssetInfo* assetInfo, const std::string_view path) const
 		{
 			IS_PROFILE_FUNCTION();
+			IS_PROFILE_SCOPE_TEXT("Model name: '%s'", assetInfo->FileName.c_str());
 
 			MaterialCache.clear();
 
@@ -1690,6 +1691,7 @@ namespace Insight
 
 			ASSERT_MSG(aiMaterial, "[ModelImporter::ProcessMaterial] AssimpMaterial from MeshNode was nullptr. This shouldn't happen.");
 			const std::string materialname = aiMaterial->GetName().C_Str();
+			IS_PROFILE_SCOPE_TEXT("Material name: '%s'", materialname.c_str());
 
 			const std::string diffuseTexturePath = GetTexturePath(aiMaterial, meshNode->Directory, aiTextureType_BASE_COLOR, aiTextureType_DIFFUSE);
 			Ref<TextureAsset> diffuseTexture = AssetRegistry::Instance().LoadAsset(diffuseTexturePath).As<TextureAsset>();

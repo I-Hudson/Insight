@@ -2,6 +2,8 @@
 
 #include "Core/Profiler.h"
 
+#include <queue>
+
 namespace Insight
 {
 	namespace ECS
@@ -10,6 +12,7 @@ namespace Insight
 		{ 
 			m_removeable = false;
 			m_allow_multiple = false;
+			m_isDirty = true;
 			m_previous_transform = Maths::Matrix4::Identity;
 		}
 
@@ -19,6 +22,9 @@ namespace Insight
 		Maths::Matrix4 TransformComponent::GetTransform() const
 		{
 			IS_PROFILE_FUNCTION();
+
+			return m_worldTransform;
+			/*
 			Maths::Matrix4 transform = GetLocalTransform();
 			Entity* parentEntity = GetOwnerEntity()->GetParent();
 			while (parentEntity != nullptr)
@@ -28,6 +34,7 @@ namespace Insight
 				parentEntity = parentEntity->GetParent();
 			}
 			return transform;
+			*/
 		}
 
 		Maths::Matrix4 TransformComponent::GetLocalTransform() const
@@ -66,24 +73,29 @@ namespace Insight
 			m_rotation = rotation;
 			m_scale = scale;
 
+			UpdateTransform();
+
 			SetDirty();
 		}
 
 		void TransformComponent::SetPosition(const Maths::Vector3& position)
 		{
 			m_position = position;
+			UpdateTransform();
 			SetDirty();
 		}
 
 		void TransformComponent::SetRotation(const Maths::Quaternion& rotation)
 		{
 			m_rotation = rotation;
+			UpdateTransform();
 			SetDirty();
 		}
 
 		void TransformComponent::SetScale(const Maths::Vector3& scale)
 		{
 			m_scale = scale;
+			UpdateTransform();
 			SetDirty();
 		}
 
@@ -91,8 +103,48 @@ namespace Insight
 		{
 			if (m_isDirty)
 			{
-				m_previous_transform = GetTransform();
+				UpdateTransform();
 				m_isDirty = false;
+			}
+		}
+
+		void TransformComponent::UpdateTransform(const bool updateChildren)
+		{
+			IS_PROFILE_FUNCTION();
+
+			Maths::Matrix4 transform = GetLocalTransform();
+			Entity* parentEntity = GetOwnerEntity()->GetParent();
+			while (parentEntity != nullptr)
+			{
+				Maths::Matrix4 parentTransform = parentEntity->GetComponent<ECS::TransformComponent>()->GetTransform();
+				transform = transform * parentTransform;
+				parentEntity = parentEntity->GetParent();
+			}
+			m_previous_transform = m_worldTransform;
+			m_worldTransform = transform;
+
+			if (updateChildren)
+			{
+				IS_PROFILE_SCOPE("Update all children transforms");
+
+				std::queue<Ptr<ECS::Entity>> transformToUpdate;
+				transformToUpdate.push(GetOwnerEntity());
+
+				while (!transformToUpdate.empty())
+				{
+					Ptr<ECS::Entity> parent = transformToUpdate.front();
+					transformToUpdate.pop();
+
+					const u32 childCount = parent->GetChildCount();
+					for (size_t i = 0; i < childCount; i++)
+					{
+						Ptr<ECS::Entity> child = parent->GetChild(i);
+						transformToUpdate.push(child);
+
+						TransformComponent* transform = child->GetComponent<TransformComponent>();
+						transform->UpdateTransform(false);
+					}
+				}
 			}
 		}
 

@@ -56,18 +56,22 @@ namespace Insight
 
 			const u64 hash = desc.GetHash();
 
-			std::lock_guard shaderLock(m_shaderLock);
-			auto itr = m_shaders.find(hash);
-			if (itr != m_shaders.end())
 			{
-				return itr->second;
+				std::unique_lock shaderLock(m_shaderLock);
+				auto itr = m_shaders.find(hash);
+				if (itr != m_shaders.end())
+				{
+					return itr->second;
+				}
 			}
 
 			RHI_Shader* shader = RHI_Shader::New();
 			shader->Create(m_context, desc);
 			shader->m_desc = desc;
-			m_shaders[hash] = shader;
-
+			{
+				std::unique_lock shaderLock(m_shaderLock);
+				m_shaders[hash] = shader;
+			}
 			return shader;
 		}
 

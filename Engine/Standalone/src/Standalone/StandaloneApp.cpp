@@ -23,6 +23,15 @@ namespace Insight
 {
 	namespace Standalone
 	{
+		StandaloneApp::StandaloneApp()
+		{
+			m_assetRegistry = New<Runtime::AssetRegistry>();
+		}
+
+		StandaloneApp::~StandaloneApp()
+		{
+		}
+
 		void StandaloneApp::OnInit()
 		{
 #ifdef IS_PACKAGE_BUILD

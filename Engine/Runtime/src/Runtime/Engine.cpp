@@ -67,8 +67,10 @@ namespace Insight
 		{
 			IS_PROFILE_FUNCTION();
 
+			ASSERT(m_assetRegistry != nullptr);
+
 			// Systems
-			m_systemRegistry.RegisterSystem(&m_assetRegistry);
+			m_systemRegistry.RegisterSystem(m_assetRegistry);
 
 			m_systemRegistry.RegisterSystem(&m_fileMangerSystem);
 			m_systemRegistry.RegisterSystem(&m_animationSystem);
@@ -109,7 +111,7 @@ namespace Insight
 				while (!Platform::IsDebuggerAttached());
 			}
 
-			m_assetRegistry.Initialise();
+			m_assetRegistry->Initialise();
 
 			m_updateThread = std::this_thread::get_id();
 			Platform::Initialise();
@@ -273,7 +275,7 @@ namespace Insight
 
 			m_audioSystem.Shutdown();
 
-			m_assetRegistry.Shutdown();
+			m_assetRegistry->Shutdown();
 
 			m_graphicsSystem.Shutdown();
 
@@ -294,8 +296,10 @@ namespace Insight
 			m_systemRegistry.UnregisterSystem(&m_taskSystem);
 			m_systemRegistry.UnregisterSystem(&m_audioSystem);
 			m_systemRegistry.UnregisterSystem(&m_animationSystem);
-			m_systemRegistry.UnregisterSystem(&m_assetRegistry);
+			m_systemRegistry.UnregisterSystem(m_assetRegistry);
 			m_systemRegistry.UnregisterSystem(&m_fileMangerSystem);
+
+			Delete(m_assetRegistry);
 
 			ASSERT(m_systemRegistry.IsEmpty());
 

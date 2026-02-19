@@ -1,6 +1,9 @@
 @echo off
 @setlocal enabledelayedexpansion
 
+set cleanRepos=%1
+echo Clean repos: %cleanRepos%
+
 set vendorPath=%~dp0..\..\vendor
 set currentDirectory=%~dp0
 
@@ -34,7 +37,9 @@ for /f "tokens=1,2,3,4 delims=," %%a in (../Engine/vsDevCmdVersions.txt) do (
 
 echo Generate and Assimp
 cd "%vendorPath%/assimp"
-git clean -fxd build/CMakeCache.txt build/CMakeFiles
+if "%cleanRepos%" == "true" (
+    git clean -fxd build/CMakeCache.txt build/CMakeFiles
+)
 call cmake -S "./" -B "build" -G !cmakeGenerator! -A %cmakeArch%
 cd "%currentDirectory%"
 call "../Engine/Build_Solution.bat" "%vendorPath%/assimp/build/Assimp.sln" !vsVersion! Build Debug x64
@@ -42,7 +47,9 @@ call "../Engine/Build_Solution.bat" "%vendorPath%/assimp/build/Assimp.sln" !vsVe
 
 echo Generate and spdlog
 cd "%vendorPath%/spdlog"
-git clean -fxd build/CMakeCache.txt build/CMakeFiles
+if "%cleanRepos%" == "true" (
+    git clean -fxd build/CMakeCache.txt build/CMakeFiles
+)
 call cmake -S "./" -B "build"  -G !cmakeGenerator! -A %cmakeArch% -D SPDLOG_BUILD_SHARED=ON
 cd "%currentDirectory%"
 call "../Engine/Build_Solution.bat" "%vendorPath%/spdlog/build/spdlog.sln" !vsVersion! Build Debug x64
@@ -51,7 +58,9 @@ call "../Engine/Build_Solution.bat" "%vendorPath%/spdlog/build/spdlog.sln" !vsVe
 
 echo Generate and Build tracy
 cd "%vendorPath%/tracy"
-git clean -fxd build/CMakeCache.txt build/CMakeFiles
+if "%cleanRepos%" == "true" (
+    git clean -fxd build/CMakeCache.txt build/CMakeFiles
+)
 call cmake -S "./" -B "build" -G !cmakeGenerator! -A %cmakeArch% -D TRACY_STATIC=OFF -D TRACY_ON_DEMAND=ON
 cd "%currentDirectory%"
 call "../Engine/Build_Solution.bat" "%vendorPath%/tracy/build/Tracy.sln" !vsVersion! Build Debug x64
@@ -59,7 +68,9 @@ call "../Engine/Build_Solution.bat" "%vendorPath%/tracy/build/Tracy.sln" !vsVers
 
 echo Generate and Build tracy profiler
 cd "%vendorPath%/tracy/profiler"
-git clean -fxd build/CMakeCache.txt build/CMakeFiles
+if "%cleanRepos%" == "true" (
+    git clean -fxd build/CMakeCache.txt build/CMakeFiles
+)
 call cmake -S "./" -B "build" -G !cmakeGenerator! -A %cmakeArch% -D TRACY_ON_DEMAND=ON
 cd "%currentDirectory%"
 call "../Engine/Build_Solution.bat" "%vendorPath%/tracy/profiler/build/tracy-profiler.sln" !vsVersion! Build Debug x64
@@ -69,11 +80,15 @@ call "../Engine/Build_Solution.bat" "%vendorPath%/tracy/profiler/build/tracy-pro
 echo Generate JoltPhysics solution
 cd "%vendorPath%/JoltPhysics/Build
 if "!vsVersion!" == "vs2022" (
-git clean -fxd VS2022_CL/CMakeCache.txt VS2022_CL/CMakeFiles
+    if "%cleanRepos%" == "true" (
+        git clean -fxd VS2022_CL/CMakeCache.txt VS2022_CL/CMakeFiles
+    )
 call cmake_vs2022_cl.bat -DUSE_STATIC_MSVC_RUNTIME_LIBRARY=OFF -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded$<$<CONFIG:Debug>:DebugDLL>$<$<CONFIG:Release>:DLL>$<$<CONFIG:Distribution>:DLL>" -Wno-dev
 )
 if "!vsVersion!" == "vs2026" (
-    git clean -fxd VS2026_CL/CMakeCache.txt VS2026_CL/CMakeFiles
+    if "%cleanRepos%" == "true" (
+        git clean -fxd VS2026_CL/CMakeCache.txt VS2026_CL/CMakeFiles
+    )
 call cmake_vs2026_cl.bat -DUSE_STATIC_MSVC_RUNTIME_LIBRARY=OFF -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded$<$<CONFIG:Debug>:DebugDLL>$<$<CONFIG:Release>:DLL>$<$<CONFIG:Distribution>:DLL>" -Wno-dev
 )
 cd "%currentDirectory%"

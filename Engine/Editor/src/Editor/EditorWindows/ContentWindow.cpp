@@ -5,7 +5,6 @@
 #include "Editor/HotReload/HotReloadSystem.h"
 
 #include "Editor/EditorGUI.h"
-#include "Editor/EditorAssetRegistry.h"
 
 #include "Asset/AssetRegistry.h"
 #include "Asset/Assets/Texture.h"

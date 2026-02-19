@@ -52,6 +52,9 @@ namespace Insight
 			IS_SERIALISABLE_H(TransformComponent)
 
 		private:
+			void UpdateTransform(bool updateChildren = true);
+
+		private:
 			REFLECT_PROPERTY()
 			Maths::Quaternion m_rotation = Maths::Quaternion::Identity;
 			REFLECT_PROPERTY()
@@ -60,7 +63,7 @@ namespace Insight
 			Maths::Vector3 m_scale = Maths::Vector3::One;
 
 			
-			//Maths::Matrix4 m_transform = Maths::Matrix4::Identity;
+			Maths::Matrix4 m_worldTransform = Maths::Matrix4::Identity;
 			Maths::Matrix4 m_previous_transform = Maths::Matrix4::Identity;
 		};
 	}

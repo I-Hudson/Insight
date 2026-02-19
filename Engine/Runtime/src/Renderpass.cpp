@@ -1553,6 +1553,8 @@ namespace Insight
 
 		void Renderpass::CreateAllCommonShaders()
 		{
+			std::vector<std::pair<ShaderDesc&, std::shared_ptr<Threading::TaskWithResult<void>>>> createShaderTasks;
+
 			g_shadowPassShader = ShaderDesc("CascadeShaderMap", EnginePaths::GetResourcePath() + "/Shaders/hlsl/Cascade_Shadow.hlsl", ShaderStageFlagBits::ShaderStage_Vertex);
 #if VERTEX_SPLIT_STREAMS
 			g_shadowPassShader.InputLayout = ShaderDesc::GetShaderInputLayoutFromStreams(
@@ -1562,7 +1564,10 @@ namespace Insight
 #else
 			g_shadowPassShader.InputLayout = ShaderDesc::GetDefaultShaderInputLayout();
 #endif
-			RenderContext::Instance().GetShaderManager().GetOrCreateShader(g_shadowPassShader);
+			std::shared_ptr<Threading::Task>shadowShaderTask = Threading::TaskSystem::Instance().CreateTask([]()
+				{
+					RenderContext::Instance().GetShaderManager().GetOrCreateShader(g_shadowPassShader);
+				});
 
 			g_depthPrepassShader = ShaderDesc("DepthPrepass", EnginePaths::GetResourcePath() + "/Shaders/hlsl/Depth_Prepass.hlsl", ShaderStageFlagBits::ShaderStage_Vertex);
 #if VERTEX_SPLIT_STREAMS
@@ -1573,7 +1578,10 @@ namespace Insight
 #else
 			g_depthPrepassShader.InputLayout = ShaderDesc::GetDefaultShaderInputLayout();
 #endif
-			RenderContext::Instance().GetShaderManager().GetOrCreateShader(g_depthPrepassShader);
+			createShaderTasks.push_back({ g_depthPrepassShader, Threading::TaskSystem::Instance().CreateTask([]()
+				{
+					RenderContext::Instance().GetShaderManager().GetOrCreateShader(g_depthPrepassShader);
+				}) });
 
 			g_lighShadowPass = ShaderDesc("LightShadowPass", EnginePaths::GetResourcePath() + "/Shaders/hlsl/LightDepth.hlsl", ShaderStageFlagBits::ShaderStage_Vertex);
 #if VERTEX_SPLIT_STREAMS
@@ -1584,29 +1592,65 @@ namespace Insight
 #else
 			g_lighShadowPass.InputLayout = ShaderDesc::GetDefaultShaderInputLayout();
 #endif
-			RenderContext::Instance().GetShaderManager().GetOrCreateShader(g_lighShadowPass);
+			createShaderTasks.push_back({ g_lighShadowPass, Threading::TaskSystem::Instance().CreateTask([]()
+			{
+				RenderContext::Instance().GetShaderManager().GetOrCreateShader(g_lighShadowPass);
+			}) });
 
 			g_GBufferShader = ShaderDesc("GBuffer", EnginePaths::GetResourcePath() + "/Shaders/hlsl/GBuffer.hlsl", ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
 			g_GBufferShader.InputLayout = ShaderDesc::GetDefaultShaderInputLayout();
-			RenderContext::Instance().GetShaderManager().GetOrCreateShader(g_GBufferShader);
+			createShaderTasks.push_back({ g_GBufferShader, Threading::TaskSystem::Instance().CreateTask([]()
+			{
+				RenderContext::Instance().GetShaderManager().GetOrCreateShader(g_GBufferShader);
+			}) });
 
 			g_compositeShader = ShaderDesc("Composite", EnginePaths::GetResourcePath() + "/Shaders/hlsl/Composite.hlsl", ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
-			RenderContext::Instance().GetShaderManager().GetOrCreateShader(g_compositeShader);
+			createShaderTasks.push_back({ g_compositeShader, Threading::TaskSystem::Instance().CreateTask([]()
+			{
+				RenderContext::Instance().GetShaderManager().GetOrCreateShader(g_compositeShader);
+			}) });
 
 			g_GFXHelperShader = ShaderDesc("GFXHelper", EnginePaths::GetResourcePath() + "/Shaders/hlsl/GFXHelper.hlsl", ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
-			RenderContext::Instance().GetShaderManager().GetOrCreateShader(g_GFXHelperShader);
+			createShaderTasks.push_back({ g_GFXHelperShader, Threading::TaskSystem::Instance().CreateTask([]()
+			{
+				RenderContext::Instance().GetShaderManager().GetOrCreateShader(g_GFXHelperShader);
+			}) });
 
 			g_swapChainShader = ShaderDesc("Swapchain", EnginePaths::GetResourcePath() + "/Shaders/hlsl/Swapchain.hlsl", ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
-			RenderContext::Instance().GetShaderManager().GetOrCreateShader(g_swapChainShader);
+			createShaderTasks.push_back({ g_swapChainShader, Threading::TaskSystem::Instance().CreateTask([]()
+			{
+				RenderContext::Instance().GetShaderManager().GetOrCreateShader(g_swapChainShader);
+			}) });
 
 			g_lighPass = ShaderDesc("LightPass", EnginePaths::GetResourcePath() + "/Shaders/hlsl/LightPass.hlsl", ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
-			RenderContext::Instance().GetShaderManager().GetOrCreateShader(g_lighPass);
+			createShaderTasks.push_back({ g_lighPass, Threading::TaskSystem::Instance().CreateTask([]()
+			{
+				RenderContext::Instance().GetShaderManager().GetOrCreateShader(g_lighPass);
+			}) });
 
 			g_lighPassCompute = ShaderDesc("LightPassCompute", EnginePaths::GetResourcePath() + "/Shaders/hlsl/LightPassCompute.hlsl", ShaderStageFlagBits::ShaderStage_Compute);
-			RenderContext::Instance().GetShaderManager().GetOrCreateShader(g_lighPassCompute);
+			createShaderTasks.push_back({ g_lighPassCompute, Threading::TaskSystem::Instance().CreateTask([]()
+			{
+				RenderContext::Instance().GetShaderManager().GetOrCreateShader(g_lighPassCompute);
+			}) });
 
 			g_skinningCompute = ShaderDesc("ComputeSkinning", EnginePaths::GetResourcePath() + "/Shaders/hlsl/ComputeSkinning.hlsl", ShaderStageFlagBits::ShaderStage_Compute);
-			RenderContext::Instance().GetShaderManager().GetOrCreateShader(g_skinningCompute);
+			createShaderTasks.push_back({ g_skinningCompute, Threading::TaskSystem::Instance().CreateTask([]()
+			{
+				RenderContext::Instance().GetShaderManager().GetOrCreateShader(g_skinningCompute);
+			}) });
+
+			for (size_t i = 0; i < createShaderTasks.size(); ++i)
+			{
+				const std::pair<ShaderDesc&, std::shared_ptr<Threading::TaskWithResult<void>>>& pair = createShaderTasks[i];
+				const ShaderDesc& shaderDesc = pair.first;
+				const std::shared_ptr<Threading::TaskWithResult<void>>& task = pair.second;
+				if (task->IsRunning())
+				{
+					IS_LOG_CORE_INFO("[Renderpass::CreateAllCommonShaders] Waiting for Shader '{}'.", shaderDesc.ShaderName.c_str());
+				}
+				task->Wait();
+			}
 		}
 
 		void Renderpass::BindCommonResources(RHI_CommandList* cmd_list, BufferFrame& buffer_frame, BufferSamplers& buffer_samplers)

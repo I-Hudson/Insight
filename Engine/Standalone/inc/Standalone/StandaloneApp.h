@@ -14,6 +14,8 @@ namespace Insight
 		class StandaloneApp : public Insight::App::Engine
 		{
 		public:
+			StandaloneApp();
+			virtual ~StandaloneApp();
 
 			virtual void OnInit() override;
 			virtual void OnUpdate() override;
