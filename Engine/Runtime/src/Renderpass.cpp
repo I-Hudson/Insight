@@ -633,8 +633,11 @@ namespace Insight
 #else
 								cmdList->SetVertexBuffer(renderMeshLod.VertexBufferView);
 #endif
-								cmdList->SetIndexBuffer(renderMeshLod.IndexBufferView, Graphics::IndexType::Uint32);
-								cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
+								for (u32 i = 0; i < renderMeshLod.IndexBufferViews.size(); ++i)
+								{
+									cmdList->SetIndexBuffer(renderMeshLod.IndexBufferViews[i], Runtime::Mesh::kMeshIndexType);
+									cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
+								}
 								++RenderStats::Instance().MeshCount;
 							}
 						}
@@ -889,8 +892,11 @@ namespace Insight
 #else
 									cmdList->SetVertexBuffer(renderMeshLod.VertexBufferView);
 #endif
-									cmdList->SetIndexBuffer(renderMeshLod.IndexBufferView, Graphics::IndexType::Uint32);
-									cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
+									for (u32 i = 0; i < renderMeshLod.IndexBufferViews.size(); ++i)
+									{
+										cmdList->SetIndexBuffer(renderMeshLod.IndexBufferViews[i], Runtime::Mesh::kMeshIndexType);
+										cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
+									}
 									++RenderStats::Instance().MeshCount;
 								}
 							}
@@ -936,8 +942,11 @@ namespace Insight
 #else
 								cmdList->SetVertexBuffer(renderMeshLod.VertexBufferView);
 #endif
-								cmdList->SetIndexBuffer(renderMeshLod.IndexBufferView, Graphics::IndexType::Uint32);
-								cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
+								for (u32 i = 0; i < renderMeshLod.IndexBufferViews.size(); ++i)
+								{
+									cmdList->SetIndexBuffer(renderMeshLod.IndexBufferViews[i], Runtime::Mesh::kMeshIndexType);
+									cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
+								}
 								++RenderStats::Instance().MeshCount;
 							}
 						}
@@ -1095,8 +1104,11 @@ namespace Insight
 #else
 									cmdList->SetVertexBuffer(renderMeshLod.VertexBufferView);
 #endif
-									cmdList->SetIndexBuffer(renderMeshLod.IndexBufferView, Graphics::IndexType::Uint32);
-									cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
+									for (u32 i = 0; i < renderMeshLod.IndexBufferViews.size(); ++i)
+									{
+										cmdList->SetIndexBuffer(renderMeshLod.IndexBufferViews[i], Runtime::Mesh::kMeshIndexType);
+										cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
+									}
 									++RenderStats::Instance().MeshCount;
 								}
 							}
@@ -1138,8 +1150,11 @@ namespace Insight
 #else
 								cmdList->SetVertexBuffer(renderMeshLod.VertexBufferView);
 #endif
-								cmdList->SetIndexBuffer(renderMeshLod.IndexBufferView, Graphics::IndexType::Uint32);
-								cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
+								for (u32 i = 0; i < renderMeshLod.IndexBufferViews.size(); ++i)
+								{
+									cmdList->SetIndexBuffer(renderMeshLod.IndexBufferViews[i], Runtime::Mesh::kMeshIndexType);
+									cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
+								}
 								++RenderStats::Instance().MeshCount;
 							}
 						}

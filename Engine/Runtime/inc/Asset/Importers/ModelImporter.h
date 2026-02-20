@@ -58,7 +58,11 @@ namespace Insight
 
             Graphics::Vertices Vertices;
             std::vector<Graphics::VertexBoneInfluence> VerticesBoneInfluence;
+#if IS_MODEL_INDEX_U16
+            std::vector<u16> Indices;
+#else
             std::vector<u32> Indices;
+#endif
             std::vector<LOD> LODs;
 
 #if VERTEX_SPLIT_STREAMS
@@ -68,10 +72,7 @@ namespace Insight
             Graphics::RHI_Buffer* RHI_VertexBuffer = nullptr;
 #endif
 
-            Graphics::RHI_Buffer* RHI_IndexBuffer = nullptr;
-
-            Graphics::RHI_Buffer* RHI_MonolithVertexBuffer = nullptr;
-            Graphics::RHI_Buffer* RHI_MonolithIndexBuffer = nullptr;
+            std::vector<Graphics::RHI_Buffer*> RHI_IndexBuffers;
 
             Maths::Matrix4 TransformOffset;
             std::string Name;
@@ -113,18 +114,7 @@ namespace Insight
             virtual Reflect::Type GetAssetType() const override;
 
         private:
-#if ENABLED_UFBX
-            void ProcessNodeUfbx(const ufbx_scene* fbxScene, const ufbx_node* fbxNode, ModelAsset* modelAsset) const;
-            void ProcessMeshUfbx(const ufbx_scene* fbxScene, const ufbx_node* fbxNode, const ufbx_mesh* fbxMesh, ModelAsset* modelAsset) const;
-            void ParseMeshDataUfbx(const ufbx_scene* fbxScene, const ufbx_node* fbxNode, const ufbx_mesh* fbxMesh, MeshData& meshData, ModelAsset* modelAsset) const;
-            Ref<MaterialAsset> ProcessMaterialUfbx(const ufbx_scene* fbxScene, const ufbx_node* fbxNode, const ufbx_material* materialsData, const u32 materialsCount, ModelAsset* modelAsset) const;
-
-            void ExtractBoneWeights(const ufbx_scene* fbxScene, const ufbx_node* fbxNode, const ufbx_mesh* fbxMesh, const u32 index, MeshData* meshData, ModelAsset* modelAsset) const;
-
-            void ProcessAnimations(const ufbx_scene* fbxScene, ModelAsset* modelAsset) const;
-
-            Maths::Matrix4 UfbxToInsightMatrix4(const ufbx_matrix& matrix) const;
-#elif EXP_MODEL_LOADING
+#if EXP_MODEL_LOADING
             void ProcessNode(const aiScene* aiScene, const aiNode* aiNode, ModelAsset* modelAsset) const;
             void ProcessMesh(const aiScene* aiScene, const aiNode* aiNode, const aiMesh* aiMesh, ModelAsset* modelAsset) const;
             void ParseMeshData(const aiScene* aiScene, const aiNode* aiNode, const aiMesh* aiMesh, MeshData& meshData, ModelAsset* modelAsset) const;

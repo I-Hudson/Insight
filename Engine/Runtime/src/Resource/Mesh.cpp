@@ -17,18 +17,22 @@ namespace Insight
 		Mesh::~Mesh()
 		{
 #if VERTEX_SPLIT_STREAMS
-			Renderer::FreeVertexBuffer(m_lods.at(0).VertexBuffers.Position);
-			Renderer::FreeVertexBuffer(m_lods.at(0).VertexBuffers.Normal);
-			Renderer::FreeVertexBuffer(m_lods.at(0).VertexBuffers.Colour);
-			Renderer::FreeVertexBuffer(m_lods.at(0).VertexBuffers.UV);
-			Renderer::FreeVertexBuffer(m_lods.at(0).VertexBuffers.BoneIds);
-			Renderer::FreeVertexBuffer(m_lods.at(0).VertexBuffers.BoneWeights);
+			Renderer::FreeVertexBuffer(m_lods[0].VertexBuffers.Position);
+			Renderer::FreeVertexBuffer(m_lods[0].VertexBuffers.Normal);
+			Renderer::FreeVertexBuffer(m_lods[0].VertexBuffers.Colour);
+			Renderer::FreeVertexBuffer(m_lods[0].VertexBuffers.UV);
+			Renderer::FreeVertexBuffer(m_lods[0].VertexBuffers.BoneIds);
+			Renderer::FreeVertexBuffer(m_lods[0].VertexBuffers.BoneWeights);
 #else
 			Renderer::FreeVertexBuffer(m_lods.at(0).VertexBuffer);
 			m_lods.at(0).VertexBuffer = nullptr;
 #endif
-			Renderer::FreeIndexBuffer(m_lods.at(0).IndexBuffer);
-			m_lods.at(0).IndexBuffer = nullptr;
+			for (size_t i = 0; i < m_lods[0].IndexBuffers.size(); ++i)
+			{
+				Graphics::RHI_Buffer*& buffer = m_lods[0].IndexBuffers[i];
+				Renderer::FreeIndexBuffer(buffer);
+				buffer = nullptr;
+			}
 		}
 
 		//IS_SERIALISABLE_CPP(Mesh)
@@ -41,8 +45,11 @@ namespace Insight
 #if VERTEX_SPLIT_STREAMS
 #else
 			cmd_list->SetVertexBuffer(meshLOD.VertexBufferView);
-			cmd_list->SetIndexBuffer(meshLOD.IndexBufferView, Graphics::IndexType::Uint32);
-			cmd_list->DrawIndexed(meshLOD.Index_count, 1, meshLOD.First_index, meshLOD.Vertex_offset, 0);
+			for (u32 i = 0; i < renderMeshLod.IndexBufferViews.size(); ++i)
+			{
+				cmdList->SetIndexBuffer(renderMeshLod.IndexBufferViews[i], Runtime::Mesh::kMeshIndexType);
+				cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
+			}
 #endif
 		}
 

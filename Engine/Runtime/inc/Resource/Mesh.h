@@ -2,6 +2,7 @@
 
 #include "Graphics/RHI/RHI_Buffer.h"
 #include "Graphics/BoundingBox.h"
+#include "Graphics/Enums.h"
 
 #include "Asset/Assets/Material.h"
 
@@ -42,8 +43,8 @@ namespace Insight
 			Graphics::RHI_Buffer* VertexBuffer = nullptr;
 			Graphics::RHI_BufferView VertexBufferView;
 #endif
-			Graphics::RHI_Buffer* IndexBuffer = nullptr;
-			Graphics::RHI_BufferView IndexBufferView;
+			std::vector<Graphics::RHI_Buffer*> IndexBuffers;
+			std::vector<Graphics::RHI_BufferView> IndexBufferViews;
 		};
 
 		/// @brief Contain vertex and index buffers for use when rendering this mesh.
@@ -76,8 +77,9 @@ namespace Insight
 
 			const MeshLOD& GetLOD(const u32 lodIndex = 0) const;
 			u32 GetLODCount() const;
+			
 			static const u32 s_MAX_LOD_COUNT = 4;
-
+			constexpr static Graphics::IndexType kMeshIndexType = Graphics::IndexType::Uint32;
 		private:
 			std::vector<MeshLOD> m_lods;
 			Ref<MaterialAsset> m_materialAsset = nullptr;
