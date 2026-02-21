@@ -369,6 +369,12 @@ namespace Insight
 			importer.SetPropertyInteger(AI_CONFIG_PP_RVC_FLAGS, aiComponent_CAMERAS | aiComponent_LIGHTS);
 			//importer.SetPropertyBool(AI_CONFIG_IMPORT_FBX_PRESERVE_PIVOTS, false);
 			
+			if (Mesh::kMeshIndexType == Graphics::IndexType::Uint16)
+			{
+				importer.SetPropertyInteger(AI_CONFIG_PP_SLM_VERTEX_LIMIT, _UI16_MAX); //65535
+				importer.SetPropertyInteger(AI_CONFIG_PP_SLM_TRIANGLE_LIMIT, _UI16_MAX);
+			}
+
 			ConsoleAssimpProgressHandler progressHandler(assetInfo->FileName);
 			importer.SetProgressHandler(&progressHandler);
 
@@ -394,6 +400,8 @@ namespace Insight
 				| aiProcess_GenUVCoords						/// Converts non-UV mappings (such as spherical or cylindrical mapping) to proper texture coordinate channels.
 				
 				| aiProcess_GenBoundingBoxes				//
+
+				| aiProcess_SplitLargeMeshes
 
 				//| aiProcess_RemoveRedundantMaterials		/// Searches for redundant/unreferenced materials and removes them
 				| aiProcess_JoinIdenticalVertices			/// Triangulates all faces of all meshes
@@ -677,9 +685,21 @@ namespace Insight
 					const u64 indexBufferDataOffset = meshData.Indices.size() - indexBufferCount;
 
 					const u32 kIndexTypeSize = Mesh::kMeshIndexType == Graphics::IndexType::Uint32 ? sizeof(u32) : sizeof(u16);
-					createIndexBuffer(indexBuffer, bufferSize * kIndexTypeSize, meshData.Indices.data() + indexBufferDataOffset, aiNode->mName.C_Str()
-						, aiMesh->mName.C_Str(), "_" + std::to_string(indexBufferIndex));
-
+					if (Mesh::kMeshIndexType == Graphics::IndexType::Uint32)
+					{
+						createIndexBuffer(indexBuffer, bufferSize * kIndexTypeSize, meshData.Indices.data() + indexBufferDataOffset, aiNode->mName.C_Str()
+							, aiMesh->mName.C_Str(), "_" + std::to_string(indexBufferIndex));
+					}
+					else
+					{
+						std::vector<u16> u16Indices(meshData.Indices.size());
+						for (size_t i = 0; i < u16Indices.size(); ++i)
+						{
+							u16Indices[i] = static_cast<u16>(meshData.Indices[i]);
+						}
+						createIndexBuffer(indexBuffer, bufferSize* kIndexTypeSize, u16Indices.data() + indexBufferDataOffset, aiNode->mName.C_Str()
+							, aiMesh->mName.C_Str(), "_" + std::to_string(indexBufferIndex));
+					}
 					indexBufferCount -= bufferSize;
 				}
 
