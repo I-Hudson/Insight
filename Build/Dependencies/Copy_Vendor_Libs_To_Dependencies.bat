@@ -86,13 +86,18 @@ call :COPY_TO_RELEASE_DEPS "..\..\vendor\Microsoft.VCRTForwarders.140\runtimes\w
 call :COPY_TO_DEBUG_DEPS "..\..\vendor\Microsoft.Windows.CppWinRT\build\native\lib\x64\cppwinrt_fast_forwarder.lib"             "lib"
 call :COPY_TO_RELEASE_DEPS "..\..\vendor\Microsoft.Windows.CppWinRT\build\native\lib\x64\cppwinrt_fast_forwarder.lib"           "lib"
 
-call :COPY_TO_DEBUG_DEPS "..\..\vendor\DirectXShaderCompiler\lib\x64\dxcompiler.lib"             "lib"
-call :COPY_TO_DEBUG_DEPS "..\..\vendor\DirectXShaderCompiler\bin\x64\dxcompiler.dll"             "dll"
-call :COPY_TO_DEBUG_DEPS "..\..\vendor\DirectXShaderCompiler\bin\x64\dxil.dll"                   "dll"
+call :COPY_TO_DEBUG_DEPS "..\..\vendor\DirectXShaderCompiler\lib\x64\dxcompiler.lib"                                            "lib"
+call :COPY_TO_DEBUG_DEPS "..\..\vendor\DirectXShaderCompiler\bin\x64\dxcompiler.dll"                                            "dll"
+call :COPY_TO_DEBUG_DEPS "..\..\vendor\DirectXShaderCompiler\bin\x64\dxil.dll"                                                  "dll"
 
-call :COPY_TO_RELEASE_DEPS "..\..\vendor\DirectXShaderCompiler\lib\x64\dxcompiler.lib"           "lib"
-call :COPY_TO_RELEASE_DEPS "..\..\vendor\DirectXShaderCompiler\bin\x64\dxcompiler.dll"           "dll"
-call :COPY_TO_RELEASE_DEPS "..\..\vendor\DirectXShaderCompiler\bin\x64\dxil.dll"                 "dll"
+call :COPY_TO_RELEASE_DEPS "..\..\vendor\DirectXShaderCompiler\lib\x64\dxcompiler.lib"                                          "lib"
+call :COPY_TO_RELEASE_DEPS "..\..\vendor\DirectXShaderCompiler\bin\x64\dxcompiler.dll"                                          "dll"
+call :COPY_TO_RELEASE_DEPS "..\..\vendor\DirectXShaderCompiler\bin\x64\dxil.dll"                                                "dll"
+
+rem Compressonator
+call :COPY_TO_DEBUG_DEPS "..\..\vendor\Compressonator\build\Debug_MD\x64\\Compressonator_MDd.lib"                               "lib"
+call :COPY_TO_RELEASE_DEPS "..\..\vendor\Compressonator\build\Release_MD\x64\Compressonator_MD.lib"						        "lib"
+call :COPY_TO_RELEASE_DEPS "..\..\vendor\Compressonator\build\Release_MD\x64\Compressonator_MD.pdb"						        "pdb"
 
 pause
 exit

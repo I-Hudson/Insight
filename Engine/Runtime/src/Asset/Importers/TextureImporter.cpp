@@ -8,6 +8,7 @@
 #include "Core/Profiler.h"
 #include "Platforms/Platform.h"
 
+#include "cmp_compressonatorlib/compressonator.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_STATIC
@@ -69,178 +70,33 @@ namespace Insight
                 return;
             }
 
-            ImageLoader imageLoader = ImageLoader::stbi;
-            void* textureBuffer = nullptr;
-            u64 textureSize = 0;
-            int width, height, channels;
-            PixelFormat pixelFormat = PixelFormat::R8G8B8A8_UNorm;
+            TextureImportContext context;
+            context.Data.resize(dataSize);
+            Platform::MemCopy(context.Data.data(), data, context.Data.size());
+            LoadRaw(context);
 
-#ifdef NVIDIA_Texture_Tools
-            const bool kEnableNVTT = true;
-
-            struct nvttCompressHandler : nvtt::OutputHandler
-            {
-                virtual ~nvttCompressHandler() override
-                {
-
-                }
-
-                /// Indicate the start of a new compressed image that's part of the final texture.
-                virtual void beginImage(int size, int width, int height, int depth, int face, int miplevel) override
-                {
-                    Size = size;
-                    Width = width;
-                    Height = height;
-                    Depth = depth;
-                    Face = face;
-                    MipLevel = miplevel;
-                }
-
-                /// Output data. Compressed data is output as soon as it's generated to minimize memory allocations.
-                virtual bool writeData(const void* data, int size) override
-                {
-                    BufferData.resize(size);
-                    Platform::MemCopy(BufferData.data(), data, size);
-                    return true;
-                }
-
-                /// Indicate the end of the compressed image. (New in NVTT 2.1)
-                virtual void endImage() override
-                {
-
-                }
-
-                int Size;
-                int Width;
-                int Height;
-                int Depth;
-                int Face;
-                int MipLevel;
-                std::vector<u8> BufferData;
-            };
-
-            bool result = false;
-            nvtt::useCurrentDevice();
-            // First, create an nvtt::Context. Contexts are used both for global settings and for controlling the compression process:
-            nvtt::Context context;
-            context.enableCudaAcceleration(true);
-            // Now all context compression will be CUDA-accelerated if any system GPU supports it.
-
-            // In NVTT, we use nvtt::Surface to store a single uncompressed image. nvtt::Surface has a method nvtt::Surface::load(), which can be used to load an image file. A typical image loading process looks like this:
-            nvtt::Surface image;
-            bool nvttLoadFromMemory = false;
-            {
-                IS_PROFILE_SCOPE("nvtt - loadFromMemory");
-                nvttLoadFromMemory = image.loadFromMemory(data, dataSize);
-            }
-            // Then, we set up compression options using nvtt::CompressionOptions:
-            nvtt::CompressionOptions compressionOptions;
-            // Compress to 4-channel, 8-bit-per-pixel BC3:
-            compressionOptions.setFormat(nvtt::Format_BC3);
-
-            // See nvtt::Format for all compression formats.
-            // Next, we say how to write the compressed data using nvtt::OutputOptions.The simplest case is to assign a filename directly :
-            nvtt::OutputOptions outputOptions;
-            //outputOptions.setFileName(outputFileName);
-
-            // For more dedicated control of the output stream, you may want to derive a subclass of nvtt::OutputHandler, then use nvtt::OutputOptions::setOutputHandler to redirect the output:
-            nvttCompressHandler outputHandler;
-            outputOptions.setOutputHandler(&outputHandler);
-
-            // When the above setup is complete, we compress the image using nvtt::Context.
-            //context.outputHeader(image, 1, compressionOptions, outputOptions); // output DDS header
-            bool nvttCompress = false;
-            {
-                IS_PROFILE_SCOPE("nvtt - compress");
-                nvttCompress = context.compress(image, 0, 0, compressionOptions, outputOptions); // output compressed image
-            }
-
-            if (kEnableNVTT && nvttLoadFromMemory && nvttCompress)
-            {
-                width = outputHandler.Width;
-                height = outputHandler.Height;
-                channels = 4;
-                textureSize = outputHandler.Size;
-                textureBuffer = outputHandler.BufferData.data();
-                imageLoader = ImageLoader::NvidiaTextureTools;
-                pixelFormat = PixelFormat::BC3_UNorm;
-            }
-#endif
-
-            if (textureBuffer == nullptr)
-            {
-                IS_PROFILE_SCOPE("stbi_load_from_memory");
-                textureBuffer = stbi_load_from_memory((const stbi_uc*)data, dataSize, &width, &height, &channels, STBI_rgb_alpha);
-                textureSize = width * height * 4;
-                imageLoader = ImageLoader::stbi;
-            }
-            else if (textureBuffer == nullptr)
-            {
-#ifdef QOI_IMPLEMENTATION
-                imageLoader = ImageLoader::qoi;
-                qoi_desc qoiDesc;
-                {
-                    IS_PROFILE_SCOPE("qoi_decode");
-                    textureBuffer = qoi_decode(data, dataSize, &qoiDesc, 4);
-                }
-                width = qoiDesc.width;
-                height = qoiDesc.height;
-                channels = static_cast<int>(qoiDesc.channels);
-                textureSize = width * height * 4;
-                imageLoader = ImageLoader::qoi;
-#endif
-            }
-
-#if 0
-            {
-                IS_PROFILE_SCOPE("qoi_encode");
-                qoi_desc qoiDesc = {};
-                qoiDesc.width = width;
-                qoiDesc.height = height;
-                qoiDesc.channels = 4;
-                qoiDesc.colorspace = QOI_SRGB;
-
-                int outLength = -1;
-                void* qoiEncode = qoi_encode(textureBuffer, &qoiDesc, &outLength);
-                FileSystem::SaveToFile((Byte*)qoiEncode, outLength, std::string(path) + ".qoi", FileType::Binary, true);
-            }
-#endif
-
-            if (textureBuffer == nullptr)
+            if (context.Data.empty())
             {
                 IS_LOG_CORE_ERROR("[TextureImporter::Import] Unable to load texture '{}' using, Nvidia texture tools, stbi or QOI.", path.data());
                 return;
             }
 
+            CompressToBC3(context);
+
             TextureAsset* texture = dynamic_cast<TextureAsset*>(asset);
             ASSERT(texture);
-            texture->m_width = width;
-            texture->m_height = height;
+            texture->m_width = context.Width;
+            texture->m_height = context.Height;
             texture->m_depth = 1;
-            texture->m_channels = 4;
-            texture->m_pixelFormat = pixelFormat;
+            texture->m_channels = context.Channels;
+            texture->m_pixelFormat = context.PixelFormat;
             texture->m_assetState = AssetState::Loaded;
             texture->m_isMemoryAsset = true;
-            texture->SetTextureData(textureBuffer, textureSize);
+            texture->SetTextureData(context.Data.data(), context.Data.size());
 
             if (texture->m_readableWriteable)
             {
-                texture->m_textureData.Bytes.resize(textureSize);
-                Platform::MemCopy(texture->m_textureData.Bytes.data(), textureBuffer, textureSize);
-            }
-
-            switch (imageLoader)
-            {
-            case ImageLoader::stbi:
-            {
-                stbi_image_free(textureBuffer);
-                break;
-            }
-            case ImageLoader::qoi:
-            {
-                free(textureBuffer);
-                break;
-            }
+                texture->m_textureData.Bytes = std::move(context.Data);
             }
         }
 
@@ -291,6 +147,7 @@ namespace Insight
                 , &context.Channels
                 , STBI_rgb_alpha);
 
+            context.Channels = 4;
             const u64 textureSize = context.Width * context.Height * context.Channels;
             context.Data.resize(textureSize);
             Platform::MemCopy(context.Data.data(), textureBuffer, textureSize);
@@ -346,6 +203,53 @@ namespace Insight
 #endif
         }
 
+        void TextureImporter::CompressToBC3(TextureImportContext& context) const
+        {
+            IS_PROFILE_FUNCTION();
+
+            // 1. Define the Source Texture (RGBA8)
+            CMP_Texture srcTexture = { 0 };
+            srcTexture.dwSize = sizeof(CMP_Texture);
+            srcTexture.dwWidth = context.Width;
+            srcTexture.dwHeight = context.Height;
+            srcTexture.dwPitch = srcTexture.dwWidth * context.Channels;
+            srcTexture.format = CMP_FORMAT_RGBA_8888;
+            srcTexture.dwDataSize = context.Data.size();
+            srcTexture.pData = context.Data.data();
+
+            // 2. Define the Destination Texture (BC3)
+            CMP_Texture destTexture = { 0 };
+            destTexture.dwSize = sizeof(CMP_Texture);
+            destTexture.dwWidth = srcTexture.dwWidth;
+            destTexture.dwHeight = srcTexture.dwHeight;
+            destTexture.dwPitch = 0;
+            destTexture.format = CMP_FORMAT_BC3;
+            // BC3 uses 1 byte per pixel (16 bytes per 4x4 block)
+            destTexture.dwDataSize = CMP_CalculateBufferSize(&destTexture);
+            std::vector<Byte> outBuffer(destTexture.dwDataSize);
+            destTexture.pData = outBuffer.data();
+
+
+            // 3. Set Compression Options
+            CMP_CompressOptions options = { 0 };
+            options.dwSize = sizeof(options);
+            options.fquality = 0.5f;            // Quality level: 0.0 (Fast) to 1.0 (High)
+            options.nEncodeWith = CMP_GPU_HW;  // Enable OpenCL acceleration for AMD GPUs
+            options.bDisableMultiThreading = false;
+
+            // 4. Run Compression
+            CMP_ERROR status = CMP_ConvertTexture(&srcTexture, &destTexture, &options, nullptr);
+
+            if (status != CMP_OK) {
+                // Log error status
+                IS_LOG_CORE_ERROR("[TextureImporter::CompressToBC3] Unable to convert texture data into BC3 format.");
+                return;
+            }
+
+            context.Data = std::move(outBuffer);
+            context.PixelFormat = PixelFormat::BC3_UNorm;
+        }
+
         ImageLoader TextureImporter::FileHeaderToImageLoader(const std::vector<u8>& fileData) const
         {
             if (fileData.size() < 8)
@@ -359,6 +263,7 @@ namespace Insight
             if (header[0] == 0xFF && header[1] == 0xD8 && header[2] == 0xFF)
             {
                 // JPG
+                return ImageLoader::stbi;
             }
             else if (header[0] == 0x89 && header[1] == 0x50 && header[2] == 0x4E && header[3] == 0x47 && header[4] == 0x0D && header[5] == 0x0A && header[6] == 0x1A && header[7] == 0x0A)
             {

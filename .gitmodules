@@ -85,3 +85,9 @@
 [submodule "vendor/NVRHI"]
 	path = vendor/NVRHI
 	url = https://github.com/NVIDIA-RTX/NVRHI.git
+[submodule "vendorCompressonator"]
+	path = vendor/Compressonator
+	url = https://github.com/GPUOpen-Tools/Compressonator
+[submodule "vendor/Compressonator"]
+	path = vendor/Compressonator
+	url = https://github.com/GPUOpen-Tools/Compressonator

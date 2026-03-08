@@ -30,7 +30,7 @@ namespace Insight
         }
 
         std::string folderPath = std::filesystem::path(filePath).parent_path().string();
-        if (!Exists(folderPath))
+        if (!folderPath.empty() && !Exists(folderPath))
         {
             CreateFolder(folderPath);
         }

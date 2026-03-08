@@ -41,9 +41,6 @@ namespace Insight
 			Ref<Runtime::Asset> LoadCachedAsset(const Runtime::AssetInfo* assetInfo);
 
 		private:
-			//mutable std::mutex m_cachedAssetLock;
-			//std::unordered_map<Core::GUID, Ref<Runtime::Asset>> m_cachedAssets;
-
 			std::string m_cacheRootFolder;
 		};
 	}

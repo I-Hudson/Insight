@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Asset/Importers/IAssetImporter.h"
+#include "Graphics/PixelFormat.h"
 
 namespace Insight
 {
@@ -12,6 +13,8 @@ namespace Insight
             int Width;
             int Height;
             int Channels;
+
+            PixelFormat PixelFormat;
         };
 
         enum class ImageLoader
@@ -42,6 +45,8 @@ namespace Insight
 
             void CompressToQOI(TextureImportContext& context) const;
             void DecompressFromQOI(TextureImportContext& context) const;
+
+            void CompressToBC3(TextureImportContext& context) const;
 
             ImageLoader FileHeaderToImageLoader(const std::vector<u8>& fileData) const;
             ImageLoader FileExtenionToImageLoader(const std::string_view fileExtension) const;

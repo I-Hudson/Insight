@@ -118,6 +118,8 @@ namespace Insight
             /// @brief Path to the asset without the filename or extension
             std::string FilePath;
 
+            std::string FullFilePath;
+
             /// @brief Package name with extension, but no path
             std::string PackageName;
             /// @brief Path to the package without the package name or extension

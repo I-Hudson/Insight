@@ -40,6 +40,7 @@ function RuntimeConfig.IncludeDirs()
         "%{IncludeDirs.simplygon}",
         "%{IncludeDirs.reflect}",
         "%{IncludeDirs.nvrhi}",
+        "%{IncludeDirs.compressonator}",
     }
 end
 
@@ -87,6 +88,8 @@ function RuntimeConfig.FilterConfigurations()
         "Reflectd",
         "assimp-vc143-mtd",
 
+        "Compressonator_MDd.lib",
+
         --"GLFW",
         --"vulkan-1",
         --"D3d12",
@@ -130,6 +133,8 @@ buildoptions "/MD"
         "lz4",
         "Reflect",
         "assimp-vc143-mt",
+
+        "Compressonator_MD.lib",
 
         --"GLFW",
         --"vulkan-1",

@@ -25,6 +25,7 @@ namespace Insight
 
             FileName = FileSystem::GetFileName(absFilePath);
             FilePath = FileSystem::GetParentPath(absFilePath);
+            FullFilePath = FilePath + "/" + FileName;
 
             PackageName = FileSystem::GetFileName(absPackagePath);
             PackagePath = FileSystem::GetParentPath(absPackagePath);
@@ -125,7 +126,7 @@ namespace Insight
         std::string AssetInfo::GetFullFilePath() const
         {
             IS_PROFILE_FUNCTION();
-            return FilePath + "/" + FileName;
+            return FullFilePath;
         }
 
         std::string AssetInfo::GetFullPackagePath() const

@@ -107,11 +107,6 @@ namespace Insight
 			const std::string filePath = m_cacheRootFolder + "/" + assetInfo->Guid.ToString() + asset->GetAssetFileExtension();
 			FileSystem::SaveToFile(serialiser.GetSerialisedData(), filePath);
 
-			{
-				//std::lock_guard lock(m_cachedAssetLock);
-				//m_cachedAssets[assetInfo->Guid] = asset;
-			}
-
 			return asset;
 		}
 
@@ -153,69 +148,6 @@ namespace Insight
 
 			}
 			return asset;
-#if 0
-			std::error_code directoryIteratorErrorCode;
-			for (auto iter : std::filesystem::directory_iterator(GetCachedRootFolder(), directoryIteratorErrorCode))
-			{
-				if (!iter.is_regular_file())
-				{
-					continue;
-				}
-
-				const std::string path = iter.path().u8string();
-				const std::string filename = iter.path().filename().u8string();
-				const std::string extension = iter.path().extension().u8string();
-
-				const std::string guidString = FileSystem::ReplaceExtension(filename, "");
-				Core::GUID assetGuid;
-				assetGuid.StringToGuid(guidString);
-
-				const Runtime::AssetInfo* assetInfo = GetAssetInfo(assetGuid);
-				if (!assetInfo)
-				{
-					IS_LOG_CORE_ERROR("[EditorAssetRegistry::GetAllCachedAssets] Unable to find asset info with guid '{}'.", guidString.c_str());
-					continue;
-				}
-
-				const Runtime::IAssetImporter* importer = GetImporter(extension);
-				if (!importer)
-				{
-					IS_LOG_CORE_ERROR("[EditorAssetRegistry::GetAllCachedAssets] Unable to find importer for file extension '{}'.", extension.c_str());
-					continue;
-				}
-
-				Ref<Runtime::Asset> asset = importer->CreateAsset(assetInfo);
-				/*
-				TextureImportSettings* settings = new TextureImportSettings();
-				settings->Format = PixelFormat::R10G10B10_Xr_Bias_A2_UNorm;
-				settings->IsReadable = true;
-				asset->GetAssetInfo()->MetaData->SubMetaData.push_back(settings);
-				asset->GetAssetInfo()->SaveMetaData();
-
-				*/
-				ASSERT(asset);
-
-				const std::vector<u8> fileData = AssetRegistry::Instance().LoadAssetData(path);
-				if (fileData.empty())
-				{
-					IS_LOG_CORE_ERROR("[EditorAssetRegistry::GetAllCachedAssets] Unable to load data from file '{}'.", path.c_str());
-					continue;
-				}
-
-				Serialiser serialiser(true);
-				if (!serialiser.Deserialise(fileData))
-				{
-					IS_LOG_CORE_ERROR("[EditorAssetRegistry::GetAllCachedAssets] Unable to deserialise '{}'.", path.c_str());
-					continue;
-				}
-				asset->Deserialise(&serialiser);
-
-				{
-					//std::lock_guard lock(m_cachedAssetLock);
-					//m_cachedAssets[asset->GetGuid()] = asset;
-				}
-			}
-#endif //0
 		}
 	}
 }

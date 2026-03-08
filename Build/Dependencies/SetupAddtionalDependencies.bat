@@ -132,6 +132,15 @@ if %FSR2GenerateSolutions%=="1" (
     call "..\..\..\Build\Engine\Build_Solution.bat" "%vendorPath%\FidelityFX-FSR2\build\VK\FSR2_Sample_VK.sln" !vsVersion! Build Debug x64
 )
 
+
+echo Build Compressonator
+cd "%vendorPath%/Compressonator/build"
+if "%cleanRepos%" == "true" (
+    git clean -fxd build/CMakeCache.txt build/CMakeFiles
+)
+call build/windows_build_sdk_cmake.bat
+cd "%currentDirectory%"
+
 rem Copy all downloaded and unziped lib/dll and built lib/dll into the deps folder. 
 cd "..\..\..\Build\Dependencies"
 call Copy_Vendor_Libs_To_Dependencies.bat
