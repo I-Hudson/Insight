@@ -7,10 +7,14 @@
 #include "FileSystem/FileSystem.h"
 #include "Serialisation/Serialisers/JsonSerialiser.h"
 
+#include "Platforms/Platform.h"
+
 namespace Insight
 {
     namespace Runtime
     {
+        IS_SERIALISABLE_CPP(IAssetSubMetaData);
+
         AssetInfo::AssetInfo(std::string_view filePath, std::string_view packagePath, Insight::Runtime::IAssetPackage* assetPackage, const bool enableMetaFiles)
         {
             std::string absFilePath = std::string(filePath);
@@ -29,7 +33,7 @@ namespace Insight
             AssetPackage = assetPackage;
 
             if (enableMetaFiles && FileSystem::GetExtension(FileName) != AssetMetaData::c_FileExtension)
-            { 
+            {
                 MetaData = ::New<AssetMetaData>();
                 LoadMetaData();
                 Guid = MetaData->AssetGuid;
@@ -62,6 +66,19 @@ namespace Insight
         bool AssetMetaData::IsValid() const
         {
             return AssetGuid.IsValid();
+        }
+
+        IAssetSubMetaData* AssetMetaData::GetSubMetaData(const char* typeName) const
+        {
+            for (size_t i = 0; i < SubMetaData.size(); ++i)
+            {
+                ASSERT(SubMetaData[i] != nullptr);
+                if (Platform::StrCompare(SubMetaData[i]->GetTypeName(), typeName))
+                {
+                    return SubMetaData[i];
+                }
+            }
+            return nullptr;
         }
 
         AssetInfo::operator bool() const
@@ -121,7 +138,7 @@ namespace Insight
             const std::string metaDataPath = GetFullFilePath() + AssetMetaData::c_FileExtension;
             std::vector<u8> data = AssetRegistry::Instance().LoadAssetData(metaDataPath);
             if (!data.empty())
-            {    
+            {
                 Serialisation::JsonSerialiser jsonSerialiser(true);
                 jsonSerialiser.Deserialise(data);
                 MetaData->Deserialise(&jsonSerialiser);
@@ -140,5 +157,6 @@ namespace Insight
             MetaData->Serialise(&jsonSerialiser);
             ASSERT(FileSystem::SaveToFile(jsonSerialiser.GetSerialisedData(), metaDataPath, FileType::Text, true));
         }
+
     }
 }

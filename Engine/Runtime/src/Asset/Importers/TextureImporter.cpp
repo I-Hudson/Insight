@@ -13,9 +13,9 @@
 #define STB_IMAGE_STATIC
 #include <stb_image.h>
 
-//#define QOI_IMPLEMENTATION
+#define QOI_IMPLEMENTATION
 #ifdef QOI_IMPLEMENTATION
-#include <qoi.h>
+#include "qoi.h"
 #endif
 
 #ifdef NVIDIA_Texture_Tools
@@ -27,7 +27,7 @@ namespace Insight
     namespace Runtime
     {
         TextureImporter::TextureImporter()
-            : IAssetImporter({ ".png", ".jpeg", ".jpg", ".qoi", ".tga" })
+            : IAssetImporter({ ".png", ".jpeg", ".jpg", ".qoi", ".tga", TextureAsset::GetStaticAssetFileExtension()})
         { }
 
         Ref<Asset> TextureImporter::CreateAsset(const AssetInfo* assetInfo) const
@@ -46,6 +46,15 @@ namespace Insight
             texture->m_isMemoryAsset = false;
         }
 
+        void TextureImporter::ImportAndConvertToEngineFormat(Ref<Asset>& asset, const AssetInfo* assetInfo, const std::string_view path) const
+        {
+            ASSERT_MSG(FileSystem::GetExtension(assetInfo->FileName) != TextureAsset::GetStaticAssetFileExtension(), "Cannot convert engine texture format.");
+
+            Ref<TextureAsset> textureAsset = asset.As<TextureAsset>();
+            textureAsset->m_readableWriteable = true;
+            Import(asset, assetInfo, path);
+        }
+
         Reflect::Type TextureImporter::GetAssetType() const
         {
             return TextureAsset::GetStaticTypeInfo().GetType();
@@ -59,13 +68,6 @@ namespace Insight
                 IS_LOG_CORE_ERROR("[TextureImporter::Import] Texture data from path '{}' was empty.", path);
                 return;
             }
-
-            enum class ImageLoader
-            {
-                stbi
-                , qoi
-                , NvidiaTextureTools
-            };
 
             ImageLoader imageLoader = ImageLoader::stbi;
             void* textureBuffer = nullptr;
@@ -221,6 +223,12 @@ namespace Insight
             texture->m_isMemoryAsset = true;
             texture->SetTextureData(textureBuffer, textureSize);
 
+            if (texture->m_readableWriteable)
+            {
+                texture->m_textureData.Bytes.resize(textureSize);
+                Platform::MemCopy(texture->m_textureData.Bytes.data(), textureBuffer, textureSize);
+            }
+
             switch (imageLoader)
             {
             case ImageLoader::stbi:
@@ -234,6 +242,154 @@ namespace Insight
                 break;
             }
             }
+        }
+
+        void TextureImporter::LoadRaw(TextureImportContext& context, const std::string_view fileExtension) const
+        {
+            void* textureBuffer = nullptr;
+            ImageLoader imageLoader = FileExtenionToImageLoader(fileExtension);
+
+            if (imageLoader == ImageLoader::Unknown)
+            {
+                imageLoader = FileHeaderToImageLoader(context.Data);
+
+                if (imageLoader == ImageLoader::Unknown)
+                {
+                    FAIL_ASSERT_MSG("[TextureImporter::LoadRaw] Unable to find a vaild image loader.");
+                    return;
+                }
+            }
+
+            if (imageLoader == ImageLoader::stbi)
+            {
+                imageLoader = ImageLoader::stbi;
+                DecompressFromPNG(context);
+            }
+            else if (fileExtension == ".jpg" || fileExtension == ".jpeg")
+            {
+
+            }
+            else if (imageLoader == ImageLoader::qoi)
+            {
+                imageLoader = ImageLoader::qoi;
+                DecompressFromQOI(context);
+            }
+        }
+
+        void TextureImporter::CompressToPNG(TextureImportContext& context) const
+        {
+        }
+
+        void TextureImporter::DecompressFromPNG(TextureImportContext& context) const
+        {
+            IS_PROFILE_SCOPE("stbi_load_from_memory");
+            void* textureBuffer = stbi_load_from_memory(
+                (const stbi_uc*)context.Data.data()
+                , context.Data.size()
+                , &context.Width
+                , &context.Height
+                , &context.Channels
+                , STBI_rgb_alpha);
+
+            const u64 textureSize = context.Width * context.Height * context.Channels;
+            context.Data.resize(textureSize);
+            Platform::MemCopy(context.Data.data(), textureBuffer, textureSize);
+
+            stbi_image_free(textureBuffer);
+        }
+
+        void TextureImporter::CompressToQOI(TextureImportContext& context) const
+        {
+#ifdef QOI_IMPLEMENTATION
+            qoi_desc desc
+            {
+                context.Width,
+                context.Height,
+                context.Channels,
+                QOI_SRGB
+            };
+
+            void* textureBuffer;
+            int outLength;
+            {
+                IS_PROFILE_SCOPE("qoi_encode");
+                textureBuffer = qoi_encode(context.Data.data(), &desc, &outLength);
+            }
+
+            context.Data.resize(outLength);
+            Platform::MemCopy(context.Data.data(), textureBuffer, static_cast<u64>(outLength));
+            QOI_FREE(textureBuffer);
+#else
+            FAIL_ASSERT();
+#endif
+        }
+
+        void TextureImporter::DecompressFromQOI(TextureImportContext& context) const
+        {
+            void* textureBuffer;
+#ifdef QOI_IMPLEMENTATION
+            qoi_desc qoiDesc;
+            {
+                IS_PROFILE_SCOPE("qoi_decode");
+                textureBuffer = qoi_decode(context.Data.data(), context.Data.size(), &qoiDesc, 4);
+            }
+            context.Width = qoiDesc.width;
+            context.Height = qoiDesc.height;
+            context.Channels = static_cast<int>(qoiDesc.channels);
+            const u64 textureSize = context.Width * context.Height * context.Channels;
+
+            context.Data.resize(textureSize);
+            Platform::MemCopy(context.Data.data(), textureBuffer, textureSize);
+            QOI_FREE(textureBuffer);
+#else
+            FAIL_ASSERT();
+#endif
+        }
+
+        ImageLoader TextureImporter::FileHeaderToImageLoader(const std::vector<u8>& fileData) const
+        {
+            if (fileData.size() < 8)
+            {
+                return ImageLoader::Unknown;
+            }
+
+            u8 header[8];
+            Platform::MemCopy(header, fileData.data(), 8);
+
+            if (header[0] == 0xFF && header[1] == 0xD8 && header[2] == 0xFF)
+            {
+                // JPG
+            }
+            else if (header[0] == 0x89 && header[1] == 0x50 && header[2] == 0x4E && header[3] == 0x47 && header[4] == 0x0D && header[5] == 0x0A && header[6] == 0x1A && header[7] == 0x0A)
+            {
+                // PNG
+                return ImageLoader::stbi;
+            }
+            else if (header[0] == 0x71 && header[1] == 0x6F && header[2] == 0x69 && header[3] == 0x66)
+            {
+                // QOI
+                return ImageLoader::qoi;
+            }
+
+            return ImageLoader::Unknown;
+        }
+
+        ImageLoader TextureImporter::FileExtenionToImageLoader(const std::string_view fileExtension) const
+        {
+            if (fileExtension == ".png")
+            {
+                return ImageLoader::stbi;
+            }
+            else if (fileExtension == ".jpg" || fileExtension == ".jpeg")
+            {
+
+            }
+            else if (fileExtension == ".qoi")
+            {
+                return ImageLoader::qoi;
+            }
+
+            return ImageLoader::Unknown;
         }
     }
 }

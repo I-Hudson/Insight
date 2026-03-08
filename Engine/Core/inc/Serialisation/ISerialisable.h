@@ -14,6 +14,9 @@ namespace Insight
         template<typename>
         struct PropertySerialiser;
 
+        template<typename>
+        struct SerialiserObjectMeta;
+
         class ISerialiser;
 
         class IS_CORE ISerialisable
@@ -38,6 +41,8 @@ namespace Insight
         friend struct ::Insight::Serialisation::ComplexSerialiser;\
         template<typename>\
         friend struct ::Insight::Serialisation::PropertySerialiser;\
+        template<typename>\
+        friend struct ::Insight::Serialisation::SerialiserObjectMeta;\
 
 #define IS_SERIALISABLE_H(TYPE)\
         IS_SERIALISABLE_FRIEND\

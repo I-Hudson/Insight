@@ -37,11 +37,16 @@ namespace Insight
             virtual ~TextureAsset() override;
 
             IS_OBJECT(TextureAsset);
+            IS_ASSERT(TextureAsset);
+            IS_SERIALISABLE_H(TextureAsset);
 
             u32 GetWidth() const;
             u32 GetHeight() const;
             u32 GetDepth() const;
             PixelFormat GetFormat() const;
+
+            void SetReadableWriteable(const bool readableWriteable) { m_readableWriteable = readableWriteable; }
+            bool HasTextureData() const { return m_textureData.Bytes.empty(); }
 
             void SetTextureData(const void* data, const u64 dataSize);
             Graphics::RHI_Texture* GetRHITexture() const;
@@ -57,11 +62,40 @@ namespace Insight
             u32 m_depth = 0;
             u32 m_channels = 0;
             PixelFormat m_pixelFormat = PixelFormat::Unknown;
+            bool m_readableWriteable = false;
             
+            struct TextureData
+            {
+                std::vector<Byte> Bytes;
+            };
+            TextureData m_textureData; // Locally stored texture data. Not always present.
             Graphics::RHI_Texture* m_rhiTexture = nullptr;
 
             friend class TextureImporter;
             friend class ModelAsset;
         };
     }
+
+    namespace Serialisation
+    {
+        struct TextureAssetTextureData {};
+        struct TextureAssetTextureDataQOI {};
+    }
+
+    OBJECT_SERIALISER(Runtime::TextureAsset, 2,
+        SERIALISE_BASE(Runtime::Asset, 1, 0)
+        SERIALISE_PROPERTY(u32, m_width, 1, 0)
+        SERIALISE_PROPERTY(u32, m_height, 1, 0)
+        SERIALISE_PROPERTY(u32, m_depth, 1, 0)
+        SERIALISE_PROPERTY(u32, m_channels, 1, 0)
+        SERIALISE_PROPERTY(PixelFormat, m_pixelFormat, 1, 0)
+        SERIALISE_COMPLEX(Serialisation::TextureAssetTextureData, m_textureData, 1, 2)
+        SERIALISE_COMPLEX(Serialisation::TextureAssetTextureDataQOI, m_textureData, 2, 0)
+    );
+
+    OBJECT_SERIALISER_META(Runtime::TextureAsset, 1,
+        SERIALISE_ADD_PROPERTY(u32, m_width, 1)
+    );
 }
+
+#include "Texture.inl"

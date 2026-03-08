@@ -25,6 +25,17 @@ namespace Insight
             Invalid
         };
 
+        struct AssetFileHeader
+        {
+            Core::GUID AssetGuid;
+            uint32_t Version = 2;
+
+            uint32_t AssetType;
+        };
+
+#define IS_ASSERT(AssetType)\
+    static const char* GetStaticAssetFileExtension() { return STRINGIZE_NX(.AssetType); }\
+    virtual const char* GetAssetFileExtension() { return STRINGIZE_NX(.AssetType); }
 
         /// @brief Base class for asset classes. An Asset object is something which can comes from 
         /// a file on disk.
@@ -38,6 +49,7 @@ namespace Insight
 
             IS_OBJECT(Asset);
             IS_SERIALISABLE_H(Asset);
+            IS_ASSERT(Asset);
 
             const AssetInfo* GetAssetInfo() const;
             AssetState GetAssetState() const;
@@ -54,11 +66,17 @@ namespace Insight
         protected:
             virtual void OnUnload() = 0;
 
+            virtual void SerialiseHeader(Serialisation::ISerialiser* serialiser);
+            virtual void DeserialiseHeader(Serialisation::ISerialiser* serialiser);
+
         protected:
             std::string m_name;
             const AssetInfo* m_assetInfo = nullptr;
             std::atomic<AssetState> m_assetState = AssetState::NotLoaded;
             bool m_isMemoryAsset = false;
+
+            // Serialised file header.
+            AssetFileHeader m_header;
 
             friend class AssetRegistry;
         };

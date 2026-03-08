@@ -94,7 +94,11 @@ namespace Insight
 
             virtual void Write(std::string_view tag, std::string const& string) override;
 
-            virtual void Write(std::string_view tag, const std::vector<Byte>& vector, bool encodeSize = true) override;
+            virtual void Write(std::string_view tag, const void* data, const u64 size, bool encodeSize = true) override;
+
+            virtual void WriteBinaryBulk(std::string_view tag, const void* data, const u64 size, bool encodeSize = true) override;
+
+            //--
 
             virtual void Read(std::string_view tag, bool& data) override;
             virtual void Read(std::string_view tag, char& data) override;
@@ -113,6 +117,8 @@ namespace Insight
             virtual void Read(std::string_view tag, std::string& string) override;
 
             virtual void Read(std::string_view tag, std::vector<Byte>& vector, bool decodeSize = true) override;
+            
+            virtual void ReadBinaryBulk(std::string_view tag, std::vector<Byte>& vector, bool decodeSize = true) override;
             // -- End ISerialiser --
 
         private:

@@ -62,10 +62,11 @@ namespace Insight
             virtual Ref<Asset> LoadAsset(std::string path);
             Ref<Asset> LoadAsset(const Core::GUID guid);
 
-            Ref<AssetAsyncRequest> LoadAssetAsync(std::string path);
+            virtual Ref<AssetAsyncRequest> LoadAssetAsync(std::string path);
             Ref<AssetAsyncRequest> LoadAssetAsync(const Core::GUID guid);
 
-            void UnloadAsset(std::string path);
+            virtual void UnloadAsset(Ref<Asset>& asset);
+            virtual void UnloadAsset(std::string path);
             void UnloadAsset(const Core::GUID& guid);
 
             const AssetInfo* GetAssetInfo(const std::string& path) const;
@@ -99,6 +100,10 @@ namespace Insight
             std::vector<IObject*> GetObjectsFromAsset(const Core::GUID& guid) const;
 
             void ValidatePath(std::string& path) const;
+
+        protected:
+            Ref<Asset> LoadAssetInternal(std::string& path, bool returnAssetConvertedToInternal = false);
+
         private:
             IAssetPackage* CreateAssetPackageInternal(std::string_view name, std::string_view path, AssetPackageType packageType);
 
@@ -110,7 +115,7 @@ namespace Insight
             bool AssetInfoValidate(const AssetInfo* assetInfo) const;
 
 
-        private:
+        protected:
             /// @brief Store all asset infos here, then give pointers to the packages which they are included in.
             /// This unordered_map acts as the owner all of the pointers.
             std::unordered_map<std::string, AssetInfo*> m_pathToAssetInfo;

@@ -182,13 +182,25 @@ namespace Insight
         {
             Write<std::string>(tag, string);
         }
-        void JsonSerialiser::Write(std::string_view tag, const std::vector<Byte>& vector, bool encodeSize)
+
+        void JsonSerialiser::Write(std::string_view tag, const void* data, const u64 size, bool encodeSize)
         {
-            u64 arraySize = vector.size();
+            u64 arraySize = size;
             StartArray(tag, arraySize, encodeSize);
             for (size_t i = 0; i < arraySize; ++i)
             {
-                Write(tag, vector.at(i));
+                Write(tag, static_cast<const Byte*>(data)[i]);
+            }
+            StopArray();
+        }
+
+        void JsonSerialiser::WriteBinaryBulk(std::string_view tag, const void* data, const u64 size, bool encodeSize)
+        {
+            u64 arraySize = size;
+            StartArray(tag, arraySize, encodeSize);
+            for (size_t i = 0; i < arraySize; ++i)
+            {
+                Write(tag, static_cast<const Byte*>(data)[i]);
             }
             StopArray();
         }
@@ -249,6 +261,7 @@ namespace Insight
         {
             ReadValue<std::string>(tag, string);
         }
+
         void JsonSerialiser::Read(std::string_view tag, std::vector<Byte>& vector, bool decodeSize)
         {
             u64 arraySize = 0;
@@ -260,6 +273,20 @@ namespace Insight
             }
             StopArray();
         }
+
+        void JsonSerialiser::ReadBinaryBulk(std::string_view tag, std::vector<Byte>& vector, bool decodeSize)
+        {
+            u64 arraySize = 0;
+            StartArray(tag, arraySize, decodeSize);
+            vector.resize(arraySize);
+            for (size_t i = 0; i < arraySize; ++i)
+            {
+                Read(tag, vector[i]);
+            }
+            StopArray();
+        }
+
+        //--
 
         bool JsonSerialiser::IsObjectNode() const
         {

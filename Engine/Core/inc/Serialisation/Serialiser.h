@@ -36,8 +36,6 @@ namespace Insight::Serialisation::Internal
         const char* GetDataName;
     };
 
-
-
     template<typename TypeSerialiser, typename TData>
     TData SerialiseNamedProperty(ISerialiser* serialiser, u32 version, u32 versionAdded, u32 versionRemoved, const char* propertyName, TData& data, Options options)
     {
@@ -137,7 +135,7 @@ namespace Insight::Serialisation::Internal
     }
 
     template<typename TypeSerialiser, typename TData, typename TObject>
-    void SerialiseNamedComplex(ISerialiser* serialiser, u32 version, u32 versionAdded, u32 versionRemoved, TData& data, TObject& object)
+    void SerialiseNamedComplex(ISerialiser* serialiser, u32 version, u32 versionAdded, u32 versionRemoved, const Serialisation::SerialiserTag tag, TData& data, TObject& object)
     {
         if (VersionCheck(version, versionAdded, versionRemoved))
         {
@@ -155,7 +153,19 @@ namespace Insight::Serialisation::Internal
             ::Insight::Serialisation::ComplexSerialiser<TypeSerialiser, TData, TObject> complexSerialiser;
             complexSerialiser(serialiser, blankData, &object);
         }
-    }   
+    }
+
+    template<typename T>
+    void SerialiseMetaProperty(ISerialiser* serialiser, std::string_view name, const void* data, const u32 version)
+    {
+
+    }
+
+    template<typename T>
+    void DeserialiseMetaProperty(ISerialiser* serialiser, std::string_view name, void* data, const u32 version)
+    {
+
+    }
 }
 
 // Serialise a single property. This would be things which only contain data for them self. 
@@ -330,8 +340,8 @@ using TVectorElementType = typename std::remove_pointer_t<std::remove_reference_
         {\
         }
 
-#define SERIALISE_NAMED_COMPLEX(TYPE_SERIALISER, PROPERTY_NAME, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
-::Insight::Serialisation::Internal::SerialiseNamedComplex<TYPE_SERIALISER>(serialiser, version, VERSION_ADDED, VERSION_REMOVED, object.PROPERTY, object);
+#define SERIALISE_NAMED_COMPLEX(TYPE_SERIALISER, PROPERTY_NAME, PROPERTY, VERSION_ADDED, VERSION_REMOVED, TAG)\
+::Insight::Serialisation::Internal::SerialiseNamedComplex<TYPE_SERIALISER>(serialiser, version, VERSION_ADDED, VERSION_REMOVED, TAG, object.PROPERTY, object);
 
 #define SERIALISE_NAMED_COMPLEX_REMOVED(TYPE_SERIALISER, PROPERTY_TYPE, PROPERTY, VERSION_ADDED, VERSION_REMOVED, TYPE_MIGRATION)\
 ::Insight::Serialisation::Internal::SerialiseNamedComplexRemoved<TYPE_SERIALISER, PROPERTY_TYPE>(serialiser, version, VERSION_ADDED, VERSION_REMOVED, object);
@@ -344,7 +354,7 @@ using TVectorElementType = typename std::remove_pointer_t<std::remove_reference_
                 ::Insight::Serialisation::ComplexSerialiser<TYPE_SERIALISER, void, ObjectType> complexSerialiser;\
                 complexSerialiser(serialiser, &object);\
             }\
-        }   
+        }
 
 // Serialise a single property with a ProertySerialiser.
 #define SERIALISE_PROPERTY(TYPE_SERIALISER, PROPERTY, VERSION_ADDED, VERSION_REMOVED)                                           SERIALISE_NAMED_PROPERTY(TYPE_SERIALISER, PROPERTY, PROPERTY, VERSION_ADDED, VERSION_REMOVED)
@@ -382,7 +392,8 @@ using TVectorElementType = typename std::remove_pointer_t<std::remove_reference_
 
 // Serialise anything. This should be used when there is a certain requirement needed. 
 // An example could be loading entities.
-#define SERIALISE_COMPLEX(TYPE_SERIALISER, PROPERTY, VERSION_ADDED, VERSION_REMOVED)                                            SERIALISE_NAMED_COMPLEX(TYPE_SERIALISER, PROPERTY, PROPERTY, VERSION_ADDED, VERSION_REMOVED)
+#define SERIALISE_COMPLEX(TYPE_SERIALISER, PROPERTY, VERSION_ADDED, VERSION_REMOVED)                                            SERIALISE_NAMED_COMPLEX(TYPE_SERIALISER, PROPERTY, PROPERTY, VERSION_ADDED, VERSION_REMOVED, ::Insight::Serialisation::SerialiserTag::Default)
+#define SERIALISE_COMPLEX_TAG(TYPE_SERIALISER, PROPERTY, VERSION_ADDED, VERSION_REMOVED, TAG)                                   SERIALISE_NAMED_COMPLEX(TYPE_SERIALISER, PROPERTY, PROPERTY, VERSION_ADDED, VERSION_REMOVED, TAG)
 #define SERIALISE_COMPLEX_REMOVED(TYPE_SERIALISER, PROPERTY, VERSION_ADDED, VERSION_REMOVED, TYPE_MIGRATION)                    SERIALISE_NAMED_COMPLEX_REMOVED(TYPE_SERIALISER, PROPERTY, PROPERTY, VERSION_ADDED, VERSION_REMOVED, TYPE_MIGRATION)
 
 #define SERIALISE_COMPLEX_THIS(TYPE_SERIALISER, VERSION_ADDED, VERSION_REMOVED)                                                 SERIALISE_NAMED_COMPLEX_THIS(TYPE_SERIALISER, VERSION_ADDED, VERSION_REMOVED)
@@ -516,7 +527,7 @@ static bool DeserialiseCheckForObjectSerialiser(::Insight::Serialisation::ISeria
 #define OBJECT_SERIALISER(OBJECT_TYPE, CURRENT_VERSION, ...)\
         static_assert(CURRENT_VERSION >= 1);\
         template<>\
-        struct ::Insight::Serialisation::SerialiserObject<OBJECT_TYPE> : public SerialiserObjectBase\
+        struct ::Insight::Serialisation::SerialiserObject<OBJECT_TYPE> : public ::Insight::Serialisation::SerialiserObjectBase\
         {\
             using ObjectType = OBJECT_TYPE;\
             SERIALISE_FUNC(OBJECT_TYPE, CURRENT_VERSION, __VA_ARGS__);\
@@ -527,6 +538,38 @@ static bool DeserialiseCheckForObjectSerialiser(::Insight::Serialisation::ISeria
             std::string objectSerialiserType;\
             ::Insight::Serialisation::Internal::Options m_options;\
         };
+
+
+#define SERIALISE_ADD_PROPERTY(DATA_TYPE, PROPERTY, VERSION_ADDED)\
+        Properties.push_back(SerialiserObjectMetaProperty\
+{\
+#PROPERTY,\
+::Insight::Serialisation::Internal::SerialiseMetaProperty<DATA_TYPE>,\
+::Insight::Serialisation::Internal::DeserialiseMetaProperty<DATA_TYPE>,\
+offsetof(Self, PROPERTY),\
+VERSION_ADDED,\
+true });
+
+#define SERIALISE_REMOVE_PROPERTY(DATA_TYPE, PROPERTY, VERSION_REMOVED)\
+        Properties.push_back(SerialiserObjectMetaProperty{\
+#PROPERTY,\
+::Insight::Serialisation::Internal::SerialiseMetaProperty<DATA_TYPE>,\
+::Insight::Serialisation::Internal::DeserialiseMetaProperty<DATA_TYPE>,\
+offsetof(Self, PROPERTY),\
+VERSION_ADDED,\
+false });
+
+#define OBJECT_SERIALISER_META(OBJECT_TYPE, CURRENT_VERSION, ...)\
+        static_assert(CURRENT_VERSION >= 1);\
+        template<>\
+        struct ::Insight::Serialisation::SerialiserObjectMeta<OBJECT_TYPE> : public ::Insight::Serialisation::SerialiserObjectMetaBase\
+        {\
+            using Self = OBJECT_TYPE;\
+            SerialiserObjectMeta()\
+            {\
+                __VA_ARGS__\
+            }\
+        }
 
 /*
     NOTES:

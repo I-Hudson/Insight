@@ -66,4 +66,27 @@ namespace Insight::Runtime
         ASSERT(!IsMemoryAsset());
         return m_assetInfo->GetFullPackagePath();
     }
+
+    void Asset::SerialiseHeader(Serialisation::ISerialiser* serialiser)
+    {
+        serialiser->Write("Version", m_header.Version);
+        serialiser->Write("GUID", m_header.AssetGuid.ToString());
+        serialiser->Write("AssetType", m_header.AssetType);
+    }
+
+    void Asset::DeserialiseHeader(Serialisation::ISerialiser* serialiser)
+    {
+        serialiser->Read("Version", m_header.Version);
+
+        if (m_header.Version == 1)
+        {
+            std::string guidStr;
+            serialiser->Read("GUID", guidStr);
+            m_header.AssetGuid.StringToGuid(guidStr);
+        }
+        else if (m_header.Version == 2)
+        {
+
+        }
+    }
 }

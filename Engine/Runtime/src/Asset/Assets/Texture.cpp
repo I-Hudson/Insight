@@ -7,6 +7,8 @@ namespace Insight
 {
     namespace Runtime
     {
+        IS_SERIALISABLE_CPP(TextureAsset);
+
         TextureAsset::TextureAsset(const AssetInfo* assetInfo)
             : Asset(assetInfo)
         { }

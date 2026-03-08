@@ -112,7 +112,11 @@ namespace Insight
 
             virtual void Write(std::string_view tag, std::string const& string) = 0;
 
-            virtual void Write(std::string_view tag, const std::vector<Byte>& vector, bool encodeSize = true) = 0;
+            virtual void Write(std::string_view tag, const void* data, const u64 size, bool encodeSize = true) = 0;
+            virtual void Write(std::string_view tag, const std::vector<Byte>& vector, bool encodeSize = true) { Write(tag, vector.data(), vector.size(), encodeSize); }
+
+            virtual void WriteBinaryBulk(std::string_view tag, const void* data, const u64 size, bool encodeSize = true) = 0;
+            virtual void WriteBinaryBulk(std::string_view tag, const std::vector<Byte>& vector, bool encodeSize = true) { Write(tag, vector.data(), vector.size(), encodeSize); }
 
             //--
 
@@ -133,6 +137,8 @@ namespace Insight
             virtual void Read(std::string_view tag, std::string& string) = 0;
 
             virtual void Read(std::string_view tag, std::vector<Byte>& vector, bool dcodeSize = true) = 0;
+
+            virtual void ReadBinaryBulk(std::string_view tag, std::vector<Byte>& vector, bool dcodeSize = true) = 0;
 
         protected:
             virtual void WriteHeader(std::vector<Byte>& data) const;

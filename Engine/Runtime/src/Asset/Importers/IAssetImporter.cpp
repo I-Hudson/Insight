@@ -1,6 +1,6 @@
 #include "Asset/Importers/IAssetImporter.h"
 
-#include "Algorithm/Vector.h"
+#include "Core/Asserts.h"
 
 namespace Insight
 {
@@ -38,6 +38,11 @@ namespace Insight
                 }
             }
             return false;
+        }
+
+        void IAssetImporter::ImportAndConvertToEngineFormat(Ref<Asset>& asset, const AssetInfo* assetInfo, const std::string_view path) const
+        {
+            FAIL_ASSERT_MSG("[IAssetImporter::ImportAndConvertToEngineFormat] Asset can't be convert to engine format at '{}'.", path.data());
         }
     }
 }

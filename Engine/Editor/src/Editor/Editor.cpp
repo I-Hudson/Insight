@@ -112,6 +112,7 @@ namespace Insight
 
                     Runtime::AssetRegistry::Instance().AddAssetsInFolder(projectInfo.GetContentPath(), m_projectAssetPackage, true, true);
 
+                    /*
                     {
                         if (false
                             && FileSystem::Exists(projectInfo.GetContentPath() + "/Main.1_Sponza_/textures"))
@@ -141,6 +142,7 @@ namespace Insight
                     }
 
                     Ref<Runtime::Asset> a = Runtime::AssetRegistry::Instance().LoadAsset("Models/pkg_a_curtains/gltf/../../../Models_2/Cube.gltf");
+                    */
 
                     Runtime::AssetRegistry::Instance().SetDebugDirectories(projectInfo.GetIntermediatePath() + "/AssetMeta", projectInfo.GetContentPath());
 
@@ -155,6 +157,9 @@ namespace Insight
 
                     m_contentListener.WatchId = m_fileWatcher.addWatch(projectInfo.GetContentPath(), &m_contentListener, true);
                     m_fileWatcher.watch();
+
+                    EditorAssetRegistry* editorAssetRegistry = static_cast<EditorAssetRegistry*>(m_assetRegistry);
+                    editorAssetRegistry->InitialiseCache();
                 });
 
             //SetEditorStyle();

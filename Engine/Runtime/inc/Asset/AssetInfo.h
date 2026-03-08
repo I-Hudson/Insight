@@ -12,19 +12,39 @@
 
 namespace Insight
 {
+#define IS_ASSET_SUBMETA_DATA_TYPE(TypeName)\
+    static const char* GetStaticTypeName() { return STRINGIZE(TypeName); }\
+    virtual const char* GetTypeName() override { return STRINGIZE(TypeName); }
+
     namespace Runtime
     {
         class IAssetPackage;
 
-        /// @brief Asset data which is stored to disk for each asset. This should only contain required meta data
-        /// like a unique id for other systems like resources to reference
+        /// @brief 
+        class IS_RUNTIME IAssetSubMetaData : public Serialisation::ISerialisable
+        {
+        public:
+            IAssetSubMetaData() = default;
+            virtual ~IAssetSubMetaData() { }
+
+            IS_SERIALISABLE_H(IAssetSubMetaData);
+            virtual const char* GetTypeName() = 0;
+        };
+ 
+        /*
+        * @brief Asset data which is stored to disk for each asset. This should only contain required meta data
+            like a unique id for other systems like resources to reference.
+
+            This stores a list of all meta data stored within the .meta file in 'SubMetaData'. In editor use this can contain anything
+            the editor needs while for standalone this will only contain runtime information.
+        */
         class IS_RUNTIME AssetMetaData : public Serialisation::ISerialisable
         {
         public:
             AssetMetaData() = default;
             AssetMetaData(const AssetMetaData& other) = default;
             AssetMetaData(AssetMetaData&& other) = default;
-            ~AssetMetaData() = default;
+            virtual ~AssetMetaData() = default;
 
             constexpr static const char* c_FileExtension = ".assetmeta";
             IS_SERIALISABLE_H(AssetMetaData);
@@ -32,8 +52,20 @@ namespace Insight
             operator bool() const;
             bool IsValid() const;
 
+            IAssetSubMetaData* GetSubMetaData(const char* typeName) const;
+            template<typename T, std::enable_if_t<std::is_base_of_v<IAssetSubMetaData, T>, int> = 0>
+            T* GetSubMetaData() const
+            {
+                return static_cast<T*>(GetSubMetaData(T::GetStaticTypeName()));
+            }
+
+            // Store the core asset meta information here.
+
             Reflect::Type ReflectType;
             Core::GUID AssetGuid;
+
+            /// @brief Store addtional information other sub systems might want to add.
+            std::vector<IAssetSubMetaData*> SubMetaData;
         };
 
         /// @brief Store relevant information about a asset. The asset could be on disk or
@@ -98,16 +130,20 @@ namespace Insight
 
             Core::GUID Guid;
 
+            void SaveMetaData() const;
         private:
             void LoadMetaData() const;
-            void SaveMetaData() const;
 
             bool m_isMemoryAsset = false;
         };
     }
  
-    OBJECT_SERIALISER(Runtime::AssetMetaData, 2,
+    OBJECT_SERIALISER(Runtime::IAssetSubMetaData, 1,
+        );
+
+    OBJECT_SERIALISER(Runtime::AssetMetaData, 3,
         SERIALISE_PROPERTY(Core::GUID, AssetGuid, 1, 0)
         SERIALISE_PROPERTY(Reflect::Type, ReflectType, 2, 0)
-    )
+        SERIALISE_ARRAY_OBJECT(Runtime::IAssetSubMetaData, SubMetaData, 3, 0)
+    );
 }

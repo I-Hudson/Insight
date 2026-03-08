@@ -320,11 +320,19 @@ namespace Insight
             StopArray();
         }
 
-        void BinarySerialiser::Write(std::string_view tag, const std::vector<Byte>& vector, bool encodeSize)
+        void BinarySerialiser::Write(std::string_view tag, const void* data, const u64 size, bool encodeSize)
         {
-            u64 arraySize = vector.size();
+            u64 arraySize = size;
             StartArray(tag, arraySize, encodeSize);
-            WriteBlock(tag, vector.data(), vector.size());
+            WriteBlock(tag, data, size);
+            StopArray();
+        }
+
+        void BinarySerialiser::WriteBinaryBulk(std::string_view tag, const void* data, const u64 size, bool encodeSize)
+        {
+            u64 arraySize = size;
+            StartArray(tag, arraySize, encodeSize);
+            WriteBlock(tag, data, size);
             StopArray();
         }
 
@@ -387,6 +395,18 @@ namespace Insight
         }
 
         void BinarySerialiser::Read(std::string_view tag, std::vector<Byte>& vector, bool decodeSize)
+        {
+            u64 arraySize = 0;
+            StartArray(tag, arraySize, decodeSize);
+            if (decodeSize)
+            {
+                vector.resize(arraySize);
+            }
+            ReadBlock(tag, vector.data(), vector.size());
+            StopArray();
+        }
+
+        void BinarySerialiser::ReadBinaryBulk(std::string_view tag, std::vector<Byte>& vector, bool decodeSize)
         {
             u64 arraySize = 0;
             StartArray(tag, arraySize, decodeSize);

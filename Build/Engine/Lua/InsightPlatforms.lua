@@ -9,9 +9,10 @@ function InsightPlatforms.SetWindowsPlatformToolset()
             local splitString = {}
             for i in string.gmatch(line, '([^,]+)') do
                 splitString[#splitString + 1] = i
-            end 
+            end
 
-            if CommonConfig.PathExists(splitString[1]) then
+            local msvcToolsetEnabled = tonumber(splitString[1]) 
+            if (msvcToolsetEnabled > 0 and CommonConfig.PathExists(splitString[1])) then
                 local msvcToolset = splitString[3]
                 toolset(splitString[3])       
                 print("Settings MSVC ToolSet to '" .. splitString[3] .. "'")

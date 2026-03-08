@@ -275,65 +275,7 @@ namespace Insight::Runtime
 
     Ref<Asset> AssetRegistry::LoadAsset(std::string path)
     {
-        IS_PROFILE_FUNCTION();
-        /*
-            Order of things:
-            First get the correct asset importer for the data being loaded. Do this before loading the data
-            so we don't read from disk, then just discard the data, saving on IO processing and remove possible not needed
-            newing and deleteing from vector creation.
-
-            Then check that we have a valid AssetInfo for this path.
-
-            If we have a valid importer and valid AssetInfo then we can load the byte data from disk.
-            // TODO When loading data maybe the importer should be in charge as then it might not have to load the whole contents 
-            of the file into a single buffer but could seek and only load the parts in wants at only one point in time.
-        */
-
-        ValidatePath(path);
-
-        if (path.empty())
-        {
-            return Ref<Asset>();
-        }
-
-
-        std::string_view extension = FileSystem::GetExtension(path);
-        const IAssetImporter* importer = GetImporter(extension);
-        if (importer == nullptr)
-        {
-            //IS_LOG_CORE_ERROR("[AssetRegistry::LoadAsset] 'Importer' is nullptr for extension '{}'.", extension);
-            return Ref<Asset>();
-        }
-
-        const AssetInfo* assetInfo = GetAssetInfo(path);
-        if (assetInfo == nullptr)
-        {
-            IS_LOG_CORE_ERROR("[AssetRegistry::LoadAsset] Unable to get AssetInfo from path '{}'.", path);
-            return Ref<Asset>();
-        }
-
-        Ref<Asset> asset;
-        {
-            std::lock_guard lock(m_loadedAssetLock);
-            if (auto iter = m_loadedAssets.find(path);
-                iter != m_loadedAssets.end())
-            {
-                return iter->second;
-            }
-            else
-            {
-                asset = importer->CreateAsset(assetInfo);
-                asset->SetGuid(assetInfo->Guid);
-                m_loadedAssets[assetInfo->GetFullFilePath()] = asset;
-            }
-        }
-
-        if (importer->AllowAssetImportingFromAssetRegistry())
-        {
-            importer->Import(asset, assetInfo, path);
-        }
-
-        return asset;
+        return LoadAssetInternal(path);
     }
 
     Ref<Asset> AssetRegistry::LoadAsset(const Core::GUID guid)
@@ -349,7 +291,7 @@ namespace Insight::Runtime
             IS_LOG_CORE_ERROR("[AssetRegistry::LoadAsset] Unable to get AssetInfo from guid '{}'.", guid.ToString());
             return Ref<Asset>();
         }
-        return LoadAsset(assetInfo->GetFullFilePath());
+        return LoadAssetInternal(assetInfo->GetFullFilePath());
     }
 
     Ref<AssetAsyncRequest> AssetRegistry::LoadAssetAsync(std::string path)
@@ -380,6 +322,23 @@ namespace Insight::Runtime
             return Ref<AssetAsyncRequest>(::New<AssetAsyncRequest>(Ref<Asset>(), true));
         }
         return LoadAssetAsync(assetInfo->GetFullFilePath());
+    }
+
+    void AssetRegistry::UnloadAsset(Ref<Asset>& asset)
+    {
+        if (!asset)
+        {
+            return;
+        }
+
+        std::lock_guard loadedAssetLock(m_loadedAssetLock);
+        if (const auto iter = m_loadedAssets.find(asset->GetAssetInfo()->GetFullFilePath());
+            iter != m_loadedAssets.end())
+        {
+            ASSERT(asset);
+            //ASSERT(asset->GetReferenceCount() == 1);
+            asset->OnUnload();
+        }
     }
 
     void AssetRegistry::UnloadAsset(std::string path)
@@ -752,5 +711,79 @@ namespace Insight::Runtime
         FileSystem::FlattenAbsolutePath(path);
 
         path = FileSystem::GetAbsolutePath(path);
+    }
+
+    Ref<Asset> AssetRegistry::LoadAssetInternal(std::string& path, bool returnAssetConvertedToInternal)
+    {
+        IS_PROFILE_FUNCTION();
+        /*
+            Order of things:
+            First get the correct asset importer for the data being loaded. Do this before loading the data
+            so we don't read from disk, then just discard the data, saving on IO processing and remove possible not needed
+            newing and deleteing from vector creation.
+
+            Then check that we have a valid AssetInfo for this path.
+
+            If we have a valid importer and valid AssetInfo then we can load the byte data from disk.
+            // TODO When loading data maybe the importer should be in charge as then it might not have to load the whole contents
+            of the file into a single buffer but could seek and only load the parts in wants at only one point in time.
+        */
+
+        ValidatePath(path);
+
+        if (path.empty())
+        {
+            return Ref<Asset>();
+        }
+
+
+        std::string_view extension = FileSystem::GetExtension(path);
+        const IAssetImporter* importer = GetImporter(extension);
+        if (importer == nullptr)
+        {
+            //IS_LOG_CORE_ERROR("[AssetRegistry::LoadAsset] 'Importer' is nullptr for extension '{}'.", extension);
+            return Ref<Asset>();
+        }
+
+        const AssetInfo* assetInfo = GetAssetInfo(path);
+        if (assetInfo == nullptr)
+        {
+            IS_LOG_CORE_ERROR("[AssetRegistry::LoadAsset] Unable to get AssetInfo from path '{}'.", path);
+            return Ref<Asset>();
+        }
+
+        Ref<Asset> asset;
+        {
+            std::lock_guard lock(m_loadedAssetLock);
+            if (auto iter = m_loadedAssets.find(path);
+                iter != m_loadedAssets.end())
+            {
+                return iter->second;
+            }
+            else
+            {
+                asset = importer->CreateAsset(assetInfo);
+                asset->SetGuid(assetInfo->Guid);
+                m_loadedAssets[assetInfo->GetFullFilePath()] = asset;
+            }
+        }
+
+        if (importer->AllowAssetImportingFromAssetRegistry())
+        {
+            if (returnAssetConvertedToInternal && importer->CanConvertToEngineFormat())
+            {
+                /*
+                    We might be importing a raw format file (like a .png/.jpeg).
+                    But we have requested that this file must be return in the engine format (this is using the Serialise/Deserialise functions).
+                */
+                importer->ImportAndConvertToEngineFormat(asset, assetInfo, path);
+            }
+            else
+            {
+                importer->Import(asset, assetInfo, path);
+            }
+        }
+
+        return asset;
     }
 }
