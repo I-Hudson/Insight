@@ -99,6 +99,9 @@ namespace Insight
 				m_loadedAssets[assetInfo->GetFullFilePath()] = asset;
 			}
 
+			//TEMP
+			return asset;
+
 			ASSERT(asset->GetAssetInfo() == assetInfo);
 
 			Serialiser serialiser;

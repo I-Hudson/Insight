@@ -25,15 +25,21 @@ set cmakeGenerator=
 set cmakeArch="x64"
 
 echo Finding most recent cmake VS option
-for /f "tokens=1,2,3,4 delims=," %%a in (../Engine/vsDevCmdVersions.txt) do (
+for /f "tokens=1,2,3,4,5 delims=," %%a in (../Engine/vsDevCmdVersions.txt) do (
     if "!vsDevCmd!" == "" (
-        if exist "%%a" (
-            SET cmakeGenerator="%%d"
-            set vsVersion=%%b
-            echo Selecting CMake generator '%%d'
+        if %%a NEQ 0 (
+            if exist "%%b" (
+                SET cmakeGenerator="%%e"
+                set vsVersion=%%c
+                echo Selecting CMake generator '%%e'
+            )
         )
     )
+
+    echo Couldn't find !%%b!
 )
+
+echo Cmake Generator '!cmakeGenerator!'
 
 echo Generate and Assimp
 cd "%vendorPath%/assimp"

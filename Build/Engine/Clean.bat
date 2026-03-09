@@ -1,2 +1,2 @@
-call GENERATE_PROJECT.bat clean
+call GENERATE_PROJECT.bat premake5.lua clean
 pause

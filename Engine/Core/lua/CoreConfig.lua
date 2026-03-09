@@ -73,6 +73,7 @@ function CoreConfig.FilterPlatforms(AMD_Ryzen_Master_SDK, OutputDir)
     filter "platforms:Win64"
         if AMD_Ryzen_Master_SDK == nil then
         else
+            print("AMD Ryzen Master Supported")
             defines
             {
                 "AMD_Ryzen_Master_SDK",

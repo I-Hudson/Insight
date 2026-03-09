@@ -136,17 +136,17 @@ namespace Insight
 
 		bool PlatformWindows::MemCompare(const void* buf1, const void* buf2, u64 size)
 		{
-			return memcmp(buf1, buf2, size);
+			return memcmp(buf1, buf2, size) == 0;
 		}
 
 		bool PlatformWindows::StrCompare(const char* str1, const char* str2)
 		{
-			return strcmp(str1, str2);
+			return strcmp(str1, str2) == 0;
 		}
 
 		bool PlatformWindows::WStrCompare(const wchar_t* wstr1, const wchar_t* wstr2)
 		{
-			return wcscmp(wstr1, wstr1);
+			return wcscmp(wstr1, wstr1) == 0;
 		}
 
 		bool PlatformWindows::RunProcessAndWait(const char* command)

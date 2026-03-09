@@ -7,6 +7,14 @@ namespace Insight
 {
     namespace Runtime
     {
+        enum class ImageLoader
+        {
+            Unknown
+            , stbi
+            , qoi
+            , NVTT
+        };
+
         struct TextureImportContext
         {
             std::vector<Byte> Data;
@@ -15,14 +23,8 @@ namespace Insight
             int Channels;
 
             PixelFormat PixelFormat;
-        };
 
-        enum class ImageLoader
-        {
-            Unknown
-            , stbi
-            , qoi
-            , NvidiaTextureTools
+            ImageLoader ImageLoader;
         };
 
         class TextureImporter : public IAssetImporter
@@ -50,6 +52,8 @@ namespace Insight
 
             ImageLoader FileHeaderToImageLoader(const std::vector<u8>& fileData) const;
             ImageLoader FileExtenionToImageLoader(const std::string_view fileExtension) const;
+
+            void QuantiseTextureData(TextureImportContext& context, const float* redChannelPtr, const float* greenChannelPtr, const float* blueChannelPtr, const float* alphaChannelPtr) const;
 
         private:
 

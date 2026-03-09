@@ -159,6 +159,23 @@
 #define NO_VTABLE __declspec(novtable)
 #define FUNCTION __FUNCSIG__
 #define PROCESSER_PAUSE _mm_pause()
+
+#if defined(__AVX2__)
+// AVX2 code path
+#define PLATFORM_SUPPORTS_AVX2 1
+#elif defined(__AVX__)
+// AVX code path
+#define PLATFORM_SUPPORTS_AVX 1
+#elif defined(_M_X64) || defined(_M_AMD64) || (defined(_M_IX86_FP) && _M_IX86_FP >= 2)
+// SSE2 code path (default for x64)
+#define PLATFORM_SUPPORTS_SSE2 1
+#elif defined(__ARM_NEON)
+// ARM NEON code path
+#define PLATFORM_SUPPORTS_ARM_NEON 1
+#else
+// Generic scalar fallback
+#endif
+
 #endif
 
 

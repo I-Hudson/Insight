@@ -90,7 +90,7 @@ function GraphicsConfig.LibraryLinks()
         "dxcompiler",
         "meshoptimizer",
         "nvrhi",
-        "ShaderCompiler"
+        --"ShaderCompiler"
     }
 
     if VULKAN_SDK == nil then

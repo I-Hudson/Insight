@@ -2,6 +2,9 @@ local CommonConfig = require "../../lua/CommonConfig"
 
 local RuntimeConfig = { }
 
+local NVTT_Path = "C:/Program Files/NVIDIA Corporation/NVIDIA Texture Tools";
+local NvidiaTextureToolsExists = CommonConfig.PathExists(NVTT_Path);
+
 function RuntimeConfig.DefinesSharedLib()
     defines
     {
@@ -59,6 +62,7 @@ function RuntimeConfig.LibraryLinks()
         "zip",
         "meshoptimizer",
     }
+
     if (profileTool == "pix") then
         links
         {
@@ -112,12 +116,13 @@ function RuntimeConfig.FilterConfigurations()
         --"ffx_fsr2_api_vk_x64d",
         --"ffx_fsr2_api_dx12_x64d",
     }
+
     prebuildcommands { "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/dll/\" \"%{cfg.targetdir}\"", "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/pdb/\" \"%{cfg.targetdir}\"",  }
 
 filter "configurations:Release"
 buildoptions "/MD"
     optimize "On"   
-            defines
+    defines
     {
         "NDEBUG",
         "IS_RELEASE",
@@ -205,14 +210,36 @@ function RuntimeConfig.FilterPlatforms(AMD_Ryzen_Master_SDK, OutputDir)
             "Comctl32",
         }
 
+        if NvidiaTextureToolsExists then
+            print("NVTT Enabled")
+
+            defines
+            {
+                "NVIDIA_TEXTURE_TOOLS=1",
+            }
+
+            includedirs
+            {
+                NVTT_Path .. "/include",
+            }
+            
+            links
+            {
+                "nvtt30205.lib",
+            }
+            
+            prebuildcommands { "{COPYFILE} \"" .. NVTT_Path .. "/lib/x64-v142/nvtt30205.lib" .. "\" \"%{wks.location}deps/" .. outputdir .. "/lib/\"" } 
+            prebuildcommands { "{COPYFILE} \"" .. NVTT_Path .. "/nvtt30205.dll" .. "\" \"%{wks.location}deps/" .. outputdir .. "/dll/\"" } 
+        end
+
         filter "system:Unix"
-    	system "linux"
-    	toolset("clang")
-        defines
-        {
-            "IS_PLATFORM_LINUX",
-            "IS_VULKAN_ENABLED",
-        }
+    	    system "linux"
+    	    toolset("clang")
+            defines
+            {
+                "IS_PLATFORM_LINUX",
+                "IS_VULKAN_ENABLED",
+            }
 end
 
 return RuntimeConfig

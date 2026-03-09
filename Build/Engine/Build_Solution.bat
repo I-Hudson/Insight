@@ -31,11 +31,13 @@ set vsBuildVersion=
 echo Finding most recent VS option
 for /f "tokens=1,2,3 delims=," %%a in (vsDevCmdVersions.txt) do (
     if "!vsDevCmd!" == "" (
-        if exist "%%a" (
-            SET vsDevCmd=%%a
-            set vsBuildVersion=%%b
-            if "%%b" == "vs2026" (
-                set vsSolutionExtension=x
+        if %%a NEQ 0 (
+            if exist "%%b" (
+                SET vsDevCmd=%%b
+                set vsBuildVersion=%%c
+                if "%%c" == "vs2026" (
+                    set vsSolutionExtension=x
+                )
             )
         )
     )
