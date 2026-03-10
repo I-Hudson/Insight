@@ -412,7 +412,7 @@ namespace Insight::Runtime
         {
             if (FileSystem::Exists(absPath))
             {
-                return FileSystem::ReadFromFile(absPath);
+                return FileSystem::ReadFromFile(absPath, FileType::Binary);
             }
         }
         IS_LOG_CORE_ERROR("[AssetRegistry::LoadAsset] Unable to load asset from path '{}'.", absPath.data());

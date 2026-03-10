@@ -49,11 +49,14 @@ namespace Insight
             void DecompressFromQOI(TextureImportContext& context) const;
 
             void CompressToBC3(TextureImportContext& context) const;
-
+            void DecompressFromBC3(TextureImportContext& context) const;
+            
             ImageLoader FileHeaderToImageLoader(const std::vector<u8>& fileData) const;
             ImageLoader FileExtenionToImageLoader(const std::string_view fileExtension) const;
 
             void QuantiseTextureData(TextureImportContext& context, const float* redChannelPtr, const float* greenChannelPtr, const float* blueChannelPtr, const float* alphaChannelPtr) const;
+
+            void SwapRedAndBlueTextureChannels(TextureImportContext& context) const;
 
         private:
 

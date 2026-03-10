@@ -414,7 +414,11 @@ namespace Insight
 			importer.SetPropertyBool(AI_CONFIG_IMPORT_FBX_PRESERVE_PIVOTS, false);
 			importer.SetPropertyInteger(AI_CONFIG_PP_LBW_MAX_WEIGHTS, 4);
 
-			const aiScene* scene = importer.ReadFile(path.data(), importerFlags);
+			const aiScene* scene = nullptr;	
+			{
+				IS_PROFILE_SCOPE("Assimp Import");
+				scene = importer.ReadFile(path.data(), importerFlags);
+			}
 			importer.SetIOHandler(nullptr);
 			importer.SetProgressHandler(nullptr);
 

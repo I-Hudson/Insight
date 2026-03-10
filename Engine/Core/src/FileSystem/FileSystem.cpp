@@ -40,7 +40,7 @@ namespace Insight
 
         try
         {
-            fileStream.open(filePath, std::ios::out | std::ios::trunc | c_FileTypeToStdIos[(int)fileType]);
+            fileStream.open(filePath, std::ios::out | std::ios::trunc | std::ios::binary);//c_FileTypeToStdIos[(int)fileType]);
 
         }
         catch (std::system_error& error)
@@ -98,7 +98,7 @@ namespace Insight
 
         try
         {
-            fileStream.open(filePath, std::ios::in | c_FileTypeToStdIos[(int)fileType]);
+            fileStream.open(filePath, std::ios::in | std::ios::binary);//c_FileTypeToStdIos[(int)fileType]);
         }
         catch (std::system_error& error)
         {

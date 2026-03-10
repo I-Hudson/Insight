@@ -8,6 +8,8 @@
 #include "Core/Profiler.h"
 #include "Platforms/Platform.h"
 
+#include "Graphics/PixelFormatExtensions.h"
+
 #include "cmp_compressonatorlib/compressonator.h"
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -54,8 +56,10 @@ namespace Insight
             ASSERT_MSG(FileSystem::GetExtension(assetInfo->FileName) != TextureAsset::GetStaticAssetFileExtension(), "Cannot convert engine texture format.");
 
             Ref<TextureAsset> textureAsset = asset.As<TextureAsset>();
+            const bool readableWriteable = textureAsset->m_readableWriteable;
             textureAsset->m_readableWriteable = true;
             Import(asset, assetInfo, path);
+            textureAsset->m_readableWriteable = readableWriteable;
         }
 
         Reflect::Type TextureImporter::GetAssetType() const
@@ -162,7 +166,8 @@ namespace Insight
                     const float* b = surface.channel(2);
                     const float* a = surface.channel(3);
                     // nvtt when compressing to BC format takes the input as BGRA not RGBA.
-                    QuantiseTextureData(context, b, g, r, a);
+                    QuantiseTextureData(context, r, g, b, a);
+                    context.PixelFormat = PixelFormat::R8G8B8A8_UNorm;
                 }
             }
 #endif
@@ -183,6 +188,7 @@ namespace Insight
                 context.Data.resize(textureSize);
                 Platform::MemCopy(context.Data.data(), textureBuffer, textureSize);
                 stbi_image_free(textureBuffer);
+                context.PixelFormat = PixelFormat::R8G8B8A8_UNorm;
             }
         }
 
@@ -224,6 +230,8 @@ namespace Insight
             context.Width = qoiDesc.width;
             context.Height = qoiDesc.height;
             context.Channels = static_cast<int>(qoiDesc.channels);
+            context.PixelFormat = PixelFormat::R8G8B8A8_UNorm;
+
             const u64 textureSize = context.Width * context.Height * context.Channels;
 
             context.Data.resize(textureSize);
@@ -239,8 +247,15 @@ namespace Insight
             IS_PROFILE_FUNCTION();
 
 #ifdef NVIDIA_TEXTURE_TOOLS
-            if (context.ImageLoader == ImageLoader::NVTT)
+            //if (context.ImageLoader == ImageLoader::NVTT)
             {
+                // We need to swap the red and blue channels around. TextureImporter will store raw data as RGBA, NVTT expects BGRA.
+                if (context.PixelFormat == PixelFormat::R8G8B8A8_UNorm)
+                {
+                    SwapRedAndBlueTextureChannels(context);
+                    context.PixelFormat == PixelFormat::B8G8R8A8_UNorm;
+                }
+
                 struct nvttCompressHandler : nvtt::OutputHandler
                 {
                     virtual ~nvttCompressHandler() override
@@ -347,9 +362,16 @@ namespace Insight
                     const u64 textureSize = outputHandler.Size;
                     context.Data = std::move(outputHandler.BufferData);
                     context.PixelFormat = PixelFormat::BC3_UNorm;
+
+                    return;
+                }
+                else
+                {
+                    SwapRedAndBlueTextureChannels(context);
+                    context.PixelFormat = PixelFormat::R8G8B8A8_UNorm;
                 }
             }
-            else
+            //else
 #endif
             {
                 // 1. Define the Source Texture (RGBA8)
@@ -393,6 +415,106 @@ namespace Insight
 
                 context.Data = std::move(outBuffer);
                 context.PixelFormat = PixelFormat::BC3_UNorm;
+            }
+        }
+
+        void TextureImporter::DecompressFromBC3(TextureImportContext& context) const
+        {
+            IS_PROFILE_FUNCTION();
+
+            bool textureDecompressed = false;
+#ifdef NVIDIA_TEXTURE_TOOLS
+            //if (context.ImageLoader == ImageLoader::NVTT)
+            {
+                const auto MessageCallback = [](nvtt::Severity severity, nvtt::Error error, const char* message, const void* userData)
+                    {
+                        switch (severity)
+                        {
+                        case nvtt::Severity_Info:
+                        {
+                            IS_LOG_CORE_INFO("{}", message);
+                        }
+                        case nvtt::Severity_Warning:
+                        {
+                            IS_LOG_CORE_WARN("{}", message);
+                        }
+                        case nvtt::Severity_Error:
+                        {
+                            IS_LOG_CORE_ERROR("{}", message);
+                        }
+                        }
+                    };
+
+                nvtt::setMessageCallback(MessageCallback, nullptr);
+
+                bool result = false;
+                nvtt::useCurrentDevice();
+                // First, create an nvtt::Context. Contexts are used both for global settings and for controlling the compression process:
+                nvtt::Context nvttContext(true);
+                // Now all context compression will be CUDA-accelerated if any system GPU supports it.
+
+                // In NVTT, we use nvtt::Surface to store a single uncompressed image. nvtt::Surface has a method nvtt::Surface::load(), which can be used to load an image file. A typical image loading process looks like this:
+                nvtt::Surface surface;
+                textureDecompressed = surface.loadFromMemory(context.Data.data(), context.Data.size());
+                if (textureDecompressed)
+                {
+                    const float* r = surface.channel(0);
+                    const float* g = surface.channel(1);
+                    const float* b = surface.channel(2);
+                    const float* a = surface.channel(3);
+                    // nvtt when compressing to BC format takes the input as BGRA not RGBA.
+                    QuantiseTextureData(context, r, g, b, a);
+                    return;
+                }
+                else
+                {
+                    IS_LOG_CORE_ERROR("NVTT Unable to uncompress BC3 image to RGBA.");
+                }
+            }
+            //else
+#endif
+            {
+                // 1. Define the Source Texture (RGBA8)
+                CMP_Texture srcTexture = { 0 };
+                srcTexture.dwSize = sizeof(CMP_Texture);
+                srcTexture.dwWidth = context.Width;
+                srcTexture.dwHeight = context.Height;
+                srcTexture.dwPitch = srcTexture.dwWidth * context.Channels;
+                srcTexture.format = CMP_FORMAT_BC3;
+                srcTexture.dwDataSize = context.Data.size();
+                srcTexture.pData = context.Data.data();
+
+                // 2. Define the Destination Texture (BC3)
+                CMP_Texture destTexture = { 0 };
+                destTexture.dwSize = sizeof(CMP_Texture);
+                destTexture.dwWidth = srcTexture.dwWidth;
+                destTexture.dwHeight = srcTexture.dwHeight;
+                destTexture.dwPitch = 0;
+                destTexture.format = CMP_FORMAT_RGBA_8888;
+                // BC3 uses 1 byte per pixel (16 bytes per 4x4 block)
+                destTexture.dwDataSize = CMP_CalculateBufferSize(&destTexture);
+                std::vector<Byte> outBuffer(destTexture.dwDataSize);
+                destTexture.pData = outBuffer.data();
+
+
+                // 3. Set Compression Options
+                CMP_CompressOptions options = { 0 };
+                options.dwSize = sizeof(options);
+                options.fquality = 0.5f;            // Quality level: 0.0 (Fast) to 1.0 (High)
+                options.nEncodeWith = CMP_GPU_HW;  // Enable OpenCL acceleration for AMD GPUs
+                options.bDisableMultiThreading = false;
+
+                // 4. Run Compression
+                CMP_ERROR status = CMP_ConvertTexture(&srcTexture, &destTexture, &options, nullptr);
+
+                if (status != CMP_OK) {
+                    // Log error status
+                    IS_LOG_CORE_ERROR("[TextureImporter::CompressToBC3] Unable to convert texture data into BC3 format.");
+                    return;
+                }
+
+                context.Data = std::move(outBuffer);
+                context.PixelFormat = PixelFormat::R8G8B8A8_UNorm;
             }
         }
 
@@ -572,6 +694,49 @@ namespace Insight
                 }
             }
             context.Data.resize(textureSize);
+        }
+
+        void TextureImporter::SwapRedAndBlueTextureChannels(TextureImportContext& context) const
+        {
+            IS_PROFILE_FUNCTION();
+
+            const Core::CPUInformation cpuInfo = Platform::GetCPUInformation();
+
+            if (false && cpuInfo.IsAVX2)
+            {
+
+            }
+            else if (cpuInfo.IsSSE2)
+            {
+                const u64 pixelCount = context.Width * context.Height;
+
+                int i = 0;
+
+                for (; i <= pixelCount - 4; i += 4)
+                {
+                    u8* pixelByteOffset = context.Data.data() + (i * 4);
+                    // 1. Load 4 floats and scale to 0-255
+                    const __m128i pixelByteData = _mm_loadu_si128((const __m128i*)pixelByteOffset);
+                    const __m128i shuffleMash = _mm_setr_epi8(
+                        2, 1, 0, 3, 
+                        6, 5, 4, 7, 
+                        10, 9, 8, 11, 
+                        14, 13, 12, 15);
+                    const __m128i shuffledPixelBytes = _mm_shuffle_epi8(pixelByteData, shuffleMash);
+                    _mm_storeu_si128((__m128i*)pixelByteOffset, shuffledPixelBytes);
+                }
+
+                // Scalar Tail Fallback
+                for (; i < pixelCount; ++i)
+                {
+                    u8* pixelByteOffset = context.Data.data() + (i * 4);
+
+                    const u8 red = pixelByteOffset[0];
+
+                    pixelByteOffset[0] = pixelByteOffset[2];
+                    pixelByteOffset[2] = red;
+                }
+            }
         }
     }
 }

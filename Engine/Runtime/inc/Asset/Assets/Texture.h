@@ -81,9 +81,10 @@ namespace Insight
         struct TextureAssetTextureData {};
         struct TextureAssetTextureDataQOI {};
         struct TextureAssetTextureDataLZ4 {};
+        struct TextureAssetTextureDataBC3{};
     }
 
-    OBJECT_SERIALISER(Runtime::TextureAsset, 3,
+    OBJECT_SERIALISER(Runtime::TextureAsset, 4,
         SERIALISE_BASE(Runtime::Asset, 1, 0)
         SERIALISE_PROPERTY(u32, m_width, 1, 0)
         SERIALISE_PROPERTY(u32, m_height, 1, 0)
@@ -92,7 +93,8 @@ namespace Insight
         SERIALISE_PROPERTY(PixelFormat, m_pixelFormat, 1, 0)
         SERIALISE_COMPLEX(Serialisation::TextureAssetTextureData, m_textureData, 1, 2)
         SERIALISE_COMPLEX(Serialisation::TextureAssetTextureDataQOI, m_textureData, 2, 3)
-        SERIALISE_COMPLEX(Serialisation::TextureAssetTextureDataLZ4, m_textureData, 3, 0)
+        SERIALISE_COMPLEX(Serialisation::TextureAssetTextureDataLZ4, m_textureData, 3, 4)
+        SERIALISE_COMPLEX(Serialisation::TextureAssetTextureDataBC3, m_textureData, 4, 0)
     );
 
     OBJECT_SERIALISER_META(Runtime::TextureAsset, 1,

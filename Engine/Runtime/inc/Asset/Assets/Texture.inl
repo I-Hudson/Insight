@@ -188,5 +188,78 @@ namespace Insight
                 }
             }
         };
+
+        template<>
+        struct ComplexSerialiser<TextureAssetTextureDataBC3, Runtime::TextureAsset::TextureData, Runtime::TextureAsset>
+        {
+            void operator()(ISerialiser* serialiser, Runtime::TextureAsset::TextureData& textureData, Runtime::TextureAsset* textureAsset) const
+            {
+                constexpr const char* kTextureData = "TextureData";
+
+                if (serialiser->IsReadMode())
+                {
+                    Runtime::TextureImporter textureImporter;
+                    Runtime::TextureImportContext context
+                    {
+                        { },
+                        textureAsset->m_width,
+                        textureAsset->m_height,
+                        textureAsset->m_channels,
+                        textureAsset->m_pixelFormat
+                    };
+
+                    serialiser->ReadBinaryBulk(kTextureData, context.Data);
+
+                    // We don't decompress here as the saved binary data is in BC3 format.
+                    textureAsset->SetTextureData(context.Data.data(), context.Data.size());
+
+                    if (textureAsset->m_readableWriteable)
+                    {
+                        textureImporter.DecompressFromBC3(context);
+                        textureData.Bytes = std::move(context.Data);
+                    }
+                }
+                else
+                {
+                    Runtime::TextureImporter textureImporter;
+                    Runtime::TextureImportContext context
+                    {
+                        { },
+                        textureAsset->m_width,
+                        textureAsset->m_height,
+                        textureAsset->m_channels,
+                        textureAsset->m_pixelFormat
+                    };
+
+                    if (!textureAsset->m_readableWriteable && textureData.Bytes.empty())
+                    {
+                        textureData.Bytes = Runtime::AssetRegistry::Instance().LoadAssetData(textureAsset->GetAssetInfo()->GetFullFilePath());
+                        context.Data = std::move(textureData.Bytes);
+
+                        const std::string_view fileExtension = FileSystem::GetExtension(textureAsset->GetAssetInfo()->FileName);
+                        textureImporter.LoadRaw(context, fileExtension);
+                    }
+                    else
+                    {
+                        context.Data = std::move(textureData.Bytes);
+                    }
+
+                    if (textureAsset->m_pixelFormat != PixelFormat::BC3_UNorm)
+                    {
+                        textureImporter.CompressToBC3(context);
+                    }
+
+                    serialiser->WriteBinaryBulk(kTextureData, context.Data);
+
+                    FileSystem::SaveToFile(context.Data, textureAsset->GetAssetInfo()->FileName);
+
+                    if (textureAsset->m_readableWriteable)
+                    {
+                        textureImporter.DecompressFromBC3(context);
+                        textureData.Bytes = std::move(context.Data);
+                    }
+                }
+            }
+        };
     }
 }

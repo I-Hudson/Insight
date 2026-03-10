@@ -100,7 +100,7 @@ namespace Insight
 			}
 
 			//TEMP
-			return asset;
+			//return asset;
 
 			ASSERT(asset->GetAssetInfo() == assetInfo);
 
