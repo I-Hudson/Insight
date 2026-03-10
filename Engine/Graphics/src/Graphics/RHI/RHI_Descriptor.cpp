@@ -291,7 +291,7 @@ namespace Insight
 				{
 					m_currentDescriptorHash = hash;
 					vkUpdateDescriptorSets(contextVulkan->GetDevice(), writeIndex, &writes[0], 0, nullptr);
-					RenderStats::Instance().DescriptorSetUpdates++;
+					RenderStats::Instance().Recording().DescriptorSetUpdates++;
 				}
 			}
 #endif
@@ -476,7 +476,7 @@ namespace Insight
 			}
 
 			RHI_BufferView view = m_uniformBuffer->Upload(data, static_cast<int>(size), static_cast<int>(m_uniformBufferOffset), PhysicalDeviceInformation::Instance().MinUniformBufferAlignment);
-			RenderStats::Instance().FrameUniformBufferSize += view.GetSize();
+			RenderStats::Instance().Recording().FrameUniformBufferSize += view.GetSize();
 			m_uniformBufferOffset += view.GetSize();
 #ifdef DESCRIPTOR_CACHE_UNIFOM_DATA
 			m_cachedBufferData[hash] = view;

@@ -178,7 +178,7 @@ namespace Insight
 				{
 					nvtx3::mark("PipelineResourceBarriers");
 					m_commandList->ResourceBarrier(static_cast<UINT>(resourceBarriers.size()), resourceBarriers.data());
-					++RenderStats::Instance().PipelineBarriers;
+					++RenderStats::Instance().Recording().PipelineBarriers;
 				}
 			}
 
@@ -474,7 +474,7 @@ namespace Insight
 					IS_PROFILE_SCOPE("IASetVertexBuffers");
 					m_commandList->IASetVertexBuffers(0, viewCount, views);
 				}
-				RenderStats::Instance().VertexBufferBindings += viewCount;
+				RenderStats::Instance().Recording().VertexBufferBindings += viewCount;
 			}
 
 			void RHI_CommandList_DX12::SetIndexBuffer(const RHI_BufferView& bufferView, const IndexType index_type)
@@ -494,7 +494,7 @@ namespace Insight
 				};
 				m_commandList->IASetIndexBuffer(&view);
 				m_boundIndexBufferView = bufferView;
-				++RenderStats::Instance().IndexBufferBindings;
+				++RenderStats::Instance().Recording().IndexBufferBindings;
 			}
 
 			void RHI_CommandList_DX12::Draw(u32 vertexCount, u32 instanceCount, u32 firstVertex, u32 firstInstance)
@@ -505,7 +505,7 @@ namespace Insight
 					{
 						IS_PROFILE_SCOPE("DrawInstanced");
 						m_commandList->DrawInstanced(vertexCount, instanceCount, firstVertex, firstInstance);
-						++RenderStats::Instance().DrawCalls;
+						++RenderStats::Instance().Recording().DrawCalls;
 					}
 				}
 			}
@@ -518,8 +518,8 @@ namespace Insight
 					{
 						IS_PROFILE_SCOPE("DrawIndexedInstanced");
 						m_commandList->DrawIndexedInstanced(indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
-						++RenderStats::Instance().DrawIndexedCalls;
-						RenderStats::Instance().DrawIndexedIndicesCount += indexCount;
+						++RenderStats::Instance().Recording().DrawIndexedCalls;
+						RenderStats::Instance().Recording().DrawIndexedIndicesCount += indexCount;
 					}
 				}
 			}
@@ -680,7 +680,7 @@ namespace Insight
 									default:
 										break;
 									}
-									++RenderStats::Instance().DescriptorSetBindings;
+									++RenderStats::Instance().Recording().DescriptorSetBindings;
 								}
 							}
 
@@ -714,7 +714,7 @@ namespace Insight
 									default:
 										break;
 									}
-									++RenderStats::Instance().DescriptorSetBindings;
+									++RenderStats::Instance().Recording().DescriptorSetBindings;
 								}
 							}
 							break;
@@ -736,13 +736,13 @@ namespace Insight
 						{
 							firstHandle = iter->second;
 							set.Bindings.at(0).Type == DescriptorType::Sampler ?
-							++RenderStats::Instance().DescriptorTableSamplerReuse : ++RenderStats::Instance().DescriptorTableResourceReuse;
+							++RenderStats::Instance().Recording().DescriptorTableSamplerReuse : ++RenderStats::Instance().Recording().DescriptorTableResourceReuse;
 						}
 						else
 #endif // DX12_REUSE_DESCRIPTOR_TABLES
 						{
 							set.Bindings.at(0).Type == DescriptorType::Sampler ? 
-								++RenderStats::Instance().DescriptorTableSamplerCreations : ++RenderStats::Instance().DescriptorTableResourceCreations;
+								++RenderStats::Instance().Recording().DescriptorTableSamplerCreations : ++RenderStats::Instance().Recording().DescriptorTableResourceCreations;
 
 							for (auto const& binding : set.Bindings)
 							{
@@ -798,14 +798,14 @@ namespace Insight
 												break;
 											}
 											}
-											++RenderStats::Instance().DescriptorSetUpdates;
+											++RenderStats::Instance().Recording().DescriptorSetUpdates;
 										}
 										else
 										{
 											IS_PROFILE_SCOPE("Copy null buffer");
 
 											m_contextDX12->GetDevice()->CopyDescriptorsSimple(1, dstHandle.CPUPtr, m_contextDX12->GetDescriptorCBVNullHandle().CPUPtr, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-											++RenderStats::Instance().DescriptorSetUpdates;
+											++RenderStats::Instance().Recording().DescriptorSetUpdates;
 										}
 									}
 
@@ -848,7 +848,7 @@ namespace Insight
 												}
 												ASSERT(srvHandle.IsValid());
 												m_contextDX12->GetDevice()->CopyDescriptorsSimple(1, dstHandle.CPUPtr, srvHandle.CPUPtr, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-												++RenderStats::Instance().DescriptorSetUpdates;
+												++RenderStats::Instance().Recording().DescriptorSetUpdates;
 											}
 										}
 										else
@@ -856,7 +856,7 @@ namespace Insight
 											IS_PROFILE_SCOPE("Copy null texture");
 
 											//m_contextDX12->GetDevice()->CopyDescriptorsSimple(1, dstHandle.CPUPtr, m_contextDX12->GetDescriptorSRVNullHandle().CPUPtr, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-											++RenderStats::Instance().DescriptorSetUpdates;
+											++RenderStats::Instance().Recording().DescriptorSetUpdates;
 										}
 									}
 
@@ -877,14 +877,14 @@ namespace Insight
 											RHI_Sampler_DX12 const* samplerDX12 = static_cast<RHI_Sampler_DX12 const*>(sampler);
 											DescriptorHeapHandle_DX12 srvHandle = samplerDX12->Handle;
 											m_contextDX12->GetDevice()->CopyDescriptorsSimple(1, samplerHandle.CPUPtr, srvHandle.CPUPtr, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
-											++RenderStats::Instance().DescriptorSetUpdates;
+											++RenderStats::Instance().Recording().DescriptorSetUpdates;
 										}
 										else
 										{
 											IS_PROFILE_SCOPE("Copy null sampler");
 
 											//m_contextDX12->GetDevice()->CopyDescriptorsSimple(1, samplerHandle.CPUPtr, m_contextDX12->GetDescriptorSAMNullHandle().CPUPtr, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
-											++RenderStats::Instance().DescriptorSetUpdates;
+											++RenderStats::Instance().Recording().DescriptorSetUpdates;
 										}
 									}
 								}
@@ -918,7 +918,7 @@ namespace Insight
 							default:
 								break;
 							}
-							++RenderStats::Instance().DescriptorSetBindings;
+							++RenderStats::Instance().Recording().DescriptorSetBindings;
 						}
 					}
 					++rootParameterIdx;

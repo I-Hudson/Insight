@@ -91,7 +91,7 @@ namespace Insight
 						0, nullptr,
 						static_cast<u32>(bufferMemoryBarrier.size()), bufferMemoryBarrier.data(),
 						static_cast<u32>(imageMemoryBarrier.size()), imageMemoryBarrier.data());
-					RenderStats::Instance().PipelineBarriers++;
+					RenderStats::Instance().Recording().PipelineBarriers++;
 				}
 			}
 
@@ -455,7 +455,7 @@ namespace Insight
 
 					IS_PROFILE_SCOPE("bindVertexBuffers");
 					vkCmdBindVertexBuffers(m_commandList, 0, viewCount, vkBuffers, vkOffsets);
-					RenderStats::Instance().VertexBufferBindings += viewCount;
+					RenderStats::Instance().Recording().VertexBufferBindings += viewCount;
 				}
 			}
 
@@ -471,7 +471,7 @@ namespace Insight
 				m_boundIndexBufferView = bufferView;
 				const RHI_Buffer_Vulkan* bufferVulkan = static_cast<RHI_Buffer_Vulkan*>(bufferView.GetBuffer());
 				vkCmdBindIndexBuffer(m_commandList, bufferVulkan->GetBuffer(), bufferView.GetOffset(), IndexTypeToVulkan(index_type));
-				RenderStats::Instance().IndexBufferBindings++;
+				RenderStats::Instance().Recording().IndexBufferBindings++;
 				m_context->GetResourceRenderTracker().TrackResource(bufferView.GetBuffer());
 			}
 
@@ -481,7 +481,7 @@ namespace Insight
 				if (CanDraw(GPUQueue::GPUQueue_Graphics))
 				{
 					vkCmdDraw(m_commandList, vertexCount, instanceCount, firstVertex, firstInstance);
-					RenderStats::Instance().DrawCalls++;
+					RenderStats::Instance().Recording().DrawCalls++;
 				}
 			}
 
@@ -493,8 +493,8 @@ namespace Insight
 					{
 						IS_PROFILE_SCOPE("API call");
 						vkCmdDrawIndexed(m_commandList, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
-						RenderStats::Instance().DrawIndexedCalls++;
-						RenderStats::Instance().DrawIndexedIndicesCount += indexCount;
+						RenderStats::Instance().Recording().DrawIndexedCalls++;
+						RenderStats::Instance().Recording().DrawIndexedIndicesCount += indexCount;
 					}
 				}
 			}
@@ -625,8 +625,8 @@ namespace Insight
 						IS_PROFILE_SCOPE("API call");
 						vkCmdBindDescriptorSets(m_commandList, VK_PIPELINE_BIND_POINT_GRAPHICS, m_bound_pipeline_layout, 0, 
 							static_cast<u32>(sets.size()), sets.data(), static_cast<u32>(dynamicOffsets.size()), dynamicOffsets.data());
-						RenderStats::Instance().DescriptorSetBindings++;
-						RenderStats::Instance().DescriptorSetUsedCount += static_cast<u32>(sets.size());
+						RenderStats::Instance().Recording().DescriptorSetBindings++;
+						RenderStats::Instance().Recording().DescriptorSetUsedCount += static_cast<u32>(sets.size());
 					}
 				}
 				return result;

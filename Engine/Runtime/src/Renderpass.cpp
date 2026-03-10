@@ -638,7 +638,7 @@ namespace Insight
 									cmdList->SetIndexBuffer(renderMeshLod.IndexBufferViews[i], Runtime::Mesh::kMeshIndexType);
 									cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
 								}
-								++RenderStats::Instance().MeshCount;
+								++RenderStats::Instance().Recording().MeshCount;
 							}
 						}
 						cmdList->EndRenderpass();
@@ -897,7 +897,7 @@ namespace Insight
 										cmdList->SetIndexBuffer(renderMeshLod.IndexBufferViews[i], Runtime::Mesh::kMeshIndexType);
 										cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
 									}
-									++RenderStats::Instance().MeshCount;
+									++RenderStats::Instance().Recording().MeshCount;
 								}
 							}
 						}
@@ -947,7 +947,7 @@ namespace Insight
 									cmdList->SetIndexBuffer(renderMeshLod.IndexBufferViews[i], Runtime::Mesh::kMeshIndexType);
 									cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
 								}
-								++RenderStats::Instance().MeshCount;
+								++RenderStats::Instance().Recording().MeshCount;
 							}
 						}
 					}
@@ -1109,7 +1109,7 @@ namespace Insight
 										cmdList->SetIndexBuffer(renderMeshLod.IndexBufferViews[i], Runtime::Mesh::kMeshIndexType);
 										cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
 									}
-									++RenderStats::Instance().MeshCount;
+									++RenderStats::Instance().Recording().MeshCount;
 								}
 							}
 						}
@@ -1155,7 +1155,7 @@ namespace Insight
 									cmdList->SetIndexBuffer(renderMeshLod.IndexBufferViews[i], Runtime::Mesh::kMeshIndexType);
 									cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
 								}
-								++RenderStats::Instance().MeshCount;
+								++RenderStats::Instance().Recording().MeshCount;
 							}
 						}
 					}

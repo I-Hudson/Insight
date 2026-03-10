@@ -5,6 +5,7 @@
 #include "Core/TypeAlias.h"
 #include "Core/Singleton.h"
 #include "Core/Timer.h"
+#include "Core/Collections/DoubleBufferVector.h"
 
 #include <string>
 
@@ -25,53 +26,61 @@ std::string _CONCAT(Stat, Formated)() { return StatDisplayText + Func; }
 
 		struct IS_GRAPHICS RenderStats : public Core::Singleton<RenderStats>
 		{
-			Core::Timer RenderTime;
+			struct Frame
+			{
+				Core::Timer RenderTime;
 
-			static constexpr u8 AverageRenderTimeCount = 128;
-			float AverageRenderTime[AverageRenderTimeCount];
-			u8 AverageRenderTimeIndex;
+				static constexpr u8 AverageRenderTimeCount = 128;
+				float AverageRenderTime[AverageRenderTimeCount];
+				u8 AverageRenderTimeIndex;
 
-			u64 MeshCount;
+				u64 MeshCount;
 
-			u64 DrawCalls;
-			u64 DrawIndexedCalls;
-			u64 DispatchCalls;
+				u64 DrawCalls;
+				u64 DrawIndexedCalls;
+				u64 DispatchCalls;
 
-			u64 IndexBufferBindings;
-			u64 VertexBufferBindings;
+				u64 IndexBufferBindings;
+				u64 VertexBufferBindings;
 
-			u64 DrawIndexedIndicesCount;
+				u64 DrawIndexedIndicesCount;
 
-			u64 FrameUniformBufferSize;
+				u64 FrameUniformBufferSize;
 
-			u64 DescriptorSetBindings;
-			u64 DescriptorSetUpdates;
-			u64 DescriptorSetUsedCount;
-			u64 PipelineBarriers;
+				u64 DescriptorSetBindings;
+				u64 DescriptorSetUpdates;
+				u64 DescriptorSetUsedCount;
+				u64 PipelineBarriers;
 
-			// DX12 Info
-			u64 DescriptorTableResourceCreations;
-			u64 DescriptorTableResourceReuse;
-			u64 DescriptorTableSamplerCreations;
-			u64 DescriptorTableSamplerReuse;
+				// DX12 Info
+				u64 DescriptorTableResourceCreations;
+				u64 DescriptorTableResourceReuse;
+				u64 DescriptorTableSamplerCreations;
+				u64 DescriptorTableSamplerReuse;
 
-			FORMAT_STAT(MeshCount, "Mesh Count: ");
-			FORMAT_STAT(DrawCalls, "Draw Calls: ");
-			FORMAT_STAT(DrawIndexedCalls, "Draw Indexed Calls: ");
-			FORMAT_STAT(DispatchCalls, "Dispatch Calls: ");
-			FORMAT_STAT(IndexBufferBindings, "Index Buffer Bindings Calls: ");
-			FORMAT_STAT(VertexBufferBindings, "Vertex Buffer Bindings Calls: ");
-			FORMAT_STAT_FUNC(DrawIndexedIndicesCount, FormatU64ToCommaString(DrawIndexedIndicesCount), "Draw indcies count: ");
-			FORMAT_STAT_VALUE(FrameUniformBufferSize, FrameUniformBufferSize / 1024, "Frame Uniform Buffer Size (KB): ");
-			FORMAT_STAT(DescriptorSetBindings, "Descriptor Set Bindings Calls: ");
-			FORMAT_STAT(DescriptorSetUpdates, "Descriptor Set Update Calls: ");
-			FORMAT_STAT(DescriptorSetUsedCount, "Descriptor Set Used Count: ");
-			FORMAT_STAT(PipelineBarriers, "Pipline barriers Calls: ");
+				FORMAT_STAT(MeshCount, "Mesh Count: ");
+				FORMAT_STAT(DrawCalls, "Draw Calls: ");
+				FORMAT_STAT(DrawIndexedCalls, "Draw Indexed Calls: ");
+				FORMAT_STAT(DispatchCalls, "Dispatch Calls: ");
+				FORMAT_STAT(IndexBufferBindings, "Index Buffer Bindings Calls: ");
+				FORMAT_STAT(VertexBufferBindings, "Vertex Buffer Bindings Calls: ");
+				FORMAT_STAT_FUNC(DrawIndexedIndicesCount, FormatU64ToCommaString(DrawIndexedIndicesCount), "Draw indcies count: ");
+				FORMAT_STAT_VALUE(FrameUniformBufferSize, FrameUniformBufferSize / 1024, "Frame Uniform Buffer Size (KB): ");
+				FORMAT_STAT(DescriptorSetBindings, "Descriptor Set Bindings Calls: ");
+				FORMAT_STAT(DescriptorSetUpdates, "Descriptor Set Update Calls: ");
+				FORMAT_STAT(DescriptorSetUsedCount, "Descriptor Set Used Count: ");
+				FORMAT_STAT(PipelineBarriers, "Pipline barriers Calls: ");
 
-			FORMAT_STAT(DescriptorTableResourceCreations, "Descriptor Table Resource Creation: ");
-			FORMAT_STAT(DescriptorTableResourceReuse, "Descriptor Table Resource Reuse: ");
-			FORMAT_STAT(DescriptorTableSamplerCreations, "Descriptor Table Sampler Creation: ");
-			FORMAT_STAT(DescriptorTableSamplerReuse, "Descriptor Table Sampler Reuse: ");
+				FORMAT_STAT(DescriptorTableResourceCreations, "Descriptor Table Resource Creation: ");
+				FORMAT_STAT(DescriptorTableResourceReuse, "Descriptor Table Resource Reuse: ");
+				FORMAT_STAT(DescriptorTableSamplerCreations, "Descriptor Table Sampler Creation: ");
+				FORMAT_STAT(DescriptorTableSamplerReuse, "Descriptor Table Sampler Reuse: ");
+			};
+
+			DoubleBufferVector<Frame> Frames;
+			Frame& Recording() { return Frames.GetCurrent(); }
+			Frame& Drawing() { return Frames.GetPending(); }
+
 
 			void Draw();
 			void Reset();

@@ -455,7 +455,7 @@ namespace Insight
                                             cmdList->SetIndexBuffer(renderMeshLod.IndexBufferViews[i], Runtime::Mesh::kMeshIndexType);
                                             cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
                                         }
-                                        ++Graphics::RenderStats::Instance().MeshCount;
+                                        ++Graphics::RenderStats::Instance().Recording().MeshCount;
                                     }
 
                                     cmdList->EndRenderpass();
@@ -543,7 +543,7 @@ namespace Insight
                                             cmdList->SetIndexBuffer(renderMeshLod.IndexBufferViews[i], Runtime::Mesh::kMeshIndexType);
                                             cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
                                         }
-                                        ++Graphics::RenderStats::Instance().MeshCount;
+                                        ++Graphics::RenderStats::Instance().Recording().MeshCount;
                                     }
 
                                     cmdList->EndRenderpass();
@@ -668,7 +668,7 @@ namespace Insight
                             cmdList->SetIndexBuffer(renderMeshLod.IndexBufferViews[i], Runtime::Mesh::kMeshIndexType);
                             cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
                         }
-                        ++Graphics::RenderStats::Instance().MeshCount;
+                        ++Graphics::RenderStats::Instance().Recording().MeshCount;
                     }
                 }
                 cmdList->EndRenderpass();
@@ -835,7 +835,7 @@ namespace Insight
                                 cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
                             }
 
-                            ++Graphics::RenderStats::Instance().MeshCount;
+                            ++Graphics::RenderStats::Instance().Recording().MeshCount;
                         }
                     }
                     cmdList->EndRenderpass();
@@ -994,7 +994,7 @@ namespace Insight
                                 cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
                             }
 
-                            ++Graphics::RenderStats::Instance().MeshCount;
+                            ++Graphics::RenderStats::Instance().Recording().MeshCount;
                         }
 
                     }

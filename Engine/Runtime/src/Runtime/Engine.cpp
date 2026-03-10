@@ -30,6 +30,8 @@
 
 #include "Physics/PhysicsWorld.h"
 
+#include "Graphics/RenderGraph/RenderGraph.h"
+
 #include "imgui.h"
 
 #include "Core/ProxyAllocator.h"
@@ -231,8 +233,12 @@ namespace Insight
 				{
 					IS_PROFILE_SCOPE("Render Update");
 
+					Graphics::RenderGraph::Instance().AddSyncPoint([]()
+						{
+							Graphics::RenderStats::Instance().Frames.Swap();
+						});
+
 					m_graphicsSystem.CreateRenderFrame();
-					Graphics::RenderStats::Instance().Draw();
 
 					{
 						m_animationSystem.WaitForAllAnimationUpdates();

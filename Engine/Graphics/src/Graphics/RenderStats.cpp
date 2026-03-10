@@ -4,6 +4,7 @@
 #include "Core/Profiler.h"
 
 #include <imgui.h>
+#include <imgui_internal.h>
 
 #include <sstream>
 #include <locale>
@@ -73,26 +74,30 @@ namespace Insight
         {
             IS_PROFILE_FUNCTION();
 
-            RenderTime.Stop();
+            Frame& frame = Drawing();
 
-            u32 rawRenderTime = static_cast<u32>(RenderTime.GetElapsedTimeMill().count());
-            float floatRenderTime = static_cast<float>(rawRenderTime);
-            float renderTime = floatRenderTime / 1000.0f;
-            float fps = 1000.0f / static_cast<float>(rawRenderTime);
+            frame.RenderTime.Stop();
 
-            AverageRenderTime[AverageRenderTimeIndex] = renderTime;
-            AverageRenderTimeIndex = (AverageRenderTimeIndex + 1) % AverageRenderTimeCount;
+            u32 rawRenderTime = static_cast<u32>(frame.RenderTime.GetElapsedTimeMill().count());
+            const float floatRenderTime = static_cast<float>(rawRenderTime);
+            const float renderTime = floatRenderTime / 1000.0f;
+            const float fps = 1000.0f / static_cast<float>(rawRenderTime);
+
+            frame.AverageRenderTime[frame.AverageRenderTimeIndex] = renderTime;
+            frame.AverageRenderTimeIndex = (frame.AverageRenderTimeIndex + 1) % frame.AverageRenderTimeCount;
 
             float averageRenderTimer = 0.0f;
-            for (size_t i = 0; i < AverageRenderTimeCount; ++i)
+            for (size_t i = 0; i < frame.AverageRenderTimeCount; ++i)
             {
-                averageRenderTimer += AverageRenderTime[i];
+                averageRenderTimer += frame.AverageRenderTime[i];
             }
-            averageRenderTimer = averageRenderTimer / AverageRenderTimeCount;
+            averageRenderTimer = averageRenderTimer / frame.AverageRenderTimeCount;
 
             std::string vendor_name = PhysicalDeviceInformation::Instance().Vendor;
             std::string device_name = PhysicalDeviceInformation::Instance().Device_Name;
 
+            if (ImGui::GetCurrentContext() != nullptr
+                && ImGui::GetCurrentContext()->WithinFrameScope)
             {
                 IS_PROFILE_SCOPE("IMGUI");
                 ImGui::Begin("Render Stats");
@@ -130,18 +135,18 @@ namespace Insight
                 ImGui::Text("Average Render Timer: %f", averageRenderTimer);
                 ImGui::Text("Render Fps: %f", fps);
 
-                ImGui::Text(MeshCountFormated().c_str());
-                ImGui::Text(DrawCallsFormated().c_str());
-                ImGui::Text(DrawIndexedCallsFormated().c_str());
-                ImGui::Text(DispatchCallsFormated().c_str());
-                ImGui::Text(IndexBufferBindingsFormated().c_str());
-                ImGui::Text(VertexBufferBindingsFormated().c_str());
-                ImGui::Text(DrawIndexedIndicesCountFormated().c_str());
-                ImGui::Text(FrameUniformBufferSizeFormated().c_str());
-                ImGui::Text(DescriptorSetBindingsFormated().c_str());
-                ImGui::Text(DescriptorSetUpdatesFormated().c_str());
-                ImGui::Text(DescriptorSetUsedCountFormated().c_str());
-                ImGui::Text(PipelineBarriersFormated().c_str());
+                ImGui::Text(frame.MeshCountFormated().c_str());
+                ImGui::Text(frame.DrawCallsFormated().c_str());
+                ImGui::Text(frame.DrawIndexedCallsFormated().c_str());
+                ImGui::Text(frame.DispatchCallsFormated().c_str());
+                ImGui::Text(frame.IndexBufferBindingsFormated().c_str());
+                ImGui::Text(frame.VertexBufferBindingsFormated().c_str());
+                ImGui::Text(frame.DrawIndexedIndicesCountFormated().c_str());
+                ImGui::Text(frame.FrameUniformBufferSizeFormated().c_str());
+                ImGui::Text(frame.DescriptorSetBindingsFormated().c_str());
+                ImGui::Text(frame.DescriptorSetUpdatesFormated().c_str());
+                ImGui::Text(frame.DescriptorSetUsedCountFormated().c_str());
+                ImGui::Text(frame.PipelineBarriersFormated().c_str());
 
                 if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::DX12)
                 {
@@ -149,10 +154,10 @@ namespace Insight
                     ImGui::Spacing();
                     ImGui::Text("DX12");
                     ImGui::Separator();
-                    ImGui::Text(DescriptorTableResourceCreationsFormated().c_str());
-                    ImGui::Text(DescriptorTableResourceReuseFormated().c_str());
-                    ImGui::Text(DescriptorTableSamplerCreationsFormated().c_str());
-                    ImGui::Text(DescriptorTableSamplerReuseFormated().c_str());
+                    ImGui::Text(frame.DescriptorTableResourceCreationsFormated().c_str());
+                    ImGui::Text(frame.DescriptorTableResourceReuseFormated().c_str());
+                    ImGui::Text(frame.DescriptorTableSamplerCreationsFormated().c_str());
+                    ImGui::Text(frame.DescriptorTableSamplerReuseFormated().c_str());
                 }
 
                 ImGui::End();
@@ -162,55 +167,57 @@ namespace Insight
 
         void RenderStats::Reset()
         {
-            RenderTime.Reset();
+            Frame& frame = Drawing();
+
+            frame.RenderTime.Reset();
 
             //MeshCount.Swap();
-            MeshCount = 0;
+            frame.MeshCount = 0;
 
             //DrawCalls.Swap();
-            DrawCalls = 0;
+            frame.DrawCalls = 0;
 
             //DrawIndexedCalls.Swap();
-            DrawIndexedCalls = 0;
+            frame.DrawIndexedCalls = 0;
 
             //DispatchCalls.Swap();
-            DispatchCalls = 0;
+            frame.DispatchCalls = 0;
 
             //IndexBufferBindings.Swap();
-            IndexBufferBindings = 0;
+            frame.IndexBufferBindings = 0;
 
             //VertexBufferBindings.Swap();
-            VertexBufferBindings = 0;
+            frame.VertexBufferBindings = 0;
 
             //DrawIndexedIndicesCount.Swap();
-            DrawIndexedIndicesCount = 0;
+            frame.DrawIndexedIndicesCount = 0;
 
             //FrameUniformBufferSize.Swap();
-            FrameUniformBufferSize = 0;
+            frame.FrameUniformBufferSize = 0;
 
             //DescriptorSetBindings.Swap();
-            DescriptorSetBindings = 0;
+            frame.DescriptorSetBindings = 0;
 
             //DescriptorSetUpdates.Swap();
-            DescriptorSetUpdates = 0;
+            frame.DescriptorSetUpdates = 0;
 
             //DescriptorSetUsedCount.Swap();
-            DescriptorSetUsedCount = 0;
+            frame.DescriptorSetUsedCount = 0;
 
             //PipelineBarriers.Swap();
-            PipelineBarriers = 0;
+            frame.PipelineBarriers = 0;
 
             //DescriptorTableResourceCreations.Swap();
-            DescriptorTableResourceCreations = 0;
+            frame.DescriptorTableResourceCreations = 0;
 
             //DescriptorTableResourceReuse.Swap();
-            DescriptorTableResourceReuse = 0;
+            frame.DescriptorTableResourceReuse = 0;
 
             //DescriptorTableSamplerCreations.Swap();
-            DescriptorTableSamplerCreations = 0;
+            frame.DescriptorTableSamplerCreations = 0;
 
             //DescriptorTableSamplerReuse.Swap();
-            DescriptorTableSamplerReuse = 0;
+            frame.DescriptorTableSamplerReuse = 0;
         }
     }
 }

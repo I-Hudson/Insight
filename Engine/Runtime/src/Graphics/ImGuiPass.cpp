@@ -67,6 +67,7 @@ namespace Insight
 
 		void ImGuiPass::Render()
 		{
+			RenderStats::Instance().Draw();
 			RenderContext::Instance().ImGuiRender();
 
 			ImGuiPassData& passData = RemoveConst(m_passData.GetCurrent());
