@@ -489,8 +489,15 @@ namespace Insight
 			void RHI_CommandList_DX12::SetIndexBuffer(const RHI_BufferView& bufferView, const IndexType index_type)
 			{
 				IS_PROFILE_FUNCTION();
-				if (!bufferView.IsValid() || bufferView == m_boundIndexBufferView)
+
+				if (!bufferView.IsValid())
 				{
+					return;
+				}
+
+				if (bufferView == m_boundIndexBufferView)
+				{
+					m_context->GetResourceRenderTracker().TrackResource(bufferView.GetBuffer());
 					return;
 				}
 
@@ -501,8 +508,11 @@ namespace Insight
 					(UINT)bufferDX12->GetSize(),  
 					IndexTypeToDX12(index_type)
 				};
+
 				m_commandList->IASetIndexBuffer(&view);
 				m_boundIndexBufferView = bufferView;
+				m_context->GetResourceRenderTracker().TrackResource(m_boundIndexBufferView.GetBuffer());
+
 				++RenderStats::Instance().Recording().IndexBufferBindings;
 			}
 

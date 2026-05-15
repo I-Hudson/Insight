@@ -463,16 +463,23 @@ namespace Insight
 			{
 				IS_PROFILE_FUNCTION();
 
-				if (!bufferView.IsValid() || bufferView == m_boundIndexBufferView)
+				if (!bufferView.IsValid())
 				{
+					return;
+				}
+
+				if (bufferView == m_boundIndexBufferView)
+				{
+					m_context->GetResourceRenderTracker().TrackResource(bufferView.GetBuffer());
 					return;
 				}
 
 				m_boundIndexBufferView = bufferView;
 				const RHI_Buffer_Vulkan* bufferVulkan = static_cast<RHI_Buffer_Vulkan*>(bufferView.GetBuffer());
 				vkCmdBindIndexBuffer(m_commandList, bufferVulkan->GetBuffer(), bufferView.GetOffset(), IndexTypeToVulkan(index_type));
+
+				m_context->GetResourceRenderTracker().TrackResource(m_boundIndexBufferView.GetBuffer());
 				RenderStats::Instance().Recording().IndexBufferBindings++;
-				m_context->GetResourceRenderTracker().TrackResource(bufferView.GetBuffer());
 			}
 
 			void RHI_CommandList_Vulkan::Draw(u32 vertexCount, u32 instanceCount, u32 firstVertex, u32 firstInstance)
