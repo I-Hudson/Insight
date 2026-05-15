@@ -10,6 +10,7 @@
 
 #include "Core/Logger.h"
 #include "Core/Profiler.h"
+#include "Platforms/Platform.h"
 
 namespace Insight
 {
@@ -40,7 +41,7 @@ namespace Insight
 			m_pso = {};
 			m_activePSO = {};
 			m_drawData = {};
-			m_boundVertexBufferViews.clear();
+			Platform::MemSet(m_boundVertexBufferViews, 0, sizeof(m_boundVertexBufferViews));
 			m_boundIndexBufferView = { };
 			m_discard = false;
 		}

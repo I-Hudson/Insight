@@ -64,7 +64,9 @@ namespace Insight
 		{
 			return static_cast<std::underlying_type_t<T>>(e);
 		}
-#endif 
+#endif
+		constexpr static int k_VertexBufferBoundMaxSize = 16;
+
 		using RGTextureHandle = int;
 
 		enum class ResourceType

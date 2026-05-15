@@ -65,15 +65,6 @@ namespace Insight
 #endif
             std::vector<LOD> LODs;
 
-#if VERTEX_SPLIT_STREAMS
-            Graphics::VerticesSplitRHIBuffers RHI_VertexBuffers;
-            bool VertexBuffersCreated = false;
-#else
-            Graphics::RHI_Buffer* RHI_VertexBuffer = nullptr;
-#endif
-
-            std::vector<Graphics::RHI_Buffer*> RHI_IndexBuffers;
-
             Maths::Matrix4 TransformOffset;
             std::string Name;
         };
@@ -103,6 +94,21 @@ namespace Insight
             const AssetInfo* AssetInfo = nullptr;
         };
 
+        struct ModelNode
+        {
+            u64 VertexSize = 0;
+            u64 IndexSize = 0;
+
+            u64 VertexOffset = 0;
+            u64 IndexOffset = 0;
+
+#if VERTEX_SPLIT_STREAMS
+            Graphics::VerticesSplitRHIBuffers RHI_VertexBuffers;
+#else
+            Graphics::RHI_Buffer* RHI_VertexBuffer = nullptr;
+#endif
+            std::vector<Graphics::RHI_Buffer*> RHI_IndexBuffers;
+        };
 
         class ModelImporter : public IAssetImporter
         {
@@ -115,9 +121,10 @@ namespace Insight
 
         private:
 #if EXP_MODEL_LOADING
-            void ProcessNode(const aiScene* aiScene, const aiNode* aiNode, ModelAsset* modelAsset) const;
-            void ProcessMesh(const aiScene* aiScene, const aiNode* aiNode, const aiMesh* aiMesh, ModelAsset* modelAsset) const;
-            void ParseMeshData(const aiScene* aiScene, const aiNode* aiNode, const aiMesh* aiMesh, MeshData& meshData, ModelAsset* modelAsset) const;
+            void PreProcessVertexAndIndexBuffer(const aiScene* aiScene, ModelNode& modelNode) const;
+            void ProcessNode(const aiScene* aiScene, const aiNode* aiNode, ModelAsset* modelAsset, ModelNode& modelNode) const;
+            void ProcessMesh(const aiScene* aiScene, const aiNode* aiNode, const aiMesh* aiMesh, ModelAsset* modelAsset, ModelNode& modelNode) const;
+            void ParseMeshData(const aiScene* aiScene, const aiNode* aiNode, const aiMesh* aiMesh, MeshData& meshData, ModelAsset* modelAsset, ModelNode& modelNode) const;
             Ref<MaterialAsset> ProcessMaterial(const aiScene* aiScene, const aiNode* aiNode, const aiMaterial* aiMaterial, ModelAsset* modelAsset) const;
             
             Ref<TextureAsset> LoadTexture(const aiScene* assimpScene, const aiMaterial* assimpMaterial, const aiTextureType PBRType, const aiTextureType legacyType, ModelAsset* modelAsset) const;

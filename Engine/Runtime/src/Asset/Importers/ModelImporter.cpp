@@ -440,7 +440,10 @@ namespace Insight
 				//skeleton->m_globalInverseTransforms = AssimpToInsightMatrix4(scene->mRootNode->mTransformation).Inversed();
 			}
 
-			ProcessNode(scene, scene->mRootNode, modelAsset.Ptr());
+			ModelNode modelNode;
+			PreProcessVertexAndIndexBuffer(scene, modelNode);
+
+			ProcessNode(scene, scene->mRootNode, modelAsset.Ptr(), modelNode);
 			ProcessAnimations(scene, modelAsset.Ptr());
 #else
 			std::unordered_map<const aiMaterial*, Ref<MaterialAsset>> materialCache;
@@ -528,7 +531,67 @@ namespace Insight
 		}
 
 #if EXP_MODEL_LOADING
-		void ModelImporter::ProcessNode(const aiScene* assimpScene, const aiNode* assimpNode, ModelAsset* modelAsset) const
+		void ModelImporter::PreProcessVertexAndIndexBuffer(const aiScene* aiScene, ModelNode& modelNode) const
+		{
+			ASSERT(aiScene);
+
+			for (unsigned int i = 0; i < aiScene->mNumMeshes; ++i)
+			{
+				const aiMesh* mesh = aiScene->mMeshes[i];
+				modelNode.VertexSize += mesh->mNumVertices;
+				modelNode.IndexSize += mesh->mNumFaces * 3;
+			}
+#if VERTEX_SPLIT_STREAMS
+			Graphics::RHI_Buffer_Overrides vertexOverrides;
+			vertexOverrides.AllowUnorderedAccess = true;
+
+			Graphics::Vertices v;
+			const auto CreateVertexBuffer = [](Graphics::RHI_Buffer*& buffer, u64 stride, u64 vertexSize, Graphics::RHI_Buffer_Overrides& overrides)
+			{
+				if (buffer == nullptr)
+				{
+					buffer = Renderer::CreateVertexBuffer(stride * vertexSize, stride, overrides);
+				}
+			};
+
+			CreateVertexBuffer(modelNode.RHI_VertexBuffers.Position, v.GetStride(Graphics::Vertices::Stream::Position), modelNode.VertexSize, vertexOverrides);
+			CreateVertexBuffer(modelNode.RHI_VertexBuffers.Normal, v.GetStride(Graphics::Vertices::Stream::Normal), modelNode.VertexSize, vertexOverrides);
+			CreateVertexBuffer(modelNode.RHI_VertexBuffers.Colour, v.GetStride(Graphics::Vertices::Stream::Colour), modelNode.VertexSize, vertexOverrides);
+			CreateVertexBuffer(modelNode.RHI_VertexBuffers.UV, v.GetStride(Graphics::Vertices::Stream::UV), modelNode.VertexSize, vertexOverrides);
+			CreateVertexBuffer(modelNode.RHI_VertexBuffers.BoneIds, v.GetStride(Graphics::Vertices::Stream::BoneId), modelNode.VertexSize, vertexOverrides);
+			CreateVertexBuffer(modelNode.RHI_VertexBuffers.BoneWeights, v.GetStride(Graphics::Vertices::Stream::BoneWeight), modelNode.VertexSize, vertexOverrides);
+#else
+			CreateVertexBuffer(modelNode.RHI_VertexBuffer, v.GetStride(Graphics::Vertices::Stream::All), modelNode.VertexSize, vertexOverrides);
+#endif
+			auto createIndexBuffer = [](Graphics::RHI_Buffer*& buffer, const u64 sizeInBytes, const std::string name, u64 index)
+				{
+					if (buffer == nullptr)
+					{
+						buffer = Renderer::CreateIndexBuffer(sizeInBytes);
+						buffer->SetName(name + "_Index_" + std::to_string(index));
+					}
+				};
+
+			const u64 kLargestIndexBufferSize = Mesh::kMeshIndexType == Graphics::IndexType::Uint32 ? _UI32_MAX : _UI16_MAX;
+			const u32 kIndexTypeSize = Mesh::kMeshIndexType == Graphics::IndexType::Uint32 ? sizeof(u32) : sizeof(u16);
+
+			u32 indexBufferIndex = 0;
+			u64 indexBufferCount = modelNode.IndexSize;
+
+			while (indexBufferCount > 0)
+			{
+				modelNode.RHI_IndexBuffers.push_back(nullptr);
+				Graphics::RHI_Buffer*& indexBuffer = modelNode.RHI_IndexBuffers.back();
+
+				const u64 bufferSize = indexBufferCount > kLargestIndexBufferSize ? kLargestIndexBufferSize : indexBufferCount;
+				const u64 indexBufferDataOffset = modelNode.IndexSize - indexBufferCount;
+
+				createIndexBuffer(indexBuffer, bufferSize * kIndexTypeSize, aiScene->mName.C_Str(), indexBufferIndex);
+				indexBufferCount -= bufferSize;
+			}
+		}
+
+		void ModelImporter::ProcessNode(const aiScene* assimpScene, const aiNode* assimpNode, ModelAsset* modelAsset, ModelNode& modelNode) const
 		{
 			if (modelAsset->GetSkeleton(0))
 			{
@@ -555,23 +618,23 @@ namespace Insight
 
 			for (size_t meshIdx = 0; meshIdx < assimpNode->mNumMeshes; ++meshIdx)
 			{
-				ProcessMesh(assimpScene, assimpNode, assimpScene->mMeshes[assimpNode->mMeshes[meshIdx]], modelAsset);
+				ProcessMesh(assimpScene, assimpNode, assimpScene->mMeshes[assimpNode->mMeshes[meshIdx]], modelAsset, modelNode);
 			}
 
 			for (size_t childIdx = 0; childIdx < assimpNode->mNumChildren; ++childIdx)
 			{
-				ProcessNode(assimpScene, assimpNode->mChildren[childIdx], modelAsset);
+				ProcessNode(assimpScene, assimpNode->mChildren[childIdx], modelAsset, modelNode);
 			}
 		}
 
-		void ModelImporter::ProcessMesh(const aiScene* aiScene, const aiNode* aiNode, const aiMesh* aiMesh, ModelAsset* modelAsset) const
+		void ModelImporter::ProcessMesh(const aiScene* aiScene, const aiNode* aiNode, const aiMesh* aiMesh, ModelAsset* modelAsset, ModelNode& modelNode) const
 		{
 			Mesh* mesh = ::New<Mesh>();
 			mesh->m_assetInfo = modelAsset->GetAssetInfo();
 			modelAsset->m_meshes.push_back(mesh);
 
 			MeshData meshData = { };
-			ParseMeshData(aiScene, aiNode, aiMesh, meshData, modelAsset);
+			ParseMeshData(aiScene, aiNode, aiMesh, meshData, modelAsset, modelNode);
 
 			mesh->m_mesh_name = aiMesh->mName.C_Str();
 			mesh->m_transform_offset = AssimpToInsightMatrix4(aiNode->mTransformation);
@@ -596,103 +659,91 @@ namespace Insight
 
 				ASSERT(mesh);
 
-				const auto UploadData =[](const void* data, Graphics::RHI_BufferView& bufferView, const u64 stride, Graphics::RHI_Buffer*& buffer, const u64 verticesCount)
+				const auto UploadVertexData =[](const ModelNode& modelNode, Graphics::RHI_Buffer* buffer, Graphics::RHI_BufferView& bufferView, void* data, u64 stride, u64 verticesCount, u64 offset)
 				{
+					ASSERT(buffer != nullptr);
 					const u64 bufferSize = stride * verticesCount;
-					if (!buffer)
-					{
-						Graphics::RHI_Buffer_Overrides vertexOverrides;
-						vertexOverrides.AllowUnorderedAccess = true;
-
-						buffer = Renderer::CreateVertexBuffer(bufferSize, stride, vertexOverrides);
-					}
-					buffer->Upload(data, bufferSize);
+					buffer->Upload(data, bufferSize, offset, 0);
 					bufferView = buffer;
 				};
 
 #if VERTEX_SPLIT_STREAMS
-					UploadData(meshData.Vertices.GetData(Graphics::Vertices::Stream::Position)
-						, meshData.RHI_VertexBuffers.PositionView
+				UploadVertexData(modelNode
+						, modelNode.RHI_VertexBuffers.Position
+						, modelNode.RHI_VertexBuffers.PositionView
+						, meshData.Vertices.GetData(Graphics::Vertices::Stream::Position)
 						, meshData.Vertices.GetStride(Graphics::Vertices::Stream::Position)
-						, meshData.RHI_VertexBuffers.Position, meshData.Vertices.VerticesCount());
-					meshData.RHI_VertexBuffers.Position->SetName(std::string(aiNode->mName.C_Str()) + "_" + aiMesh->mName.C_Str() + "_Position");
+						, meshData.Vertices.VerticesCount()
+						, modelNode.VertexOffset * meshData.Vertices.GetStride(Graphics::Vertices::Stream::Position));
 
-					UploadData(meshData.Vertices.GetData(Graphics::Vertices::Stream::Normal)
-						, meshData.RHI_VertexBuffers.NormalView
+				UploadVertexData(modelNode
+						, modelNode.RHI_VertexBuffers.Normal
+						, modelNode.RHI_VertexBuffers.NormalView
+						, meshData.Vertices.GetData(Graphics::Vertices::Stream::Normal)
 						, meshData.Vertices.GetStride(Graphics::Vertices::Stream::Normal)
-						, meshData.RHI_VertexBuffers.Normal, meshData.Vertices.VerticesCount());
-					meshData.RHI_VertexBuffers.Normal->SetName(std::string(aiNode->mName.C_Str()) + "_" + aiMesh->mName.C_Str() + "_Normal");
+						, meshData.Vertices.VerticesCount()
+						, modelNode.VertexOffset * meshData.Vertices.GetStride(Graphics::Vertices::Stream::Normal));
 
-					UploadData(meshData.Vertices.GetData(Graphics::Vertices::Stream::Colour)
-						, meshData.RHI_VertexBuffers.ColourView
+				UploadVertexData(modelNode
+						, modelNode.RHI_VertexBuffers.Colour
+						, modelNode.RHI_VertexBuffers.ColourView
+						, meshData.Vertices.GetData(Graphics::Vertices::Stream::Colour)
 						, meshData.Vertices.GetStride(Graphics::Vertices::Stream::Colour)
-						, meshData.RHI_VertexBuffers.Colour, meshData.Vertices.VerticesCount());
-					meshData.RHI_VertexBuffers.Colour->SetName(std::string(aiNode->mName.C_Str()) + "_" + aiMesh->mName.C_Str() + "_Colour");
+						, meshData.Vertices.VerticesCount()
+						, modelNode.VertexOffset * meshData.Vertices.GetStride(Graphics::Vertices::Stream::Colour));
 
-
-					UploadData(meshData.Vertices.GetData(Graphics::Vertices::Stream::UV)
-						, meshData.RHI_VertexBuffers.UVView
+				UploadVertexData(modelNode
+						, modelNode.RHI_VertexBuffers.UV
+						, modelNode.RHI_VertexBuffers.UVView
+						, meshData.Vertices.GetData(Graphics::Vertices::Stream::UV)
 						, meshData.Vertices.GetStride(Graphics::Vertices::Stream::UV)
-						, meshData.RHI_VertexBuffers.UV, meshData.Vertices.VerticesCount());
-					meshData.RHI_VertexBuffers.UV->SetName(std::string(aiNode->mName.C_Str()) + "_" + aiMesh->mName.C_Str() + "_UV");
+						, meshData.Vertices.VerticesCount()
+						, modelNode.VertexOffset * meshData.Vertices.GetStride(Graphics::Vertices::Stream::UV));
 
-					UploadData(meshData.Vertices.GetData(Graphics::Vertices::Stream::BoneId)
-						, meshData.RHI_VertexBuffers.BoneIdsView
+				UploadVertexData(modelNode
+						, modelNode.RHI_VertexBuffers.BoneIds
+						, modelNode.RHI_VertexBuffers.BoneIdsView
+						, meshData.Vertices.GetData(Graphics::Vertices::Stream::BoneId)
 						, meshData.Vertices.GetStride(Graphics::Vertices::Stream::BoneId)
-						, meshData.RHI_VertexBuffers.BoneIds, meshData.Vertices.VerticesCount());
-					meshData.RHI_VertexBuffers.BoneIds->SetName(std::string(aiNode->mName.C_Str()) + "_" + aiMesh->mName.C_Str() + "_BoneId");
+						, meshData.Vertices.VerticesCount()
+						, modelNode.VertexOffset * meshData.Vertices.GetStride(Graphics::Vertices::Stream::BoneId));
 
-					UploadData(meshData.Vertices.GetData(Graphics::Vertices::Stream::BoneWeight)
-						, meshData.RHI_VertexBuffers.BoneWeightsView
+				UploadVertexData(modelNode
+						, modelNode.RHI_VertexBuffers.BoneWeights
+						, modelNode.RHI_VertexBuffers.BoneWeightsView
+						, meshData.Vertices.GetData(Graphics::Vertices::Stream::BoneWeight)
 						, meshData.Vertices.GetStride(Graphics::Vertices::Stream::BoneWeight)
-						, meshData.RHI_VertexBuffers.BoneWeights, meshData.Vertices.VerticesCount());
-					meshData.RHI_VertexBuffers.BoneWeights->SetName(std::string(aiNode->mName.C_Str()) + "_" + aiMesh->mName.C_Str() + "_BoneWeight");
+						, meshData.Vertices.VerticesCount()
+						, modelNode.VertexOffset * meshData.Vertices.GetStride(Graphics::Vertices::Stream::BoneWeight));
 #else
-				if (!meshData.RHI_VertexBuffer)
-				{
-					Graphics::RHI_Buffer_Overrides vertexOverrides;
-					vertexOverrides.AllowUnorderedAccess = true;
-
-					meshData.RHI_VertexBuffer = Renderer::CreateVertexBuffer(meshData.Vertices.VerticesCount() * meshData.Vertices.GetStride(Graphics::Vertices::Stream::Interleaved)
-						, meshData.Vertices.GetStride(Graphics::Vertices::Stream::Interleaved), vertexOverrides);
-					// TODO: Look into why when using the Sponza model and QueueUpload if the editor camera is in certain positions then the mesh disappears.
-					//meshData.RHI_VertexBuffer->QueueUpload(meshData.Vertices.data(), meshData.RHI_VertexBuffer->GetSize());
-					meshData.RHI_VertexBuffer->Upload(meshData.Vertices.GetData(Graphics::Vertices::Stream::Interleaved), meshData.RHI_VertexBuffer->GetSize());
-				}
-				else
-				{
-					// We already have a buffer, just upload out data.
-					FAIL_ASSERT();
-				}
+				ASSERT(modelNode.RHI_VertexBuffer != nullptr);
+				// TODO: Look into why when using the Sponza model and QueueUpload if the editor camera is in certain positions then the mesh disappears.
+				//meshData.RHI_VertexBuffer->QueueUpload(meshData.Vertices.data(), meshData.RHI_VertexBuffer->GetSize());
+				modelNode.RHI_VertexBuffer->Upload(meshData.Vertices.GetData(Graphics::Vertices::Stream::Interleaved), modelNode.RHI_VertexBuffer->GetSize());
 #endif
-				auto createIndexBuffer = [](Graphics::RHI_Buffer*& buffer, const u64 sizeInBytes, const void* data, const std::string& aiNode
-					, const std::string& aiMeshName, const std::string customName = std::string())
+
+				auto UploadIndexData = [](Graphics::RHI_Buffer*& buffer, void* data, u64 sizeInBytes, u64 offset)
 					{
-						if (buffer == nullptr)
-						{
-							buffer = Renderer::CreateIndexBuffer(sizeInBytes);
-							buffer->Upload(data, sizeInBytes);
-							buffer->SetName(aiNode + "_" + aiMeshName + "_Index" + customName);
-						}
+						ASSERT(buffer != nullptr);
+						buffer->Upload(data, sizeInBytes, offset, 0);
 					};
 
 				const u64 kLargestIndexBufferSize = Mesh::kMeshIndexType == Graphics::IndexType::Uint32 ? _UI32_MAX : _UI16_MAX;
+				const u32 kIndexTypeSize = Mesh::kMeshIndexType == Graphics::IndexType::Uint32 ? sizeof(u32) : sizeof(u16);
+
 				u32 indexBufferIndex = 0;
 				u64 indexBufferCount = meshData.Indices.size();
 
 				while (indexBufferCount > 0)
 				{
-					meshData.RHI_IndexBuffers.push_back(nullptr);
-					Graphics::RHI_Buffer*& indexBuffer = meshData.RHI_IndexBuffers.back();
+					Graphics::RHI_Buffer*& indexBuffer = modelNode.RHI_IndexBuffers[indexBufferIndex++];
 
 					const u64 bufferSize = indexBufferCount > kLargestIndexBufferSize ? kLargestIndexBufferSize : indexBufferCount;
 					const u64 indexBufferDataOffset = meshData.Indices.size() - indexBufferCount;
 
-					const u32 kIndexTypeSize = Mesh::kMeshIndexType == Graphics::IndexType::Uint32 ? sizeof(u32) : sizeof(u16);
 					if (Mesh::kMeshIndexType == Graphics::IndexType::Uint32)
 					{
-						createIndexBuffer(indexBuffer, bufferSize * kIndexTypeSize, meshData.Indices.data() + indexBufferDataOffset, aiNode->mName.C_Str()
-							, aiMesh->mName.C_Str(), "_" + std::to_string(indexBufferIndex));
+						UploadIndexData(indexBuffer, meshData.Indices.data() + indexBufferDataOffset, bufferSize * kIndexTypeSize, modelNode.IndexOffset * kIndexTypeSize);
 					}
 					else
 					{
@@ -701,8 +752,7 @@ namespace Insight
 						{
 							u16Indices[i] = static_cast<u16>(meshData.Indices[i]);
 						}
-						createIndexBuffer(indexBuffer, bufferSize* kIndexTypeSize, u16Indices.data() + indexBufferDataOffset, aiNode->mName.C_Str()
-							, aiMesh->mName.C_Str(), "_" + std::to_string(indexBufferIndex));
+						UploadIndexData(indexBuffer, u16Indices.data() + indexBufferDataOffset, bufferSize * kIndexTypeSize, modelNode.IndexOffset * kIndexTypeSize);
 					}
 					indexBufferCount -= bufferSize;
 				}
@@ -735,18 +785,18 @@ namespace Insight
 					meshLod.Index_count = static_cast<u32>(meshDataLod.Index_count);
 
 #if VERTEX_SPLIT_STREAMS
-					meshLod.VertexBuffers = meshData.RHI_VertexBuffers;
+					meshLod.VertexBuffers = modelNode.RHI_VertexBuffers;
 #else
-					meshLod.VertexBuffer = meshData.RHI_VertexBuffer;
-					meshLod.VertexBufferView = meshLod.VertexBuffer;
+					meshLod.VertexBuffer = modelNode.RHI_VertexBuffer;
+					meshLod.VertexBufferView = modelNode.VertexBuffer;
 					const std::string vertexBufferName = std::string(aiNode->mName.C_Str()) + "_" + aiMesh->mName.C_Str() + "_Veretx";
 					meshLod.VertexBuffer->SetName(vertexBufferName);
 #endif
 
-					for (size_t i = 0; i < meshData.RHI_IndexBuffers.size(); ++i)
+					for (size_t i = 0; i < modelNode.RHI_IndexBuffers.size(); ++i)
 					{
-						meshLod.IndexBuffers.push_back(meshData.RHI_IndexBuffers[i]);
-						meshLod.IndexBufferViews.push_back(meshData.RHI_IndexBuffers[i]);
+						meshLod.IndexBuffers.push_back(modelNode.RHI_IndexBuffers[i]);
+						meshLod.IndexBufferViews.push_back(modelNode.RHI_IndexBuffers[i]);
 					}
 				}
 			}
@@ -759,9 +809,12 @@ namespace Insight
 				modelAsset->m_materials.push_back(material);
 				mesh->SetMaterial(material);
 			}
+
+			modelNode.VertexOffset += meshData.Vertices.VerticesCount();
+			modelNode.IndexOffset += meshData.Indices.size();
 		}
 
-		void ModelImporter::ParseMeshData(const aiScene* aiScene, const aiNode* aiNode, const aiMesh* aiMesh, MeshData& meshData, ModelAsset* modelAsset) const
+		void ModelImporter::ParseMeshData(const aiScene* aiScene, const aiNode* aiNode, const aiMesh* aiMesh, MeshData& meshData, ModelAsset* modelAsset, ModelNode& modelNode) const
 		{
 			IS_PROFILE_FUNCTION();
 
@@ -851,9 +904,9 @@ namespace Insight
 			meshData.LODs.push_back(
 				MeshData::LOD(
 					0,
-					0,
+					modelNode.VertexOffset,
 					static_cast<u32>(meshData.Vertices.VerticesCount()),
-					0,
+					modelNode.IndexOffset,
 					static_cast<u32>(meshData.Indices.size())));
 		}
 

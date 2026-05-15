@@ -23,16 +23,13 @@ namespace Insight
 			Renderer::FreeVertexBuffer(m_lods[0].VertexBuffers.UV);
 			Renderer::FreeVertexBuffer(m_lods[0].VertexBuffers.BoneIds);
 			Renderer::FreeVertexBuffer(m_lods[0].VertexBuffers.BoneWeights);
+			m_lods[0].VertexBuffers = {};
 #else
 			Renderer::FreeVertexBuffer(m_lods.at(0).VertexBuffer);
 			m_lods.at(0).VertexBuffer = nullptr;
 #endif
-			for (size_t i = 0; i < m_lods[0].IndexBuffers.size(); ++i)
-			{
-				Graphics::RHI_Buffer*& buffer = m_lods[0].IndexBuffers[i];
-				Renderer::FreeIndexBuffer(buffer);
-				buffer = nullptr;
-			}
+			Renderer::FreeIndexBuffer(m_lods[0].IndexBuffers[0]);
+			m_lods[0].IndexBuffers[0] = nullptr;
 		}
 
 		//IS_SERIALISABLE_CPP(Mesh)

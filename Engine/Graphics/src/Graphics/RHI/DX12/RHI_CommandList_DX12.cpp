@@ -11,7 +11,9 @@
 #include "Graphics/RenderTarget.h"
 
 #include "Core/Logger.h"
+#include "Core/TypeAlias.h"
 #include "Core/Profiler.h"
+#include "Platforms/Platform.h"
 
 #include <WinPixEventRuntime/pix3.h>
 
@@ -398,7 +400,7 @@ namespace Insight
 			{
 				IS_PROFILE_FUNCTION();
 
-				m_boundVertexBufferViews.clear();
+				//Platform::MemSet(m_boundVertexBufferViews, 0, sizeof(m_boundVertexBufferViews));
 				m_boundIndexBufferView = { };
 			}
 
@@ -443,23 +445,21 @@ namespace Insight
 			{
 				IS_PROFILE_FUNCTION();
 	
-				ASSERT(viewCount < D3D12_IA_VERTEX_INPUT_RESOURCE_SLOT_COUNT);
-				D3D12_VERTEX_BUFFER_VIEW views[D3D12_IA_VERTEX_INPUT_RESOURCE_SLOT_COUNT];
+				ASSERT(viewCount < k_VertexBufferBoundMaxSize);
+				D3D12_VERTEX_BUFFER_VIEW views[k_VertexBufferBoundMaxSize];
 
 				for (size_t i = 0; i < viewCount; ++i)
 				{
 					const RHI_BufferView& bufferView = bufferViews[i];
 					ASSERT(bufferView.IsValid());
 
-					/*
-					if (m_boundVertexBufferViews.find(bufferView) != m_boundVertexBufferViews.end())
+					
+					if (m_boundVertexBufferViews[i] != bufferView)
 					{
-						m_context->GetResourceRenderTracker().TrackResource(bufferView.GetBuffer());
-						continue;
+						m_boundVertexBufferViews[i] = bufferView;
+						m_boundVertexBufferDirtyMask |= 1 << i;
 					}
-					m_boundVertexBufferViews.insert(bufferView);
-					*/
-
+					
 					const RHI_Buffer_DX12* bufferDX12 = static_cast<RHI_Buffer_DX12*>(bufferView.GetBuffer());
 					views[i] = D3D12_VERTEX_BUFFER_VIEW
 					{
@@ -470,11 +470,20 @@ namespace Insight
 					m_context->GetResourceRenderTracker().TrackResource(bufferView.GetBuffer());
 				}
 
+
+				if (m_boundVertexBufferDirtyMask > 0)
 				{
+					const u16 firstBit = FindFirstSetBit(m_boundVertexBufferDirtyMask);
+					const u16 lastBit = FindLastSetBit(m_boundVertexBufferDirtyMask);
+					const u16 dirtySize = (lastBit - firstBit) + 1;
+
 					IS_PROFILE_SCOPE("IASetVertexBuffers");
-					m_commandList->IASetVertexBuffers(0, viewCount, views);
+					m_commandList->IASetVertexBuffers(firstBit, dirtySize, views);
+
+					m_boundVertexBufferDirtyMask = 0;
+					RenderStats::Instance().Recording().VertexBufferBindings += viewCount;
 				}
-				RenderStats::Instance().Recording().VertexBufferBindings += viewCount;
+
 			}
 
 			void RHI_CommandList_DX12::SetIndexBuffer(const RHI_BufferView& bufferView, const IndexType index_type)

@@ -438,23 +438,23 @@ namespace Insight
 					vkOffsets[i] = { bufferView.GetOffset() };
 					m_context->GetResourceRenderTracker().TrackResource(bufferView.GetBuffer());
 
-					if (m_boundVertexBufferViews.find(bufferView) == m_boundVertexBufferViews.end())
+					if (m_boundVertexBufferViews[i] != bufferView)
 					{
-						rebindBuffers = true;
-						continue;
+						m_boundVertexBufferViews[i] = bufferView;
+						m_boundVertexBufferDirtyMask |= 1 << i;
 					}
 				}
 
-				if (rebindBuffers)
+				if (m_boundVertexBufferDirtyMask > 0)
 				{
-					m_boundVertexBufferViews.clear();
-					for (size_t i = 0; i < viewCount; ++i)
-					{
-						m_boundVertexBufferViews.insert(bufferViews[i]);
-					}
+					const u16 firstBit = FindFirstSetBit(m_boundVertexBufferDirtyMask);
+					const u16 lastBit = FindLastSetBit(m_boundVertexBufferDirtyMask);
+					const u16 dirtySize = (lastBit - firstBit) + 1;
 
 					IS_PROFILE_SCOPE("bindVertexBuffers");
-					vkCmdBindVertexBuffers(m_commandList, 0, viewCount, vkBuffers, vkOffsets);
+					vkCmdBindVertexBuffers(m_commandList, firstBit, dirtySize, vkBuffers, vkOffsets);
+
+					m_boundVertexBufferDirtyMask = 0;
 					RenderStats::Instance().Recording().VertexBufferBindings += viewCount;
 				}
 			}

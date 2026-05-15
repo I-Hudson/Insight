@@ -152,7 +152,9 @@ namespace Insight
 
 			DescriptorAllocator* m_descriptorAllocator = nullptr;
 
-			std::unordered_set<RHI_BufferView> m_boundVertexBufferViews;
+			RHI_BufferView m_boundVertexBufferViews[k_VertexBufferBoundMaxSize];
+			u16 m_boundVertexBufferDirtyMask = 0;
+
 			RHI_BufferView m_boundIndexBufferView;
 
 			friend class RenderContext;
