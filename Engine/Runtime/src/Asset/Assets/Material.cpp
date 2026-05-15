@@ -11,6 +11,8 @@ namespace Insight
         MaterialAsset::~MaterialAsset()
         { }
 
+        IS_SERIALISABLE_CPP(MaterialAsset);
+
         void MaterialAsset::SetTexture(const TextureAssetTypes textureType, Ref<TextureAsset> texture)
         {
             m_textures[static_cast<u32>(textureType)] = texture;

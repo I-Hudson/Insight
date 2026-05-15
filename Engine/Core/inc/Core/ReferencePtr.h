@@ -135,7 +135,7 @@ namespace Insight
     
     template<typename T>
     bool operator==(const ReferencePtr<T>& left, std::nullptr_t) 
-    { return left.ptr() == nullptr; }
+    { return left.Ptr() == nullptr; }
 
     template<typename TOther1, typename TOther2>
     bool operator==(const ReferencePtr<TOther1>& left, const ReferencePtr<TOther2>& right)

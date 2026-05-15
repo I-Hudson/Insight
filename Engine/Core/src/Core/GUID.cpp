@@ -64,6 +64,11 @@ namespace Insight
 			Platform::MemSet(other.m_data4, 0, sizeof(other.m_data4));
 		}
 
+		GUID::GUID(const std::string_view guidStr)
+		{
+			StringToGuid(guidStr);
+		}
+
 		GUID& GUID::operator=(const GUID& other)
 		{
 			m_data1 = other.m_data1;

@@ -19,6 +19,7 @@ namespace Insight
 			GUID(u32 data1, u16 data2, u16 data3, u8 data4[8]);
 			GUID(const GUID& other);
 			GUID(GUID&& other);
+			GUID(const std::string_view guidStr);
 
 			GUID& operator=(const GUID& other);
 			GUID& operator=(GUID&& other);

@@ -4,6 +4,7 @@
 #include "Asset/Assets/Texture.h"
 
 #include "Core/ReferencePtr.h"
+#include "Core/Logger.h"
 
 #include "Generated/Material_reflect_generated.h"
 
@@ -37,6 +38,7 @@ namespace Insight
             virtual ~MaterialAsset() override;
 
             IS_OBJECT(MaterialAsset);
+            IS_SERIALISABLE_H(MaterialAsset);
 
             void SetTexture(const TextureAssetTypes textureType, Ref<TextureAsset> texture);
             Ref<TextureAsset> GetTexture(const TextureAssetTypes textureType) const;
@@ -59,4 +61,55 @@ namespace Insight
             friend class ModelAsset;
         };
     }
+
+    namespace Serialisation
+    {
+        struct MaterialTextures {};
+        template<>
+        struct ComplexSerialiser<MaterialTextures,
+            std::array<Ref<Runtime::TextureAsset>, static_cast<u32>(Runtime::TextureAssetTypes::Count)>, Runtime::MaterialAsset>
+        {
+            void operator()(ISerialiser* serialiser, 
+                std::array<Ref<Runtime::TextureAsset>, static_cast<u32>(Runtime::TextureAssetTypes::Count)>& textures, Runtime::MaterialAsset* materialAsset) const
+            {
+                if (serialiser->IsReadMode())
+                {
+                    for (u64 i = 0; i < textures.size(); ++i)
+                    {
+                        std::string textureGuidStr;
+                        serialiser->Read(Runtime::TextureAssetTypesToString[i], textureGuidStr);
+
+                        const Core::GUID textureGuid(textureGuidStr);
+                        if (textureGuid != Core::GUID::s_InvalidGUID)
+                        {
+                            Ref<Runtime::Asset> textureAsset = Runtime::AssetRegistry::Instance().LoadAsset(textureGuid);
+                            if (textureAsset == nullptr)
+                            {
+                                IS_LOG_CORE_ERROR("Unable to load texture with guid '{}'.", textureGuidStr.c_str());
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    for (u64 i = 0; i < textures.size(); ++i)
+                    {
+                        const Ref<Runtime::TextureAsset>& texture = textures[i];
+                        Core::GUID textureGuid = Core::GUID::s_InvalidGUID;
+                        if (texture)
+                        {
+                            textureGuid = texture->GetGuid();
+                        }
+                        serialiser->Write(Runtime::TextureAssetTypesToString[i], textureGuid.ToString());
+                    }
+                }
+            }
+        };
+    };
+
+    OBJECT_SERIALISER(Runtime::MaterialAsset, 1,
+        SERIALISE_BASE(Runtime::Asset, 1, 0)
+        SERIALISE_COMPLEX(Serialisation::MaterialTextures, m_textures, 1, 0)
+        SERIALISE_ARRAY_PROPERTY(float, m_properties, 1, 0)
+    );
 }

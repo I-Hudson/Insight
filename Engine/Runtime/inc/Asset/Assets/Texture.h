@@ -27,6 +27,13 @@ namespace Insight
 
             Count
         };
+        constexpr const char* TextureAssetTypesToString[]
+        {
+            "Diffuse",
+            "Normal",
+            "Specular"
+        };
+        static_assert(ARRAY_COUNT(TextureAssetTypesToString) == static_cast<u64>(TextureAssetTypes::Count));
 
         REFLECT_CLASS();
         class IS_RUNTIME TextureAsset : public Asset
