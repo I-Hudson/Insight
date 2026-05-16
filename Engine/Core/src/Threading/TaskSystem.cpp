@@ -12,7 +12,7 @@ namespace Insight
 			Shutdown();
 			m_destroy = false;
 
-			u32 threadCount = std::thread::hardware_concurrency();
+			const u32 threadCount = std::thread::hardware_concurrency();
 			std::lock_guard lock(m_mutex);
 			m_threads.resize(threadCount - 1);
 
@@ -72,7 +72,7 @@ namespace Insight
 					}
 					task.reset();
 				}
-				//threadData.Thread->SleepFor(16);
+				threadData.Thread->SleepFor(2);
 			}
 		}
 	}

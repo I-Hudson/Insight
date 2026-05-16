@@ -546,7 +546,7 @@ namespace Insight
 			vertexOverrides.AllowUnorderedAccess = true;
 
 			Graphics::Vertices v;
-			const auto CreateVertexBuffer = [](Graphics::RHI_Buffer*& buffer, u64 stride, u64 vertexSize, Graphics::RHI_Buffer_Overrides& overrides)
+			const auto CreateVertexBuffer = [](Graphics::RHI_Buffer*& buffer, int stride, u64 vertexSize, Graphics::RHI_Buffer_Overrides& overrides)
 			{
 				if (buffer == nullptr)
 				{
@@ -602,7 +602,7 @@ namespace Insight
 						assimpNode->mParent != nullptr ? assimpNode->mParent->mName.C_Str() : "",
 						{  },
 
-						-1u,
+						_UI32_MAX,
 						""
 					});
 
@@ -904,9 +904,9 @@ namespace Insight
 			meshData.LODs.push_back(
 				MeshData::LOD(
 					0,
-					modelNode.VertexOffset,
+					static_cast<u32>(modelNode.VertexOffset),
 					static_cast<u32>(meshData.Vertices.VerticesCount()),
-					modelNode.IndexOffset,
+					static_cast<u32>(modelNode.IndexOffset),
 					static_cast<u32>(meshData.Indices.size())));
 		}
 
@@ -1071,7 +1071,7 @@ namespace Insight
 				}
 
 				skeleton->m_rootBoneIdx = skeleton->GetBone(currentNode->mName.C_Str()).Id;
-				ASSERT(skeleton->m_rootBoneIdx < -1u);
+				ASSERT(skeleton->m_rootBoneIdx < _UI32_MAX);
 				return currentNode;
 			}
 

@@ -106,8 +106,8 @@ namespace Insight
                     static int benchmarkIndex = 0;
                     const float space = 2;
                     const i64 gridSize = 10;
-                    const float offsetX = (benchmarkIndex % gridSize) * (gridSize * 2);
-                    const float offsetZ = (benchmarkIndex / gridSize) * (gridSize * 2);
+                    const float offsetX = static_cast<float>((benchmarkIndex % gridSize) * (gridSize * 2));
+                    const float offsetZ = static_cast<float>((benchmarkIndex / gridSize)* (gridSize * 2));
 
                     if (ImGui::MenuItem("Skeletal Animations"))
                     {

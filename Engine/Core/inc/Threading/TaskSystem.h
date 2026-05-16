@@ -7,6 +7,7 @@
 
 #include "Threading/Task.h"
 #include "Threading/Thread.h"
+#include "Threading/SpinLock.h"
 
 #include <mutex>
 #include <queue>
@@ -76,19 +77,19 @@ namespace Insight
 			}
 
 			// Store all the start indexes to be completed.
-			std::queue<u32> startIdxs;
+			std::vector<u32> startIdxs;
 			std::mutex startIdxsMutex;
 
 			const u32 taskNum = IntDivideRoundUp(vecSize, workGroupSize);
 			for (u32 taskIdx = 1; taskIdx < taskNum; ++taskIdx)
 			{
-				startIdxs.push(workGroupSize * taskIdx);
+				startIdxs.push_back(workGroupSize * taskIdx);
 			}
 			// Don't add index 0 as the caller thread will handle this range (0->workGroupSize). This should mean that the caller thread
 			// "always" has some of the most amount of work to do so we aren't wasting a lot of time just waiting.
 			// The caller thread should have some of the highest amount of work to do other wise it will be waiting for worker threads. 
 			// Really we want the worker threads to have less work so they can finish early and then move onto other work which has been queued.
-			//startIdxs.push(0);
+			// startIdxs.push(0);
 
 			std::vector<std::shared_ptr<Task>> tasks;
 			tasks.reserve(taskNum);
@@ -103,6 +104,7 @@ namespace Insight
 					// Kick off all our tasks. These will run on objects vec[0] + workGroupSize.
 					tasks.push_back(TaskSystem::Instance().CreateTask([&]()
 						{
+							IS_PROFILE_SCOPE("ParallelFor");
 							while (true)
 							{
 								u32 startIdx = 0;
@@ -112,11 +114,10 @@ namespace Insight
 									{
 										break;
 									}
-									startIdx = startIdxs.front();
-									startIdxs.pop();
+									startIdx = startIdxs.back();
+									startIdxs.pop_back();
 								}
 								const u32 endIdx = std::min(startIdx + workGroupSize, vecSize);
-								IS_PROFILE_SCOPE("ParallelFor");
 								IS_PROFILE_SCOPE_TEXT("ParallelFor - %s (%d)", name.data(), endIdx - startIdx);
 
 								for (size_t i = startIdx; i < endIdx; ++i)
@@ -133,6 +134,7 @@ namespace Insight
 			bool completedIndexZero = false;
 			while (true)
 			{
+				IS_PROFILE_SCOPE("ParallelFor");
 				u32 startIdx = 0;
 				if (completedIndexZero)
 				{
@@ -141,13 +143,12 @@ namespace Insight
 					{
 						break;
 					}
-					startIdx = startIdxs.front();
-					startIdxs.pop();
+					startIdx = startIdxs.back();
+					startIdxs.pop_back();
 				}
 
 				completedIndexZero = true;
 				const u32 endIdx = std::min(startIdx + workGroupSize, vecSize);
-				IS_PROFILE_SCOPE("ParallelFor");
 				IS_PROFILE_SCOPE_TEXT("ParallelFor - %s (%d)", name.data(), endIdx - startIdx);
 
 				for (size_t i = startIdx; i < endIdx; ++i)

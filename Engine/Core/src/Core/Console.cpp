@@ -189,7 +189,7 @@ namespace Insight
                 {
                     Message(">>>" + inputText, ConsoleLogLevel::Info);
                     // Change console variables is possible.
-                    const std::vector<std::string_view> cVar = SplitString(std::string_view(inputText.data(), inputText.size()), '=');
+                    const std::vector<std::string_view> cVar = SplitString(std::string_view(inputText.data(), inputText.size()), "= ");
                     if (cVar.size() != 2)
                     {
                         Message("Unable to set CVar, the format must be 'Key=Value'.", ConsoleLogLevel::Error);

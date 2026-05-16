@@ -17,6 +17,7 @@
 
 #include <vector>
 #include <string>
+#include <filesystem>
 
 namespace Insight
 {
@@ -82,6 +83,7 @@ namespace Insight
             // End - IEditorWindow
 
             Ref<Runtime::TextureAsset> PathToThumbnail(std::string const& path);
+            Ref<Runtime::TextureAsset> PathToThumbnail(const std::filesystem::path& path);
 
         private:
             void TopBar();
@@ -94,6 +96,7 @@ namespace Insight
             void SplitDirectory();
             void SetDirectoryFromParent(u32 parentIndex);
 
+            void DrawAssetMenu();
             void DrawGeneralMenu();
             void DrawCreateClassNamePopup();
 
@@ -109,6 +112,7 @@ namespace Insight
             std::string m_currentDirectory;
             std::string m_currentItemSelected;
 
+
             std::string m_importFilePath;
             int m_resourceTypeToLoadIndex = 0;
             bool m_showImportWindow = false;
@@ -116,6 +120,7 @@ namespace Insight
 
             bool m_showCreateResourceWindow = false;
 
+            bool m_itemRightClickMenu = false;
             bool m_showGeneralMenu = false;
             bool m_showCreateClassNamePopup = false;
 

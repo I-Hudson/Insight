@@ -42,8 +42,8 @@ namespace test
 			CHECK(vec.y == x1);
 
 #ifdef IS_MATHS_DIRECTX_MATHS
-			CHECK(x1 == DirectX::XMVectorGetX(vec.xmvector));
-			CHECK(x1 == DirectX::XMVectorGetY(vec.xmvector));
+			CHECK(x1 == vec.x);
+			CHECK(x1 == vec.y);
 #elif defined(IS_MATHS_GLM)
 			CHECK(x1 == vec.vec2.x);
 			CHECK(x1 == vec.vec2.y);

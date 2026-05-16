@@ -229,7 +229,8 @@ namespace Insight
 		Vector2 Matrix2::operator*(const Vector2& other) const
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
-			return Vector2(DirectX::XMVector2Transform(other.xmvector, xmmatrix));
+			const DirectX::XMVECTOR vector = DirectX::XMVectorSet(other.x, other.y, 0.0f, 0.0f);
+			return Vector2(DirectX::XMVector2Transform(vector, xmmatrix));
 #elif defined(IS_MATHS_GLM)
 			return mat2 * other.vec2;
 #else

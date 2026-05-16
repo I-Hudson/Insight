@@ -123,17 +123,17 @@ namespace Insight
 
 			/// @brief Set the render resolution size.
 			/// @param render_resolution 
-			void SetRenderResolution(Maths::Vector2 render_resolution);
+			void SetRenderResolution(Maths::IVector2 render_resolution);
 			/// @brief Return the render resoltuion size.
 			/// @return glm::ivec2
-			Maths::Vector2 GetRenderResolution() const { return m_render_resolution; }
+			Maths::IVector2 GetRenderResolution() const { return m_render_resolution; }
 
 			/// @brief Attempt to set the output resolution. This is restricted by the window size (Best to leave alone).
 			/// @param output_resolution 
-			void SetOutputResolution(Maths::Vector2 output_resolution);
+			void SetOutputResolution(Maths::IVector2 output_resolution);
 			/// @brief Return then output size.
 			/// @return glm::ivec2
-			Maths::Vector2 GetOutputResolution() const { return m_output_resolution; }
+			Maths::IVector2 GetOutputResolution() const { return m_output_resolution; }
 
 		private:
 			void Build();
@@ -168,7 +168,7 @@ namespace Insight
 			std::vector<std::vector<UPtr<RenderGraphPassBase>>> m_passes;
 
 			/// @brief General render resolution to be used for all render passes. Can be overwritten.
-			Maths::Vector2 m_render_resolution = {};
+			Maths::IVector2 m_render_resolution = {};
 			bool m_render_resolution_has_changed = false;
 			
 			// Hack for ImGui. Currently there is an issue with ImGui and textures where if frame 1 resizes the window then all RenderGraph textures
@@ -179,7 +179,7 @@ namespace Insight
 			/// @brief Set the render resolution to the window resolution when the window resolution has changed automaticly.
 			bool m_set_render_resolution_to_window_resolution_auto = true;
 			/// @brief General ouput resolution to be used for all render passes. Can be overwritten.
-			Maths::Vector2 m_output_resolution = {};
+			Maths::IVector2 m_output_resolution = {};
 
 			FrameResource<RHI_ResourceCache<RHI_Texture>*> m_textureCaches;
 		};

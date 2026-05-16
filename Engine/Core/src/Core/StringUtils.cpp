@@ -33,7 +33,7 @@ std::string RemoveString(const std::string& str, std::string_view strToRemove)
 	return str;
 }
 
-std::vector<std::string> SplitString(const std::string& str, const char splitCharacter)
+std::vector<std::string> SplitString(const std::string& str, const char* splitCharacter)
 {
 	std::vector<std::string> strings;
 
@@ -72,7 +72,7 @@ std::vector<std::string> SplitString(const std::string& str, const char splitCha
 	return strings;
 }
 
-std::vector<std::string_view> SplitString(std::string_view str, const char splitCharacter)
+std::vector<std::string_view> SplitString(std::string_view str, const char* splitCharacter)
 {
 	std::vector<std::string_view> strings;
 

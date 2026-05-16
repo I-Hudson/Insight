@@ -1387,7 +1387,7 @@ namespace Insight
             }
             ImGui::DragFloat("Editor FSR sharpness", &fsrSharpness, 0.05f, 0.0f, 1.0f);
 
-            if (m_renderResolution == Maths::Vector2(0, 0))
+            if (m_renderResolution == Maths::IVector2(0, 0))
             {
                 m_renderResolution = Graphics::RenderGraph::Instance().GetRenderResolution();
             }
@@ -1396,7 +1396,7 @@ namespace Insight
             ImGui::InputInt2("Render Resolution", renderRes);
             if (ImGui::Button("Apply Render Resolution"))
             {
-                m_renderResolution = Maths::Vector2(renderRes[0], renderRes[1]);
+                m_renderResolution = Maths::IVector2(renderRes[0], renderRes[1]);
                 Graphics::RenderGraph::Instance().SetRenderResolution(m_renderResolution);
                 return;
             }
@@ -1409,7 +1409,7 @@ namespace Insight
             }
             else if (ImGui::Button("Apply 720p Resolution"))
             {
-                m_renderResolution = Maths::Vector2(1270, 720);
+                m_renderResolution = Maths::IVector2(1270, 720);
                 Graphics::RenderGraph::Instance().SetRenderResolution(m_renderResolution);
                 return;
             }

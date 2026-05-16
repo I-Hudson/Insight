@@ -71,7 +71,7 @@ namespace Insight
             if (!miniAudioSound)
             {
                 miniAudioSound = ::New<MiniAudioSound>();
-                miniAudioSound->Id = m_sounds.size() + 1;
+                miniAudioSound->Id = static_cast<u32>(m_sounds.size()) + 1ul;
                 miniAudioSound->SoundBuffer = std::move(fileBuffer);
                 miniAudioSound->AssetInfo = assetInfo;
                 miniAudioSound->InUse = true;

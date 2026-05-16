@@ -18,8 +18,8 @@ namespace Insight
 
             int* fData = static_cast<int*>(data);
             ImGui::DragInt(label.data(), fData, 1.0f, 
-                clampMin.IsValid() ? clampMin.GetValue<float>() : 0.0f,
-                clampMax.IsValid() ? clampMax.GetValue<float>() : 0.0f);
+                clampMin.IsValid() ? clampMin.GetValue<int>() : 0,
+                clampMax.IsValid() ? clampMax.GetValue<int>() : 0);
 
             if (clampMin.IsValid())
             {

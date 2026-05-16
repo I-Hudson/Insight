@@ -74,7 +74,7 @@ namespace Insight
 			passData.Reset();
 			passData.ImDrawData = std::move(*ImGui::GetDrawData());
 
-			for (size_t i = 0; i < passData.ImDrawData.CmdListsCount; ++i)
+			for (int i = 0; i < passData.ImDrawData.CmdListsCount; ++i)
 			{
 				ImDrawList* imguiDrawList = passData.ImDrawData.CmdLists[i];
 				ImDrawList* drawList = nullptr;
@@ -102,7 +102,7 @@ namespace Insight
 				}
 			}
 			ImDrawList** drawListPtr = passData.CmdListPtrs.data();
-			passData.ImDrawData.CmdLists.resize(passData.CmdListPtrs.size());
+			passData.ImDrawData.CmdLists.resize(static_cast<int>(passData.CmdListPtrs.size()));
 			Platform::MemCopy(passData.ImDrawData.CmdLists.Data, passData.CmdListPtrs.data(), 
 				sizeof(ImDrawList*) * passData.ImDrawData.CmdLists.size());
 			//passData.ImDrawData.CmdLists = drawListPtr;

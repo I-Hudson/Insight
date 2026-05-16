@@ -78,7 +78,7 @@ namespace Insight
 		{
 			const u32 width = Graphics::Window::Instance().GetWidth();
 			const u32 height = Graphics::Window::Instance().GetHeight();
-			Graphics::RenderGraph::Instance().SetOutputResolution(Maths::Vector2(width, height));
+			Graphics::RenderGraph::Instance().SetOutputResolution(Maths::IVector2(width, height));
 
 			Graphics::RenderGraph::Instance().AddSyncPoint([this]()
 			{

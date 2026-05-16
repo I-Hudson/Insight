@@ -40,7 +40,7 @@ namespace Insight::Physics::Jolt
 
             RendererData.Lines.push_back(DebugRendererData::Line
                 {
-                    RendererData.Vertices.size(),
+                    static_cast<u32>(RendererData.Vertices.size()),
                     2
                 });
             RendererData.Vertices.push_back(DebugRendererData::Vertex
@@ -95,9 +95,9 @@ namespace Insight::Physics::Jolt
 
             RendererData.Triangles.push_back(DebugRendererData::Triangle
                 {
-                    RendererData.Vertices.size(),
-                    RendererData.Indices.size(),
-                    3
+                    static_cast<u32>(RendererData.Vertices.size()),
+                    static_cast<u32>(RendererData.Indices.size()),
+                    3ul
                 });
             RendererData.Vertices.push_back(DebugRendererData::Vertex
                 {

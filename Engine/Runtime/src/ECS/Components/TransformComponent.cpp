@@ -136,7 +136,7 @@ namespace Insight
 					transformToUpdate.pop();
 
 					const u32 childCount = parent->GetChildCount();
-					for (size_t i = 0; i < childCount; i++)
+					for (u32 i = 0; i < childCount; i++)
 					{
 						Ptr<ECS::Entity> child = parent->GetChild(i);
 						transformToUpdate.push(child);

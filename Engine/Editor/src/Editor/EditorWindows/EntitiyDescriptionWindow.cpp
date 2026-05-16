@@ -201,7 +201,7 @@ namespace Insight
                         std::string payloadData;
                         if (EditorGUI::ObjectFieldTarget("EDW_COMPONENT_DRAG_DROP", payloadData, member.GetType()))
                         {
-                            std::vector<std::string> splitPayloadData = SplitString(payloadData, '::');
+                            std::vector<std::string> splitPayloadData = SplitString(payloadData, "::");
 
                             Core::GUID entityGuid;
                             entityGuid.StringToGuid(splitPayloadData.at(0));

@@ -153,9 +153,13 @@ namespace Insight
             return false;
         }
 
+#if IS_PLATFORM_WINDOWS
+        return FileManagerSystem::Instance().GetNativeFileSystem()->DirectoryExists(path);
+#else
         std::error_code existsErrorCode = {};
         std::error_code isDirectoryErrorCode = {};
         return std::filesystem::exists(path, existsErrorCode) && std::filesystem::is_directory(path, isDirectoryErrorCode);
+#endif
     }
 
     bool FileSystem::IsFile(const std::string& path)
@@ -353,8 +357,8 @@ namespace Insight
             return "";
         }
 
-        std::vector<std::string_view> pathSplit = SplitString(path, '/');
-        std::vector<std::string_view> basePathSplit = SplitString(basePath, '/');
+        std::vector<std::string_view> pathSplit = SplitString(path, "/");
+        std::vector<std::string_view> basePathSplit = SplitString(basePath, "/");
 
         u32 pathIdx = 0;
         u32 basePathIdx = 0;

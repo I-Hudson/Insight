@@ -127,3 +127,82 @@ constexpr T& RemoveConst(const T& value)
 {
     return const_cast<T&>(value);
 }
+
+// Finds the index of the lowest set bit (0 to 31)
+inline uint32_t FindFirstSetBit(uint32_t mask) 
+{
+#if defined(_MSC_VER)
+    unsigned long index;
+    _BitScanForward(&index, mask);
+    return static_cast<uint32_t>(index);
+#else
+    return static_cast<uint32_t>(__builtin_ctz(mask));
+#endif
+}
+
+template <typename T>
+inline T FindFirstSetBit(T mask) {
+    static_assert(std::is_integral_v<T> && std::is_unsigned_v<T>, "Mask must be an unsigned integer type.");
+
+    if (mask == 0) return 0; // Guard against UB
+
+    if constexpr (sizeof(T) <= 4) 
+    {
+        // 32-bit paths
+        T mask32 = static_cast<T>(mask);
+#if defined(_MSC_VER)
+        unsigned long index;
+        _BitScanForward(&index, mask32);
+        return static_cast<uint32_t>(index);
+#else
+        return static_cast<uint32_t>(__builtin_ctz(mask32));
+#endif
+    }
+    else if constexpr (sizeof(T) == 8) 
+    {
+        // 64-bit paths
+        uint64_t mask64 = static_cast<uint64_t>(mask);
+#if defined(_MSC_VER)
+        unsigned long index;
+        // Note the '64' suffix for MSVC 64-bit intrinsic
+        _BitScanForward64(&index, mask64);
+        return static_cast<uint64_t>(index);
+#else
+        // Note the 'll' (long long) suffix for GCC/Clang 64-bit built-in
+        return static_cast<uint64_t>(__builtin_clzll(mask64));
+#endif
+    }
+}
+
+template <typename T>
+inline T FindLastSetBit(T mask) 
+{
+    static_assert(std::is_integral_v<T> && std::is_unsigned_v<T>, "Mask must be an unsigned integer type.");
+
+    if (mask == 0) return 0; // Guard against UB
+
+    if constexpr (sizeof(T) <= 4) {
+        // 32-bit paths
+        uint32_t mask32 = static_cast<uint32_t>(mask);
+#if defined(_MSC_VER)
+        unsigned long index;
+        _BitScanReverse(&index, mask32);
+        return static_cast<uint32_t>(index);
+#else
+        return 31 - static_cast<uint32_t>(__builtin_clz(mask32));
+#endif
+    }
+    else if constexpr (sizeof(T) == 8) {
+        // 64-bit paths
+        uint64_t mask64 = static_cast<uint64_t>(mask);
+#if defined(_MSC_VER)
+        unsigned long index;
+        // Note the '64' suffix for MSVC 64-bit intrinsic
+        _BitScanReverse64(&index, mask64);
+        return static_cast<uint64_t>(index);
+#else
+        // Note the 'll' (long long) suffix for GCC/Clang 64-bit built-in
+        return 63 - static_cast<uint64_t>(__builtin_clzll(mask64));
+#endif
+    }
+}

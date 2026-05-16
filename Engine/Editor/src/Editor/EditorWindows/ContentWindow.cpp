@@ -21,6 +21,8 @@
 #include "Core/Logger.h"
 #include "Core/StringUtils.h"
 
+#include "Serialisation/Serialisers/JsonSerialiser.h"
+
 #include "Event/EventSystem.h"
 
 #include <filesystem>
@@ -579,13 +581,14 @@ namespace Insight::Editor
                         // Item functionality
                         {
                             // Manually detect some useful states
-                            if (m_currentItemSelected.empty()
+                            if (!m_currentItemSelected.empty()
                                 && ImGui::IsItemHovered(ImGuiHoveredFlags_RectOnly)
                                 && ImGui::IsMouseClicked(ImGuiMouseButton_Right))
                             {
                                 //m_is_hovering_item = true;
                                 //m_hovered_item_path = item.GetPath();
-                                IS_LOG_CORE_INFO("Item right click: {}", assetInfo->FileName);
+
+                                m_itemRightClickMenu = true;
                             }
 
                             //ItemClick(&item);
@@ -628,6 +631,11 @@ namespace Insight::Editor
 
             ImGui::EndTable();
 
+            if (m_itemRightClickMenu)
+            {
+                DrawAssetMenu();
+            }
+
             if (m_showGeneralMenu)
             {
                 DrawGeneralMenu();
@@ -638,6 +646,7 @@ namespace Insight::Editor
                 && !itemSelectedThisFrame)
             {
                 m_showGeneralMenu = false;
+                m_itemRightClickMenu = false;
             }
             else if (ImGui::IsMouseReleased(ImGuiMouseButton_Right)
                 && IsCursorWithinWindow()
@@ -938,12 +947,24 @@ namespace Insight::Editor
         {
             return iter->second;
         }
-
-        if (std::filesystem::is_directory(path))
+        
+        if (FileSystem::IsDirectory(path))
         {
             return m_thumbnailToTexture[ContentWindowThumbnailType::Folder];
         }
         return m_thumbnailToTexture[ContentWindowThumbnailType::File];
+    }
+
+    void ContentWindow::DrawAssetMenu()
+    {
+        constexpr const char* kMenuName = "##AssetAddtionalMenu";
+        ImGui::OpenPopup(kMenuName);
+        if (ImGui::BeginPopup(kMenuName))
+        {
+
+
+            ImGui::EndPopup();
+        }
     }
 
     void ContentWindow::DrawGeneralMenu()
@@ -964,6 +985,14 @@ namespace Insight::Editor
                 TObjectPtr<Runtime::World> world = Runtime::WorldSystem::Instance().CreateWorld("New World");
                 //world->SaveWorld(m_currentDirectory + "/" + world->GetFileName() + Runtime::World::c_FileExtension);
                 Runtime::WorldSystem::Instance().RemoveWorld(world);
+            }
+            else if (ImGui::MenuItem("Serialise") && !m_currentItemSelected.empty())
+            {
+                Ref<Runtime::Asset> asset = Runtime::AssetRegistry::Instance().LoadAsset(m_currentItemSelected);
+                Serialisation::JsonSerialiser jsonSerialiser(false);
+                asset->Serialise(&jsonSerialiser);
+                const Runtime::ProjectInfo& projectInfo = Runtime::ProjectSystem::Instance().GetProjectInfo();
+                FileSystem::SaveToFile(jsonSerialiser.GetSerialisedData(), projectInfo.GetIntermediatePath() + "/SerialsiedFiles/" + FileSystem::GetFileName(m_currentItemSelected));
             }
             ImGui::EndPopup();
         }

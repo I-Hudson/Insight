@@ -580,7 +580,7 @@ namespace Insight
 			Core::EventSystem::Instance().DispatchEvent(MakeRPtr<Core::GraphicsRenderResolutionChange>(m_render_resolution.x, m_render_resolution.y));
 		}
 
-		void RenderGraphV2::SetOutputResolution(Maths::Vector2 output_resolution)
+		void RenderGraphV2::SetOutputResolution(Maths::IVector2 output_resolution)
 		{
 			m_context->SetSwaphchainResolution(output_resolution);
 			m_output_resolution = m_context->GetSwaphchainResolution();

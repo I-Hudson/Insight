@@ -177,9 +177,9 @@ namespace Insight
         float Animator::GetScaleFactor(const double lastTimeStamp, const double nextTimeStamp) const
         {
             float scaleFactor = 0.0f;
-            float midWayLength = m_currentAnimationTime - static_cast<float>(lastTimeStamp);
-            float framesDiff = nextTimeStamp - static_cast<float>(lastTimeStamp);
-            scaleFactor = midWayLength / framesDiff;
+            const double midWayLength = m_currentAnimationTime - lastTimeStamp;
+            const double framesDiff = nextTimeStamp - lastTimeStamp;
+            scaleFactor = static_cast<float>(midWayLength / framesDiff);
             return scaleFactor;
         }
 
@@ -301,7 +301,7 @@ namespace Insight
         void Animator::SetBindPose()
         {
             const u32 boneSize = m_skelton->GetNumberOfBones();
-            for (size_t i = 0; i < boneSize; ++i)
+            for (u32 i = 0; i < boneSize; ++i)
             {
                 const SkeletonBone& bone = m_skelton->GetBone(i);
                 m_boneMatrices[bone.Id] = Maths::Matrix4::Identity;

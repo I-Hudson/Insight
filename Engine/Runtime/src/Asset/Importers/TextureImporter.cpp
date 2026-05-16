@@ -174,14 +174,20 @@ namespace Insight
 
             if (!imageLoaded)
             {
+                int width, height, channels;
+
                 IS_PROFILE_SCOPE("stbi_load_from_memory");
                 void* textureBuffer = stbi_load_from_memory(
                     (const stbi_uc*)context.Data.data()
-                    , context.Data.size()
-                    , &context.Width
-                    , &context.Height
-                    , &context.Channels
+                    , static_cast<int>(context.Data.size())
+                    , &width
+                    , &height
+                    , &channels
                     , STBI_rgb_alpha);
+
+                context.Width = static_cast<u32>(width);
+                context.Height = static_cast<u32>(height);
+                context.Channels = static_cast<u32>(channels);
 
                 context.Channels = 4;
                 const u64 textureSize = context.Width * context.Height * context.Channels;
@@ -199,7 +205,7 @@ namespace Insight
             {
                 context.Width,
                 context.Height,
-                context.Channels,
+                static_cast<u8>(context.Channels),
                 QOI_SRGB
             };
 
@@ -225,7 +231,7 @@ namespace Insight
             qoi_desc qoiDesc;
             {
                 IS_PROFILE_SCOPE("qoi_decode");
-                textureBuffer = qoi_decode(context.Data.data(), context.Data.size(), &qoiDesc, 4);
+                textureBuffer = qoi_decode(context.Data.data(), static_cast<int>(context.Data.size()), &qoiDesc, 4);
             }
             context.Width = qoiDesc.width;
             context.Height = qoiDesc.height;
@@ -253,7 +259,7 @@ namespace Insight
                 if (context.PixelFormat == PixelFormat::R8G8B8A8_UNorm)
                 {
                     SwapRedAndBlueTextureChannels(context);
-                    context.PixelFormat == PixelFormat::B8G8R8A8_UNorm;
+                    context.PixelFormat = PixelFormat::B8G8R8A8_UNorm;
                 }
 
                 struct nvttCompressHandler : nvtt::OutputHandler
@@ -381,7 +387,7 @@ namespace Insight
                 srcTexture.dwHeight = context.Height;
                 srcTexture.dwPitch = srcTexture.dwWidth * context.Channels;
                 srcTexture.format = CMP_FORMAT_RGBA_8888;
-                srcTexture.dwDataSize = context.Data.size();
+                srcTexture.dwDataSize = static_cast<CMP_DWORD>(context.Data.size());
                 srcTexture.pData = context.Data.data();
 
                 // 2. Define the Destination Texture (BC3)
@@ -481,7 +487,7 @@ namespace Insight
                 srcTexture.dwHeight = context.Height;
                 srcTexture.dwPitch = srcTexture.dwWidth * context.Channels;
                 srcTexture.format = CMP_FORMAT_BC3;
-                srcTexture.dwDataSize = context.Data.size();
+                srcTexture.dwDataSize = static_cast<CMP_DWORD>(context.Data.size());
                 srcTexture.pData = context.Data.data();
 
                 // 2. Define the Destination Texture (BC3)

@@ -93,7 +93,7 @@ namespace Insight
         ASSERT(Platform::IsMainThread());
         Clear();
 
-        std::vector<TObjectPtr<Runtime::World>> worlds = worldSystem->GetAllWorlds();
+        const std::vector<TObjectPtr<Runtime::World>> worlds = worldSystem->GetAllWorlds();
         for (TObjectPtr<Runtime::World> const& world : worlds)
         {
             IS_PROFILE_SCOPE("RenderWorld");
@@ -171,7 +171,9 @@ namespace Insight
                         if (!material)
                         {
                             FAIL_ASSERT();
+#if !PARALLEL_FOR
                             continue;
+#endif
                         }
 
                         RenderMesh renderMesh;
@@ -416,5 +418,6 @@ namespace Insight
             }
         }
         FAIL_ASSERT();
+        return {};
     }
 }

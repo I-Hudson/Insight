@@ -18,9 +18,9 @@ namespace Insight
         struct TextureImportContext
         {
             std::vector<Byte> Data;
-            int Width;
-            int Height;
-            int Channels;
+            u32 Width;
+            u32 Height;
+            u32 Channels;
 
             PixelFormat PixelFormat;
 

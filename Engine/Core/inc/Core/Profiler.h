@@ -23,8 +23,12 @@ namespace Insight
 	#define IS_PROFILE_SCOPE_TEXT(format, ...)
 
 #elif defined(IS_PROFILE_TRACY)
-#define TRACY_ENABLE
+#ifndef TRACY_ENABLE
+#define TRACY_ENABLE 1
+#endif // TRACY_ENABLE
+#ifndef TRACY_ON_DEMAND
 #define TRACY_ON_DEMAND
+#endif // TRACY_ON_DEMAND
 	#include "public/tracy/Tracy.hpp"
 	#define IS_PROFILE_FUNCTION()			ZoneScoped
 	#define IS_PROFILE_SCOPE(name)			ZoneScopedN(name)

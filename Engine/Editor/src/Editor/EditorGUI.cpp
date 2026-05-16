@@ -16,7 +16,7 @@ namespace Insight::Editor::EditorGUI
     {
         bool VerifyObjectFieldPayload(std::string& payload, Reflect::Type& type)
         {
-            std::vector<std::string> splitStrings = SplitString(payload, ',');
+            std::vector<std::string> splitStrings = SplitString(payload, ",");
             std::string& payloadData = splitStrings.at(0);
             std::string& typeName = splitStrings.at(1);
             std::string& typeSize = splitStrings.at(2);
@@ -112,7 +112,7 @@ namespace Insight::Editor::EditorGUI
     {
         data.clear();
 
-        if (ImGui::BeginDragDropTargetCustom(rect, ImGuiID(id)))
+        if (ImGui::BeginDragDropTargetCustom(rect, *reinterpret_cast<const ImGuiID*>(id)))
         {
             const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(id);
             if (payload)

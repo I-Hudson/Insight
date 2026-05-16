@@ -608,39 +608,39 @@ namespace Insight
 #endif
 			}
 
-			void Resize(const int size)
+			void Resize(const u64 size)
 			{
 #if VERTEX_SPLIT_STREAMS
-				Vertices.Positons.resize(size * 3);
+				Vertices.Positons.resize(size * 3ull);
 
 #ifdef VERTEX_NORMAL_PACKED
 				Vertices.Normals.resize(size);
 #else
-				Vertices.Normals.resize(size * 3);
+				Vertices.Normals.resize(size * 3ull);
 #endif
 
 #ifdef VERTEX_COLOUR_PACKED
 				Vertices.Colours.resize(size);
 #else
-				Vertices.Colours.resize(size * 3);
+				Vertices.Colours.resize(size * 3ull);
 #endif
 
 #ifdef VERTEX_UV_PACKED
 				Vertices.UVs.resize(size);
 #else
-				Vertices.UVs.resize(size * 2);
+				Vertices.UVs.resize(size * 2ull);
 #endif
 
 #ifdef VERTEX_BONE_ID_PACKED
 				Vertices.BoneIds.resize(size);
 #else
-				Vertices.Normals.resize(size * 4);
+				Vertices.Normals.resize(size * 4ull);
 #endif
 
 #ifdef VERTEX_BONE_WEIGHT_PACKED
 				Vertices.BoneWeights.resize(size);
 #else
-				Vertices.BoneWeights.resize(size * 4);
+				Vertices.BoneWeights.resize(size * 4ull);
 #endif
 
 #else

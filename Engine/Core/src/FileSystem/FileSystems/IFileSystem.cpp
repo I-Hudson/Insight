@@ -79,7 +79,7 @@ namespace Insight
 	u32 IFileSystem::OpenFilesCount() const
 	{
 		Threading::ScopedLock lock(m_openedFilesLock);
-		return m_openedFiles.size();
+		return static_cast<u32>(m_openedFiles.size());
 	}
 
 	bool IFileSystem::IsAbsolutePath(std::string_view path) const

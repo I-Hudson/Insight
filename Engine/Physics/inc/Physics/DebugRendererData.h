@@ -94,15 +94,15 @@ namespace Insight::Physics
 
         struct IS_PHYSICS Line
         {
-            u64 StartIndex = 0;
-            u64 Size = 0;
+            u32 StartIndex = 0;
+            u32 Size = 0;
         };
 
         struct IS_PHYSICS Triangle
         {
-            u64 VertexStartIndex = 0;
-            u64 IndexStartIndex = 0;
-            u64 IndexCount = 0;
+            u32 VertexStartIndex = 0;
+            u32 IndexStartIndex = 0;
+            u32 IndexCount = 0;
         };
 
         struct IS_PHYSICS Text

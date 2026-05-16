@@ -736,7 +736,7 @@ namespace Insight
 					interfaceVariable->location,
 					SpvFormatToPixelFormat(interfaceVariable->format),
 #if VERTEX_SPLIT_STREAMS
-					i,
+					static_cast<int>(i),
 #else
 					0,
 #endif

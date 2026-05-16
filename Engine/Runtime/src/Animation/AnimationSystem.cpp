@@ -138,7 +138,7 @@ namespace Insight
             ASSERT(m_animations.size() < c_MaxGPUSkinnedObjects);
             if (m_animationsOpenList.empty())
             {
-                m_animationsOpenList.push(m_animations.size());
+                m_animationsOpenList.push(static_cast<u32>(m_animations.size()));
                 m_animations.emplace_back();
             }
 
@@ -164,7 +164,7 @@ namespace Insight
                 const AnimationInstance& instance = m_animations[animIdx];
                 if (entity == instance.Entity)
                 {
-                    m_animationsOpenList.push(animIdx);
+                    m_animationsOpenList.push(static_cast<u32>(animIdx));
                     m_animationLookup.erase(entity->GetGUID());
                     return;
                 }
