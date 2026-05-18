@@ -566,5 +566,11 @@ namespace Insight
 				, vec1.z > vec2.z ? vec1.z : vec2.z
 				, vec1.w > vec2.w ? vec1.w : vec2.w);
 		}
+
+		template<typename T, int Legnth>
+		T Distance(const Vec<Legnth, T>& vec1, const Vec<Legnth, T>& vec2)
+		{
+			return (vec2 - vec1).Length();
+		}
 	}
 }

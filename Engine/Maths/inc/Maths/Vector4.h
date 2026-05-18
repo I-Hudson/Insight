@@ -125,7 +125,10 @@ namespace Insight
 		Vec<4, T> Min(const Vec<4, T> vec1, const Vec<4, T> vec2);		
 		template<typename T>
 		Vec<4, T> Max(const Vec<4, T> vec1, const Vec<4, T> vec2);
-		
+
+		template<typename T, int Legnth>
+		T Distance(const Vec<Legnth, T>& vec1, const Vec<Legnth, T>& vec2);
+
 		using Vector4 = Vec<4, float>;
 		using DVector4 = Vec<4, double>;
 		using IVector4 = Vec<4, int>;

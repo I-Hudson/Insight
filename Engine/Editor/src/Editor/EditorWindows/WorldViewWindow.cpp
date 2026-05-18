@@ -414,7 +414,9 @@ namespace Insight
                                         }
                                         */
 
-                                        if (mesh.BoudingBox.GetRadius() < boundingRadiusCutoff[cascadeIdx])
+                                        const float distanceToCamera = Maths::Distance(mesh.Transform[3], renderWorld.MainCamera.Transform[3]);
+                                        if (mesh.BoudingBox.GetRadius() < boundingRadiusCutoff[cascadeIdx]
+                                            /*|| distanceToCamera > boundingRadiusCutoff[cascadeIdx]*/)
                                         {
                                             continue;
                                         }
@@ -608,11 +610,11 @@ namespace Insight
                     pso.DepthBaisEnabled = false;
                     if (Graphics::RenderContext::Instance().IsRenderOptionsEnabled(Graphics::RenderOptions::ReverseZ))
                     {
-                        pso.DepthCompareOp = Graphics::CompareOp::GreaterOrEqual;
+                        pso.DepthCompareOp = Graphics::CompareOp::Greater;
                     }
                     else
                     {
-                        pso.DepthCompareOp = Graphics::CompareOp::LessOrEqual;
+                        pso.DepthCompareOp = Graphics::CompareOp::Less;
                     }
                 }
                 builder.SetPipeline(pso);
@@ -742,6 +744,7 @@ namespace Insight
                         gbufferPso.FrontFace = Graphics::FrontFace::CounterClockwise;
                         gbufferPso.ShaderDescription = shaderDesc;
                         gbufferPso.DepthCompareOp = Graphics::CompareOp::LessOrEqual;
+                        gbufferPso.DepthTest = true;
 
                         if (Graphics::RenderContext::Instance().IsRenderOptionsEnabled(Graphics::RenderOptions::ReverseZ))
                         {
@@ -751,7 +754,7 @@ namespace Insight
                         if (data.DepthPrepassEnabled)
                         {
                             gbufferPso.DepthWrite = false;
-                            gbufferPso.DepthCompareOp = Graphics::CompareOp::Always;
+                            gbufferPso.DepthCompareOp = Graphics::CompareOp::LessOrEqual;
                         }
                     }
                     builder.SetPipeline(gbufferPso);
