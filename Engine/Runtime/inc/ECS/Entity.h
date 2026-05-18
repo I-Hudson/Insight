@@ -383,7 +383,7 @@ namespace Insight
 						if (memberIter != members.end())
 						{
 							Reflect::MemberInfo& member = (*memberIter);
-							assert(member.GetType().GetTypeSize() == data.size());
+							ASSERT(member.GetType().GetTypeSize() == data.size());
 							Platform::MemCopy(member.GetMemberPointer(), data.data(), data.size());
 						}
 					}

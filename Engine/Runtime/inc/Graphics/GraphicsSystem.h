@@ -44,7 +44,7 @@ namespace Insight
 			Graphics::RenderContext* m_context = nullptr;
 			Graphics::Window m_window;
 
-			DoubleBufferVector<RenderFrame> m_renderFrame;
+			DoubleBufferVector<UPtr<RenderFrame>> m_renderFrame;
 			Input::InputSystem* m_inputSystem = nullptr;
 		};
 	}

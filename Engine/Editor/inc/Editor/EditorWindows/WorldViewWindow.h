@@ -18,7 +18,7 @@ namespace Insight
     {
         struct RenderData
         {
-            RenderFrame RenderFrame;
+            const RenderFrame* RenderFrame;
             Graphics::BufferFrame BufferFrame;
             Graphics::BufferSamplers BufferSamplers;
 

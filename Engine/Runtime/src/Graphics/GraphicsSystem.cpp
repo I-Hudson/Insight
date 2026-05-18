@@ -47,6 +47,18 @@ namespace Insight
 
 			InitialiseRenderContext(graphcisAPI);
 
+			UPtr<RenderFrame>& currentRenderFramePtr = m_renderFrame.GetCurrent();
+			if (!currentRenderFramePtr)
+			{
+				currentRenderFramePtr = MakeUPtr<RenderFrame>();
+			}
+
+			UPtr<RenderFrame>& pendingRenderFramePtr = m_renderFrame.GetPending();
+			if (!pendingRenderFramePtr)
+			{
+				pendingRenderFramePtr = MakeUPtr<RenderFrame>();
+			}
+
 			m_state = Core::SystemStates::Initialised;
 		}
 
@@ -92,13 +104,14 @@ namespace Insight
 			WorldSystem* worldSystem = App::Engine::Instance().GetSystemRegistry().GetSystem<WorldSystem>();
 			if (worldSystem)
 			{
-				m_renderFrame.GetCurrent().CreateRenderFrameFromWorldSystem(worldSystem);
+				const UPtr<RenderFrame>& renderFramePtr = m_renderFrame.GetCurrent();
+				renderFramePtr->CreateRenderFrameFromWorldSystem(worldSystem);
 			}
 		}
 
 		const RenderFrame& GraphicsSystem::GetRenderFrame() const
 		{
-			return m_renderFrame.GetCurrent();
+			return *m_renderFrame.GetCurrent().Get();
 		}
 
 		void GraphicsSystem::InitialiseRenderContext(Graphics::GraphicsAPI graphicsAPI)

@@ -92,6 +92,8 @@ namespace Insight
             ImGui::Checkbox("GPU Skinning", &gpuSkinningEnabled);
             Runtime::AnimationSystem::Instance().SetGPUSkinningEnabled(gpuSkinningEnabled);
 
+            ImGui::Checkbox("Depth Pre Pass", &m_enableDepthPrepass);
+
             Graphics::RHI_Texture* worldViewTexture = Graphics::RenderGraph::Instance().GetRenderCompletedRHITexture(editorOutputItems[editorOutput]);
             if (worldViewTexture == nullptr)
             {
@@ -225,17 +227,17 @@ namespace Insight
             const Maths::Matrix4 cameraTransform = m_editorCameraComponent->GetViewMatrix();
             Runtime::GraphicsSystem* graphicsSystem = App::Engine::Instance().GetSystemRegistry().GetSystem<Runtime::GraphicsSystem>();
 
-            RenderFrame renderFrame;
+            RenderFrame* renderFrame;
             {
                 IS_PROFILE_SCOPE("Copy render frame");
-                renderFrame = graphicsSystem->GetRenderFrame();
+                renderFrame = &const_cast<RenderFrame&>(graphicsSystem->GetRenderFrame());
             }
-            renderFrame.SetCameraForAllWorlds(camera, cameraTransform);
-            renderFrame.Sort();
+            renderFrame->SetCameraForAllWorlds(camera, cameraTransform);
+            renderFrame->Sort();
 
             {
                 IS_PROFILE_SCOPE("Set RenderData");
-                m_renderingData.GetPending().RenderFrame = std::move(renderFrame);
+                m_renderingData.GetPending().RenderFrame = renderFrame;
                 m_renderingData.GetPending().BufferFrame = GetBufferFrame();
                 m_renderingData.GetPending().BufferSamplers = GetBufferSamplers();
             }
@@ -310,7 +312,7 @@ namespace Insight
                     Graphics::PipelineStateObject pso = { };
                     {
                         pso.Name = "EditorWorldLightShadowPass";
-                        pso.CullMode = Graphics::CullMode::Back;
+                        pso.CullMode = Graphics::CullMode::Front;
                         pso.FrontFace = Graphics::FrontFace::CounterClockwise;
                         pso.DepthTest = true;
                         pso.DepthWrite = true;
@@ -357,7 +359,7 @@ namespace Insight
                         BindCommonResources(cmdList, m_renderingData.GetCurrent());
                     }
 
-                    const RenderFrame& renderFrame = m_renderingData.GetCurrent().RenderFrame;
+                    const RenderFrame& renderFrame = *m_renderingData.GetCurrent().RenderFrame;
                     for (size_t worldIdx = 0; worldIdx < renderFrame.RenderWorlds.size(); ++worldIdx)
                     {
                         const RenderWorld& renderWorld = renderFrame.RenderWorlds[worldIdx];
@@ -581,31 +583,39 @@ namespace Insight
                     , renderResolutionY
                     , PixelFormat::D32_Float
                     , Graphics::ImageUsageFlagsBits::DepthStencilAttachment | Graphics::ImageUsageFlagsBits::Sampled);
-                Graphics::RGTextureHandle depthStencil = builder.CreateTexture("EditorWorldDepthStencilRT_Prepass", textureCreateInfo);
+                Graphics::RGTextureHandle depthStencil = builder.CreateTexture("EditorWorldDepthStencilRT", textureCreateInfo);
                 builder.WriteDepthStencil(depthStencil);
 
-                Graphics::ShaderDesc shaderDesc("GBuffer", {}, Graphics::ShaderStageFlagBits::ShaderStage_Vertex | Graphics::ShaderStageFlagBits::ShaderStage_Pixel);
+                Graphics::ShaderDesc shaderDesc("DepthPrepass", {}, Graphics::ShaderStageFlagBits::ShaderStage_Vertex);
 #if VERTEX_SPLIT_STREAMS
-                shaderDesc.InputLayout = Graphics::ShaderDesc::GetShaderInputLayoutFromStreams(Graphics::Vertices::Stream::Position);
+                shaderDesc.InputLayout = Graphics::ShaderDesc::GetShaderInputLayoutFromStreams(Graphics::Vertices::Stream::Position
+                        | Graphics::Vertices::Stream::BoneId
+                        | Graphics::Vertices::Stream::BoneWeight);
 #else
                 shaderDesc.InputLayout = Graphics::ShaderDesc::GetDefaultShaderInputLayout();
 #endif
                 builder.SetShader(shaderDesc);
 
-                Graphics::PipelineStateObject gbufferPso = { };
+                Graphics::PipelineStateObject pso = { };
                 {
-                    gbufferPso.Name = "EditorWorldPrepass_PSO";
-                    gbufferPso.CullMode = Graphics::CullMode::Front;
-                    gbufferPso.FrontFace = Graphics::FrontFace::CounterClockwise;
-                    gbufferPso.ShaderDescription = shaderDesc;
-                    gbufferPso.DepthCompareOp = Graphics::CompareOp::LessOrEqual;
-
+                    pso.ShaderDescription = shaderDesc;
+                    pso.Name = "EditorWorldDepthPrepass";
+                    pso.CullMode = Graphics::CullMode::Back;
+                    pso.FrontFace = Graphics::FrontFace::CounterClockwise;
+                    pso.DepthTest = true;
+                    pso.DepthWrite = true;
+                    pso.DepthClampEnabled = false;
+                    pso.DepthBaisEnabled = false;
                     if (Graphics::RenderContext::Instance().IsRenderOptionsEnabled(Graphics::RenderOptions::ReverseZ))
                     {
-                        gbufferPso.DepthCompareOp = Graphics::CompareOp::GreaterOrEqual;
+                        pso.DepthCompareOp = Graphics::CompareOp::GreaterOrEqual;
+                    }
+                    else
+                    {
+                        pso.DepthCompareOp = Graphics::CompareOp::LessOrEqual;
                     }
                 }
-                builder.SetPipeline(gbufferPso);
+                builder.SetPipeline(pso);
 
                 builder.SetViewport(renderResolutionX, renderResolutionY);
                 builder.SetScissor(renderResolutionX, renderResolutionY);
@@ -623,10 +633,9 @@ namespace Insight
                     BindCommonResources(cmdList, m_renderingData.GetCurrent());
                 }
 
-                const RenderFrame& renderFrame = m_renderingData.GetCurrent().RenderFrame;
+                const RenderFrame& renderFrame = *m_renderingData.GetCurrent().RenderFrame;
                 for (const RenderWorld& world : renderFrame.RenderWorlds)
                 {
-
                     for (const u64 meshIndex : world.OpaqueMeshIndexs)
                     {
                         IS_PROFILE_SCOPE("Draw Entity");
@@ -636,17 +645,10 @@ namespace Insight
                         object.Transform = mesh.Transform;
                         object.Previous_Transform = mesh.Transform;
 
+                        object.SkinnedMesh = mesh.SkinnedMesh;
+                        if (mesh.SkinnedMesh)
                         {
-                            IS_PROFILE_SCOPE("Set textures");
-
-                            const RenderMaterial& renderMaterial = mesh.Material;
-                            // Theses sets and bindings shouldn't chagne.
-                            Graphics::RHI_Texture* diffuseTexture = renderMaterial.Textures[(u64)Runtime::TextureAssetTypes::Diffuse];
-                            if (diffuseTexture)
-                            {
-                                cmdList->SetTexture(3, 0, diffuseTexture);
-                                object.Textures_Set[0] = 1;
-                            }
+                            RenderSetSkinnedMeshesBonesUniform(mesh, cmdList);
                         }
 
                         cmdList->SetUniform(2, 0, object);
@@ -736,7 +738,7 @@ namespace Insight
                     Graphics::PipelineStateObject gbufferPso = { };
                     {
                         gbufferPso.Name = "EditorWorldGBuffer_PSO";
-                        gbufferPso.CullMode = Graphics::CullMode::Front;
+                        gbufferPso.CullMode = Graphics::CullMode::Back;
                         gbufferPso.FrontFace = Graphics::FrontFace::CounterClockwise;
                         gbufferPso.ShaderDescription = shaderDesc;
                         gbufferPso.DepthCompareOp = Graphics::CompareOp::LessOrEqual;
@@ -749,7 +751,7 @@ namespace Insight
                         if (data.DepthPrepassEnabled)
                         {
                             gbufferPso.DepthWrite = false;
-                            gbufferPso.DepthCompareOp = Graphics::CompareOp::Equal;
+                            gbufferPso.DepthCompareOp = Graphics::CompareOp::Always;
                         }
                     }
                     builder.SetPipeline(gbufferPso);
@@ -769,7 +771,7 @@ namespace Insight
                         BindCommonResources(cmdList, m_renderingData.GetCurrent());
                     }
 
-                    const RenderFrame& renderFrame = m_renderingData.GetCurrent().RenderFrame;
+                    const RenderFrame& renderFrame = *m_renderingData.GetCurrent().RenderFrame;
                     for (const RenderWorld& world : renderFrame.RenderWorlds)
                     {
                         const RenderCamera& mainCamera = world.MainCamera;
@@ -926,7 +928,7 @@ namespace Insight
                         BindCommonResources(cmdList, m_renderingData.GetCurrent());
                     }
 
-                    const RenderFrame& renderFrame = m_renderingData.GetCurrent().RenderFrame;
+                    const RenderFrame& renderFrame = *m_renderingData.GetCurrent().RenderFrame;
                     for (const RenderWorld& world : renderFrame.RenderWorlds)
                     {
                         for (const u64 meshIndex : world.TransparentMeshIndexs)
@@ -1086,7 +1088,7 @@ namespace Insight
                         cmdList->SetTexture(6, 2, render_graph.GetRHITexture(render_graph.GetTexture("EditorWorldNormalRT")));
                         //cmdList->SetTexture(1, 7, render_graph.GetRHITexture(""));
 
-                        const RenderFrame& renderFrame = m_renderingData.GetCurrent().RenderFrame;
+                        const RenderFrame& renderFrame = *m_renderingData.GetCurrent().RenderFrame;
                         for (const RenderWorld& world : renderFrame.RenderWorlds)
                         {
                             const u32 c_MaxDirectionalLights = 8;
@@ -1183,7 +1185,7 @@ namespace Insight
                         cmdList->SetTexture(0, 0, render_graph.GetRHITexture(render_graph.GetTexture("EditorWorldDepthStencilRT")));
                         cmdList->SetTexture(0, 1, render_graph.GetRHITexture(render_graph.GetTexture("EditorWorldColourRT")));
 
-                        const RenderFrame& renderFrame = m_renderingData.GetCurrent().RenderFrame;
+                        const RenderFrame& renderFrame = *m_renderingData.GetCurrent().RenderFrame;
                         for (const RenderWorld& world : renderFrame.RenderWorlds)
                         {
                             const u32 c_MaxPointLights = 32;

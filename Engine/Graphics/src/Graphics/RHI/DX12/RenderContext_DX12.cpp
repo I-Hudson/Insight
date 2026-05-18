@@ -96,7 +96,7 @@ namespace Insight
 					return false;
 				}
 
-				FindPhysicalDevice(&m_physicalDevice.GetPhysicalDevice());
+				FindPhysicalDevice(m_physicalDevice.GetPhysicalDevice().GetAddressOf());
 				
 				ThrowIfFailed(D3D12CreateDevice(
 					m_physicalDevice.GetPhysicalDevice().Get(),
@@ -750,11 +750,11 @@ namespace Insight
 
 				IDXGIFactory4* factory = m_factory.Get();
 
-				ComPtr<IDXGIAdapter1> adapter;
+				ComPtr<IDXGIAdapter1> bestAdapter;
 				ComPtr<IDXGIFactory6> factory6;
 				if (SUCCEEDED(factory->QueryInterface(IID_PPV_ARGS(&factory6))))
 				{
-					u32 adapterIdx = 0;
+					ComPtr<IDXGIAdapter1> adapter;
 					u32 vram = 0;
 
 					for (
@@ -779,13 +779,13 @@ namespace Insight
 								/// Check to see whether the adapter supports Direct3D 12, but don't create the
 								/// actual device yet.
 								const HRESULT createdDevice = D3D12CreateDevice(adapter.Get(), featureLevel, __uuidof(ID3D12Device), NULL) == S_FALSE;
-								const bool featureLevelValid = m_d3dFeatureLevel <= featureLevel;
+								const bool featureLevelValid = m_d3dFeatureLevel < featureLevel;
 								const bool higherVRAM = desc.DedicatedVideoMemory > vram;
 								if (createdDevice && featureLevelValid && higherVRAM)
 								{
 									m_d3dFeatureLevel = featureLevel;
-									adapterIdx = adapterIndex;
 									vram = static_cast<u32>(desc.DedicatedVideoMemory);
+									bestAdapter = adapter;
 								}
 							};
 
@@ -793,11 +793,6 @@ namespace Insight
 						findDXFeatureLevel(D3D_FEATURE_LEVEL_11_0);
 						findDXFeatureLevel(D3D_FEATURE_LEVEL_1_0_CORE);
 					}
-
-					SUCCEEDED(factory6->EnumAdapterByGpuPreference(
-						adapterIdx,
-						DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE,
-						IID_PPV_ARGS(&adapter)));
 				}
 
 				ASSERT(m_d3dFeatureLevel != D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_1_0_CORE);
@@ -825,10 +820,10 @@ namespace Insight
 				}
 #endif
 
-				if (adapter)
+				if (bestAdapter)
 				{
 					DXGI_ADAPTER_DESC1 desc;
-					adapter->GetDesc1(&desc);
+					bestAdapter->GetDesc1(&desc);
 
 					m_physical_device_info.Device_Name = Platform::StringFromWString(desc.Description);
 					m_physical_device_info.Vendor_Id = desc.VendorId;
@@ -838,7 +833,7 @@ namespace Insight
 					m_physical_device_info.MinUniformBufferAlignment = D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT;
 				}
 
-				*ppAdapter = adapter.Detach();
+				*ppAdapter = bestAdapter.Detach();
 			}
 
 			void RenderContext_DX12::SetDeviceExtenstions()

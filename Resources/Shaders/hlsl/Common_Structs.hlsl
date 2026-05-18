@@ -55,6 +55,20 @@ struct ShadowVertexInput
 typedef GeoVertexInput ShadowVertexInput;
 #endif
 
+struct GeoVertexOutput
+{
+	precise float4 Position 		: SV_POSITION;
+	float4 Colour 					: COLOR0;
+	float4 WorldPos 				: POSITION1;
+	float4 WorldNormal 				: NORMAL0;
+
+	float4 position_ss_current  	: SCREEN_POS;
+    float4 position_ss_previous 	: SCREEN_POS_PREVIOUS;
+
+	float4 TexturesSet				: POSITION2;
+	float2 UV 						: TEXCOORD0;
+};
+
 #ifdef VERTEX_NORMAL_PACKED
 float UnpackNormal(const in int normal, const in uint bitshift)
 {

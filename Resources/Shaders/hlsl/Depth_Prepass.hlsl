@@ -1,29 +1,18 @@
 #include "Common.hlsl"
 
-struct VertexInput
+GeoVertexOutput VSMain(const ShadowVertexInput input)
 {
-	float4 Position : POSITION;
-	float4 Normal : NORMAL0;
-	float4 Colour : COLOR0;
-	float4 UV : TEXCOORD0;
-};
-
-struct VertexOutput
-{
-	float4 Position : SV_POSITION;
-};
-
-cbuffer UBO : register(b0, PerObjectUniform)
-{
-	float4x4 ubo_Transform;
-};
-
-VertexOutput VSMain(const ShadowVertexInput input)
-{
-	VertexOutput vsOut;
+	GeoVertexOutput vsOut;
 	vsOut.Position = float4(input.Position.xyz, 1);
 
-	vsOut.Position = mul(ubo_Transform, vsOut.Position);
+	[branch]
+	if (bpo_SkinnedMesh && !GPUSkinningEnabled())
+	{
+		float4 worldNormal = float4(0.0, 0.0, 0.0, 0.0);
+		SkinMesh(input, vsOut.Position, worldNormal);
+	}
+
+	vsOut.Position = mul(bpo_Transform, vsOut.Position);
 	vsOut.Position = mul(bf_Camera_Proj_View, vsOut.Position);
 
 	return vsOut;

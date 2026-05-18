@@ -797,9 +797,10 @@ namespace Insight
     };
 
     /// @brief Contain a vector of worlds for rendering.
-    struct IS_RUNTIME RenderFrame
+    struct IS_RUNTIME RenderFrame : NonCopyable
     {
         RenderFrame();
+        RenderFrame(RenderFrame&&) = default;
         ~RenderFrame();
 
         std::vector<RenderWorld> RenderWorlds;

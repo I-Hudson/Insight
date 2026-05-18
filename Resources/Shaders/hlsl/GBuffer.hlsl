@@ -1,22 +1,8 @@
 #include "Common.hlsl"
 
-struct VertexOutput
+GeoVertexOutput VSMain(const GeoVertexInput input, uint vertexID : SV_VertexID)
 {
-	float4 Position 						: SV_POSITION;
-	float4 Colour 					: COLOR0;
-	float4 WorldPos 				: POSITION1;
-	float4 WorldNormal 				: NORMAL0;
-
-	float4 position_ss_current  	: SCREEN_POS;
-    float4 position_ss_previous 	: SCREEN_POS_PREVIOUS;
-
-	float4 TexturesSet				: POSITION2;
-	float2 UV 						: TEXCOORD0;
-};
-
-VertexOutput VSMain(const GeoVertexInput input, uint vertexID : SV_VertexID)
-{
-	VertexOutput vsOut;
+	GeoVertexOutput vsOut;
 	vsOut.Position = float4(input.Position, 1);
 	vsOut.Colour = GetVertexColour(input.Colour);
 	vsOut.WorldNormal = GetVertexNormal(input.Normal);
@@ -49,7 +35,7 @@ struct PixelOutput
 };
 
 [earlydepthstencil]
-PixelOutput PSMain(VertexOutput input)
+PixelOutput PSMain(GeoVertexOutput input)
 {	
 	PixelOutput Out;
 	Out.World_Normal = float4(input.WorldNormal.xyz, 1.0);

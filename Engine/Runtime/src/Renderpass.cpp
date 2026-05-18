@@ -59,7 +59,7 @@ namespace Insight
 	static int MeshLod = 0;
 	static bool RenderMaterialBatching = false;
 
-	RenderFrame renderFrame;
+	const RenderFrame* renderFrame;
 
 	enum class DefaultModels
 	{
@@ -237,14 +237,14 @@ namespace Insight
 
 			{
 				IS_PROFILE_SCOPE("Create render frame");
-				renderFrame = App::Engine::Instance().GetSystemRegistry().GetSystem<Runtime::GraphicsSystem>()->GetRenderFrame();
+				renderFrame = &App::Engine::Instance().GetSystemRegistry().GetSystem<Runtime::GraphicsSystem>()->GetRenderFrame();
 			}
 
 			{
 				IS_PROFILE_SCOPE("BufferFrame cameras");
-				m_buffer_frame.Proj_View = renderFrame.MainCamera.Camera.GetProjectionViewMatrix();
-				m_buffer_frame.Projection = renderFrame.MainCamera.Camera.GetProjectionMatrix();
-				m_buffer_frame.View = renderFrame.MainCamera.Transform;
+				m_buffer_frame.Proj_View = renderFrame->MainCamera.Camera.GetProjectionViewMatrix();
+				m_buffer_frame.Projection = renderFrame->MainCamera.Camera.GetProjectionMatrix();
+				m_buffer_frame.View = renderFrame->MainCamera.Transform;
 			}
 
 			{
@@ -275,8 +275,8 @@ namespace Insight
 
 			{
 				IS_PROFILE_SCOPE("BufferFrame resolutions");
-				m_buffer_frame.View_Inverted = renderFrame.MainCamera.Camera.GetInvertedViewMatrix();
-				m_buffer_frame.Projection_View_Inverted = renderFrame.MainCamera.Camera.GetInvertedProjectionViewMatrix();
+				m_buffer_frame.View_Inverted = renderFrame->MainCamera.Camera.GetInvertedViewMatrix();
+				m_buffer_frame.Projection_View_Inverted = renderFrame->MainCamera.Camera.GetInvertedProjectionViewMatrix();
 
 				m_buffer_frame.Render_Resolution[0] = RenderGraph::Instance().GetRenderResolution().x;
 				m_buffer_frame.Render_Resolution[1] = RenderGraph::Instance().GetRenderResolution().y;
@@ -372,11 +372,11 @@ namespace Insight
 				ImGui::End();
 			}
 
-			renderFrame = App::Engine::Instance().GetSystemRegistry().GetSystem<Runtime::GraphicsSystem>()->GetRenderFrame();
+			renderFrame = &App::Engine::Instance().GetSystemRegistry().GetSystem<Runtime::GraphicsSystem>()->GetRenderFrame();
 
-			m_buffer_frame.Proj_View = renderFrame.MainCamera.Camera.GetProjectionViewMatrix();
-			m_buffer_frame.Projection = renderFrame.MainCamera.Camera.GetProjectionMatrix();
-			m_buffer_frame.View = renderFrame.MainCamera.Camera.GetViewMatrix();
+			m_buffer_frame.Proj_View = renderFrame->MainCamera.Camera.GetProjectionViewMatrix();
+			m_buffer_frame.Projection = renderFrame->MainCamera.Camera.GetProjectionMatrix();
+			m_buffer_frame.View = renderFrame->MainCamera.Camera.GetViewMatrix();
 
 			if (enableFSR)
 			{
@@ -401,8 +401,8 @@ namespace Insight
 				}
 			}
 
-			m_buffer_frame.View_Inverted = renderFrame.MainCamera.Camera.GetInvertedViewMatrix();
-			m_buffer_frame.Projection_View_Inverted = renderFrame.MainCamera.Camera.GetInvertedProjectionViewMatrix();
+			m_buffer_frame.View_Inverted = renderFrame->MainCamera.Camera.GetInvertedViewMatrix();
+			m_buffer_frame.Projection_View_Inverted = renderFrame->MainCamera.Camera.GetInvertedProjectionViewMatrix();
 
 			m_buffer_frame.Render_Resolution[0] = RenderGraph::Instance().GetRenderResolution().x;
 			m_buffer_frame.Render_Resolution[1] = RenderGraph::Instance().GetRenderResolution().y;
@@ -513,7 +513,7 @@ namespace Insight
 			struct PassData
 			{
 				RGTextureHandle Depth_Tex;
-				RenderFrame RenderFrame;
+				const RenderFrame* RenderFrame;
 			};
 			PassData data;
 			{
@@ -599,7 +599,7 @@ namespace Insight
 						cmdList->BeginRenderpass(renderpass_description);
 
 						const float CasacdeMinRaius[s_Cascade_Count] = { 0.0f, 2.5f, 5.0f, 8.5f };
-						for (RenderWorld const& world : data.RenderFrame.RenderWorlds)
+						for (RenderWorld const& world : data.RenderFrame->RenderWorlds)
 						{
 							for (const u64 meshIndex : world.OpaqueMeshIndexs)
 							{
@@ -735,7 +735,7 @@ namespace Insight
 
 			struct TestPassData
 			{
-				RenderFrame RenderFrame;
+				const RenderFrame* RenderFrame;
 				BufferFrame Buffer_Frame = { };
 				BufferSamplers Buffer_Samplers = { };
 			};
@@ -848,7 +848,7 @@ namespace Insight
 						camera_frustum = Frustum(data.Buffer_Frame.View, data.Buffer_Frame.Projection, Main_Camera_Far_Plane);
 					}
 
-					for (const RenderWorld& world : data.RenderFrame.RenderWorlds)
+					for (const RenderWorld& world : data.RenderFrame->RenderWorlds)
 					{
 						if (RenderMaterialBatching)
 						{
@@ -962,7 +962,7 @@ namespace Insight
 
 			struct TestPassData
 			{
-				RenderFrame RenderFrame;
+				const RenderFrame* RenderFrame;
 				BufferFrame Buffer_Frame = { };
 				BufferSamplers Buffer_Samplers = { };
 			};
@@ -1060,7 +1060,7 @@ namespace Insight
 
 					Frustum camera_frustum(data.Buffer_Frame.View, data.Buffer_Frame.Projection, Main_Camera_Far_Plane);
 
-					for (const RenderWorld& world : data.RenderFrame.RenderWorlds)
+					for (const RenderWorld& world : data.RenderFrame->RenderWorlds)
 					{
 						if (RenderMaterialBatching)
 						{
@@ -1268,9 +1268,9 @@ namespace Insight
 			PassData passData = {};
 			passData.BufferFrame = m_buffer_frame;
 
-			passData.NearPlane = renderFrame.MainCamera.Camera.GetNearPlane();
-			passData.FarPlane = renderFrame.MainCamera.Camera.GetFarPlane();
-			passData.FOVY = renderFrame.MainCamera.Camera.GetFovY();
+			passData.NearPlane = renderFrame->MainCamera.Camera.GetNearPlane();
+			passData.FarPlane = renderFrame->MainCamera.Camera.GetFarPlane();
+			passData.FOVY = renderFrame->MainCamera.Camera.GetFovY();
 
 			RenderGraph::Instance().AddPass<PassData>("FSR2",
 				[](PassData& data, RenderGraphBuilder& builder)

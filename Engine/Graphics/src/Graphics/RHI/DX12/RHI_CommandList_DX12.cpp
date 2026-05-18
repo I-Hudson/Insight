@@ -448,25 +448,25 @@ namespace Insight
 				ASSERT(viewCount < k_VertexBufferBoundMaxSize);
 				D3D12_VERTEX_BUFFER_VIEW views[k_VertexBufferBoundMaxSize];
 
+				u32 dirtyViewIndex = 0;
 				for (size_t i = 0; i < viewCount; ++i)
 				{
 					const RHI_BufferView& bufferView = bufferViews[i];
 					ASSERT(bufferView.IsValid());
-
-					
+	
 					if (m_boundVertexBufferViews[i] != bufferView)
 					{
 						m_boundVertexBufferViews[i] = bufferView;
 						m_boundVertexBufferDirtyMask |= 1 << i;
+
+						const RHI_Buffer_DX12* bufferDX12 = static_cast<RHI_Buffer_DX12*>(bufferView.GetBuffer());
+						views[dirtyViewIndex++] = D3D12_VERTEX_BUFFER_VIEW
+						{
+							bufferDX12->GetResource()->GetGPUVirtualAddress() + bufferView.GetOffset(),
+							(UINT)bufferDX12->GetSize(),
+							(UINT)bufferDX12->GetStride()
+						};
 					}
-					
-					const RHI_Buffer_DX12* bufferDX12 = static_cast<RHI_Buffer_DX12*>(bufferView.GetBuffer());
-					views[i] = D3D12_VERTEX_BUFFER_VIEW
-					{
-						bufferDX12->GetResource()->GetGPUVirtualAddress() + bufferView.GetOffset(),
-						(UINT)bufferDX12->GetSize(),
-						(UINT)bufferDX12->GetStride()
-					};
 					m_context->GetResourceRenderTracker().TrackResource(bufferView.GetBuffer());
 				}
 
