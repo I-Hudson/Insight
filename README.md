@@ -1,18 +1,21 @@
 <img src="https://github.com/I-Hudson/Insight/blob/main/Resources/Insight/cover.png" alt="Insight Logo" style="max-width: 100%;">
 
+This is a dummy chang
+Color 
+
 # Insight
 This is a small project used for video game engine (runtime) development. This project's main purpose is for an area to try and implement my own ideas and versions of techniques.
 
 ## Feature
 Some features are:
 - Render graph
-- Seperate Update and Render thread
+- Separate Update and Render thread
 - Memory tracking
 - Multiple graphics API support (Vulkan/DX12)
 - Runtime shader creation (with descriptor reflection)
 - GPU Skinning
 
-## Thrid Party
+## Third Party
 
 ##### Runtime
 - [Assimp](https://github.com/assimp/assimp)
