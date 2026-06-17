@@ -43,8 +43,10 @@ namespace Insight
 			Graphics::RHI_Buffer* VertexBuffer = nullptr;
 			Graphics::RHI_BufferView VertexBufferView;
 #endif
-			std::vector<Graphics::RHI_Buffer*> IndexBuffers;
-			std::vector<Graphics::RHI_BufferView> IndexBufferViews;
+			Graphics::RHI_Buffer* IndexBuffer;
+			Graphics::RHI_BufferView IndexBufferView;
+			//std::vector<Graphics::RHI_Buffer*> IndexBuffers;
+			//std::vector<Graphics::RHI_BufferView> IndexBufferViews;
 		};
 
 		/// @brief Contain vertex and index buffers for use when rendering this mesh.
@@ -81,7 +83,7 @@ namespace Insight
 			static const u32 s_MAX_LOD_COUNT = 4;
 			constexpr static Graphics::IndexType kMeshIndexType = Graphics::IndexType::Uint32;
 		private:
-			std::vector<MeshLOD> m_lods;
+			MeshLOD m_lods[s_MAX_LOD_COUNT];
 			Ref<MaterialAsset> m_materialAsset = nullptr;
 			Graphics::BoundingBox m_boundingBox;
 

@@ -41,8 +41,7 @@ namespace Insight
 
     const Runtime::MeshLOD& RenderMesh::GetLOD(u32 lodIndex) const
     {
-        ASSERT(MeshLods.size() > 0);
-        lodIndex = std::min(lodIndex, static_cast<u32>(MeshLods.size() - 1));
+        ASSERT(lodIndex < Runtime::Mesh::s_MAX_LOD_COUNT);
         return MeshLods[lodIndex];
     }
 
@@ -53,7 +52,14 @@ namespace Insight
     {
         IS_PROFILE_FUNCTION();
         BoudingBox = mesh->GetBoundingBox();
-        MeshLods = mesh->m_lods;
+        ASSERT(sizeof(MeshLods) == sizeof(mesh->m_lods))
+        Platform::MemCopy(MeshLods, mesh->m_lods, sizeof(MeshLods));
+        /*
+        for (size_t i = 0; i < Runtime::Mesh::s_MAX_LOD_COUNT; ++i)
+        {
+            MeshLods[i] = mesh->m_lods[i];
+        }
+        */
     }
 
     void RenderMesh::SetMaterial(const Ref<Runtime::MaterialAsset> material)

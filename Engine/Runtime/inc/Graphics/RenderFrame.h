@@ -47,7 +47,7 @@ namespace Insight
         Core::GUID EntityGuid;
 
         /// @brief All render calls for this mesh.
-        std::vector<Runtime::MeshLOD> MeshLods;
+        Runtime::MeshLOD MeshLods[Runtime::Mesh::s_MAX_LOD_COUNT];
         RenderMaterial Material;
 
         std::vector<Maths::Matrix4> BoneTransforms;

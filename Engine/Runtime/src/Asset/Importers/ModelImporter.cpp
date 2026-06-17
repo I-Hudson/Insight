@@ -577,6 +577,7 @@ namespace Insight
 
 			u32 indexBufferIndex = 0;
 			u64 indexBufferCount = modelNode.IndexSize;
+			ASSERT(indexBufferCount < kLargestIndexBufferSize);
 
 			while (indexBufferCount > 0)
 			{
@@ -772,7 +773,6 @@ namespace Insight
 				}
 				*/
 
-				mesh->m_lods.resize(meshData.LODs.size());
 				for (size_t lodIdx = 0; lodIdx < meshData.LODs.size(); ++lodIdx)
 				{
 					MeshData::LOD meshDataLod = meshData.LODs[lodIdx];
@@ -792,12 +792,15 @@ namespace Insight
 					const std::string vertexBufferName = std::string(aiNode->mName.C_Str()) + "_" + aiMesh->mName.C_Str() + "_Veretx";
 					meshLod.VertexBuffer->SetName(vertexBufferName);
 #endif
-
+					meshLod.IndexBuffer = modelNode.RHI_IndexBuffers[0];
+					meshLod.IndexBufferView = modelNode.RHI_IndexBuffers[0];
+					/*
 					for (size_t i = 0; i < modelNode.RHI_IndexBuffers.size(); ++i)
 					{
 						meshLod.IndexBuffers.push_back(modelNode.RHI_IndexBuffers[i]);
 						meshLod.IndexBufferViews.push_back(modelNode.RHI_IndexBuffers[i]);
 					}
+					*/
 				}
 			}
 
@@ -1477,8 +1480,7 @@ namespace Insight
 					FAIL_ASSERT();
 				}
 
-				mesh->m_lods.resize(meshData->LODs.size());
-				for (size_t lodIdx = 0; lodIdx < meshData->LODs.size(); ++lodIdx)
+				for (size_t lodIdx = 0; lodIdx < Mesh::s_MAX_LOD_COUNT; ++lodIdx)
 				{
 					MeshData::LOD meshDataLod = meshData->LODs[lodIdx];
 					MeshLOD& meshLod = mesh->m_lods[lodIdx];
@@ -1701,8 +1703,7 @@ namespace Insight
 					FAIL_ASSERT();
 				}
 
-				mesh->m_lods.resize(meshData.LODs.size());
-				for (size_t lodIdx = 0; lodIdx < meshData.LODs.size(); ++lodIdx)
+				for (size_t lodIdx = 0; lodIdx < Mesh::s_MAX_LOD_COUNT; ++lodIdx)
 				{
 					MeshData::LOD meshDataLod = meshData.LODs[lodIdx];
 					MeshLOD& meshLod = mesh->m_lods[lodIdx];

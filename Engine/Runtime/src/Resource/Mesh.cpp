@@ -11,7 +11,6 @@ namespace Insight
 	{
 		Mesh::Mesh()
 		{
-			m_lods.push_back(MeshLOD());
 		}
 
 		Mesh::~Mesh()
@@ -25,19 +24,24 @@ namespace Insight
 			Renderer::FreeVertexBuffer(m_lods[0].VertexBuffers.BoneWeights);
 			m_lods[0].VertexBuffers = {};
 #else
-			Renderer::FreeVertexBuffer(m_lods.at(0).VertexBuffer);
-			m_lods.at(0).VertexBuffer = nullptr;
+			Renderer::FreeVertexBuffer(m_lods[0].VertexBuffer);
+			m_lods[0].VertexBuffer = nullptr;
 #endif
+			Renderer::FreeIndexBuffer(m_lods[0].IndexBuffer);
+			m_lods[0].IndexBuffer = nullptr;
+
+			/*
 			Renderer::FreeIndexBuffer(m_lods[0].IndexBuffers[0]);
 			m_lods[0].IndexBuffers[0] = nullptr;
+			*/
 		}
 
 		//IS_SERIALISABLE_CPP(Mesh)
 
 		void Mesh::Draw(Graphics::RHI_CommandList* cmd_list, const u32 lod_index) const
 		{
-			const u32 lodIndex = std::min(lod_index, static_cast<u32>(m_lods.size()));
-			const MeshLOD& meshLOD = m_lods[lodIndex];
+			ASSERT(lod_index < s_MAX_LOD_COUNT);
+			const MeshLOD& meshLOD = m_lods[lod_index];
 
 #if VERTEX_SPLIT_STREAMS
 #else
@@ -82,13 +86,13 @@ namespace Insight
 
 		const MeshLOD& Mesh::GetLOD(const u32 lodIndex) const
 		{
-			ASSERT(lodIndex >= 0 && lodIndex < m_lods.size());
+			ASSERT(lodIndex >= 0 && lodIndex < s_MAX_LOD_COUNT);
 			return m_lods[lodIndex];
 		}
 
 		u32 Mesh::GetLODCount() const
 		{
-			return static_cast<u32>(m_lods.size());
+			return s_MAX_LOD_COUNT;
 		}
 	}
 }
