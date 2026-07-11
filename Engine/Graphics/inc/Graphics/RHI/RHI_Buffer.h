@@ -2,6 +2,7 @@
 
 #include "Graphics/RHI/RHI_Resource.h"
 #include "Graphics/RHI/RHI_UploadQueue.h"
+#include "Graphics/RHI/RHI_ResourceAllocation.h"
 
 namespace Insight
 {
@@ -94,8 +95,9 @@ namespace Insight
 			/// Returns the size of the buffer in bytes.
 			/// </summary>
 			/// <returns></returns>
-			u64 GetSize() const { return m_size; }
-			u64 GetStride() const { return m_stride; }
+			u64 GetOffset() const { return m_resourceAllocation.GetOffset(); }
+			u64 GetSize() const { return m_resourceAllocation.GetSize(); }
+			u64 GetStride() const { return m_resourceAllocation.GetStride(); }
 			BufferType GetType() const { return m_bufferType; }
 
 		private:
@@ -103,8 +105,7 @@ namespace Insight
 
 		protected:
 			BufferType m_bufferType;
-			u64 m_size = 0;
-			u64 m_stride = 0;
+			RHI_ResourceAllocation m_resourceAllocation;
 			RHI_Buffer_Overrides m_overrides = { };
 			Byte* m_mappedData = nullptr;
 

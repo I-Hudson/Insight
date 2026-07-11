@@ -33,21 +33,21 @@ namespace Insight
 			{
 				m_context = static_cast<RenderContext_DX12*>(context);
 				m_bufferType = bufferType;
-				m_size = sizeBytes;
-				m_stride = stride;
 				m_overrides = overrides;
+
+				if (bufferType == BufferType::Uniform)
+				{
+					// must be a multiple 256 bytes
+					sizeBytes += (D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT - 1) & ~(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT - 1);
+				}
+
+				m_resourceAllocation = RHI_ResourceAllocation(0, sizeBytes, stride, nullptr, nullptr);
 
 				CD3DX12_HEAP_PROPERTIES heapProperties = BufferTypeToDX12HeapProperties(m_bufferType);
 				D3D12_RESOURCE_STATES resourceState = BufferTypeToDX12InitialResourceState(m_bufferType);
 				CD3DX12_RESOURCE_DESC resourceDesc = {};
 
-				if (bufferType == BufferType::Uniform)
-				{
-					// must be a multiple 256 bytes
-					m_size += (D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT - 1) & ~(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT - 1); 
-				}
-
-				resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(m_size);
+				resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(GetSize());
 
 				if (overrides.Force_Host_Writeable)
 				{
@@ -62,19 +62,14 @@ namespace Insight
 				m_currentResouceState = resourceState;
 				m_uploadStatus = m_overrides.InitialUploadState;
 
-				D3D12MA::ALLOCATION_DESC allocationDesc = { };
-				allocationDesc.HeapType = heapProperties.Type;
+				if (!m_context->CreateBufferResource(m_bufferType, resourceDesc, heapProperties, resourceState, m_resourceAllocation))
+				{
+					IS_LOG_CORE_ERROR("[RHI_Buffer_DX12::Create] Unable to create buffer.");
+					Release();
+					return;
+				}
 
-				/// Create the constant buffer.
-				ThrowIfFailed(m_context->GetAllocator()->CreateResource(
-					&allocationDesc,
-					&resourceDesc,
-					resourceState,
-					nullptr,
-					&m_d3d12maAllocation,
-					IID_PPV_ARGS(&m_resource)));
-
-				ASSERT(m_resource == m_d3d12maAllocation->GetResource());
+				ASSERT(GetResource() != nullptr);
 
 				SetName("UnknownBuffer");
 
@@ -85,7 +80,7 @@ namespace Insight
 					|| m_bufferType == BufferType::Readback
 					|| overrides.Force_Host_Writeable)
 				{
-					ThrowIfFailed(m_resource->Map(0, nullptr, reinterpret_cast<void**>(&m_mappedData)));
+					ThrowIfFailed(GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&m_mappedData)));
 				}
 			}
 
@@ -189,38 +184,38 @@ namespace Insight
 			{
 				std::vector<Byte> data = Download();
 				const u64 data_size = GetSize();
+				const u64 stride = GetStride();
 
 				Release();
-				Create(m_context, m_bufferType, newSizeInBytes, m_stride, m_overrides);
+				Create(m_context, m_bufferType, newSizeInBytes, stride, m_overrides);
 
 				Upload(data.data(), data_size, 0, 0);
 			}
 
 			void RHI_Buffer_DX12::Release()
 			{
-				if (m_resource)
+				if (GetResource())
 				{
 					if (m_mappedData)
 					{
-						m_resource->Unmap(0, nullptr);
+						GetResource()->Unmap(0, nullptr);
 						m_mappedData = nullptr;
 					}
-					m_resource = nullptr;
-					m_d3d12maAllocation->Release();
-					m_d3d12maAllocation = nullptr;
+
+					m_context->FreeResource(m_resourceAllocation);
 				}
 			}
 
 			bool RHI_Buffer_DX12::ValidResource()
 			{
-				return m_resource;
+				return GetResource();
 			}
 
 			void RHI_Buffer_DX12::SetName(std::string name)
 			{
-				if (m_resource)
+				if (GetResource())
 				{
-					m_context->SetObjectName(name, m_resource);
+					//m_context->SetObjectName(name, m_resource);
 				}
 				m_name = name;
 			}

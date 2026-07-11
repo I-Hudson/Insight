@@ -3,6 +3,7 @@
 #if defined(IS_DX12_ENABLED)
 
 #include "Graphics/RenderContext.h"
+#include "Graphics/RHI/RHI_ResourceAllocation.h"
 #include "Graphics/RHI/DX12/RHI_PhysicalDevice_DX12.h"
 #include "Graphics/RHI/DX12/RHI_Descriptor_DX12.h"
 #include "Graphics/RHI/DX12/RHI_Queue_DX12.h"
@@ -89,6 +90,13 @@ namespace Insight
 				DescriptorHeapHandle_DX12 GetDescriptorSRVNullHandle() const;
 				DescriptorHeapHandle_DX12 GetDescriptorUAVNullHandle() const;
 				DescriptorHeapHandle_DX12 GetDescriptorSAMNullHandle() const;
+
+				bool CreateBufferResource(const BufferType bufferType, const D3D12_RESOURCE_DESC resourceDesc, 
+					const D3D12_HEAP_PROPERTIES heapProps, D3D12_RESOURCE_STATES resourceState, RHI_ResourceAllocation& resourceAllocation);
+				bool CreateTextureResource(const D3D12_RESOURCE_DESC resourceDesc,
+					const D3D12_HEAP_PROPERTIES heapProps, D3D12_RESOURCE_STATES resourceState, RHI_ResourceAllocation& resourceAllocation);
+
+				void FreeResource(RHI_ResourceAllocation& resourceAllocation);
 
 				D3D12MA::Allocator* GetAllocator() const { return m_d3d12MA; }
 

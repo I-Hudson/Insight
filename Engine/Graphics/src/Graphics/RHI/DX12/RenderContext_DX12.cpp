@@ -914,6 +914,55 @@ namespace Insight
 				return m_samNullHandle;
 			}
 
+			bool RenderContext_DX12::CreateBufferResource(const BufferType bufferType, const D3D12_RESOURCE_DESC resourceDesc, const D3D12_HEAP_PROPERTIES heapProps, D3D12_RESOURCE_STATES resourceState, RHI_ResourceAllocation& resourceAllocation)
+			{
+				ASSERT(resourceAllocation.GetSize() == resourceDesc.Width);
+
+				D3D12MA::ALLOCATION_DESC allocationDesc = { };
+				allocationDesc.HeapType = heapProps.Type;
+
+				D3D12MA::Allocation* d3d12MAAllocation = nullptr;
+				ID3D12Resource* resource = nullptr;
+
+				HRESULT hr = GetAllocator()->CreateResource(
+					&allocationDesc,
+					&resourceDesc,
+					resourceState,
+					nullptr,
+					&d3d12MAAllocation,
+					IID_PPV_ARGS(&resource));
+
+				if (FAILED(hr))
+				{
+					IS_LOG_CORE_ERROR("[RenderContext_DX12::CreateBufferResource] Unable to create buffer resource. HR: 0x{:08X}. Message: {}."
+						, static_cast<unsigned int>(hr), HrToString(hr).c_str());
+					return false;
+				}
+
+				resourceAllocation = 
+					RHI_ResourceAllocation(
+						0
+						, resourceAllocation.GetSize()
+						, resourceAllocation.GetStride()
+						, resource
+						, d3d12MAAllocation);
+
+				return true;
+			}
+
+			bool RenderContext_DX12::CreateTextureResource(const D3D12_RESOURCE_DESC resourceDesc, const D3D12_HEAP_PROPERTIES heapProps, D3D12_RESOURCE_STATES resourceState, RHI_ResourceAllocation& resourceAllocation)
+			{
+				return false;
+			}
+
+			void RenderContext_DX12::FreeResource(RHI_ResourceAllocation& resourceAllocation)
+			{
+				D3D12MA::Allocation* d3d12MAAllocation = reinterpret_cast<D3D12MA::Allocation*>(resourceAllocation.GetMemoryAllocation());
+				d3d12MAAllocation->Release();
+
+				resourceAllocation = {};
+			}
+
 #ifdef IS_RESOURCE_HANDLES_ENABLED
 			RHI_Handle<Texture> RenderContext_DX12::CreateTexture(const Texture texture)
 			{

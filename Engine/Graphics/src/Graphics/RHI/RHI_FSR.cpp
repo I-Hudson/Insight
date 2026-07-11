@@ -1,6 +1,7 @@
 #include "Graphics/RHI/RHI_FSR.h"
 #include "Graphics/RHI/RHI_CommandList.h"
 #include "Graphics/RHI/RHI_Texture.h"
+#include "Graphics/RenderGraph/RenderGraph.h"
 
 #include "Core/Asserts.h"
 #include "Core/Memory.h"

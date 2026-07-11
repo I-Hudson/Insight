@@ -52,7 +52,7 @@ function InsightPlatforms.All()
         else
             defines
             {
-                "IS_VULKAN_ENABLED",
+                --"IS_VULKAN_ENABLED",
             }
         end
 
