@@ -756,6 +756,63 @@ namespace Insight
 
 			}
 
+			RHI_TextureFootprint RenderContext_DX12::GetTextureFootprint(RHI_TextureInfo textureInfo)
+			{
+				D3D12_RESOURCE_DESC desc;
+				
+				switch(textureInfo.TextureType)
+				{
+					case TextureType::Tex2D:
+					{
+						desc = CD3DX12_RESOURCE_DESC::Tex2D(
+							PixelFormatToDX12(textureInfo.Format),
+							textureInfo.Width,
+							textureInfo.Height,
+							textureInfo.Layer_Count,
+							textureInfo.Mip_Count,
+							1,
+							0,
+							ImageUsageFlagsToDX12(textureInfo.ImageUsage),
+							D3D12_TEXTURE_LAYOUT_UNKNOWN);
+						break;
+					}
+
+					default:
+					{
+						FAIL_ASSERT();
+						break;
+					}
+				}
+
+				u64 requriedSize = 0;
+				std::array<D3D12_PLACED_SUBRESOURCE_FOOTPRINT, 1> layouts;
+				std::array<u64, 1> rowSizeInBytes;
+				std::array<UINT, 1> numRows;
+				GetDevice()->GetCopyableFootprints(
+					&desc,
+					0,
+					1,
+					0,
+					layouts.data(),
+					numRows.data(),
+					rowSizeInBytes.data(),
+					&requriedSize);
+
+
+				return RHI_TextureFootprint
+				{
+					layouts[0].Footprint.Width,
+					layouts[0].Footprint.Height,
+					layouts[0].Footprint.Depth,
+					
+					layouts[0].Footprint.RowPitch,
+					numRows[0],
+					rowSizeInBytes[0],
+
+					requriedSize
+				};
+			}
+
 			void RenderContext_DX12::SetObjectName(std::string_view name, ID3D12Object* handle)
 			{
 				if (handle)

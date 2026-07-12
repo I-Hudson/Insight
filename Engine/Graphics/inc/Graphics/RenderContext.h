@@ -199,6 +199,8 @@ namespace Insight
 			virtual void SetFullScreen() { }
 			virtual void SetFPSTarget(const int targetFps) = 0;
 
+			virtual RHI_TextureFootprint GetTextureFootprint(RHI_TextureInfo textureInfo) = 0;
+
 			u32 GetFrameIndex() const;
 			u32 GetFrameIndexCompleted() const;
 			u64 GetFrameCount() const;

@@ -77,6 +77,8 @@ namespace Insight
 
 				virtual void SetFPSTarget(const int targetFps) override;
 
+				virtual RHI_TextureFootprint GetTextureFootprint(RHI_TextureInfo textureInfo) override;
+
 				void SetObjectName(std::string_view name, ID3D12Object* handle);
 
 				virtual RHI_Texture* GetSwaphchainIamge() const override;

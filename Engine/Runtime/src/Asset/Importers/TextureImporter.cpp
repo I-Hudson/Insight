@@ -8,7 +8,6 @@
 #include "Core/Profiler.h"
 #include "Platforms/Platform.h"
 
-#include "Graphics/PixelFormatExtensions.h"
 
 #include "cmp_compressonatorlib/compressonator.h"
 
@@ -708,11 +707,7 @@ namespace Insight
 
             const Core::CPUInformation cpuInfo = Platform::GetCPUInformation();
 
-            if (false && cpuInfo.IsAVX2)
-            {
-
-            }
-            else if (cpuInfo.IsSSE2)
+            if (cpuInfo.IsSSE2)
             {
                 const u64 pixelCount = context.Width * context.Height;
 
@@ -734,6 +729,21 @@ namespace Insight
 
                 // Scalar Tail Fallback
                 for (; i < pixelCount; ++i)
+                {
+                    u8* pixelByteOffset = context.Data.data() + (i * 4);
+
+                    const u8 red = pixelByteOffset[0];
+
+                    pixelByteOffset[0] = pixelByteOffset[2];
+                    pixelByteOffset[2] = red;
+                }
+            }
+            else
+            {
+                const u64 pixelCount = context.Width * context.Height;
+
+                // Scalar Tail Fallback
+                for (u32 i = 0; i < pixelCount; ++i)
                 {
                     u8* pixelByteOffset = context.Data.data() + (i * 4);
 

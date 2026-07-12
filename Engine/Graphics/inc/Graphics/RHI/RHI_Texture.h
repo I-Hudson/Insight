@@ -20,6 +20,19 @@ namespace Insight
 		class RHI_CommandList;
 		struct RHI_UploadQueueRequest;
 
+		struct RHI_TextureFootprint
+		{
+			u32 Width;
+			u32 Height;
+			u32 Depth;
+			
+			u32 RowPitch;
+			u32 NumRows;
+			u64 RowSizeBytes;
+
+			u64 TotalByteSize;
+		};
+
 		struct RHI_TextureInfo
 		{
 			TextureType TextureType = TextureType::Unknown;

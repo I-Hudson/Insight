@@ -101,7 +101,11 @@ namespace Insight
 			void RemoveRequest(RHI_UploadQueueRequest* request);
 
 		private:
-			void UploadDataToStagingBuffer(const void* data, u64 sizeInBytes, RHI_UploadTypes uploadType, RPtr<RHI_UploadQueueRequestInternal>& uploadRequest);
+			void UploadData(const void* data, u64 sizeInBytes, RHI_UploadTypes uploadType, RPtr<RHI_UploadQueueRequestInternal>& uploadRequest);
+			void UploadTextureData(const void* data, u64 sizeInBytes, RPtr<RHI_UploadQueueRequestInternal>& uploadRequest);
+
+			void FlushStagingBuffer(u64 sizeInBytes, bool forceFlush = false);
+			void UploadDataToStagingBuffer(const void* data, u64 sizeInBytes, RPtr<RHI_UploadQueueRequestInternal>& uploadRequest);
 
 		private:
 			/// <summary>
