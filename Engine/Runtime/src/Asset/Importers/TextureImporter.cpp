@@ -140,10 +140,14 @@ namespace Insight
 
         void TextureImporter::CompressToPNG(TextureImportContext& context) const
         {
+            IS_PROFILE_FUNCTION();
+
         }
 
         void TextureImporter::DecompressFromPNG(TextureImportContext& context) const
         {
+            IS_PROFILE_FUNCTION();
+
             bool imageLoaded = false;
 #if NVIDIA_TEXTURE_TOOLS
             if (context.ImageLoader == ImageLoader::NVTT)
@@ -199,6 +203,8 @@ namespace Insight
 
         void TextureImporter::CompressToQOI(TextureImportContext& context) const
         {
+            IS_PROFILE_FUNCTION();
+
 #ifdef QOI_IMPLEMENTATION
             qoi_desc desc
             {
@@ -225,6 +231,8 @@ namespace Insight
 
         void TextureImporter::DecompressFromQOI(TextureImportContext& context) const
         {
+            IS_PROFILE_FUNCTION();
+
             void* textureBuffer;
 #ifdef QOI_IMPLEMENTATION
             qoi_desc qoiDesc;
@@ -614,34 +622,49 @@ namespace Insight
 
             const Core::CPUInformation cpuInfo = Platform::GetCPUInformation();
 
-            if (false && cpuInfo.IsAVX2)
+            if (cpuInfo.IsAVX2)
             {
                 IS_PROFILE_SCOPE("AVX2");
 
                 const __m256 scale = _mm256_set1_ps(255.0f);
+                //Shuffle bytes inside each 128-bit lane to interleave them into RGBA pixels
+                // Maps: Index 0->R, Index 4->G, Index 8->B, Index 12->A for Pixel 0, and so on.
+                const __m256i shuffle_mask = _mm256_setr_epi8(
+                    0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15, // Low lane (Pix 0-3)
+                    0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15  // High lane (Pix 4-7)
+                );
+
                 int i = 0;
 
                 for (; i <= pixelCount - 8; i += 8)
                 {
+                    // 1. Unaligned loads safely handle arbitrary pointer buffers
                     __m256 r = _mm256_mul_ps(_mm256_loadu_ps(redChannelPtr + i), scale);
                     __m256 g = _mm256_mul_ps(_mm256_loadu_ps(greenChannelPtr + i), scale);
                     __m256 b = _mm256_mul_ps(_mm256_loadu_ps(blueChannelPtr + i), scale);
                     __m256 a = _mm256_mul_ps(_mm256_loadu_ps(alphaChannelPtr + i), scale);
 
+                    // 2. Convert floats to signed 32-bit integers
                     __m256i ri = _mm256_cvtps_epi32(r);
                     __m256i gi = _mm256_cvtps_epi32(g);
                     __m256i bi = _mm256_cvtps_epi32(b);
                     __m256i ai = _mm256_cvtps_epi32(a);
 
-                    // Interleaving 8-bit planes into RGBA in AVX2
-                    __m256i rg_16 = _mm256_packus_epi32(ri, gi);
-                    __m256i ba_16 = _mm256_packus_epi32(bi, ai);
-                    __m256i rgba_8 = _mm256_packus_epi16(rg_16, ba_16);
+                    // 3. PACK AND SATURATE:
+                    // _mm256_packus_epi32 truncates and automatically saturates values to.
+                    // This prevents values greater than 255.0f from creating unexpected byte overflow.
+                    __m256i rg_16 = _mm256_packus_epi32(ri, gi); // [R0..R3, G0..G3 | R4..R7, G4..G7]
+                    __m256i ba_16 = _mm256_packus_epi32(bi, ai); // [B0..B3, A0..A3 | B4..B7, A4..A7]
 
-                    // Fix AVX2 lane shuffling
-                    rgba_8 = _mm256_permutevar8x32_epi32(rgba_8, _mm256_setr_epi32(0, 4, 1, 5, 2, 6, 3, 7));
+                    // _mm256_packus_epi16 downcasts to 8-bit bytes and saturates to.
+                    // Layout: Low lane = Pixels 0-3 blocks, High lane = Pixels 4-7 blocks
+                    __m256i rgba_sequential = _mm256_packus_epi16(rg_16, ba_16);
 
-                    _mm256_storeu_si256((__m256i*)(dst + i * 4), rgba_8);
+                    // 4. Interleave bytes into native RGBA layouts inside the 128-bit sub-lanes
+                    __m256i rgba_interleaved = _mm256_shuffle_epi8(rgba_sequential, shuffle_mask);
+
+                    // 5. Store out to the linear destination buffer (4 bytes per pixel)
+                    _mm256_storeu_si256(reinterpret_cast<__m256i*>(dst + i * 4), rgba_interleaved);
                 }
 
                 // Scalar Tail Fallback
@@ -698,6 +721,18 @@ namespace Insight
                     dst[i * 4 + 3] = static_cast<uint8_t>(std::clamp(alphaChannelPtr[i] * 255.0f, 0.0f, 255.0f));
                 }
             }
+            else
+            {
+                IS_PROFILE_SCOPE("Scalar Tail Fallback");
+
+                for (int i = 0; i < pixelCount; ++i)
+                {
+                    dst[i * 4 + 0] = static_cast<uint8_t>(std::clamp(redChannelPtr[i] * 255.0f, 0.0f, 255.0f));
+                    dst[i * 4 + 1] = static_cast<uint8_t>(std::clamp(greenChannelPtr[i] * 255.0f, 0.0f, 255.0f));
+                    dst[i * 4 + 2] = static_cast<uint8_t>(std::clamp(blueChannelPtr[i] * 255.0f, 0.0f, 255.0f));
+                    dst[i * 4 + 3] = static_cast<uint8_t>(std::clamp(alphaChannelPtr[i] * 255.0f, 0.0f, 255.0f));
+                }
+            }
             context.Data.resize(textureSize);
         }
 
@@ -706,10 +741,44 @@ namespace Insight
             IS_PROFILE_FUNCTION();
 
             const Core::CPUInformation cpuInfo = Platform::GetCPUInformation();
+            const u64 pixelCount = context.Width * context.Height;
 
-            if (cpuInfo.IsSSE2)
+            if (cpuInfo.IsAVX2)
             {
-                const u64 pixelCount = context.Width * context.Height;
+                IS_PROFILE_SCOPE("AVX2");
+
+                // 256-bit shuffle mask (swaps R and B, keeps G and A intact)
+                const __m256i shuffleMask = _mm256_setr_epi8(
+                    2, 1, 0, 3, 6, 5, 4, 7, 10, 9, 8, 11, 14, 13, 12, 15, // Low lane (Pix 0-3)
+                    2, 1, 0, 3, 6, 5, 4, 7, 10, 9, 8, 11, 14, 13, 12, 15  // High lane (Pix 4-7)
+                );
+
+                int i = 0;
+
+                // Pure unaligned vector loop processing 8 pixels per iteration
+                for (; i <= pixelCount - 8; i += 8) 
+                {
+                    u8* pixelByteOffset = context.Data.data() + (i * 4);
+
+                    // Safe unaligned load and store for any memory address
+                    __m256i pixelByteData = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pixelByteOffset));
+                    __m256i shuffledPixelBytes = _mm256_shuffle_epi8(pixelByteData, shuffleMask);
+                    _mm256_storeu_si256(reinterpret_cast<__m256i*>(pixelByteOffset), shuffledPixelBytes);
+                }
+
+                // Scalar Tail Fallback: Handles trailing pixels or non-AVX2 environments
+                for (; i < static_cast<int>(pixelCount); ++i)
+                {
+                    u8* pixelByteOffset = context.Data.data() + (i * 4);
+
+                    const u8 red = pixelByteOffset[0];
+                    pixelByteOffset[0] = pixelByteOffset[2];
+                    pixelByteOffset[2] = red;
+                }
+            }
+            else if (cpuInfo.IsSSE2)
+            {
+                IS_PROFILE_SCOPE("SSE2");
 
                 int i = 0;
 
@@ -740,7 +809,7 @@ namespace Insight
             }
             else
             {
-                const u64 pixelCount = context.Width * context.Height;
+                IS_PROFILE_SCOPE("Scalar Tail Fallback");
 
                 // Scalar Tail Fallback
                 for (u32 i = 0; i < pixelCount; ++i)
