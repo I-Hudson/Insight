@@ -748,7 +748,9 @@ namespace Insight
 
 				// Go through out deferred manager and call all the functions which have been queued up.
 				m_gpu_defered_manager.Update(cmdList);
+				m_uploadQueue.Lock();
 				m_uploadQueue.UploadToDevice(cmdList);
+				m_uploadQueue.Unlock();
 			}
 
 			void RenderContext_DX12::SetFPSTarget(const int targetFps)

@@ -79,6 +79,9 @@ namespace Insight
 			void Init();
 			void Destroy();
 
+			void Lock() { m_mutex.lock(); }
+			void Unlock() { m_mutex.unlock(); }
+
 			RPtr<RHI_UploadQueueRequest> UploadBuffer(const void* data, u64 sizeInBytes, u64 offset, u64 alignment, RHI_Buffer* buffer);
 			RPtr<RHI_UploadQueueRequest> UploadBuffer(const void* data, u64 sizeInBytes, RHI_Buffer* buffer) { return UploadBuffer(data, sizeInBytes, 0, 0, buffer); }
 

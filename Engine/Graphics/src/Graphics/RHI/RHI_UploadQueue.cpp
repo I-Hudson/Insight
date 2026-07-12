@@ -223,7 +223,6 @@ namespace Insight
 			//ASSERT(RenderContext::Instance().IsRenderThread());
 			cmdList->BeginTimeBlock("UploadToDevice");
 
-			std::lock_guard lock(m_mutex);
 			m_frameUploadOffset = 0;
 
 			// Remove all completed requests from m_runningUploads.
@@ -290,10 +289,12 @@ namespace Insight
 		{
 			IS_PROFILE_FUNCTION();
 
+			Lock();
+
 			if (uploadType == RHI_UploadTypes::Texture)
 			{
-				UploadTextureData(data, sizeInBytes, uploadRequest);
-				return;
+				//UploadTextureData(data, sizeInBytes, uploadRequest);
+				//return;
 			}
 
 			if (sizeInBytes > c_UploadBufferMaxSize)
@@ -330,6 +331,8 @@ namespace Insight
 			{
 				UploadDataToStagingBuffer(data, sizeInBytes, uploadRequest);
 			}
+
+			Unlock();
 		}
 
 		void RHI_UploadQueue::UploadTextureData(const void* data, u64 sizeInBytes, RPtr<RHI_UploadQueueRequestInternal>& uploadRequest)
@@ -343,8 +346,6 @@ namespace Insight
 
 			if (footprint.RowSizeBytes != footprint.RowPitch)
 			{
-				std::lock_guard lock(m_mutex);
-
 				u8* mappedPtr = m_uploadStagingBuffer->GetMappedData() + m_stagingBufferOffset;
 				const u8* src = static_cast<const u8*>(data);
 
@@ -382,7 +383,6 @@ namespace Insight
 		{
 			FlushStagingBuffer(sizeInBytes);
 
-			std::lock_guard lock(m_mutex);
 			// Upload the data.
 			m_uploadStagingBuffer->Upload(data, sizeInBytes, m_stagingBufferOffset, uploadRequest->Alignment);
 			m_stagingBufferOffset += sizeInBytes;
