@@ -11,10 +11,17 @@ namespace Insight
 {
 	namespace Graphics
 	{
-		RHI_UploadQueueRequestInternal::RHI_UploadQueueRequestInternal(RHI_UploadQueueFunction function, RHI_Resource* resource, u64 sizeInBytes)
+		RHI_UploadQueueRequestInternal::RHI_UploadQueueRequestInternal(RHI_UploadQueueFunction function, RHI_Resource* resource, u64 sizeInBytes, u64 offset, u64 alignment)
 			: UploadFunction(std::move(function))
+			, Resource(resource)
 			, SizeInBytes(std::move(sizeInBytes))
+			, Offset(offset)
+			, Alignment(alignment)
 		{
+			RHI_ResourceRenderTracker::Instance().TrackResource(resource);
+
+			SizeInBytes = AlignUp(SizeInBytes, alignment);
+
 			Request = MakeRPtr<RHI_UploadQueueRequest>();
 			Request->Resource = resource;
 		}
@@ -60,13 +67,13 @@ namespace Insight
 			m_uploadStagingBuffer = nullptr;
 		}
 
-		RPtr<RHI_UploadQueueRequest> RHI_UploadQueue::UploadBuffer(const void* data, u64 sizeInBytes, RHI_Buffer* buffer)
+		RPtr<RHI_UploadQueueRequest> RHI_UploadQueue::UploadBuffer(const void* data, u64 sizeInBytes, u64 offset, u64 alignment, RHI_Buffer* buffer)
 		{
 			IS_PROFILE_FUNCTION();
 
 			RPtr<RHI_UploadQueueRequestInternal> uploadRequest = MakeRPtr<
 				RHI_UploadQueueRequestInternal>(
-					[=](const RHI_UploadQueueRequestInternal* request, RHI_CommandList* cmdList)
+					[this](const RHI_UploadQueueRequestInternal* request, RHI_CommandList* cmdList)
 					{
 						if (request->Cancelled)
 						{
@@ -74,11 +81,11 @@ namespace Insight
 						}
 
 						request->Request->Status = DeviceUploadStatus::Uploading;
-						cmdList->CopyBufferToBuffer(buffer, 0, m_uploadStagingBuffer, m_frameUploadOffset, request->SizeInBytes);
+						cmdList->CopyBufferToBuffer(static_cast<RHI_Buffer*>(request->Resource), request->Offset, m_uploadStagingBuffer, m_frameUploadOffset, request->SizeInBytes);
 						m_frameUploadOffset += request->SizeInBytes;
-					}, buffer, sizeInBytes);
+					}, buffer, sizeInBytes, offset, alignment);
 
-			UploadDataToStagingBuffer(data, sizeInBytes, RHI_UploadTypes::Buffer, uploadRequest);
+			UploadDataToStagingBuffer(data, sizeInBytes,  RHI_UploadTypes::Buffer, uploadRequest);
 
 			if (uploadRequest)
 			{
@@ -95,12 +102,14 @@ namespace Insight
 
 			RPtr<RHI_UploadQueueRequestInternal> uploadRequest = MakeRPtr<
 				RHI_UploadQueueRequestInternal>(
-					[=](const RHI_UploadQueueRequestInternal* request, RHI_CommandList* cmdList)
+					[this](const RHI_UploadQueueRequestInternal* request, RHI_CommandList* cmdList)
 					{
 						if (request->Cancelled)
 						{
 							return;
 						}
+
+						RHI_Texture* texture = static_cast<RHI_Texture*>(request->Resource);
 
 						request->Request->Status = DeviceUploadStatus::Uploading;
 						PipelineBarrier barreir;
@@ -136,7 +145,7 @@ namespace Insight
 						barreir.ImageBarriers.push_back(imageBarrier);
 						cmdList->PipelineBarrier(barreir);
 
-				}, texture, sizeInBytes);
+				}, texture, sizeInBytes, 0, 0);
 
 			UploadDataToStagingBuffer(data, sizeInBytes, RHI_UploadTypes::Texture, uploadRequest);
 
@@ -185,7 +194,7 @@ namespace Insight
 						barreir = { };
 
 						request->Request->Status = DeviceUploadStatus::Uploading;
-						//cmdList->CopyBufferToImage(texture, m_uploadStagingBuffer, m_frameUploadOffset);
+						cmdList->CopyBufferToImage(texture, m_uploadStagingBuffer, m_frameUploadOffset);
 						m_frameUploadOffset += request->SizeInBytes;
 
 						barreir.SrcStage = +PipelineStageFlagBits::Transfer;
@@ -223,6 +232,8 @@ namespace Insight
 				{
 					completedRequests.push_back(uploadRequest.Get());
 					uploadRequest->Request->Resource->m_uploadStatus = DeviceUploadStatus::Completed;
+					RHI_ResourceRenderTracker::Instance().TrackResource(uploadRequest->Request->Resource);
+
 				}
 			}
 
@@ -245,6 +256,8 @@ namespace Insight
 				m_queuedUploads[i]->CommandList->OnWorkCompleted.Bind<&RHI_UploadQueueRequestInternal::OnWorkComplete>(m_queuedUploads[i].Get());
 				//m_queuedUploads[i]->Request->Resource->m_uploadStatus = DeviceUploadStatus::Uploading;
 				// Call the upload functions.
+
+				RHI_ResourceRenderTracker::Instance().TrackResource(m_queuedUploads[i]->Resource);
 				m_queuedUploads[i]->UploadFunction(m_queuedUploads.at(i).Get(), cmdList);
 			}
 			// Move all  our requests to the running vector.
@@ -274,7 +287,7 @@ namespace Insight
 		{
 			IS_PROFILE_FUNCTION();
 
-			if (sizeInBytes > c_UploadBufferMaxSize)
+			if (sizeInBytes > c_UploadBufferMaxSize || uploadType == RHI_UploadTypes::Texture)
 			{
 				// We must allocate a temp buffer to update this data.
 				/// We need a staging buffer to upload data from CPU to GPU.
@@ -324,7 +337,7 @@ namespace Insight
 
 				std::lock_guard lock(m_mutex);
 				// Upload the data.
-				m_uploadStagingBuffer->Upload(data, sizeInBytes, m_stagingBufferOffset, 0);
+				m_uploadStagingBuffer->Upload(data, uploadRequest->SizeInBytes, m_stagingBufferOffset, uploadRequest->Alignment);
 				m_stagingBufferOffset += sizeInBytes;
 			}
 		}

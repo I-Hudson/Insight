@@ -46,12 +46,15 @@ namespace Insight
 
 		struct RHI_UploadQueueRequestInternal
 		{
-			RHI_UploadQueueRequestInternal(RHI_UploadQueueFunction function, RHI_Resource* resource, u64 sizeInBytes);
+			RHI_UploadQueueRequestInternal(RHI_UploadQueueFunction function, RHI_Resource* resource, u64 sizeInBytes, u64 offset, u64 aligment);
 			
 			RHI_UploadQueueFunction UploadFunction;
-			u64 SizeInBytes;
-			RPtr<RHI_UploadQueueRequest> Request;
-			RHI_CommandList* CommandList;
+			RHI_Resource* Resource = nullptr;
+			u64 SizeInBytes = 0;
+			u64 Offset = 0;
+			u64 Alignment = 0;
+			RPtr<RHI_UploadQueueRequest> Request = nullptr;
+			RHI_CommandList* CommandList = nullptr;
 			bool Cancelled = false;
 
 		private:
@@ -76,7 +79,10 @@ namespace Insight
 			void Init();
 			void Destroy();
 
-			RPtr<RHI_UploadQueueRequest> UploadBuffer(const void* data, u64 sizeInBytes, RHI_Buffer* buffer);
+			RPtr<RHI_UploadQueueRequest> UploadBuffer(const void* data, u64 sizeInBytes, u64 offset, u64 alignment, RHI_Buffer* buffer);
+			RPtr<RHI_UploadQueueRequest> UploadBuffer(const void* data, u64 sizeInBytes, RHI_Buffer* buffer) { return UploadBuffer(data, sizeInBytes, 0, 0, buffer); }
+
+			
 			/// <summary>
 			/// Add a new upload request for a texture to the queue.
 			/// </summary>
@@ -114,7 +120,7 @@ namespace Insight
 			/// </summary>
 			u64 m_frameUploadOffset = 0;
 
-			const u64 c_UploadBufferMaxSize = 4_MB;
+			const u64 c_UploadBufferMaxSize = 64_MB;
 
 			std::mutex m_mutex;
 		};

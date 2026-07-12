@@ -660,12 +660,17 @@ namespace Insight
 
 				ASSERT(mesh);
 
-				const auto UploadVertexData =[](const ModelNode& modelNode, Graphics::RHI_Buffer* buffer, Graphics::RHI_BufferView& bufferView, void* data, u64 stride, u64 verticesCount, u64 offset)
+				const auto UploadVertexData = [](const ModelNode& modelNode, Graphics::RHI_Buffer* buffer, Graphics::RHI_BufferView& bufferView, void* data, u64 stride, u64 verticesCount, u64 offset)
 				{
 					ASSERT(buffer != nullptr);
 					const u64 bufferSize = stride * verticesCount;
-					buffer->Upload(data, bufferSize, offset, 0);
 					bufferView = buffer;
+#define MODEL_IMPORTER_QUEUE_UPLOAD 1
+#if MODEL_IMPORTER_QUEUE_UPLOAD
+					buffer->QueueUpload(data, bufferSize, offset, 0);
+#else
+					buffer->Upload(data, bufferSize, offset, 0);
+#endif // MODEL_IMPORTER_QUEUE_UPLOAD
 				};
 
 #if VERTEX_SPLIT_STREAMS

@@ -32,9 +32,9 @@ namespace Insight
 			return m_mappedData;
 		}
 
-		RPtr<RHI_UploadQueueRequest> RHI_Buffer::QueueUpload(void* data, int sizeInBytes)
+		RPtr<RHI_UploadQueueRequest> RHI_Buffer::QueueUpload(const void* data, u64 sizeInBytes, u64 offset, u64 alignment)
 		{
-			return RenderContext::Instance().GetUploadQueue().UploadBuffer(data, sizeInBytes, this);
+			return RenderContext::Instance().GetUploadQueue().UploadBuffer(data, sizeInBytes, offset, alignment, this);
 		}
 
 		RHI_BufferView RHI_Buffer::GetView(u64 offset, u64 size)
@@ -53,7 +53,7 @@ namespace Insight
 		{ }
 
 		RHI_BufferView::RHI_BufferView(RHI_Buffer* buffer)
-			: m_buffer(buffer), m_offset(0), m_size(buffer->GetSize())
+			: m_buffer(buffer), m_offset(buffer->GetOffset()), m_size(buffer->GetSize())
 		{ }
 
 		//// <summary>

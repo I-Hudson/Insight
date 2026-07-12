@@ -41,7 +41,7 @@ namespace Insight
 					sizeBytes += (D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT - 1) & ~(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT - 1);
 				}
 
-				m_resourceAllocation = RHI_ResourceAllocation(0, sizeBytes, stride, nullptr, nullptr);
+				m_resourceAllocation = RHI_ResourceAllocation(0, sizeBytes, stride, nullptr, nullptr, bufferType);
 
 				CD3DX12_HEAP_PROPERTIES heapProperties = BufferTypeToDX12HeapProperties(m_bufferType);
 				D3D12_RESOURCE_STATES resourceState = BufferTypeToDX12InitialResourceState(m_bufferType);
@@ -88,6 +88,8 @@ namespace Insight
 			{
 				IS_PROFILE_FUNCTION();
 
+				sizeInBytes = AlignUp(sizeInBytes, alignment);
+
 				if (data == nullptr)
 				{
 					m_uploadStatus = DeviceUploadStatus::Completed;
@@ -104,6 +106,7 @@ namespace Insight
 				m_uploadStatus = DeviceUploadStatus::Uploading;
 				if (m_mappedData)
 				{
+					ASSERT((offset + sizeInBytes) <= GetSize());
 					Platform::MemCopy(m_mappedData + offset, data, sizeInBytes);
 				}
 				else
@@ -122,7 +125,6 @@ namespace Insight
 
 					stagingBuffer.Release();
 				}
-				sizeInBytes = AlignUp(sizeInBytes, alignment);
 				m_uploadStatus = DeviceUploadStatus::Completed;
 				return RHI_BufferView(this, offset, sizeInBytes);
 			}

@@ -17,14 +17,13 @@ namespace Insight
 			std::lock_guard lock(m_lock);
 
 			const u64 current_frame = RenderContext::Instance().GetFrameCount();
-			const u64 magicFrameCount = 6;
-			if (current_frame <= (RenderContext::Instance().GetFramesInFligtCount() - magicFrameCount))
+			if (current_frame <= c_FrameDelay)
 			{
 				// Not enough frames have passed.
 				return;
 			}
 
-			const u64 out_of_date_frame = current_frame - RenderContext::Instance().GetFramesInFligtCount() - magicFrameCount;
+			const u64 out_of_date_frame = current_frame - c_FrameDelay;
 			std::vector<u64> frams_to_remove;
 
 			for (auto pair : m_defered_resources_to_release)

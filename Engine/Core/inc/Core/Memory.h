@@ -288,6 +288,12 @@ private:
 public:
 	RPtr() { }
 
+	RPtr(std::nullptr_t)
+	{
+		m_ptr = nullptr;
+		m_refCount = nullptr;
+	}
+
 	RPtr(TPtr* ptr)
 	{
 		m_ptr = ptr;
@@ -333,6 +339,12 @@ public:
 	~RPtr()
 	{
 		Dec();
+	}
+
+	RPtr& operator=(std::nullptr_t)
+	{
+		Reset();
+		return *this;
 	}
 
 	RPtr& operator=(const RPtr& other)

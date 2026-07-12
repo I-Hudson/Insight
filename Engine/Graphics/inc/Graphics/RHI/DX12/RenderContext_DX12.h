@@ -137,6 +137,11 @@ namespace Insight
 				/// @brief D3D12 memory allocator used for all resource (buffer/textures) allocations.
 				D3D12MA::Allocator* m_d3d12MA = nullptr;
 
+				RHI_Buffer* m_meshMonolithBuffer = nullptr;
+
+				std::mutex m_meshMonolithVirtualBlockMutex;
+				D3D12MA::VirtualBlock* m_meshMonolithVirtualBlock = nullptr;
+
 				RHI_GPUCrashTracker* m_gpuCrashTracker = nullptr;
 
 				D3D_FEATURE_LEVEL m_d3dFeatureLevel = D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_1_0_CORE;

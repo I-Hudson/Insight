@@ -17,6 +17,8 @@
 
 #include "Event/EventSystem.h"
 
+#include "Threading/ScopedLock.h"
+
 #include "backends/imgui_impl_glfw.h"
 #include <nvtx3/nvtx3.hpp>
 
@@ -124,6 +126,16 @@ namespace Insight
 				d3d12MA_AllocatorDesc.pAdapter = m_physicalDevice.GetPhysicalDevice().Get();
 				d3d12MA_AllocatorDesc.pAllocationCallbacks = &m_d3d12maAllocationCallbacks;
 				ThrowIfFailed(D3D12MA::CreateAllocator(&d3d12MA_AllocatorDesc, &m_d3d12MA));
+
+				RHI_Buffer_Overrides bufferOverrides;
+				bufferOverrides.AllowUnorderedAccess = true;
+				m_meshMonolithBuffer = Renderer::CreateRawBuffer(512_MB, bufferOverrides);
+
+				D3D12MA::VIRTUAL_BLOCK_DESC virtualBlockDesc;
+				virtualBlockDesc.Size = m_meshMonolithBuffer->GetSize();
+				virtualBlockDesc.pAllocationCallbacks = &m_d3d12maAllocationCallbacks;
+
+				ThrowIfFailed(D3D12MA::CreateVirtualBlock(&virtualBlockDesc, &m_meshMonolithVirtualBlock));
 
 				/// Describe and create the command queue.
 				D3D12_COMMAND_QUEUE_DESC queueDesc = {};
@@ -282,6 +294,19 @@ namespace Insight
 				Renderer::FreeReadbackBuffer(m_timeStampReadbackBuffer);
 				m_timeStampReadbackBuffer = nullptr;
 
+				if (m_meshMonolithVirtualBlock)
+				{
+					IS_PROFILE_SCOPE("[D3D12MA] Release Mesh monolith virtual block");
+
+					{
+						Threading::ScopedLock l(m_meshMonolithVirtualBlockMutex);
+						m_meshMonolithVirtualBlock->Release();
+					}
+
+				}
+
+				Renderer::FreeRawBuffer(m_meshMonolithBuffer);
+
 				BaseDestroy();
 				m_resource_tracker.Release();
 
@@ -301,6 +326,7 @@ namespace Insight
 				if (m_d3d12MA)
 				{
 					IS_PROFILE_SCOPE("D3D12MA Release");
+
 					m_d3d12MA->Release();
 					m_d3d12MA = nullptr;
 				}
@@ -918,35 +944,61 @@ namespace Insight
 			{
 				ASSERT(resourceAllocation.GetSize() == resourceDesc.Width);
 
-				D3D12MA::ALLOCATION_DESC allocationDesc = { };
-				allocationDesc.HeapType = heapProps.Type;
-
-				D3D12MA::Allocation* d3d12MAAllocation = nullptr;
-				ID3D12Resource* resource = nullptr;
-
-				HRESULT hr = GetAllocator()->CreateResource(
-					&allocationDesc,
-					&resourceDesc,
-					resourceState,
-					nullptr,
-					&d3d12MAAllocation,
-					IID_PPV_ARGS(&resource));
-
-				if (FAILED(hr))
+				if (false && bufferType == BufferType::Vertex)
 				{
-					IS_LOG_CORE_ERROR("[RenderContext_DX12::CreateBufferResource] Unable to create buffer resource. HR: 0x{:08X}. Message: {}."
-						, static_cast<unsigned int>(hr), HrToString(hr).c_str());
-					return false;
+					D3D12MA::VIRTUAL_ALLOCATION_DESC allocationDesc = { };
+					allocationDesc.Size = resourceDesc.Width;
+					allocationDesc.Alignment = 16;
+
+					D3D12MA::VirtualAllocation* virtualAllocation = ::New<D3D12MA::VirtualAllocation>();
+					u64 offset = 0;
+
+					{
+						Threading::ScopedLock l(m_meshMonolithVirtualBlockMutex);
+						ThrowIfFailed(m_meshMonolithVirtualBlock->Allocate(&allocationDesc, virtualAllocation, &offset));
+					}
+					resourceAllocation =
+						RHI_ResourceAllocation(
+							offset
+							, resourceAllocation.GetSize()
+							, resourceAllocation.GetStride()
+							, m_meshMonolithBuffer
+							, virtualAllocation
+							, bufferType);
 				}
+				else
+				{
+					D3D12MA::ALLOCATION_DESC allocationDesc = { };
+					allocationDesc.HeapType = heapProps.Type;
 
-				resourceAllocation = 
-					RHI_ResourceAllocation(
-						0
-						, resourceAllocation.GetSize()
-						, resourceAllocation.GetStride()
-						, resource
-						, d3d12MAAllocation);
+					D3D12MA::Allocation* d3d12MAAllocation = nullptr;
+					ID3D12Resource* resource = nullptr;
 
+					HRESULT hr = GetAllocator()->CreateResource(
+						&allocationDesc,
+						&resourceDesc,
+						resourceState,
+						nullptr,
+						&d3d12MAAllocation,
+						IID_PPV_ARGS(&resource));
+
+					if (FAILED(hr))
+					{
+						IS_LOG_CORE_ERROR("[RenderContext_DX12::CreateBufferResource] Unable to create buffer resource. HR: 0x{:08X}. Message: {}."
+							, static_cast<unsigned int>(hr), HrToString(hr).c_str());
+						return false;
+					}
+
+					resourceAllocation =
+						RHI_ResourceAllocation(
+							0
+							, resourceAllocation.GetSize()
+							, resourceAllocation.GetStride()
+							, resource
+							, d3d12MAAllocation
+							, bufferType);
+
+				}
 				return true;
 			}
 
@@ -957,8 +1009,21 @@ namespace Insight
 
 			void RenderContext_DX12::FreeResource(RHI_ResourceAllocation& resourceAllocation)
 			{
-				D3D12MA::Allocation* d3d12MAAllocation = reinterpret_cast<D3D12MA::Allocation*>(resourceAllocation.GetMemoryAllocation());
-				d3d12MAAllocation->Release();
+				if (false && resourceAllocation.GetResourceType() == ResourceType::Buffer 
+					&& resourceAllocation.GetBufferType() == BufferType::Vertex)
+				{
+					D3D12MA::VirtualAllocation* allocation = reinterpret_cast<D3D12MA::VirtualAllocation*>(resourceAllocation.GetMemoryAllocation());
+					{
+						Threading::ScopedLock l(m_meshMonolithVirtualBlockMutex);
+						m_meshMonolithVirtualBlock->FreeAllocation(*allocation);
+					}
+					Delete(allocation);
+				}
+				else
+				{
+					D3D12MA::Allocation* d3d12MAAllocation = reinterpret_cast<D3D12MA::Allocation*>(resourceAllocation.GetMemoryAllocation());
+					d3d12MAAllocation->Release();
+				}
 
 				resourceAllocation = {};
 			}

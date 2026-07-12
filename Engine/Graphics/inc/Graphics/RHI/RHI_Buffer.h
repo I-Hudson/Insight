@@ -84,7 +84,8 @@ namespace Insight
 			virtual RHI_BufferView Upload(RHI_Buffer* srcBuffer) = 0;
 
 			RHI_BufferView Upload(const void* data, u64 sizeInBytes) { return Upload(data, sizeInBytes, 0, 0); }
-			RPtr<RHI_UploadQueueRequest> QueueUpload(void* data, int sizeInBytes);
+			RPtr<RHI_UploadQueueRequest> QueueUpload(const void* data, u64 sizeInBytes, u64 offset, u64 alignment);
+			RPtr<RHI_UploadQueueRequest> QueueUpload(void* data, int sizeInBytes) { return QueueUpload(data, sizeInBytes, 0, 0); }
 
 			virtual std::vector<Byte> Download() = 0;
 			virtual void Resize(u64 newSizeBytes) = 0;

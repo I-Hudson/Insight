@@ -10,12 +10,24 @@ namespace Insight
         RHI_ResourceAllocation::RHI_ResourceAllocation()
         { }
 
-        RHI_ResourceAllocation::RHI_ResourceAllocation(u64 offset, u64 size, u64 stride, void* resource, void* memoryAllocation)
+        RHI_ResourceAllocation::RHI_ResourceAllocation(u64 offset, u64 size, u64 stride, void* resource, void* memoryAllocation, BufferType bufferType)
             : m_offset(offset)
             , m_size(size)
             , m_stride(stride)
             , m_resource(resource)
             , m_memoryAllocation(memoryAllocation)
+            , m_resourceType(ResourceType::Buffer)
+            , m_bufferType(bufferType)
+        { }
+
+        RHI_ResourceAllocation::RHI_ResourceAllocation(u64 offset, u64 size, u64 stride, void* resource, void* memoryAllocation, TextureType textureType)
+            : m_offset(offset)
+            , m_size(size)
+            , m_stride(stride)
+            , m_resource(resource)
+            , m_memoryAllocation(memoryAllocation)
+            , m_resourceType(ResourceType::Texture)
+            , m_textureType(textureType)
         { }
 
         RHI_ResourceAllocation::~RHI_ResourceAllocation()
