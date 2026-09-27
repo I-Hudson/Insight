@@ -54,7 +54,7 @@ namespace Insight
             void SetBindPose();
 
         private:
-            Ref<Skeleton> m_skelton;
+            Ref<Skeleton> m_skeleton;
             Ref<AnimationClip> m_animationClip;
 
             /// @brief Final transforms for all bones.

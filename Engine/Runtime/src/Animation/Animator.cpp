@@ -15,15 +15,15 @@ namespace Insight
 
         Ref<Skeleton> Animator::GetSkelton() const
         {
-            return m_skelton;
+            return m_skeleton;
         }
 
         void Animator::SetSkelton(Ref<Skeleton> skeleton)
         {
-            if (m_skelton != skeleton)
+            if (m_skeleton != skeleton)
             {
-                m_skelton = skeleton;
-                m_boneMatrices.resize(m_skelton->GetNumberOfBones(), Maths::Matrix4::Identity);
+                m_skeleton = skeleton;
+                m_boneMatrices.resize(m_skeleton->GetNumberOfBones(), Maths::Matrix4::Identity);
                 Reset();
                 SetBindPose();
             }
@@ -48,12 +48,12 @@ namespace Insight
             IS_PROFILE_FUNCTION();
 
             if (m_isPlaying 
-                && m_skelton 
+                && m_skeleton 
                 && m_animationClip)
             {
                 m_currentAnimationTime += m_animationClip->GetTickPerSecond() * static_cast<double>(deltaTime);
                 m_currentAnimationTime = fmod(m_currentAnimationTime, m_animationClip->GetDuration());
-                CalculateBoneTransform(m_skelton->GetRootBone().Id, Maths::Matrix4::Identity);
+                CalculateBoneTransform(m_skeleton->GetRootBone().Id, Maths::Matrix4::Identity);
 #if ANIMATION_NODE_TRANSFORMS
                 //CalculateBoneTransform(&m_animationClip->GetRootNode(), Maths::Matrix4::Identity);
 #endif
@@ -79,11 +79,12 @@ namespace Insight
             return m_boneMatrices;
         }
 
+#if 0
         void Animator::CalculateBoneTransform(const u32 boneId, const Maths::Vector3 parentPosition, const Maths::Quaternion parentQuaternion, const Maths::Vector3 parentScale)
         {
             IS_PROFILE_FUNCTION();
 
-            const SkeletonBone& bone = m_skelton->GetBone(boneId);
+            const SkeletonBone& bone = m_skeleton->GetBone(boneId);
             ASSERT(bone);
 
             const Maths::Vector3 bonePositionVector = InterpolatePositionVec(boneId);
@@ -99,7 +100,7 @@ namespace Insight
                     .Rotated(globalRotation)
                     .Translated(Maths::Vector4(globalPosition, 1.0f));
 
-            const Maths::Matrix4 boneOffsetTransform = m_skelton->GetGlobalInverseTransform() * globalTransform * bone.Offset;
+            const Maths::Matrix4 boneOffsetTransform = m_skeleton->GetGlobalInverseTransform() * globalTransform * bone.Offset;
             m_boneMatrices[boneId] = boneOffsetTransform;
 
             for (size_t childBoneIdx = 0; childBoneIdx < bone.ChildrenBoneIds.size(); ++childBoneIdx)
@@ -108,12 +109,13 @@ namespace Insight
                 CalculateBoneTransform(childBoneId, globalPosition, globalRotation, globalScale);
             }
         }
+#endif
 
         void Animator::CalculateBoneTransform(const u32 boneId, const Maths::Matrix4 parentTransform)
         {
             IS_PROFILE_FUNCTION();
 
-            const SkeletonBone& bone = m_skelton->GetBone(boneId);
+            const SkeletonBone& bone = m_skeleton->GetBone(boneId);
             ASSERT(bone);
 
             Maths::Matrix4 boneTransform;
@@ -135,8 +137,11 @@ namespace Insight
             }
             const Maths::Matrix4 globalTransform = parentTransform * boneTransform;
 
-            const Maths::Matrix4 boneOffsetTransform = m_skelton->GetGlobalInverseTransform() * globalTransform * bone.Offset;
-            m_boneMatrices[boneId] = boneOffsetTransform;
+            const Maths::Matrix4 boneOffsetTransform = m_skeleton->GetGlobalInverseTransform() * globalTransform * bone.Offset;
+            {
+                IS_PROFILE_SCOPE("Place BoneOffsetTransform");
+                m_boneMatrices[boneId] = boneOffsetTransform;
+            }
 
             for (size_t childBoneIdx = 0; childBoneIdx < bone.ChildrenBoneIds.size(); ++childBoneIdx)
             {
@@ -354,10 +359,10 @@ namespace Insight
 
         void Animator::SetBindPose()
         {
-            const u32 boneSize = m_skelton->GetNumberOfBones();
+            const u32 boneSize = m_skeleton->GetNumberOfBones();
             for (u32 i = 0; i < boneSize; ++i)
             {
-                const SkeletonBone& bone = m_skelton->GetBone(i);
+                const SkeletonBone& bone = m_skeleton->GetBone(i);
                 m_boneMatrices[bone.Id] = Maths::Matrix4::Identity;
             }
         }

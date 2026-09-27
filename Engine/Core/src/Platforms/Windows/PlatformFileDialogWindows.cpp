@@ -117,14 +117,9 @@ namespace Insight
 
         bool PlatformFileDialogWindows::ShowDialog(IFileDialog* dialog, PlatformFileDialogOperations operation, std::string* selectedItem, const std::string_view folder, const std::vector<FileDialogFilter>& fileFilters, bool appendExtension)
         {
-            IFileSaveDialog* saveDialogHandle;
-            HRESULT hr = CoCreateInstance(CLSID_FileSaveDialog, NULL, CLSCTX_ALL, IID_IFileDialog, reinterpret_cast<void**>(&saveDialogHandle));
-            ASSERT(SUCCEEDED(hr));
-
-            hr = saveDialogHandle->SetOptions(PlatformFileDialogOperationsToFileDialogOptions(operation));
+            HRESULT hr = dialog->SetOptions(PlatformFileDialogOperationsToFileDialogOptions(operation));
             if (hr != S_OK)
             {
-                saveDialogHandle->Release();
                 return false;
             }
 
@@ -138,10 +133,9 @@ namespace Insight
                     fileTypes.at(i).pszSpec = fileFilters.at(i).Extension;
                 }
 
-                hr = saveDialogHandle->SetFileTypes(static_cast<unsigned int>(fileTypes.size()), fileTypes.data());
+                hr = dialog->SetFileTypes(static_cast<unsigned int>(fileTypes.size()), fileTypes.data());
                 if (hr != S_OK)
                 {
-                    saveDialogHandle->Release();
                     return false;
                 }
             }
@@ -155,28 +149,25 @@ namespace Insight
 
                 if (FAILED(hr))
                 {
-                    saveDialogHandle->Release();
                     return false;
                 }
 
-                saveDialogHandle->SetFolder(pCurFolder);
+                dialog->SetFolder(pCurFolder);
                 pCurFolder->Release();
             }
 
-            hr = saveDialogHandle->Show(NULL);
+            hr = dialog->Show(NULL);
             if (hr != S_OK)
             {
-                saveDialogHandle->Release();
                 return false;
             }
 
             IShellItem* item;
-            hr = saveDialogHandle->GetResult(&item);
+            hr = dialog->GetResult(&item);
             if (hr != S_OK)
             {
                 IS_LOG_CORE_ERROR("[PlatformFileDialogWindows::ShowDialog] Unable to get selected item.");
                 item->Release();
-                saveDialogHandle->Release();
                 return false;
             }
 
@@ -186,7 +177,6 @@ namespace Insight
             {
                 IS_LOG_CORE_ERROR("[PlatformFileDialogWindows::ShowDialog] Unable to get selected item display name.");
                 item->Release();
-                saveDialogHandle->Release();
                 return false;
             }
 
@@ -214,7 +204,6 @@ namespace Insight
             }
 
             item->Release();
-            saveDialogHandle->Release();
 
             return true;
         }
