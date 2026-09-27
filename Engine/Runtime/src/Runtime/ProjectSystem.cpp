@@ -129,7 +129,14 @@ namespace Insight
             }
 
             m_projectInfo.Deserialise(&jsonSerialiser);
-            m_projectInfo.ProjectPath = FileSystem::GetParentPath(FileSystem::GetAbsolutePath(projectPath));
+
+            projectPath = FileSystem::GetParentPath(FileSystem::GetAbsolutePath(projectPath));
+            ASSERT(std::equal(projectPath.begin(), projectPath.end(), m_projectInfo.ProjectPath.begin(), m_projectInfo.ProjectPath.end(), 
+                [](const char a, const char b)
+                {
+                    return std::tolower(a) == std::tolower(b);
+                }));
+
             m_projectInfo.IsOpen = true;
 
             ValidateProjectFolder(m_projectInfo);

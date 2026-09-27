@@ -8,6 +8,7 @@
 #include "Threading/Task.h"
 #include "Threading/Thread.h"
 #include "Threading/SpinLock.h"
+#include "Threading/ScopedLock.h"
 
 #include <mutex>
 #include <queue>
@@ -46,6 +47,8 @@ namespace Insight
 					std::unique_lock lock(TaskSystem::Instance().m_mutex);
 					TaskSystem::Instance().m_queuedTasks.push(taskShared);
 					lock.unlock();
+
+					TaskSystem::Instance().m_queueCV.notify_one();
 				}
 				else
 				{
@@ -59,7 +62,8 @@ namespace Insight
 			static void ThreadWorker(ThreadData threadData);
 
 		private:
-			std::mutex m_mutex;
+			IS_PROFILE_LOCKABLE_NAME(std::mutex, m_mutex, "TaskSystemQueue");
+			std::condition_variable_any m_queueCV;
 			std::queue<std::shared_ptr<Task>> m_queuedTasks;
 			std::unordered_set<Task*> m_runningTasks;
 			std::vector<Thread> m_threads;
@@ -76,20 +80,9 @@ namespace Insight
 				return;
 			}
 
-			// Store all the start indexes to be completed.
-			std::vector<u32> startIdxs;
-			std::mutex startIdxsMutex;
 
+			std::atomic<u32> nextAvailableIdx = 0;
 			const u32 taskNum = IntDivideRoundUp(vecSize, workGroupSize);
-			for (u32 taskIdx = 1; taskIdx < taskNum; ++taskIdx)
-			{
-				startIdxs.push_back(workGroupSize * taskIdx);
-			}
-			// Don't add index 0 as the caller thread will handle this range (0->workGroupSize). This should mean that the caller thread
-			// "always" has some of the most amount of work to do so we aren't wasting a lot of time just waiting.
-			// The caller thread should have some of the highest amount of work to do other wise it will be waiting for worker threads. 
-			// Really we want the worker threads to have less work so they can finish early and then move onto other work which has been queued.
-			// startIdxs.push(0);
 
 			std::vector<std::shared_ptr<Task>> tasks;
 			tasks.reserve(taskNum);
@@ -102,21 +95,17 @@ namespace Insight
 				for (size_t threadIdx = 0; threadIdx < workerThreads; ++threadIdx)
 				{
 					// Kick off all our tasks. These will run on objects vec[0] + workGroupSize.
-					tasks.push_back(TaskSystem::Instance().CreateTask([&]()
+					tasks.push_back(TaskSystem::Instance().CreateTask([&func, &container, &nextAvailableIdx, name, vecSize, workGroupSize]()
 						{
 							IS_PROFILE_SCOPE("ParallelFor");
 							while (true)
 							{
-								u32 startIdx = 0;
+								const u32 startIdx = nextAvailableIdx.fetch_add(workGroupSize, std::memory_order_relaxed);
+								if (startIdx > vecSize)
 								{
-									std::lock_guard l(startIdxsMutex);
-									if (startIdxs.empty())
-									{
-										break;
-									}
-									startIdx = startIdxs.back();
-									startIdxs.pop_back();
+									break;
 								}
+
 								const u32 endIdx = std::min(startIdx + workGroupSize, vecSize);
 								IS_PROFILE_SCOPE_TEXT("ParallelFor - %s (%d)", name.data(), endIdx - startIdx);
 
@@ -129,25 +118,16 @@ namespace Insight
 				}
 			}
 
-			// Make sure the caller thread always does the items from 0->workGroupSize so it "should" have a "full"
-			// load of work.
-			bool completedIndexZero = false;
 			while (true)
 			{
 				IS_PROFILE_SCOPE("ParallelFor");
-				u32 startIdx = 0;
-				if (completedIndexZero)
+
+				const u32 startIdx = nextAvailableIdx.fetch_add(workGroupSize, std::memory_order_relaxed);
+				if (startIdx > vecSize)
 				{
-					std::lock_guard l(startIdxsMutex);
-					if (startIdxs.empty())
-					{
-						break;
-					}
-					startIdx = startIdxs.back();
-					startIdxs.pop_back();
+					break;
 				}
 
-				completedIndexZero = true;
 				const u32 endIdx = std::min(startIdx + workGroupSize, vecSize);
 				IS_PROFILE_SCOPE_TEXT("ParallelFor - %s (%d)", name.data(), endIdx - startIdx);
 

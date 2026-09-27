@@ -112,6 +112,15 @@ namespace Insight
                     if (ImGui::MenuItem("Skeletal Animations"))
                     {
                         Ref<Runtime::ModelAsset> model = Runtime::AssetRegistry::Instance().LoadAsset("Base/Models/New folder/dancing_stormtrooper/gltf/scene.gltf").As<Runtime::ModelAsset>();
+                        if (!model)
+                        {
+                            std::string file;
+                            PlatformFileDialog fileDialog;
+                            fileDialog.ShowLoad(&file, Runtime::ProjectSystem::Instance().GetProjectInfo().GetContentPath());
+
+                            model = Runtime::AssetRegistry::Instance().LoadAsset(file).As<Runtime::ModelAsset>();
+                        }
+
                         if (model)
                         {
                             for (size_t z = 0; z < gridSize; ++z)

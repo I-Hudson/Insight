@@ -741,7 +741,7 @@ namespace Insight::Runtime
         const IAssetImporter* importer = GetImporter(extension);
         if (importer == nullptr)
         {
-            //IS_LOG_CORE_ERROR("[AssetRegistry::LoadAsset] 'Importer' is nullptr for extension '{}'.", extension);
+            IS_LOG_CORE_ERROR("[AssetRegistry::LoadAsset] 'Importer' is nullptr for extension '{}'.", extension);
             return Ref<Asset>();
         }
 

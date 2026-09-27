@@ -165,6 +165,27 @@ namespace Insight
                 return (sin((1.0f - time) * angle) * *this + std::sin(time * angle) * z) / sin(angle);
             }
         }
+        Quaternion Quaternion::Nlerp(const Quaternion& q, const float time) const
+        {
+            float cosTheta = Dot(q);
+
+            // Shortest path check
+            float bias = (cosTheta < 0.0f) ? -1.0f : 1.0f;
+
+            // Standard Lerp using the bias to invert 'q' if necessary
+            float scale0 = 1.0f - time;
+            float scale1 = time * bias;
+
+            Quaternion result(
+                scale0 * this->w + scale1 * q.w,
+                scale0 * this->x + scale1 * q.x,
+                scale0 * this->y + scale1 * q.y,
+                scale0 * this->z + scale1 * q.z
+            );
+
+            // Fast normalization step to bring it back onto the unit sphere
+            return result.Normalised();
+        }
 
         Quaternion& Quaternion::operator=(const Quaternion& q)
         {

@@ -31,6 +31,7 @@ namespace Insight
         private:
             void CalculateBoneTransform(const u32 boneId, const Maths::Vector3 parentPosition, const Maths::Quaternion parentQuaternion, const Maths::Vector3 parentScale);
             void CalculateBoneTransform(const u32 boneId, const Maths::Matrix4 parentTransform);
+            Maths::Matrix4 ConstructBoneMatrix(const Maths::Vector4& position, const Maths::Quaternion& rotation, const Maths::Vector4& scale) const;
 #if ANIMATION_NODE_TRANSFORMS
             void CalculateBoneTransform(const AnimationNode* node, const Maths::Matrix4 parentTransform);
 #endif

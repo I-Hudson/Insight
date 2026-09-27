@@ -31,6 +31,9 @@ namespace Insight
 			IS_PROFILE_FUNCTION();
 
 			m_destroy = true;
+
+			m_queueCV.notify_all();
+
 			for (size_t i = 0; i < m_threads.size(); ++i)
 			{
 				m_threads.at(i).Join();
@@ -44,18 +47,26 @@ namespace Insight
 
 		bool TaskSystem::GetTask(std::shared_ptr<Task>& task)
 		{
-			std::lock_guard lock(m_mutex);
-			if (m_queuedTasks.size() > 0)
+			IS_PROFILE_FUNCTION();
+
+			std::unique_lock lock(m_mutex);
 			{
-				task = m_queuedTasks.front();
-				m_queuedTasks.pop();
-				m_runningTasks.insert(task.get());
-				return true;
+				IS_PROFILE_SCOPE("ThreadSleepWaitting");
+				m_queueCV.wait(lock, [this]()
+					{
+							return m_destroy || !m_queuedTasks.empty();
+					});
 			}
-			else
+
+			if (m_queuedTasks.empty())
 			{
 				return false;
 			}
+
+			task = m_queuedTasks.front();
+			m_queuedTasks.pop();
+			m_runningTasks.insert(task.get());
+			return true;
 		}
 
 		void TaskSystem::ThreadWorker(ThreadData threadData)
@@ -65,14 +76,16 @@ namespace Insight
 				std::shared_ptr<Task> task;
 				if (threadData.TaskSystem->GetTask(task))
 				{
-					task->Call();
+					{
+						IS_PROFILE_SCOPE("ExecuteTask");
+						task->Call();
+					}
 					{
 						std::lock_guard lock(threadData.TaskSystem->m_mutex);
 						threadData.TaskSystem->m_runningTasks.erase(task.get());
 					}
 					task.reset();
 				}
-				threadData.Thread->SleepFor(2);
 			}
 		}
 	}

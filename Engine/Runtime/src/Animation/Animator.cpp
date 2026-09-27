@@ -2,6 +2,8 @@
 #include "Core/Profiler.h"
 #include "Core/Asserts.h"
 
+#define OPTIMISE_MATRIX_MATHS 1
+
 namespace Insight
 {
     namespace Runtime
@@ -114,11 +116,23 @@ namespace Insight
             const SkeletonBone& bone = m_skelton->GetBone(boneId);
             ASSERT(bone);
 
+            Maths::Matrix4 boneTransform;
+            {
+                IS_PROFILE_SCOPE("BoneTransform");
+#if OPTIMISE_MATRIX_MATHS
+            const Maths::Vector4 bonePosition = InterpolatePositionVec(bone.Id);
+            const Maths::Quaternion boneRotation = InterpolateRotationQuat(bone.Id);
+            const Maths::Vector4 boneScale = InterpolateScaleVec(bone.Id);
+            
+            boneTransform = ConstructBoneMatrix(bonePosition, boneRotation, boneScale);
+#else
             const Maths::Matrix4 bonePositionMatrix = InterpolatePosition(boneId);
             const Maths::Matrix4 boneRotationMatrix = InterpolateRotation(boneId);
             const Maths::Matrix4 boneScaleMatrix = InterpolateScale(boneId);
-            const Maths::Matrix4 boneTransform = bonePositionMatrix * boneRotationMatrix * boneScaleMatrix;
-
+            
+            boneTransform = bonePositionMatrix * boneRotationMatrix * boneScaleMatrix;
+#endif
+            }
             const Maths::Matrix4 globalTransform = parentTransform * boneTransform;
 
             const Maths::Matrix4 boneOffsetTransform = m_skelton->GetGlobalInverseTransform() * globalTransform * bone.Offset;
@@ -129,6 +143,46 @@ namespace Insight
                 const u32 childBoneId = bone.ChildrenBoneIds[childBoneIdx];
                 CalculateBoneTransform(childBoneId, globalTransform);
             }
+        }
+
+        Maths::Matrix4 Animator::ConstructBoneMatrix(const Maths::Vector4& position, const Maths::Quaternion& rotation, const Maths::Vector4& scale) const
+        {
+            // 1. Calculate intermediate quaternion values
+            float x2 = rotation.x + rotation.x;
+            float y2 = rotation.y + rotation.y;
+            float z2 = rotation.z + rotation.z;
+
+            float xx = rotation.x * x2; float xy = rotation.x * y2; float xz = rotation.x * z2;
+            float yy = rotation.y * y2; float yz = rotation.y * z2; float zz = rotation.z * z2;
+            float wx = rotation.w * x2; float wy = rotation.w * y2; float wz = rotation.w * z2;
+
+            Maths::Matrix4 outMatrix;
+            // 2. Compute the scaled Basis Vectors (Columns 0, 1, 2)
+            // Column 0 (X-axis) * Scale.x
+            outMatrix[0][0] = (1.0f - (yy + zz)) * scale.x;
+            outMatrix[0][1] = (xy + wz) * scale.x;
+            outMatrix[0][2] = (xz - wy) * scale.x;
+            outMatrix[0][3] = 0.0f;
+
+            // Column 1 (Y-axis) * Scale.y
+            outMatrix[1][0] = (xy - wz) * scale.y;
+            outMatrix[1][1] = (1.0f - (xx + zz)) * scale.y;
+            outMatrix[1][2] = (yz + wx) * scale.y;
+            outMatrix[1][3] = 0.0f;
+
+            // Column 2 (Z-axis) * Scale.z
+            outMatrix[2][0] = (xz + wy) * scale.z;
+            outMatrix[2][1] = (yz - wx) * scale.z;
+            outMatrix[2][2] = (1.0f - (xx + yy)) * scale.z;
+            outMatrix[2][3] = 0.0f;
+
+            // 3. Insert Position directly into Column 3 (Translation)
+            outMatrix[3][0] = position.x;
+            outMatrix[3][1] = position.y;
+            outMatrix[3][2] = position.z;
+            outMatrix[3][3] = 1.0f; // or pos.w if you explicitly track it
+
+            return outMatrix;
         }
 
 #if ANIMATION_NODE_TRANSFORMS

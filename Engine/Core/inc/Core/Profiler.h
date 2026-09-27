@@ -21,6 +21,8 @@ namespace Insight
 	#define IS_PROFILE_FRAME(frame_name)	OPTICK_FRAME(frame_name)
 	#define IS_PROFILE_THREAD(name)			OPTICK_THREAD(name)
 	#define IS_PROFILE_SCOPE_TEXT(format, ...)
+	#define IS_PROFILE_LOCKABLE(type, object)
+	#define IS_PROFILE_LOCKABLE_NAME(type, object, name)
 
 #elif defined(IS_PROFILE_TRACY)
 #ifndef TRACY_ENABLE
@@ -36,6 +38,9 @@ namespace Insight
 	#define IS_PROFILE_THREAD(name)			::tracy::SetThreadName(name);
 	#define IS_PROFILE_SCOPE_TEXT(format, ...)	ZoneTextF(format, __VA_ARGS__)
 
+	#define IS_PROFILE_LOCKABLE(type, object) TracyLockable(type, object)
+	#define IS_PROFILE_LOCKABLE_NAME(type, object, name) TracyLockableN(type, object, name)
+
 #elif defined(IS_PROFILE_PIX)
 #define WIN32_LEAN_AND_MEAN
 	#include <Windows.h>
@@ -45,6 +50,8 @@ namespace Insight
 	#define IS_PROFILE_FRAME(frame_name)	PIXScopedEvent(PIX_COLOR_DEFAULT, frame_name)
 	#define IS_PROFILE_THREAD(name)
 	#define IS_PROFILE_SCOPE_TEXT(format, ...)
+	#define IS_PROFILE_LOCKABLE(type, object)
+	#define IS_PROFILE_LOCKABLE_NAME(type, object, name)
 
 #else
 	#define IS_PROFILE_FUNCTION()		
@@ -52,6 +59,8 @@ namespace Insight
 	#define IS_PROFILE_FRAME(frame_name)
 	#define IS_PROFILE_THREAD(name)
 	#define IS_PROFILE_SCOPE_TEXT(format, ...)
+	#define IS_PROFILE_LOCKABLE(type, object, name) type object
+	#define IS_PROFILE_LOCKABLE_NAME(type, object, name) type object
 
 #endif
 #else
@@ -60,4 +69,6 @@ namespace Insight
 #define IS_PROFILE_FRAME(frame_name)
 #define IS_PROFILE_THREAD(name)
 #define IS_PROFILE_SCOPE_TEXT(format, ...)
+#define IS_PROFILE_LOCKABLE(type, object, name) type object
+#define IS_PROFILE_LOCKABLE_NAME(type, object, name) type object
 #endif

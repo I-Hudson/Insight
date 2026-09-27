@@ -51,6 +51,7 @@ namespace Insight
 
             float Dot(const Quaternion& q) const;
             Quaternion Slerp(const Quaternion& q, const float time) const;
+            Quaternion Nlerp(const Quaternion& q, const float time) const;
 
             Quaternion& operator=(const Quaternion& q);
 
