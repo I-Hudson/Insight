@@ -24,16 +24,29 @@
 
 #include "Editor/EditorStyles.h"
 #include <imgui.h>
+#include <misc/cpp/imgui_stdlib.h>
 
 namespace Insight
 {
     namespace Editor
     {
+        struct
+        {
+            bool ShowModal = false;
+            std::string ModelPath;
+            Ref<Runtime::ModelAsset> Model;
+            int Amount = 1;
+
+        } benchmarkAnimations;
+
         MenuBar::MenuBar()
-        { }
+        {
+        }
 
         MenuBar::~MenuBar()
-        { }
+        {
+            benchmarkAnimations = {};
+        }
 
         void MenuBar::Initialise(EditorWindowManager* editorWindowManager)
         {
@@ -43,6 +56,10 @@ namespace Insight
         void MenuBar::Draw()
         {
             IS_PROFILE_FUNCTION();
+
+            static int benchmarkIndex = 0;
+            const float space = 2;
+            const i64 gridSize = 10;
 
             if (ImGui::BeginMainMenuBar())
             {
@@ -68,14 +85,14 @@ namespace Insight
                         std::string item;
                         PlatformFileDialog fileDialog;
                         fileDialog.ShowLoad(&item, Runtime::ProjectSystem::Instance().GetProjectInfo().GetProjectFilePath(),
-                            { 
+                            {
                                 FileDialogFilter{ L"Project", L"*.isproject"},
                             });
                         Runtime::ProjectSystem::Instance().OpenProject(item);
                     }
 
                     WorldItems();
-                    
+
                     DrawAllRegisteredWindow(EditorWindowCategories::File);
                     ImGui::EndMenu();
                 }
@@ -103,45 +120,18 @@ namespace Insight
                 }
                 if (ImGui::BeginMenu("Benchmark"))
                 {
-                    static int benchmarkIndex = 0;
-                    const float space = 2;
-                    const i64 gridSize = 10;
-                    const float offsetX = static_cast<float>((benchmarkIndex % gridSize) * (gridSize * 2));
-                    const float offsetZ = static_cast<float>((benchmarkIndex / gridSize)* (gridSize * 2));
+
 
                     if (ImGui::MenuItem("Skeletal Animations"))
                     {
-                        Ref<Runtime::ModelAsset> model = Runtime::AssetRegistry::Instance().LoadAsset("Base/Models/New folder/dancing_stormtrooper/gltf/scene.gltf").As<Runtime::ModelAsset>();
-                        if (!model)
-                        {
-                            std::string file;
-                            PlatformFileDialog fileDialog;
-                            fileDialog.ShowLoad(&file, Runtime::ProjectSystem::Instance().GetProjectInfo().GetContentPath());
-
-                            model = Runtime::AssetRegistry::Instance().LoadAsset(file).As<Runtime::ModelAsset>();
-                        }
-
-                        if (model)
-                        {
-                            for (size_t z = 0; z < gridSize; ++z)
-                            {
-                                for (size_t x = 0; x < gridSize; ++x)
-                                {
-                                    const float xPos = offsetX + ((0.0f - (gridSize * 0.5f)) + (space * x));
-                                    const float zPos = offsetZ + ((0.0f - (gridSize * 0.5f)) + (space * z));
-                                    Maths::Vector3 position(xPos, 0.0f, zPos);
-                                    ECS::Entity* e = model->CreateEntityHierarchy();
-                                    e->GetComponent<ECS::TransformComponent>()->SetPosition(position);
-                                }
-                            }
-                            ++benchmarkIndex;
-                        }
+                        benchmarkAnimations.ShowModal = true;
                     }
                     else if (ImGui::MenuItem("Static Mesh"))
                     {
                         Ref<Runtime::ModelAsset> model = Runtime::AssetRegistry::Instance().LoadAsset("Base/Models/New folder/dancing_stormtrooper/gltf/scene.gltf").As<Runtime::ModelAsset>();
-                        const float space = 2;
-                        const i64 gridSize = 10;
+
+                        const float offsetX = static_cast<float>((benchmarkIndex % gridSize) * (gridSize * 2));
+                        const float offsetZ = static_cast<float>((benchmarkIndex / gridSize) * (gridSize * 2));
                         for (size_t z = 0; z < gridSize; ++z)
                         {
                             for (size_t x = 0; x < gridSize; ++x)
@@ -160,6 +150,57 @@ namespace Insight
                 EditorStylesMenu();
                 DrawProfileMenu();
                 ImGui::EndMainMenuBar();
+
+                if (benchmarkAnimations.ShowModal)
+                {
+                    ImGui::OpenPopup("Benchmark Animations");
+                }
+
+                if (ImGui::BeginPopupModal("Benchmark Animations", &benchmarkAnimations.ShowModal))
+                {
+                    ImGui::Text("Model Path: %s", benchmarkAnimations.ModelPath.c_str());
+                    ImGui::SameLine();
+                    if (ImGui::Button("Select"))
+                    {
+                        PlatformFileDialog fileDialog;
+                        fileDialog.ShowLoad(&benchmarkAnimations.ModelPath, Runtime::ProjectSystem::Instance().GetProjectInfo().GetContentPath());
+
+                        benchmarkAnimations.Model = Insight::Runtime::AssetRegistry::Instance().LoadAsset(benchmarkAnimations.ModelPath).As<Runtime::ModelAsset>();
+                        if (!benchmarkAnimations.Model)
+                        {
+                            benchmarkAnimations.ModelPath.clear();
+                        }
+                    }
+
+                    ImGui::InputInt("Amount", &benchmarkAnimations.Amount);
+                    benchmarkAnimations.Amount = std::clamp(benchmarkAnimations.Amount, 1, 100);
+
+                    if (ImGui::Button("Import") && benchmarkAnimations.Model)
+                    {
+                        for (size_t i = 0; i < benchmarkAnimations.Amount; i++)
+                        {
+                            const float offsetX = static_cast<float>((benchmarkIndex % gridSize) * (gridSize * 2));
+                            const float offsetZ = static_cast<float>((benchmarkIndex / gridSize) * (gridSize * 2));
+
+                            for (size_t z = 0; z < gridSize; ++z)
+                            {
+                                for (size_t x = 0; x < gridSize; ++x)
+                                {
+                                    const float xPos = offsetX + ((0.0f - (gridSize * 0.5f)) + (space * x));
+                                    const float zPos = offsetZ + ((0.0f - (gridSize * 0.5f)) + (space * z));
+                                    Maths::Vector3 position(xPos, 0.0f, zPos);
+                                    ECS::Entity* e = benchmarkAnimations.Model->CreateEntityHierarchy();
+                                    e->GetComponent<ECS::TransformComponent>()->SetPosition(position);
+                                }
+                            }
+                            ++benchmarkIndex;
+                        }
+
+                        benchmarkAnimations.ShowModal = false;
+                    }
+
+                    ImGui::EndPopup();
+                }
 
                 m_fileDialog.Update();
             }

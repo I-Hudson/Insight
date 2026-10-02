@@ -82,6 +82,20 @@ namespace Insight
         Cameras.push_back(RenderCamera{ std::move(camera), std::move(transform), true });
     }
 
+    void RenderWorld::Clear()
+    {
+        MeshesCount = 0;
+        Meshes = {};
+
+        Cameras = {};
+        PointLights = {};
+        DirectionalLights = {};
+        OpaqueMeshIndexs = {};
+        TransparentMeshIndexs = {};
+        MaterialBatch = {};
+        MaterialBatchLookup = {};
+    }
+
     //=====================================================
     // RenderFrame
     //=====================================================
@@ -91,6 +105,7 @@ namespace Insight
 
     RenderFrame::~RenderFrame()
     {
+        RenderWorlds = {};
     }
 
     void RenderFrame::CreateRenderFrameFromWorldSystem(Runtime::WorldSystem* worldSystem)
@@ -108,9 +123,14 @@ namespace Insight
                 continue;
             }
 
-            RenderWorld renderWorld;
+            if (RenderWorlds.size() == RenderWorldsCount)
+            {
+                RenderWorlds.push_back(RenderWorld());
+            }
+
+            RenderWorld& renderWorld = RenderWorlds[RenderWorldsCount++];
             std::vector<Ptr<ECS::Entity>> entities = world->GetAllEntitiesFlatten();
-            renderWorld.Meshes.reserve(entities.size());
+            renderWorld.Meshes.resize(entities.size());
 
             std::vector<Ptr<ECS::Entity>> cameraEntities = world->GetAllEntitiesWithComponentByName(ECS::CameraComponent::Type_Name);
             for (Ptr<ECS::Entity>& entity : cameraEntities)
@@ -182,7 +202,8 @@ namespace Insight
 #endif
                         }
 
-                        RenderMesh renderMesh;
+
+                        RenderMesh& renderMesh = renderWorld.Meshes[renderWorld.MeshesCount++];
                         renderMesh.EntityGuid = entity->GetGUID();
                         {
                             IS_PROFILE_SCOPE("Set Transforms");
@@ -248,8 +269,8 @@ namespace Insight
 
                         {
                             std::lock_guard l(renderWorldMutex);
-                            u64 meshIndex = meshIndex = renderWorld.Meshes.size();
-                            renderWorld.Meshes.push_back(std::move(renderMesh));
+                            u64 meshIndex = meshIndex = renderWorld.MeshesCount - 1;
+                            //renderWorld.Meshes.push_back(std::move(renderMesh));
 
                             if (auto materialBatchIter = renderWorld.MaterialBatchLookup.find(material->GetGuid());
                                 materialBatchIter != renderWorld.MaterialBatchLookup.end())
@@ -333,7 +354,8 @@ namespace Insight
 #else
                 }
 #endif
-            RenderWorlds.push_back(std::move(renderWorld));
+
+                renderWorld.Meshes.resize(renderWorld.MeshesCount);
         }
 
         SortOpaqueMeshes();
@@ -348,7 +370,12 @@ namespace Insight
 
     void RenderFrame::Clear()
     {
-        RenderWorlds.clear();
+        //RenderWorlds.clear();
+        for (size_t i = 0; i < RenderWorlds.size(); ++i)
+        {
+            RenderWorlds[i].Clear();
+        }
+        RenderWorldsCount = 0;
         MainCamera = {};
         MainCamera.Transform = Maths::Matrix4::Zero;
     }

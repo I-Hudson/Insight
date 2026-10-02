@@ -776,6 +776,8 @@ namespace Insight
         void SetMainCamera(ECS::Camera mainCamera, const Maths::Matrix4 transform);
         void AddCamrea(ECS::Camera camera, const Maths::Matrix4 transform);
 
+        void Clear();
+
         /// @brief The main rendering camera for this world.
         RenderCamera MainCamera;
         /// @brief Addition cameras within the world.
@@ -783,6 +785,7 @@ namespace Insight
 
         /// @brief All meshes within the world.
         std::vector<RenderMesh> Meshes;
+        u32 MeshesCount = 0;
 
         std::vector<RenderPointLight> PointLights;
         std::vector<RenderDirectionalLight> DirectionalLights;
@@ -804,6 +807,7 @@ namespace Insight
         ~RenderFrame();
 
         std::vector<RenderWorld> RenderWorlds;
+        int RenderWorldsCount = 0;
         /// @brief The main rendering camera for all render worlds.
         RenderCamera MainCamera;
 
