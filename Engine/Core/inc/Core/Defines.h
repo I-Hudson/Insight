@@ -46,6 +46,7 @@
 #define THREAD_SAFE
 
 #if defined(__clang__)
+#define C_PLUS_PLUS_STANDARD 00
 #define CLANG_COMPILER 1
 #define DLLEXPORT __attribute__ ((__visibility__ ("default")))
 #define DLLIMPORT
@@ -78,6 +79,7 @@
 #pragma clang diagnostic ignored "-Winvalid-noreturn"
 
 #elif defined(__GNUC__)
+#define C_PLUS_PLUS_STANDARD 00
 #define GCC_COMPILER 1
 #define DLLEXPORT __attribute__ ((__visibility__ ("default")))
 #define DLLIMPORT
@@ -99,6 +101,7 @@
 
 #elif defined(__INTEL_COMPILER)
 
+#define C_PLUS_PLUS_STANDARD 00
 #define DLLEXPORT ??
 #define DLLIMPORT ??
 #if _WIN32
@@ -127,6 +130,8 @@
 #if _MSC_VER < 1900
 #error "Required Visual Studio 2015 or newer."
 #endif
+
+#define C_PLUS_PLUS_STANDARD _MSVC_LANG
 
 #ifndef COMPILER_DEFINES
 #define COMPILER_DEFINES
@@ -184,5 +189,8 @@
 #pragma error "Unknown compiler."
 
 #endif
+
+static_assert(C_PLUS_PLUS_STANDARD != 00
+	, "'C_PLUS_PLUS_STANDARD' define hasn't been set. It must be set to a valid value.");
 
 #pragma warning( disable : 4251 )
