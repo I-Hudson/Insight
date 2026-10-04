@@ -168,6 +168,8 @@ namespace Insight
 
 		bool Window::Init(Input::InputSystem* inputSystem, bool startHidden, int width, int height, std::string title)
 		{
+			IS_PROFILE_FUNCTION();
+
 			m_inputSystem = inputSystem;
 
 			if (m_glfwInit)

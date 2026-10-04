@@ -108,6 +108,8 @@ namespace Insight
             Graphics::RHI_Buffer* RHI_VertexBuffer = nullptr;
 #endif
             std::vector<Graphics::RHI_Buffer*> RHI_IndexBuffers;
+        
+            std::vector<std::function<void()>> Materials;
         };
 
         class ModelImporter : public IAssetImporter
@@ -125,7 +127,7 @@ namespace Insight
             void ProcessNode(const aiScene* aiScene, const aiNode* aiNode, ModelAsset* modelAsset, ModelNode& modelNode) const;
             void ProcessMesh(const aiScene* aiScene, const aiNode* aiNode, const aiMesh* aiMesh, ModelAsset* modelAsset, ModelNode& modelNode) const;
             void ParseMeshData(const aiScene* aiScene, const aiNode* aiNode, const aiMesh* aiMesh, MeshData& meshData, ModelAsset* modelAsset, ModelNode& modelNode) const;
-            Ref<MaterialAsset> ProcessMaterial(const aiScene* aiScene, const aiNode* aiNode, const aiMaterial* aiMaterial, ModelAsset* modelAsset) const;
+            Ref<MaterialAsset> ProcessMaterial(const aiScene* aiScene, const aiNode* aiNode, const aiMaterial* aiMaterial, ModelAsset* modelAsset, ModelNode& modelNode) const;
             
             Ref<TextureAsset> LoadTexture(const aiScene* assimpScene, const aiMaterial* assimpMaterial, const aiTextureType PBRType, const aiTextureType legacyType, ModelAsset* modelAsset) const;
             Ref<AssetAsyncRequest> LoadTextureAsync(const aiScene* assimpScene, const aiMaterial* assimpMaterial, const aiTextureType PBRType, const aiTextureType legacyType, ModelAsset* modelAsset) const;

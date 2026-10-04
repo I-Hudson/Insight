@@ -29,7 +29,7 @@ namespace Insight
 
         void AssetAsyncRequest::Wait() const
         {
-            if (!m_requestState->IsReady)
+            if (!IsReady())
             {
                 std::unique_lock lk(m_cvLock);
                 m_cv.wait(lk, [this]() { return IsReady(); });
@@ -39,8 +39,8 @@ namespace Insight
         void AssetAsyncRequest::SetIsReady()
         {
             ASSERT(m_requestState);
-            m_requestState->IsReady = true;
-            m_cv.notify_one();
+            m_requestState->IsReady.store(true, std::memory_order_release);
+            m_cv.notify_all();
         }
 
         AssetAsyncRequest& AssetAsyncRequest::operator=(AssetAsyncRequest&& other)
@@ -57,12 +57,17 @@ namespace Insight
         bool AssetAsyncRequest::IsReady() const
         {
             ASSERT(m_requestState);
-            return m_requestState->IsReady;
+            return m_requestState->IsReady.load(std::memory_order_acquire);
         }
 
         Ref<Asset> AssetAsyncRequest::GetAsset() const
         {
-            return m_asset;
+            if (m_requestState->IsReady.load(std::memory_order_acquire))
+            {
+                return m_asset;
+            }
+
+            return Ref<Asset>();
         }
     }
 }

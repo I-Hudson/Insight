@@ -445,6 +445,14 @@ namespace Insight
 
 			ProcessNode(scene, scene->mRootNode, modelAsset.Ptr(), modelNode);
 			ProcessAnimations(scene, modelAsset.Ptr());
+
+			// We store callable function for the mateiral to be called later. This allows us to load all the textures for all the matierals
+			// async, then call the callable here to set them.
+			for (size_t i = 0; i < modelNode.Materials.size(); ++i)
+			{
+				std::function<void()> materialFunc = modelNode.Materials[i];
+				materialFunc();
+			}
 #else
 			std::unordered_map<const aiMaterial*, Ref<MaterialAsset>> materialCache;
 
@@ -812,7 +820,7 @@ namespace Insight
 			if (aiScene->HasMaterials())
 			{
 				const aiMaterial* aiMaterial = aiScene->mMaterials[aiMesh->mMaterialIndex];
-				Ref<MaterialAsset> material = ProcessMaterial(aiScene, aiNode, aiMaterial, modelAsset);
+				Ref<MaterialAsset> material = ProcessMaterial(aiScene, aiNode, aiMaterial, modelAsset, modelNode);
 
 				modelAsset->m_materials.push_back(material);
 				mesh->SetMaterial(material);
@@ -918,7 +926,7 @@ namespace Insight
 					static_cast<u32>(meshData.Indices.size())));
 		}
 
-		Ref<MaterialAsset> ModelImporter::ProcessMaterial(const aiScene* aiScene, const aiNode* aiNode, const aiMaterial* aiMaterial, ModelAsset* modelAsset) const
+		Ref<MaterialAsset> ModelImporter::ProcessMaterial(const aiScene* aiScene, const aiNode* aiNode, const aiMaterial* aiMaterial, ModelAsset* modelAsset, ModelNode& modelNode) const
 		{
 			IS_PROFILE_FUNCTION();
 
@@ -959,14 +967,27 @@ namespace Insight
 
 			const auto Load_Texture = [&](const TextureAssetTypes textureType, const aiTextureType legacyType, const aiTextureType pbrType)
 				{
+					Ref<AssetAsyncRequest> materialAsset = loadedTexturesAsync[textureType];
+					Ref<MaterialAsset> modelMaterial = material;
+
+					modelNode.Materials.push_back([aiScene, aiMaterial, modelAsset, textureType, legacyType, pbrType, materialAsset, modelMaterial, this]()
+						{
+							IS_PROFILE_SCOPE("Get textued loaded async");
 #if AYNSC_TEXTURE_LOAD
-					loadedTexturesAsync[textureType]->Wait();
-					if (nullptr != loadedTexturesAsync[textureType]->GetAsset())
+							{
+								IS_PROFILE_SCOPE("Waiting on Texture to load");
+								materialAsset->Wait();
+							}
+							if (nullptr != materialAsset->GetAsset())
 #else
 #endif
-					{
-						material->SetTexture(textureType, LoadTexture(aiScene, aiMaterial, legacyType, pbrType, modelAsset));
-					}
+							{
+								RemoveConst(modelMaterial)->SetTexture(textureType, LoadTexture(aiScene, aiMaterial, legacyType, pbrType, modelAsset));
+							}
+						});
+
+
+					
 				};
 
 			Load_Texture(TextureAssetTypes::Diffuse, aiTextureType::aiTextureType_BASE_COLOR, aiTextureType::aiTextureType_DIFFUSE);

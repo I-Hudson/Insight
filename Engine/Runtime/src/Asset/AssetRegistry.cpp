@@ -190,7 +190,7 @@ namespace Insight::Runtime
 
         IAssetPackage* package = GetAssetPackageFromAsset(info);
         if (package)
-        { 
+        {
             package->RemoveAsset(info);
         }
 
@@ -208,32 +208,32 @@ namespace Insight::Runtime
         {
             return;
         }
-    
+
         Serialisation::BinarySerialiser binarySerialiser(false);
         Serialisation::JsonSerialiser jsonSerialiser(false);
-    
+
         AssetMetaData* metaData = assetInfo->MetaData;
-        ASSERT(metaData)
-    
+        ASSERT(metaData);
+
         metaData->Serialise(&binarySerialiser);
         if (object)
         {
             //object->Serialise(&binarySerialiser);
         }
-    
+
         metaData->Serialise(&jsonSerialiser);
         if (object)
         {
             //object->Serialise(&jsonSerialiser);
         }
-    
-        ASSERT(FileSystem::SaveToFile(binarySerialiser.GetSerialisedData(), assetInfo->GetFullFilePath() + AssetMetaData::c_FileExtension,FileType::Binary, true));
-    
+
+        ASSERT(FileSystem::SaveToFile(binarySerialiser.GetSerialisedData(), assetInfo->GetFullFilePath() + AssetMetaData::c_FileExtension, FileType::Binary, true));
+
         if (!m_debugMetaFileDirectory.empty())
         {
             std::string assetPathRelativeToContent = FileSystem::GetRelativePath(assetInfo->GetFullFilePath(), m_assetReativeBaseDirectory);
             ASSERT(FileSystem::SaveToFile(jsonSerialiser.GetSerialisedData(), m_debugMetaFileDirectory + "/" + assetPathRelativeToContent + AssetMetaData::c_FileExtension, true));
-    
+
         }
     }
 
@@ -296,13 +296,28 @@ namespace Insight::Runtime
 
     Ref<AssetAsyncRequest> AssetRegistry::LoadAssetAsync(std::string path)
     {
-        Ref<AssetAsyncRequest> request =  Ref<AssetAsyncRequest>(::New<AssetAsyncRequest>(Ref<Asset>()));
+        Threading::ScopedLock l(m_assetAsyncRequestsLock);
+        const u64 hash = Algorithm::GetHash64(path);
+        if (auto iter = m_assetAsyncRequests.find(hash);
+            iter != m_assetAsyncRequests.end())
+        {
+            return iter->second;
+        }
 
-        Threading::TaskSystem::Instance().CreateTask([this, path, request]() mutable
+        Ref<AssetAsyncRequest> request = Ref<AssetAsyncRequest>(::New<AssetAsyncRequest>(Ref<Asset>()));
+        m_assetAsyncRequests[hash] = request;
+        l.Unlock();
+
+        Threading::TaskSystem::Instance().CreateTask([this, path, request, hash]() mutable
             {
+                IS_PROFILE_SCOPE("LoadAssetAsync");
                 Ref<Asset> loadedAsset = LoadAsset(path);
                 request->m_asset = std::move(loadedAsset);
                 request->SetIsReady();
+
+                Threading::ScopedLock l(m_assetAsyncRequestsLock);
+                ASSERT(Algorithm::GetHash64(path) == hash);
+                m_assetAsyncRequests.erase(hash);
             });
 
         return request;
@@ -556,7 +571,7 @@ namespace Insight::Runtime
     IAssetPackage* AssetRegistry::GetAssetPackageFromAsset(const AssetInfo* assetInfo) const
     {
         std::lock_guard lock(m_assetPackagesLock);
-        for (IAssetPackage* package: m_assetPackages)
+        for (IAssetPackage* package : m_assetPackages)
         {
             if (package && package->HasAsset(assetInfo))
             {
@@ -625,7 +640,7 @@ namespace Insight::Runtime
 
         IAssetPackage* newPackage = nullptr;
 
-        switch(packageType)
+        switch (packageType)
         {
         case AssetPackageType::FileSystem:
             newPackage = New<AssetPackageFileSystem>(path, name);
@@ -642,9 +657,9 @@ namespace Insight::Runtime
             serialiserObject.MetaDataEnabled = false;
             serialiserObject.Deserialise(&serialiser, *static_cast<AssetPackageZip*>(newPackage));
 
-            break;   
+            break;
         }
-        
+
         {
             std::lock_guard lock(m_assetPackagesLock);
             m_assetPackages.push_back(newPackage);
@@ -656,7 +671,7 @@ namespace Insight::Runtime
     {
         return GetAssetInfo(guid) != nullptr;
     }
-    
+
     bool AssetRegistry::HasAssetFromPath(std::string_view path) const
     {
         return GetAssetInfo(std::string(path)) != nullptr;
@@ -703,7 +718,7 @@ namespace Insight::Runtime
             {
                 newPath += '/';
             }
-            
+
             newPath += path;
             path = newPath;
         }

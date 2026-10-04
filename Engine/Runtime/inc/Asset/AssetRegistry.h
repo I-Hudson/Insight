@@ -114,7 +114,6 @@ namespace Insight
 
             bool AssetInfoValidate(const AssetInfo* assetInfo) const;
 
-
         protected:
             /// @brief Store all asset infos here, then give pointers to the packages which they are included in.
             /// This unordered_map acts as the owner all of the pointers.
@@ -129,6 +128,9 @@ namespace Insight
 
             mutable std::mutex m_assetToObjectGuid;
             std::unordered_map<Core::GUID, std::unordered_set<const IObject*>> m_assetToObjects;
+
+            Threading::SpinLock m_assetAsyncRequestsLock;
+            std::unordered_map<u64, Ref<AssetAsyncRequest>> m_assetAsyncRequests;
 
             //std::unordered_map<Core::GUID, AssetInfo*> m_guidToAssetInfoLookup;
             //std::unordered_map<std::string, Core::GUID> m_pathToGuidLookup;

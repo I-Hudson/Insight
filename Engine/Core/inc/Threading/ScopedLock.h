@@ -18,6 +18,16 @@ namespace Insight
                 m_lock.unlock();
             }
 
+            void Lock()
+            {
+                m_lock.lock();
+            }
+
+            void Unlock()
+            {
+                m_lock.unlock();
+            }
+
         private:
             TLock& m_lock;
         };

@@ -116,6 +116,8 @@ namespace Insight
 
 		void GraphicsSystem::InitialiseRenderContext(Graphics::GraphicsAPI graphicsAPI)
 		{
+			IS_PROFILE_FUNCTION();
+
 			m_context = Graphics::RenderContext::New(graphicsAPI);
 
 			Graphics::RenderContextDesc renderContextDesc = {};

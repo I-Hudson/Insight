@@ -67,7 +67,7 @@ cd "%vendorPath%/tracy"
 if "%cleanRepos%" == "true" (
     git clean -fxd build/CMakeCache.txt build/CMakeFiles
 )
-call cmake -S "./" -B "build" -G !cmakeGenerator! -A %cmakeArch% -D TRACY_STATIC=OFF -D TRACY_ON_DEMAND=ON
+call cmake -S "./" -B "build" -G !cmakeGenerator! -A %cmakeArch% -D TRACY_STATIC=OFF -D TRACY_ON_DEMAND=ON TRACY_ENABLE=ON
 cd "%currentDirectory%"
 call "../Engine/Build_Solution.bat" "%vendorPath%/tracy/build/Tracy.sln" !vsVersion! Build Debug x64
 call "../Engine/Build_Solution.bat" "%vendorPath%/tracy/build/Tracy.sln" !vsVersion! Build Release x64

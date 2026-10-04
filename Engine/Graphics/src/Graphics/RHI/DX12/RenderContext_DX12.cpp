@@ -64,6 +64,8 @@ namespace Insight
 
 			bool RenderContext_DX12::Init(RenderContextDesc desc)
 			{
+				IS_PROFILE_FUNCTION();
+
 				m_desc = desc;
 				UINT dxgiFactoryFlags = 0;
 
@@ -100,11 +102,14 @@ namespace Insight
 
 				FindPhysicalDevice(m_physicalDevice.GetPhysicalDevice().GetAddressOf());
 				
-				ThrowIfFailed(D3D12CreateDevice(
-					m_physicalDevice.GetPhysicalDevice().Get(),
-					m_d3dFeatureLevel,
-					IID_PPV_ARGS(&m_device)
-				));
+				{
+					IS_PROFILE_SCOPE("D3D12CreateDevice");
+					ThrowIfFailed(D3D12CreateDevice(
+						m_physicalDevice.GetPhysicalDevice().Get(),
+						m_d3dFeatureLevel,
+						IID_PPV_ARGS(&m_device)
+					));
+				}
 
 				if (!m_desc.GPUValidation && !RenderDocAPI::Instance().IsInitialised())
 				{
@@ -120,12 +125,15 @@ namespace Insight
 				m_d3d12maAllocationCallbacks.pAllocate = D3D12Allocate;
 				m_d3d12maAllocationCallbacks.pFree = D3D12Free;
 
-				D3D12MA::ALLOCATOR_DESC d3d12MA_AllocatorDesc = {};
-				d3d12MA_AllocatorDesc.Flags = D3D12MA_RECOMMENDED_ALLOCATOR_FLAGS | D3D12MA::ALLOCATOR_FLAG_DONT_USE_TIGHT_ALIGNMENT;
-				d3d12MA_AllocatorDesc.pDevice = m_device.Get();
-				d3d12MA_AllocatorDesc.pAdapter = m_physicalDevice.GetPhysicalDevice().Get();
-				d3d12MA_AllocatorDesc.pAllocationCallbacks = &m_d3d12maAllocationCallbacks;
-				ThrowIfFailed(D3D12MA::CreateAllocator(&d3d12MA_AllocatorDesc, &m_d3d12MA));
+				{
+					IS_PROFILE_SCOPE("Setup D3D12MA");
+					D3D12MA::ALLOCATOR_DESC d3d12MA_AllocatorDesc = {};
+					d3d12MA_AllocatorDesc.Flags = D3D12MA_RECOMMENDED_ALLOCATOR_FLAGS | D3D12MA::ALLOCATOR_FLAG_DONT_USE_TIGHT_ALIGNMENT;
+					d3d12MA_AllocatorDesc.pDevice = m_device.Get();
+					d3d12MA_AllocatorDesc.pAdapter = m_physicalDevice.GetPhysicalDevice().Get();
+					d3d12MA_AllocatorDesc.pAllocationCallbacks = &m_d3d12maAllocationCallbacks;
+					ThrowIfFailed(D3D12MA::CreateAllocator(&d3d12MA_AllocatorDesc, &m_d3d12MA));
+				}
 
 				RHI_Buffer_Overrides bufferOverrides;
 				bufferOverrides.AllowUnorderedAccess = true;
@@ -217,27 +225,33 @@ namespace Insight
 				m_pipelineLayoutManager.SetRenderContext(this);
 				m_pipelineManager.SetRenderContext(this);
 
-				m_commandListManager.ForEach([this](CommandListManager& manager)
-					{
-						manager.Create(this);
-					});
-
-				m_submitFrameContexts.Setup();
-				m_submitFrameContexts.ForEach([this](FrameSubmitContext_DX12& context)
-					{
-						ThrowIfFailed(m_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&context.SubmitFence)));
-						context.SubmitFenceValue = 0;
-						context.SubmitFenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
-						if (context.SubmitFence == nullptr)
+				{
+					IS_PROFILE_SCOPE("Setup CommandList Managers");
+					m_commandListManager.ForEach([this](CommandListManager& manager)
 						{
-							ThrowIfFailed(HRESULT_FROM_WIN32(GetLastError()));
-						}
+								manager.Create(this);
+						});
+				}
 
-						context.DescriptorHeapGPURes.SetRenderContext(this);
-						context.DescriptorHeapGPURes.Create(DescriptorHeapTypes::CBV_SRV_UAV, 100000, "CBV_SRV_UAV_HEAP");
-						context.DescriptorHeapSampler.SetRenderContext(this);
-						context.DescriptorHeapSampler.Create(DescriptorHeapTypes::Sampler, 2048, "SAMPLER_HEAP");
-					});
+				{
+					IS_PROFILE_SCOPE("Setup Submit Frame Contexts");
+					m_submitFrameContexts.Setup();
+					m_submitFrameContexts.ForEach([this](FrameSubmitContext_DX12& context)
+						{
+								ThrowIfFailed(m_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&context.SubmitFence)));
+								context.SubmitFenceValue = 0;
+								context.SubmitFenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+								if (context.SubmitFence == nullptr)
+								{
+									ThrowIfFailed(HRESULT_FROM_WIN32(GetLastError()));
+								}
+
+								context.DescriptorHeapGPURes.SetRenderContext(this);
+								context.DescriptorHeapGPURes.Create(DescriptorHeapTypes::CBV_SRV_UAV, 100000, "CBV_SRV_UAV_HEAP");
+								context.DescriptorHeapSampler.SetRenderContext(this);
+								context.DescriptorHeapSampler.Create(DescriptorHeapTypes::Sampler, 2048, "SAMPLER_HEAP");
+						});
+				}
 
 				m_submitFenceValues.Setup();
 				m_submitFenceValues.ForEach([](u64& fenceValue)
@@ -509,6 +523,8 @@ namespace Insight
 
 			void RenderContext_DX12::CreateSwapchain(SwapchainDesc desc)
 			{
+				IS_PROFILE_FUNCTION();
+
 				if (m_swapchain)
 				{
 					for (auto& image : m_swapchainImages)
@@ -831,6 +847,8 @@ namespace Insight
 
 			void RenderContext_DX12::FindPhysicalDevice(IDXGIAdapter1** ppAdapter)
 			{
+				IS_PROFILE_FUNCTION();
+
 				*ppAdapter = nullptr;
 
 				IDXGIFactory4* factory = m_factory.Get();
