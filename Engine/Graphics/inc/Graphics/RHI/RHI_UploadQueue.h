@@ -3,6 +3,7 @@
 #include "Core/Memory.h"
 #include "Core/TypeAlias.h"
 #include "Core/Delegate.h"
+#include "Core/Profiler.h"
 
 #include "Graphics/Defines.h"
 #include "Graphics/Enums.h"
@@ -79,8 +80,8 @@ namespace Insight
 			void Init();
 			void Destroy();
 
-			void Lock() { m_mutex.lock(); }
-			void Unlock() { m_mutex.unlock(); }
+			void Lock() { m_rhiUploadQueueLock.lock(); }
+			void Unlock() { m_rhiUploadQueueLock.unlock(); }
 
 			RPtr<RHI_UploadQueueRequest> UploadBuffer(const void* data, u64 sizeInBytes, u64 offset, u64 alignment, RHI_Buffer* buffer);
 			RPtr<RHI_UploadQueueRequest> UploadBuffer(const void* data, u64 sizeInBytes, RHI_Buffer* buffer) { return UploadBuffer(data, sizeInBytes, 0, 0, buffer); }
@@ -127,9 +128,10 @@ namespace Insight
 			/// </summary>
 			u64 m_frameUploadOffset = 0;
 
+			// This is the max size our upload queue buffer can be.
 			const u64 c_UploadBufferMaxSize = 64_MB;
 
-			std::mutex m_mutex;
+			IS_PROFILE_LOCKABLE(std::mutex, m_rhiUploadQueueLock);
 		};
 	}
 }

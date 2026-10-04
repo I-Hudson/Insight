@@ -5,6 +5,7 @@
 #include "Serialisation/PropertySerialiserTypes.h"
 
 #include "Core/StringUtils.h"
+#include "Core/Profiler.h"
 
 #include <string>
 #include <optional>
@@ -409,6 +410,7 @@ namespace Insight::Serialisation::Keys
     public:\
         void Serialise(::Insight::Serialisation::ISerialiser* serialiser, OBJECT_TYPE& object, std::string serialisedObjectSerilaiser = "")\
         {\
+            IS_PROFILE_SCOPE(STRINGIZE(PPCAT(OBJECT_TYPE, _Serialise)));\
             const u32 version = CURRENT_VERSION;\
             std::string objectSerialiserType = typeid(OBJECT_TYPE).name();\
             objectSerialiserType = RemoveString(objectSerialiserType, "class");\
@@ -463,6 +465,7 @@ static bool DeserialiseCheckForObjectSerialiser(::Insight::Serialisation::ISeria
 #define DESERIALISE_FUNC(OBJECT_TYPE, CURRENT_VERSION, ...)\
         void Deserialise(::Insight::Serialisation::ISerialiser* serialiser, OBJECT_TYPE& object, std::string serialisedObjectSerilaiser = "")\
         {\
+            IS_PROFILE_SCOPE(STRINGIZE(PPCAT(OBJECT_TYPE, _Deserialise)));\
             u32 version = -1;\
             std::string objectSerialiserType = typeid(OBJECT_TYPE).name();\
             objectSerialiserType = RemoveString(objectSerialiserType, "class");\

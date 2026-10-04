@@ -5,6 +5,9 @@
 #include "Core/Profiler.h"
 #include "Platforms/Platform.h"
 
+
+#include "Threading/ScopedLock.h"
+
 #include <iterator>
 
 namespace Insight
@@ -47,7 +50,7 @@ namespace Insight
 		{
 			//ASSERT(RenderContext::Instance().IsRenderThread());
 
-			std::lock_guard lock(m_mutex);
+			Threading::ScopedLock l(m_rhiUploadQueueLock);
 			if (!m_uploadStagingBuffer)
 			{
 				RHI_Buffer_Overrides overrides;
@@ -61,7 +64,7 @@ namespace Insight
 		{
 			//ASSERT(RenderContext::Instance().());
 
-			std::lock_guard lock(m_mutex);
+			Threading::ScopedLock l(m_rhiUploadQueueLock);
 			m_queuedUploads.clear();
 			Renderer::FreeRawBuffer(m_uploadStagingBuffer);
 			m_uploadStagingBuffer = nullptr;
@@ -70,6 +73,8 @@ namespace Insight
 		RPtr<RHI_UploadQueueRequest> RHI_UploadQueue::UploadBuffer(const void* data, u64 sizeInBytes, u64 offset, u64 alignment, RHI_Buffer* buffer)
 		{
 			IS_PROFILE_FUNCTION();
+
+			Lock();
 
 			RPtr<RHI_UploadQueueRequestInternal> uploadRequest = MakeRPtr<
 				RHI_UploadQueueRequestInternal>(
@@ -89,16 +94,18 @@ namespace Insight
 
 			if (uploadRequest)
 			{
-				std::lock_guard lock(m_mutex);
 				m_queuedUploads.push_back(std::move(uploadRequest));
 			}
 
+			Unlock();
 			return m_queuedUploads.back()->Request;
 		}
 
 		RPtr<RHI_UploadQueueRequest> RHI_UploadQueue::UploadTexture(const void* data, u64 sizeInBytes, RHI_Texture* texture)
 		{
 			IS_PROFILE_FUNCTION();
+
+			Lock();
 
 			const RHI_TextureFootprint footprint = RenderContext::Instance().GetTextureFootprint(texture->GetInfo());
 			const u64 totalStagingBytesRequired = footprint.NumRows * footprint.RowPitch;
@@ -154,10 +161,12 @@ namespace Insight
 
 			if (uploadRequest)
 			{
-				std::lock_guard lock(m_mutex);
 				m_queuedUploads.push_back(std::move(uploadRequest));
+				Unlock();
 				return m_queuedUploads.back()->Request;
 			}
+
+			Unlock();
 			return { };
 		}
 
@@ -273,7 +282,7 @@ namespace Insight
 		void RHI_UploadQueue::RemoveRequest(RHI_UploadQueueRequest* request)
 		{
 			IS_PROFILE_FUNCTION();
-			std::lock_guard lock(m_mutex);
+			Threading::ScopedLock l(m_rhiUploadQueueLock);
 
 			for (const RPtr<RHI_UploadQueueRequestInternal>& internalRequest : m_queuedUploads)
 			{
@@ -289,18 +298,10 @@ namespace Insight
 		{
 			IS_PROFILE_FUNCTION();
 
-			Lock();
-
-			if (uploadType == RHI_UploadTypes::Texture)
-			{
-				//UploadTextureData(data, sizeInBytes, uploadRequest);
-				//return;
-			}
-
 			if (sizeInBytes > c_UploadBufferMaxSize)
 			{
-				// We must allocate a temp buffer to update this data.
-				/// We need a staging buffer to upload data from CPU to GPU.
+				// We must allocate a temp buffer to update this data. The data we are tring to upload is bigger than our upload buffer.
+				// We need a staging buffer to upload data from CPU to GPU.
 				RHI_Buffer* stagingBuffer = Renderer::CreateStagingBuffer(sizeInBytes);
 				stagingBuffer->Upload(data, sizeInBytes, 0, 0);
 				uploadRequest->Request->Resource->m_uploadStatus = DeviceUploadStatus::Uploading;
@@ -331,8 +332,6 @@ namespace Insight
 			{
 				UploadDataToStagingBuffer(data, sizeInBytes, uploadRequest);
 			}
-
-			Unlock();
 		}
 
 		void RHI_UploadQueue::UploadTextureData(const void* data, u64 sizeInBytes, RPtr<RHI_UploadQueueRequestInternal>& uploadRequest)

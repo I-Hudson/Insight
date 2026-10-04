@@ -1,7 +1,9 @@
 #include "Editor/Asset/EditorAssetRegistry.h"
 
-#include "Event/EventSystem.h"
 #include "Core/Logger.h"
+#include "Core/Profiler.h"
+
+#include "Event/EventSystem.h"
 #include "Serialisation/Serialisers/BinarySerialiser.h"
 #include "Serialisation/Serialisers/JsonSerialiser.h"
 
@@ -61,6 +63,8 @@ namespace Insight
 
 		Ref<Runtime::Asset> EditorAssetRegistry::LoadAsset(std::string path)
 		{
+			IS_PROFILE_FUNCTION();
+
 			ValidatePath(path);
 
 			if (!Runtime::ProjectSystem::Instance().IsProjectOpen())
@@ -115,6 +119,8 @@ namespace Insight
 
 		Ref<Runtime::Asset> EditorAssetRegistry::LoadCachedAsset(const Runtime::AssetInfo* assetInfo)
 		{
+			IS_PROFILE_FUNCTION();
+
 			{
 				std::lock_guard lock(m_loadedAssetLock);
 				if (const auto iter = m_loadedAssets.find(assetInfo->GetFullFilePath());
@@ -145,10 +151,16 @@ namespace Insight
 
 				const std::vector<u8> diskData = Runtime::AssetRegistry::LoadAssetData(cachedAssetPath);
 				Serialiser serialiser(true);
-				serialiser.Deserialise(diskData);
+				{
+					IS_PROFILE_SCOPE("Deserialise into serialiser");
 
-				asset->Deserialise(&serialiser);
+					serialiser.Deserialise(diskData);
+				}
 
+				{
+					IS_PROFILE_SCOPE("Deserialise into asset");
+					asset->Deserialise(&serialiser);
+				}
 			}
 			return asset;
 		}

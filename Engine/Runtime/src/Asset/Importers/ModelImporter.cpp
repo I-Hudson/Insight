@@ -441,6 +441,8 @@ namespace Insight
 			}
 
 			ModelNode modelNode;
+			modelNode.Materials.reserve(scene->mNumMaterials);
+
 			PreProcessVertexAndIndexBuffer(scene, modelNode);
 
 			ProcessNode(scene, scene->mRootNode, modelAsset.Ptr(), modelNode);
@@ -739,7 +741,7 @@ namespace Insight
 				auto UploadIndexData = [](Graphics::RHI_Buffer*& buffer, void* data, u64 sizeInBytes, u64 offset)
 					{
 						ASSERT(buffer != nullptr);
-						buffer->Upload(data, sizeInBytes, offset, 0);
+						buffer->QueueUpload(data, sizeInBytes, offset, 0);
 					};
 
 				const u64 kLargestIndexBufferSize = Mesh::kMeshIndexType == Graphics::IndexType::Uint32 ? _UI32_MAX : _UI16_MAX;
@@ -984,10 +986,8 @@ namespace Insight
 							{
 								RemoveConst(modelMaterial)->SetTexture(textureType, LoadTexture(aiScene, aiMaterial, legacyType, pbrType, modelAsset));
 							}
-						});
-
-
-					
+						}
+						);
 				};
 
 			Load_Texture(TextureAssetTypes::Diffuse, aiTextureType::aiTextureType_BASE_COLOR, aiTextureType::aiTextureType_DIFFUSE);
