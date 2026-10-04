@@ -131,7 +131,7 @@ namespace Insight
 			InputDevice_KeyboardMouse();
 			virtual ~InputDevice_KeyboardMouse() override;
 
-			virtual void Initialise(u32 id) override;
+			virtual void Initialise(u64 deviceId) override;
 			virtual void Shutdown() override;
 
 			virtual InputDeviceTypes GetDeviceType() const override { return InputDeviceTypes::KeyboardMouse; }

@@ -53,9 +53,11 @@ namespace Insight
 		XInputManager::~XInputManager()
 		{ }
 
-		void XInputManager::Initialise(InputSystem* inputSystem)
+		bool XInputManager::Initialise(InputSystem* inputSystem)
 		{
 			m_inputSystem = inputSystem;
+
+			return true;
 		}
 
 		void XInputManager::Shutdown()

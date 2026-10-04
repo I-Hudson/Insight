@@ -42,6 +42,8 @@ VendorIncludes["Physx"] = "vendor/physx/include"
 VendorIncludes["nvrhi"] = "vendor/NVRHI/include"
 VendorIncludes["compressonator"] = "vendor/Compressonator"
 
+VendorIncludes["GameInput"] = "vendor/Microsoft.GameInput/native/include"
+
 -- Shorthand form is less typing and doesn't use a local variable
 function InsightVendorIncludes.AddIncludes(includeTable, prefix)
     for k,v in pairs(VendorIncludes) 

@@ -65,7 +65,6 @@ function InsightPlatforms.All()
         {
             "WinPixEventRuntime",
             "cppwinrt_fast_forwarder",
-            "Comctl32",
         }
         
     filter { "platforms:Win64", "configurations:Debug or configurations:Testing" }

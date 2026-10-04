@@ -44,13 +44,13 @@ namespace Insight
 			IInputDevice* GetLastUsedInputDevices() const;
 			std::vector<IInputDevice*> GetAllInputDevices() const;
 
-			void UpdateInputs(std::vector<GenericInput> inputs);
+			void UpdateInputs(std::vector<GenericInput>& inputs);
 			void Update(float const deltaTime);
 			void ClearFrame();
 
 		private:
-			IInputDevice* AddInputDevice(InputDeviceTypes deviceType, u32 id);
-			void RemoveInputDevice(InputDeviceTypes deviceType, u32 id);
+			IInputDevice* AddInputDevice(InputDeviceTypes deviceType, u64 deviceId);
+			void RemoveInputDevice(InputDeviceTypes deviceType, u64 deviceId);
 
 		private:
 			std::vector<IInputDevice*> m_inputDevices;

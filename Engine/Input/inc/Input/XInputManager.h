@@ -25,7 +25,7 @@ namespace Insight
 			XInputManager();
 			virtual ~XInputManager() override;
 
-			virtual void Initialise(InputSystem* inputSystem) override;
+			virtual bool Initialise(InputSystem* inputSystem) override;
 			virtual void Shutdown() override;
 			virtual void Update(float const deltaTime) override;
 

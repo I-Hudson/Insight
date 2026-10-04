@@ -23,11 +23,11 @@ namespace Insight
 			IInputDevice(const InputDeviceTypes inputDeviceType);
 			virtual ~IInputDevice() = default;
 			
-			virtual void Initialise(u32 id) = 0;
+			virtual void Initialise(u64 deviceId) = 0;
 			virtual void Shutdown() = 0;
 
 			virtual InputDeviceTypes GetDeviceType() const = 0;
-			u32 GetId() const { return m_id; }
+			u64 GetId() const { return m_deviceId; }
 			DeviceInfo GetDeviceInfo() const { return m_deviceInfo; }
 
 			virtual void ProcessInput(GenericInput const& input) = 0;
@@ -36,7 +36,7 @@ namespace Insight
 			virtual void ClearFrame() = 0;
 
 		protected:
-			u32 m_id = 0;
+			u64 m_deviceId = 0;
 			DeviceInfo m_deviceInfo;
 			InputDeviceTypes m_deviceType;
 		};

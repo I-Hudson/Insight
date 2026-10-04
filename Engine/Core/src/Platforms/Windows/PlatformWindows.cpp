@@ -91,10 +91,10 @@ namespace Insight
 
 			ASSERT(SUCCEEDED(CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED)));
 
-			INITCOMMONCONTROLSEX iccex;
-			iccex.dwSize = sizeof(iccex);
-			iccex.dwICC = ICC_PROGRESS_CLASS;
-			ASSERT(InitCommonControlsEx(&iccex));
+			//INITCOMMONCONTROLSEX iccex;
+			//iccex.dwSize = sizeof(iccex);
+			//iccex.dwICC = ICC_PROGRESS_CLASS;
+			//ASSERT(InitCommonControlsEx(&iccex));
 
 			s_memoryInformation = GetMemoryInformation();
 			s_cpuInformation = GetCPUInformation();

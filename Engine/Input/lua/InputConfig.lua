@@ -24,6 +24,7 @@ function InputConfig.IncludeDirs()
 
         "%{IncludeDirs.imgui}",
         "%{IncludeDirs.spdlog}",
+        "%{IncludeDirs.GameInput}",
     }
 end
 
@@ -59,6 +60,7 @@ function InputConfig.FilterPlatforms(AMD_Ryzen_Master_SDK, OutputDir)
         links
         {
             "Xinput",
+            "GameInput"
             "WindowsApp",
         }
 end

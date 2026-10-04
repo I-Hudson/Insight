@@ -12,6 +12,7 @@ call :DOWNLOAD_AND_UNZIP https://www.nuget.org/api/v2/package/WinPixEventRuntime
 call :DOWNLOAD_AND_UNZIP https://www.nuget.org/api/v2/package/Microsoft.Direct3D.D3D12/1.717.1-preview                                                                      %vendorPath%\Microsoft.Direct3D.D3D12
 call :DOWNLOAD_AND_UNZIP https://www.nuget.org/api/v2/package/Microsoft.VCRTForwarders.140/1.0.7                                                                            %vendorPath%\Microsoft.VCRTForwarders.140
 call :DOWNLOAD_AND_UNZIP https://www.nuget.org/api/v2/package/Microsoft.Windows.CppWinRT/2.0.221121.5                                                                       %vendorPath%\Microsoft.Windows.CppWinRT
+call :DOWNLOAD_AND_UNZIP https://www.nuget.org/api/v2/package/Microsoft.GameInput/3.5.283                                                                                   %vendorPath%\Microsoft.GameInput
 call :DOWNLOAD_AND_UNZIP https://github.com/microsoft/DirectXShaderCompiler/releases/download/v1.7.2212/dxc_2022_12_16.zip                                                  %vendorPath%\DirectXShaderCompiler
 call :DOWNLOAD_AND_UNZIP https://github.com/glfw/glfw/releases/download/3.4/glfw-3.4.zip                                                                                    %vendorPath%\glfw
 rem call :DOWNLOAD_AND_UNZIP https://github.com/wolfpld/tracy/releases/download/v0.11.1/windows-0.11.1.zip                                                                      %vendorPath%\tracyProfiler

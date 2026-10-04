@@ -77,7 +77,7 @@ namespace Insight
 			InputDevice_Controller();
 			virtual ~InputDevice_Controller() override = default;
 
-			virtual void Initialise(u32 id) override;
+			virtual void Initialise(u64 deviceId) override;
 			virtual void Shutdown() override;
 
 			virtual InputDeviceTypes GetDeviceType() const override { return InputDeviceTypes::Controller; }

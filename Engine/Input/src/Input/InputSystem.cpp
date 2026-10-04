@@ -146,6 +146,7 @@ namespace Insight
 			}
 
 			m_inputManagerType = inputManager;
+			bool inputManagerInitialised = false;
 
 			switch (m_inputManagerType)
 			{
@@ -183,16 +184,17 @@ namespace Insight
 			return m_inputManagerType;
 		}
 
-		void InputSystem::UpdateInputs(std::vector<GenericInput> inputs)
+		void InputSystem::UpdateInputs(std::vector<GenericInput>& inputs)
 		{
 			for (auto& device : m_inputDevices)
 			{
 				for (const auto& input : inputs)
 				{
 					if (device->GetDeviceType() == input.InputDevice
-						&& device->GetId() == input.DevieId)
+						&& device->GetId() == input.DeviceId)
 					{
 						device->ProcessInput(input);
+
 					}
 				}
 			}
@@ -232,7 +234,7 @@ namespace Insight
 		}
 
 
-		IInputDevice* InputSystem::AddInputDevice(InputDeviceTypes deviceType, u32 id)
+		IInputDevice* InputSystem::AddInputDevice(InputDeviceTypes deviceType, u64 deviceId)
 		{
 			IInputDevice* newInputDevice = nullptr;
 			switch (deviceType)
@@ -249,18 +251,18 @@ namespace Insight
 			}
 			}
 			ASSERT(newInputDevice);
-			newInputDevice->Initialise(id);
+			newInputDevice->Initialise(deviceId);
 			m_inputDevices.push_back(newInputDevice);
 			return newInputDevice;
 		}
 
-		void InputSystem::RemoveInputDevice(InputDeviceTypes deviceType, u32 id)
+		void InputSystem::RemoveInputDevice(InputDeviceTypes deviceType, u64 deviceId)
 		{
 			int idx = 0;
 			for (auto& device : m_inputDevices)
 			{
 				if (device->GetDeviceType() == deviceType
-					&& device->GetId() == id)
+					&& device->GetId() == deviceId)
 				{
 					device->Shutdown();
 

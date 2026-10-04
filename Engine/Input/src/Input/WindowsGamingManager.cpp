@@ -116,7 +116,7 @@ namespace Insight
 			}
 		}
 
-		void WindowsGamingManager::Initialise(InputSystem* inputSystem)
+		bool WindowsGamingManager::Initialise(InputSystem* inputSystem)
 		{
 			m_inputSystem = inputSystem;
 
@@ -141,6 +141,8 @@ namespace Insight
 			{
 				OnRawControllerAdded({ }, controllers.GetAt(i));
 			}
+
+			return true;
 		}
 
 		void WindowsGamingManager::Shutdown()

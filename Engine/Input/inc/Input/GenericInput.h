@@ -30,7 +30,7 @@ namespace Insight
 
 		struct IS_INPUT GenericInput
 		{
-			u64 DevieId;
+			u64 DeviceId;
 			InputDeviceTypes InputDevice;
 			InputTypes InputType;
 			u64 Data0 = 0;
@@ -43,7 +43,7 @@ namespace Insight
 		public:
 			virtual ~InputManager() = 0;
 
-			virtual void Initialise(InputSystem* inputSystem) = 0;
+			virtual bool Initialise(InputSystem* inputSystem) = 0;
 			virtual void Shutdown() = 0;
 			virtual void Update(float const deltaTime) = 0;
 		};

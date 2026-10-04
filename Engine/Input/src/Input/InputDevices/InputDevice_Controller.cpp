@@ -80,9 +80,9 @@ namespace Insight
 			: IInputDevice(InputDeviceTypes::Controller)
 		{ }
 
-		void InputDevice_Controller::Initialise(u32 id)
+		void InputDevice_Controller::Initialise(u64 deviceId)
 		{
-			m_id = id;
+			m_deviceId = deviceId;
 		}
 
 		void InputDevice_Controller::Shutdown()

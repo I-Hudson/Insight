@@ -134,14 +134,14 @@ namespace Insight
 		InputDevice_KeyboardMouse::~InputDevice_KeyboardMouse()
 		{ }
 
-		void InputDevice_KeyboardMouse::Initialise(u32 id)
+		void InputDevice_KeyboardMouse::Initialise(u64 deviceId)
 		{
-			m_id = id;
+			m_deviceId = deviceId;
 		}
 
 		void InputDevice_KeyboardMouse::Shutdown()
 		{
-			m_id = 0;
+			m_deviceId = 0;
 		}
 
 		void InputDevice_KeyboardMouse::ProcessInput(GenericInput const& input)
