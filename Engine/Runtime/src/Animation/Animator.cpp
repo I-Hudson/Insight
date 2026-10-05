@@ -51,8 +51,8 @@ namespace Insight
                 && m_skeleton 
                 && m_animationClip)
             {
-                m_currentAnimationTime += m_animationClip->GetTickPerSecond() * static_cast<double>(deltaTime);
-                m_currentAnimationTime = fmod(m_currentAnimationTime, m_animationClip->GetDuration());
+                m_currentAnimationTimeTicks += m_animationClip->GetTickPerSecond() * static_cast<double>(deltaTime);
+                m_currentAnimationTimeTicks = fmod(m_currentAnimationTimeTicks, m_animationClip->GetDurationTicks());
                 CalculateBoneTransform(m_skeleton->GetRootBone().Id, Maths::Matrix4::Identity);
 #if ANIMATION_NODE_TRANSFORMS
                 //CalculateBoneTransform(&m_animationClip->GetRootNode(), Maths::Matrix4::Identity);
@@ -236,7 +236,7 @@ namespace Insight
         float Animator::GetScaleFactor(const double lastTimeStamp, const double nextTimeStamp) const
         {
             float scaleFactor = 0.0f;
-            const double midWayLength = m_currentAnimationTime - lastTimeStamp;
+            const double midWayLength = m_currentAnimationTimeTicks - lastTimeStamp;
             const double framesDiff = nextTimeStamp - lastTimeStamp;
             scaleFactor = static_cast<float>(midWayLength / framesDiff);
             return scaleFactor;
@@ -276,8 +276,8 @@ namespace Insight
                 const Maths::Vector4 position = Maths::Vector4(boneTrack->Positions[0].Position, 1.0f);
                 return position;
             }
-
-            const u32 p0Index = boneTrack->GetPositionKeyFrameIndex(m_currentAnimationTime);
+                
+            const u32 p0Index = boneTrack->GetPositionKeyFrameIndex(m_currentAnimationTimeTicks);
             const u32 p1Index = p0Index + 1;
 
             const AnimationBoneTrack::PositionKeyFrame& p0KeyFrame = boneTrack->Positions[p0Index];
@@ -308,7 +308,7 @@ namespace Insight
                 return boneTrack->Rotations[0].Rotation.Normalised();
             }
 
-            const u32 p0Index = boneTrack->GetRotationKeyFrameIndex(m_currentAnimationTime);
+            const u32 p0Index = boneTrack->GetRotationKeyFrameIndex(m_currentAnimationTimeTicks);
             const u32 p1Index = p0Index + 1;
 
             const AnimationBoneTrack::RotationKeyFrame& p0KeyFrame = boneTrack->Rotations[p0Index];
@@ -340,7 +340,7 @@ namespace Insight
                 return scale;
             }
 
-            const u32 p0Index = boneTrack->GetScaleKeyFrameIndex(m_currentAnimationTime);
+            const u32 p0Index = boneTrack->GetScaleKeyFrameIndex(m_currentAnimationTimeTicks);
             const u32 p1Index = p0Index + 1;
 
             const AnimationBoneTrack::ScaleKeyFrame& p0KeyFrame = boneTrack->Scales[p0Index];
@@ -354,7 +354,7 @@ namespace Insight
 
         void Animator::Reset()
         {
-            m_currentAnimationTime = 0;
+            m_currentAnimationTimeTicks = 0;
         }
 
         void Animator::SetBindPose()

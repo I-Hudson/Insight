@@ -1,4 +1,13 @@
 @echo off 
+@setlocal enabledelayedexpansion
+
+call ../Engine/bat/SetVSCompilerVars.bat
+
+if "%VS_COMPILER_VERSION%" == "" (
+    echo No MSVC compiler was found
+    pause
+    exit -1
+)
 
 rem ASSIMP DEBUG
 call :COPY_TO_DEBUG_DEPS "..\..\vendor\assimp\build\bin\Debug\assimp-vc143-mtd.dll"						                    "dll"
@@ -16,7 +25,7 @@ call :COPY_TO_DEBUG_DEPS "..\..\vendor\spdlog\build\Debug\spdlogd.pdb"						    
 rem SPDLOG RELEASE
 call :COPY_TO_RELEASE_DEPS "..\..\vendor\spdlog\build\Release\spdlog.dll"						                            "dll"
 call :COPY_TO_RELEASE_DEPS "..\..\vendor\spdlog\build\Release\spdlog.lib"						                            "lib"
-rem call :COPY_TO_RELEASE_DEPS "..\..\vendor\spdlog\build\Release\spdlog.pdb"						                            "pdb"
+rem call :COPY_TO_RELEASE_DEPS "..\..\vendor\spdlog\build\Release\spdlog.pdb"						                        "pdb"
 
 rem TRACY DEBUG
 call :COPY_TO_DEBUG_DEPS "..\..\vendor\tracy\build\Debug\TracyClient.dll"						                            "dll"
@@ -27,12 +36,19 @@ call :COPY_TO_RELEASE_DEPS "..\..\vendor\tracy\build\Release\TracyClient.dll"			
 call :COPY_TO_RELEASE_DEPS "..\..\vendor\tracy\build\Release\TracyClient.lib"						                        "lib"
 call :COPY_TO_RELEASE_DEPS "..\..\vendor\tracy\build\Release\TracyClient.pdb"						                        "pdb"
 
+set joltVSVersion=
+if %VS_COMPILER_VERSION% == "vs2026" (
+    set joltVSVersion=VS2026_CL
+)
+if %VS_COMPILER_VERSION% == "vs2022" (
+    set joltVSVersion=VS2026_CL
+)
 rem JOLT DEBUG
-call :COPY_TO_DEBUG_DEPS "..\..\vendor\JoltPhysics\Build\VS2022_CL\Debug\Jolt.lib"						                    "lib"
-call :COPY_TO_DEBUG_DEPS "..\..\vendor\JoltPhysics\Build\VS2022_CL\Debug\Jolt.pdb"						                    "pdb"
+call :COPY_TO_DEBUG_DEPS "..\..\vendor\JoltPhysics\Build\%joltVSVersion%\Debug\Jolt.lib"						            "lib"
+call :COPY_TO_DEBUG_DEPS "..\..\vendor\JoltPhysics\Build\%joltVSVersion%\Debug\Jolt.pdb"						            "pdb"
 rem JOLT RELEASE
-call :COPY_TO_RELEASE_DEPS "..\..\vendor\JoltPhysics\Build\VS2022_CL\Release\Jolt.lib"						                "lib"
-call :COPY_TO_RELEASE_DEPS "..\..\vendor\JoltPhysics\Build\VS2022_CL\Release\Jolt.pdb"						                "pdb"
+call :COPY_TO_RELEASE_DEPS "..\..\vendor\JoltPhysics\Build\%joltVSVersion%\Release\Jolt.lib"						        "lib"
+call :COPY_TO_RELEASE_DEPS "..\..\vendor\JoltPhysics\Build\%joltVSVersion%\Release\Jolt.pdb"						        "pdb"
 
 call :COPY_TO_DEBUG_DEPS "..\..\vendor\FidelityFX-FSR2\bin\ffx_fsr2_api\ffx_fsr2_api_x64d.lib"						        "lib"
 call :COPY_TO_DEBUG_DEPS "..\..\vendor\FidelityFX-FSR2\bin\ffx_fsr2_api\ffx_fsr2_api_vk_x64d.lib"					        "lib"

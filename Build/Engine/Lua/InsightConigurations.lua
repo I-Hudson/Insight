@@ -12,6 +12,8 @@ function InsightConfigurations.All()
 
     filter "configurations:Release"
     buildoptions "/MD"
+    optimize "Full"
+    linktimeoptimization "On"
     defines
     {
         "NDEBUG",

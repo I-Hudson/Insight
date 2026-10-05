@@ -96,12 +96,8 @@ end
 
 function PhysicsConfig.PreBuildCommands(OutputDir)
     filter "configurations:Debug or configurations:Testing"
-        if EnabledPhysicsEngine == JoltPhysics then
-            prebuildcommands
-            {
-                "{COPYFILE} \"%{wks.location}vendor/JoltPhysics/Build/VS2022_CL/Debug/Jolt.lib\" \"%{wks.location}deps/".. OutputDir..  "/lib/\"\n",
-            }
-        elseif EnabledPhysicsEngine == PhysXPhysics then
+    -- This should all be moved into builds scripts and not here.
+        if EnabledPhysicsEngine == PhysXPhysics then
             prebuildcommands
             {
                 "{COPYFILE} \"%{wks.location}vendor/PhysX/physx/bin/win.x86_64.vc143.md/checked/PhysXCommon_64.lib\" \"%{wks.location}deps/".. OutputDir..  "/lib/\"\n",
@@ -111,14 +107,6 @@ function PhysicsConfig.PreBuildCommands(OutputDir)
                 "{COPYFILE} \"%{wks.location}vendor/PhysX/physx/bin/win.x86_64.vc143.md/checked/PhysXCommon_64.dll\" \"%{wks.location}deps/".. OutputDir..  "/dll/\"\n",
                 "{COPYFILE} \"%{wks.location}vendor/PhysX/physx/bin/win.x86_64.vc143.md/checked/PhysX_64.dll\" \"%{wks.location}deps/".. OutputDir..  "/dll/\"\n",
                 "{COPYFILE} \"%{wks.location}vendor/PhysX/physx/bin/win.x86_64.vc143.md/checked/PhysXFoundation_64.dll\" \"%{wks.location}deps/".. OutputDir..  "/dll/\"\n",
-            }
-        end
-
-    filter "configurations:Release"
-        if EnabledPhysicsEngine == JoltPhysics then
-            prebuildcommands
-            {
-                "{COPYFILE} \"%{wks.location}vendor/JoltPhysics/Build/VS2022_CL/Release/Jolt.lib\" \"%{wks.location}deps/".. OutputDir..  "/lib/\"\n",
             }
         end
 

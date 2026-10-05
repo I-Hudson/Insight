@@ -24,6 +24,8 @@ namespace Insight
 
         const u32 AnimationBoneTrack::GetPositionKeyFrameIndex(const double time) const
         {
+            IS_PROFILE_FUNCTION();
+
             // Return the index to the position to interpolate to.
             for (size_t posIdx = 0; posIdx < Positions.size() - 1; ++posIdx)
             {
@@ -39,6 +41,8 @@ namespace Insight
 
         const u32 AnimationBoneTrack::GetRotationKeyFrameIndex(const double time) const
         {
+            IS_PROFILE_FUNCTION();
+
             // Return the index to the rotation to interpolate to.
             for (size_t rotIdx = 0; rotIdx < Rotations.size() - 1; ++rotIdx)
             {
@@ -54,6 +58,9 @@ namespace Insight
 
         const u32 AnimationBoneTrack::GetScaleKeyFrameIndex(const double time) const
         {
+            IS_PROFILE_FUNCTION();
+
+
             // Return the index to the scale to interpolate to.
             for (size_t scaleIdx = 0; scaleIdx < Scales.size() - 1; ++scaleIdx)
             {
@@ -113,14 +120,19 @@ namespace Insight
             return nullptr;
         }
 
-        double AnimationClip::GetDuration() const
+        double AnimationClip::GetDurationTicks() const
         {
-            return m_duration;
+            return m_durationTicks;
         }
 
         double AnimationClip::GetTickPerSecond() const
         {
             return m_ticksPerSecond;
+        }
+
+        double AnimationClip::GetDurationSeconds() const
+        {
+            return m_durationSeconds;
         }
 
         void AnimationClip::AddBoneTrack(AnimationBoneTrack animationBoneTrack)

@@ -1251,8 +1251,9 @@ namespace Insight
 					}
 				}
 
-				animationClip->m_duration = aiAnimation->mDuration;
+				animationClip->m_durationTicks = aiAnimation->mDuration;
 				animationClip->m_ticksPerSecond = aiAnimation->mTicksPerSecond;
+				animationClip->m_durationTicks = animationClip->m_durationTicks * animationClip->m_ticksPerSecond;
 
 				for (size_t animChannelIdx = 0; animChannelIdx < aiAnimation->mNumChannels; ++animChannelIdx)
 				{

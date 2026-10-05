@@ -60,7 +60,7 @@ namespace Insight
             /// @brief Final transforms for all bones.
             std::vector<Maths::Matrix4> m_boneMatrices;
         
-            double m_currentAnimationTime = 0.0f;
+            double m_currentAnimationTimeTicks = 0.0f;
             float m_deltaTime = 0.0f;
             bool m_isPlaying = true;
         };

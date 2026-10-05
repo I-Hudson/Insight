@@ -81,8 +81,9 @@ namespace Insight
 
             const AnimationBoneTrack* GetBoneTrack(const std::string_view boneName) const;
             const AnimationBoneTrack* GetBoneTrack(const u32 boneId) const;
-            double GetDuration() const;
+            double GetDurationTicks() const;
             double GetTickPerSecond() const;
+            double GetDurationSeconds() const;
 
             std::string_view GetName() const { return m_name; }
             const AssetInfo* GetAssetInfo() const { return m_assetInfo; }
@@ -107,8 +108,9 @@ namespace Insight
             AnimationNode m_rootNode;
 #endif
 
-            double m_duration = 0.0f;
-            double m_ticksPerSecond = 0;
+            double m_durationTicks = 0.0;
+            double m_ticksPerSecond = 0.0;
+            double m_durationSeconds = 0.0;
 
             friend ModelImporter;
         };

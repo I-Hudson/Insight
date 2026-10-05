@@ -60,7 +60,7 @@ function InputConfig.FilterPlatforms(AMD_Ryzen_Master_SDK, OutputDir)
         links
         {
             "Xinput",
-            "GameInput"
+            "GameInput",
             "WindowsApp",
         }
 end
