@@ -14,8 +14,9 @@ namespace Insight
 {
 	namespace Graphics
 	{
-		RHI_UploadQueueRequestInternal::RHI_UploadQueueRequestInternal(RHI_UploadQueueFunction function, RHI_Resource* resource, u64 sizeInBytes, u64 offset, u64 alignment)
+		RHI_UploadQueueRequestInternal::RHI_UploadQueueRequestInternal(RHI_UploadQueueFunction function, RHI_Resource* resource, u64 sizeInBytes, u64 offset, u64 alignment, RHI_UploadRequestCallback callback)
 			: UploadFunction(std::move(function))
+			, Callback(callback)
 			, Resource(resource)
 			, SizeInBytes(std::move(sizeInBytes))
 			, Offset(offset)
@@ -70,7 +71,7 @@ namespace Insight
 			m_uploadStagingBuffer = nullptr;
 		}
 
-		RPtr<RHI_UploadQueueRequest> RHI_UploadQueue::UploadBuffer(const void* data, u64 sizeInBytes, u64 offset, u64 alignment, RHI_Buffer* buffer)
+		RPtr<RHI_UploadQueueRequest> RHI_UploadQueue::UploadBuffer(const void* data, u64 sizeInBytes, u64 offset, u64 alignment, RHI_Buffer* buffer, RHI_UploadRequestCallback callback)
 		{
 			IS_PROFILE_FUNCTION();
 
@@ -88,17 +89,17 @@ namespace Insight
 						request->Request->Status = DeviceUploadStatus::Uploading;
 						cmdList->CopyBufferToBuffer(static_cast<RHI_Buffer*>(request->Resource), request->Offset, m_uploadStagingBuffer, m_frameUploadOffset, request->SizeInBytes);
 						m_frameUploadOffset += request->SizeInBytes;
-					}, buffer, sizeInBytes, offset, alignment);
+					}, buffer, sizeInBytes, offset, alignment, callback);
 
 			UploadData(data, sizeInBytes,  RHI_UploadTypes::Buffer, uploadRequest);
 
 			if (uploadRequest)
 			{
-				m_queuedUploads.push_back(std::move(uploadRequest));
+				m_queuedUploads.push_back(uploadRequest);
 			}
 
 			Unlock();
-			return m_queuedUploads.back()->Request;
+			return uploadRequest->Request;
 		}
 
 		RPtr<RHI_UploadQueueRequest> RHI_UploadQueue::UploadTexture(const void* data, u64 sizeInBytes, RHI_Texture* texture)
@@ -155,7 +156,7 @@ namespace Insight
 						barreir.ImageBarriers.push_back(imageBarrier);
 						cmdList->PipelineBarrier(barreir);
 
-				}, texture, totalStagingBytesRequired, 0, 0);
+				}, texture, totalStagingBytesRequired, 0, 0, [](RHI_UploadCallbackInfo) {  });
 
 			UploadData(data, totalStagingBytesRequired, RHI_UploadTypes::Texture, uploadRequest);
 
@@ -229,7 +230,7 @@ namespace Insight
 		void RHI_UploadQueue::UploadToDevice(RHI_CommandList* cmdList)
 		{
 			IS_PROFILE_FUNCTION();
-			//ASSERT(RenderContext::Instance().IsRenderThread());
+			ASSERT(RenderContext::Instance().IsRenderThread());
 			cmdList->BeginTimeBlock("UploadToDevice");
 
 			m_frameUploadOffset = 0;
@@ -245,6 +246,12 @@ namespace Insight
 					uploadRequest->Request->Resource->m_uploadStatus = DeviceUploadStatus::Completed;
 					RHI_ResourceRenderTracker::Instance().TrackResource(uploadRequest->Request->Resource);
 
+					RHI_UploadCallbackInfo callbackInfo
+					{
+						uploadRequest->Request->Resource->m_uploadStatus,
+						uploadRequest->Request->Resource
+					};
+					uploadRequest->Callback(callbackInfo);
 				}
 			}
 
@@ -263,13 +270,15 @@ namespace Insight
 			// Bind our work completed function.
 			for (size_t i = 0; i < m_queuedUploads.size(); ++i)
 			{
-				m_queuedUploads[i]->CommandList = cmdList;
-				m_queuedUploads[i]->CommandList->OnWorkCompleted.Bind<&RHI_UploadQueueRequestInternal::OnWorkComplete>(m_queuedUploads[i].Get());
+				RHI_UploadQueueRequestInternal& request = *m_queuedUploads[i].Get();
+
+				request.CommandList = cmdList;
+				request.CommandList->OnWorkCompleted.Bind<&RHI_UploadQueueRequestInternal::OnWorkComplete>(m_queuedUploads[i].Get());
 				//m_queuedUploads[i]->Request->Resource->m_uploadStatus = DeviceUploadStatus::Uploading;
 				// Call the upload functions.
 
 				RHI_ResourceRenderTracker::Instance().TrackResource(m_queuedUploads[i]->Resource);
-				m_queuedUploads[i]->UploadFunction(m_queuedUploads.at(i).Get(), cmdList);
+				request.UploadFunction(m_queuedUploads.at(i).Get(), cmdList);
 			}
 			// Move all  our requests to the running vector.
 			std::move(m_queuedUploads.begin(), m_queuedUploads.end(), std::back_inserter(m_runningUploads));
@@ -281,6 +290,8 @@ namespace Insight
 
 		void RHI_UploadQueue::RemoveRequest(RHI_UploadQueueRequest* request)
 		{
+			return;
+
 			IS_PROFILE_FUNCTION();
 			Threading::ScopedLock l(m_rhiUploadQueueLock);
 

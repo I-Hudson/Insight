@@ -132,28 +132,31 @@ namespace Insight
             std::vector<Ptr<ECS::Entity>> entities = world->GetAllEntitiesFlatten();
             renderWorld.Meshes.resize(entities.size());
 
-            std::vector<Ptr<ECS::Entity>> cameraEntities = world->GetAllEntitiesWithComponentByName(ECS::CameraComponent::Type_Name);
-            for (Ptr<ECS::Entity>& entity : cameraEntities)
             {
-                ECS::CameraComponent* cameraComponent = entity->GetComponent<ECS::CameraComponent>();
-                if (renderWorld.MainCamera.IsSet)
+                IS_PROFILE_SCOPE("Find Main Camera");
+                std::vector<Ptr<ECS::Entity>> cameraEntities = world->GetAllEntitiesWithComponentByName(ECS::CameraComponent::Type_Name);
+                for (Ptr<ECS::Entity>& entity : cameraEntities)
                 {
-                    renderWorld.AddCamrea(cameraComponent->GetCamera(), cameraComponent->GetViewMatrix());
-                }
-                else
-                {
-                    renderWorld.SetMainCamera(cameraComponent->GetCamera(), cameraComponent->GetViewMatrix());
-                }
+                    ECS::CameraComponent* cameraComponent = entity->GetComponent<ECS::CameraComponent>();
+                    if (renderWorld.MainCamera.IsSet)
+                    {
+                        renderWorld.AddCamrea(cameraComponent->GetCamera(), cameraComponent->GetViewMatrix());
+                    }
+                    else
+                    {
+                        renderWorld.SetMainCamera(cameraComponent->GetCamera(), cameraComponent->GetViewMatrix());
+                    }
 
-                if (!MainCamera.IsSet)
-                {
-                    MainCamera.Camera = cameraComponent->GetCamera();
-                    MainCamera.Transform = cameraComponent->GetViewMatrix();
-                    MainCamera.IsSet = true;
+                    if (!MainCamera.IsSet)
+                    {
+                        MainCamera.Camera = cameraComponent->GetCamera();
+                        MainCamera.Transform = cameraComponent->GetViewMatrix();
+                        MainCamera.IsSet = true;
+                    }
                 }
             }
 
-            std::mutex renderWorldMutex;
+            IS_PROFILE_LOCKABLE(Threading::SpinLock, renderWorldMutex);
 #define PARALLEL_FOR 0
 #if PARALLEL_FOR
             Threading::ParallelFor<Ptr<ECS::Entity>>(16, entities, [&](Ptr<ECS::Entity>& entity)
@@ -203,7 +206,9 @@ namespace Insight
                         }
 
 
-                        RenderMesh& renderMesh = renderWorld.Meshes[renderWorld.MeshesCount++];
+                        u64 meshIndex = renderWorld.MeshesCount++;
+                        RenderMesh& renderMesh = renderWorld.Meshes[meshIndex];
+
                         renderMesh.EntityGuid = entity->GetGUID();
                         {
                             IS_PROFILE_SCOPE("Set Transforms");
@@ -218,7 +223,7 @@ namespace Insight
                             boundingBox = boundingBox.Transform(renderMesh.Transform);
                         }
                         {
-                            std::lock_guard l(renderWorldMutex);
+                            //Threading::ScopedLock l(renderWorldMutex);
                             //isVisible = renderWorld.MainCamera.Camera.IsVisible(boundingBox);
                             if (!renderWorld.MainCamera.IsSet || !isVisible)
                             {
@@ -268,8 +273,9 @@ namespace Insight
                         const bool meshIsTransparent = renderMesh.Material.Properties[static_cast<u64>(Runtime::MaterialAssetProperty::Opacity)] < 1.0f;
 
                         {
-                            std::lock_guard l(renderWorldMutex);
-                            u64 meshIndex = meshIndex = renderWorld.MeshesCount - 1;
+                            IS_PROFILE_SCOPE("Set Material batch and mesh type");
+
+                            Threading::ScopedLock l(renderWorldMutex);
                             //renderWorld.Meshes.push_back(std::move(renderMesh));
 
                             if (auto materialBatchIter = renderWorld.MaterialBatchLookup.find(material->GetGuid());
@@ -302,8 +308,12 @@ namespace Insight
                         }
                     }
                 }
+
                 if (entity->HasComponent<ECS::PointLightComponent>())
                 {
+
+                    IS_PROFILE_SCOPE("Evaluate PointLightComponent");
+
                     ECS::PointLightComponent* pointLightComponent = entity->GetComponent<ECS::PointLightComponent>();
                     RenderPointLight pointLight;
 
@@ -326,12 +336,15 @@ namespace Insight
                     pointLight.DepthTexture = pointLightComponent->GetShadowMap();
 
                     {
-                        std::lock_guard l(renderWorldMutex);
+                        Threading::ScopedLock l(renderWorldMutex);
                         renderWorld.PointLights.push_back(std::move(pointLight));
                     }
                 }
+
                 if (entity->HasComponent<ECS::DirectionalLightComponent>())
                 {
+                    IS_PROFILE_SCOPE("Evaluate DirectionalLightComponent");
+
                     const ECS::DirectionalLightComponent* directionalLightComponent = entity->GetComponent<ECS::DirectionalLightComponent>();
                     const ECS::TransformComponent* transformComponent = directionalLightComponent->GetOwnerEntity()->GetComponent<ECS::TransformComponent>();
                     
@@ -345,7 +358,7 @@ namespace Insight
                         , directionalLightComponent->GetCascadeSplitLambda());
 
                     {
-                        std::lock_guard l(renderWorldMutex);
+                        Threading::ScopedLock l(renderWorldMutex);
                         renderWorld.DirectionalLights.push_back(std::move(directionalLight));
                     }
                 }

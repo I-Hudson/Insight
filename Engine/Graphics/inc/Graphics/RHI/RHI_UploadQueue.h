@@ -24,8 +24,9 @@ namespace Insight
 		class RHI_Buffer;
 		class RHI_Resource;
 		class RHI_Texture;
-		struct RHI_UploadQueueRequestInternal;
 		class RHI_UploadQueue;
+		struct RHI_UploadQueueRequestInternal;
+		struct RHI_UploadQueueRequest;
 
 		using RHI_UploadQueueFunction = std::function<void(const RHI_UploadQueueRequestInternal*, RHI_CommandList*)>;
 
@@ -45,11 +46,19 @@ namespace Insight
 			Core::Delegate<RHI_UploadQueueRequest*> OnUploadCompleted;
 		};
 
+		struct RHI_UploadCallbackInfo
+		{
+			DeviceUploadStatus Status = DeviceUploadStatus::NotUploaded;
+			RHI_Resource* Resource = nullptr;
+		};
+		using RHI_UploadRequestCallback = Core::Function<void(RHI_UploadCallbackInfo)>;
+
 		struct RHI_UploadQueueRequestInternal
 		{
-			RHI_UploadQueueRequestInternal(RHI_UploadQueueFunction function, RHI_Resource* resource, u64 sizeInBytes, u64 offset, u64 aligment);
+			RHI_UploadQueueRequestInternal(RHI_UploadQueueFunction function, RHI_Resource* resource, u64 sizeInBytes, u64 offset, u64 aligment, RHI_UploadRequestCallback callback);
 			
 			RHI_UploadQueueFunction UploadFunction;
+			RHI_UploadRequestCallback Callback;
 			RHI_Resource* Resource = nullptr;
 			u64 SizeInBytes = 0;
 			u64 Offset = 0;
@@ -83,8 +92,11 @@ namespace Insight
 			void Lock() { m_rhiUploadQueueLock.lock(); }
 			void Unlock() { m_rhiUploadQueueLock.unlock(); }
 
-			RPtr<RHI_UploadQueueRequest> UploadBuffer(const void* data, u64 sizeInBytes, u64 offset, u64 alignment, RHI_Buffer* buffer);
-			RPtr<RHI_UploadQueueRequest> UploadBuffer(const void* data, u64 sizeInBytes, RHI_Buffer* buffer) { return UploadBuffer(data, sizeInBytes, 0, 0, buffer); }
+			RPtr<RHI_UploadQueueRequest> UploadBuffer(const void* data, u64 sizeInBytes, u64 offset, u64 alignment, RHI_Buffer* buffer, RHI_UploadRequestCallback callback);
+			RPtr<RHI_UploadQueueRequest> UploadBuffer(const void* data, u64 sizeInBytes, u64 offset, u64 alignment, RHI_Buffer* buffer)
+			{ return UploadBuffer(data, sizeInBytes, offset, alignment, buffer, [](RHI_UploadCallbackInfo) {}); }
+			RPtr<RHI_UploadQueueRequest> UploadBuffer(const void* data, u64 sizeInBytes, RHI_Buffer* buffer) 
+			{ return UploadBuffer(data, sizeInBytes, 0, 0, buffer, [](RHI_UploadCallbackInfo) {}); }
 
 			
 			/// <summary>

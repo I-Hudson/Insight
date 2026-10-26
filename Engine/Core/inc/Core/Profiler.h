@@ -50,8 +50,8 @@ namespace Insight
 	#define IS_PROFILE_FRAME(frame_name)	PIXScopedEvent(PIX_COLOR_DEFAULT, frame_name)
 	#define IS_PROFILE_THREAD(name)
 	#define IS_PROFILE_SCOPE_TEXT(format, ...)
-	#define IS_PROFILE_LOCKABLE(type, object)
-	#define IS_PROFILE_LOCKABLE_NAME(type, object, name)
+	#define IS_PROFILE_LOCKABLE(type, object) type object
+	#define IS_PROFILE_LOCKABLE_NAME(type, object, name) type object
 
 #else
 	#define IS_PROFILE_FUNCTION()		

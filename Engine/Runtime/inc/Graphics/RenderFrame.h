@@ -73,7 +73,7 @@ namespace Insight
         std::vector<u64> TransparentMeshIndex;
     };
 
-    struct RenderDirectionalLight
+    struct IS_RUNTIME RenderDirectionalLight
     {
     private:
         /*
@@ -696,7 +696,7 @@ namespace Insight
             */
     };
 
-    struct RenderPointLight
+    struct IS_RUNTIME RenderPointLight
     {
         Maths::Matrix4 ProjectionView[6];
         Maths::Vector3 LightColour;
@@ -707,7 +707,7 @@ namespace Insight
 
         void CreateViewMatrixs(const Maths::Matrix4 projection, const Maths::Vector3& position)
         {
-            for (size_t i = 0; i < 6; i++)
+            for (size_t i = 0; i < 6; ++i)
             {
                 Maths::Vector3 lightCentre = position;
                 Maths::Vector3 upDirection(0, 1, 0);

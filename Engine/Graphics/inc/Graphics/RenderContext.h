@@ -15,6 +15,7 @@
 #include "Graphics/RHI/RHI_ResourceRenderTracker.h"
 #include "Graphics/RHI/RHI_UploadQueue.h"
 #include "Graphics/RHI/RHI_PipelineManager.h"
+#include "Graphics/RHI/RHI_GPUMeshAllocator.h"
 #include "Graphics/RHI/RHI_MemoryInfo.h"
 
 #include "Graphics/RenderStats.h"
@@ -42,7 +43,7 @@ namespace Insight
 		class RenderTarget;
 		class RenderGraph;
 		class RenderGraphV2;
-
+		
 		enum class GraphicsAPI
 		{
 			Vulkan,
@@ -229,6 +230,8 @@ namespace Insight
 			RHI_PipelineManager& GetPipelineManager()					{ return m_pipelineManager; }
 			RHI_PipelineLayoutManager& GetPipelineLayoutManager()		{ return m_pipelineLayoutManager; }
 
+			RHI_GPUMeshAllocator& GetGPUMeshAllocator()					{ return *m_gpuMeshAllocator; }
+
 			GPUDeferedManager& GetDeferredManager()						{ return m_gpu_defered_manager; }
 			RHI_UploadQueue& GetUploadQueue()							{ return m_uploadQueue; }
 
@@ -308,6 +311,8 @@ namespace Insight
 
 			RHI_PipelineManager m_pipelineManager;
 			RHI_PipelineLayoutManager m_pipelineLayoutManager;
+
+			RHI_GPUMeshAllocator* m_gpuMeshAllocator = nullptr;
 
 			FrameResource<RHI_MemoryInfo> m_rhiMemoryInfo;
 
